@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+  {% include head.html %}
+
+  <body>
+
+    <div class="container content">
+      <div class="masthead">
+        <h3 class="masthead-title">
+          <a href="/" title="Home">{{ site.title }}</a>
+        </h3>
+      </div>
+
+      {{ content }}
+
+    </div>
+
+    <!-- FOOTER  -->
+	    <div id="footer_wrap">
+	      <footer id="footer_content">
+	        <p>&copy; {{'now' | date: '%Y'}} Metropolitan Transportation Commission, Oakland, CA, USA.  Published using <a href="http://pages.github.com">GitHub Pages</a></p>
+	      </footer>
+    </div>
+
+  </body>
+</html>
