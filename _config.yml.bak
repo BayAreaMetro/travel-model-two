@@ -29,7 +29,7 @@ github:
 # This is the list of pages to include in the header of the website.
 pages_list:       
   Guide: 'guide/'
-  Archive: 'archive/'
+  Other: 'archive/'
 
 # Allow URL Redirects: 
 #  * https://help.github.com/articles/redirects-on-github-pages
