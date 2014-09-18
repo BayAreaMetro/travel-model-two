@@ -3,20 +3,35 @@ layout: default
 title: Home
 ---
 
-<html>
+<div class="posts">
+  {% for post in paginator.posts %}
+  <div class="post">
+    <h1 class="post-title">
+      <a href="{{ post.url }}">
+        {{ post.title }}
+      </a>
+    </h1>
 
-  <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Travel-model-two : Placeholder for all things related to MTC&#39;s Travel Model Two (currently in development)">
-  </head>
+    <span class="post-date">{{ post.date | date_to_string }}</span>
 
-  <body>
-	"Hello World"
-  </body>
+    {{ post.content }}
+  </div>
+  {% endfor %}
+</div>
 
-
-</html>
-
-
-
+<div class="pagination">
+  {% if paginator.next_page %}
+    <a class="pagination-item older" href="/page{{paginator.next_page}}/">Older</a>
+  {% else %}
+    <span class="pagination-item older">Older</span>
+  {% endif %}
+  {% if paginator.previous_page %}
+    {% if paginator.page == 2 %}
+      <a class="pagination-item newer" href="/">Newer</a>
+    {% else %}
+      <a class="pagination-item newer" href="/page{{paginator.previous_page}}/">Newer</a>
+    {% endif %}
+  {% else %}
+    <span class="pagination-item newer">Newer</span>
+  {% endif %}
+</div>
