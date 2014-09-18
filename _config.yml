@@ -1,0 +1,7 @@
+name: travel-model-two
+description: sandbox with github pages
+url: http://metropolitantransportationcommission.github.io/travel-model-two
+highlighter: pygments
+lsi: false
+timezone: America/Los_Angeles
+permalink: /:categories/:year/:title
