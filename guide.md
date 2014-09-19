@@ -11,7 +11,7 @@ title: Guide
 
 ** CONTENTS **
 
-1. [Computing Environment](guide#Computing-Environment) 
+1. [Computing Environment](#Computing-Environment) 
 2. [System Design](#System-Design) 
 
 
@@ -31,7 +31,7 @@ As discussed in the [System Design](#System-Design) section, these four computer
 The following software are required to execute the MTC travel model.
 
 #### Citilabs Cube Voyager
-The travel model currently uses version 6.1.X of [Citilabs Cube](http://www.citilabs.com/) or [[http://www.citilabs.com]]software. The Cube software is used to build skims, manipulate networks, manipulate matrices, and perform assignments. A Cube license that supports up to 9,999,999 nodes is required.
+The travel model currently uses version 6.1.X of [Citilabs Cube](http://www.citilabs.com/) or software. The Cube software is used to build skims, manipulate networks, manipulate matrices, and perform assignments. A Cube license that supports up to 9,999,999 nodes is required.
 
 #### Citilabs Cube Voyager 64bit Matrix I/O DLL
 The CT-RAMP software, as discussed below, needs to access data stored in a format dictated by Cube. This is accomplished through a 64-bit DLL library specifically for matrix I/O,which must be accessible through the `PATH` environment variable.  To install the DLL:
