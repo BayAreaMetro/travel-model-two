@@ -20,7 +20,7 @@
 
   document.onreadystatechange = function () {
     if (this.readyState === "complete") {
-      var contentBlock = document.getElementsByClassName("page");
+      var contentBlock = document.getElementsByClassName("page")[0];
       console.log("contentBlock = "+contentBlock);
       if (!contentBlock) {
         return;
