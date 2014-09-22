@@ -15,10 +15,10 @@
       if (header.id == "") {
         // use jQuery to get at text-only bit
         // header.id = jQuery(header.innerHTML).text();
-        header.id = header.innerHTML.toLowerCase();
+        header.id = header.innerHTML;
         header.id = header.id.replace(/ /g,"-");
         header.id = header.id.replace(/(,|\/)/g,"");  // remove commas, slash
-        console.log("  -> header.id = [" + header.id + "]");
+        // console.log("  -> header.id = [" + header.id + "]");
       }
       if (typeof header.id !== "undefined" && header.id !== "") {
         header.appendChild(anchorForId(header.id));
