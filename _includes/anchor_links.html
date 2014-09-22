@@ -9,20 +9,15 @@
 
   var linkifyAnchors = function (level, containingElement) {
     var headers = containingElement.getElementsByTagName("h" + level);
-    console.log("headers = " + headers);
     for (var h = 0; h < headers.length; h++) {
       var header = headers[h];
-      console.log("header = " + header);
-      console.log("  tagName = " + header.tagName);
-      console.log("  innerHTML = " + header.innerHTML);
-      console.log("  header.id = [" + header.id + "] type=[" + typeof header.id + "]");
-
       // if the header is lacking an id, create one
       if (header.id == "") {
         // use jQuery to get at text-only bit
         // header.id = jQuery(header.innerHTML).text();
         header.id = header.innerHTML.toLowerCase();
-        header.id = header.id.replace(" ","-");
+        header.id = header.id.replace(/ /r,"-");
+        header.id = header.id.replace(/(,|\/)/r,"");  // remove commas, slash
         console.log("  -> header.id = [" + header.id + "]");
       }
       if (typeof header.id !== "undefined" && header.id !== "") {
@@ -34,7 +29,6 @@
   document.onreadystatechange = function () {
     if (this.readyState === "complete") {
       var contentBlock = document.getElementsByClassName("page")[0];
-      console.log("contentBlock = "+contentBlock);
       if (!contentBlock) {
         return;
       }
