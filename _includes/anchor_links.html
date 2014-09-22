@@ -17,7 +17,7 @@
         // header.id = jQuery(header.innerHTML).text();
         header.id = header.innerHTML.toLowerCase();
         header.id = header.id.replace(/ /g,"-");
-        header.id = header.id.replace(/(,|\//)/g,"");  // remove commas, slash
+        header.id = header.id.replace(/(,|\/)/g,"");  // remove commas, slash
         console.log("  -> header.id = [" + header.id + "]");
       }
       if (typeof header.id !== "undefined" && header.id !== "") {
