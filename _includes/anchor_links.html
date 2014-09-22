@@ -9,8 +9,10 @@
 
   var linkifyAnchors = function (level, containingElement) {
     var headers = containingElement.getElementsByTagName("h" + level);
+    console.log("headers = " + headers);
     for (var h = 0; h < headers.length; h++) {
       var header = headers[h];
+      console.log("header = " + header);
 
       if (typeof header.id !== "undefined" && header.id !== "") {
         header.appendChild(anchorForId(header.id));
