@@ -17,6 +17,11 @@
       console.log("  innerHTML = " + header.innerHTML);
       console.log("  header.id = [" + header.id + "] type=[" + typeof header.id + "]");
 
+      // if the header is lacking an id, create one
+      if (header.id == "") {
+        header.id = header.innerText.toLowerCase();
+        header.id = header.id.replace(" ","-");
+      }
       if (typeof header.id !== "undefined" && header.id !== "") {
         header.appendChild(anchorForId(header.id));
       }
