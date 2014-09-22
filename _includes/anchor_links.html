@@ -19,8 +19,10 @@
 
       // if the header is lacking an id, create one
       if (header.id == "") {
-        header.id = header.innerText.toLowerCase();
+        header.id = jQuery(header.innerHTML).text();
+        header.id = header.id.toLowerCase();
         header.id = header.id.replace(" ","-");
+        console.log("  -> header.id = [" + header.id + "]");
       }
       if (typeof header.id !== "undefined" && header.id !== "") {
         header.appendChild(anchorForId(header.id));
