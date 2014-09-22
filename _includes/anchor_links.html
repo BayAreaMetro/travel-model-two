@@ -19,8 +19,9 @@
 
       // if the header is lacking an id, create one
       if (header.id == "") {
-        header.id = jQuery(header.innerHTML).text();
-        header.id = header.id.toLowerCase();
+        // use jQuery to get at text-only bit
+        // header.id = jQuery(header.innerHTML).text();
+        header.id = header.innerHTML.toLowerCase();
         header.id = header.id.replace(" ","-");
         console.log("  -> header.id = [" + header.id + "]");
       }
