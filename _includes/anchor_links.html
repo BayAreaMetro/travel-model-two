@@ -13,6 +13,9 @@
     for (var h = 0; h < headers.length; h++) {
       var header = headers[h];
       console.log("header = " + header);
+      console.log("  tagName = " + header.tagName);
+      console.log("  innerHTML = " + header.innerHTML);
+      console.log("  header.id = " + header.id);
 
       if (typeof header.id !== "undefined" && header.id !== "") {
         header.appendChild(anchorForId(header.id));
