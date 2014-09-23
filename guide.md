@@ -9,11 +9,13 @@ title: Guide
 
 *Model Version 1.0*
 
-** CONTENTS **
+---
+CONTENTS
 
 1. [Computing Environment](#Computing-Environment) 
 2. [System Design](#System-Design) 
 
+---
 
 ## Computing Environment
 
@@ -21,6 +23,7 @@ The hardware and software MTC uses to execute Travel Model Two are described on 
 
 ### Hardware
 MTC uses four identical servers with the following characteristics:
+
 * Operating system: Microsoft Windows Server 2007 with Service Pack 2, 64-bit edition;
 * Processors: Two Intel Xeon X5570 @ 2.93 GHz (i.e., two quad-core processors with hyper-threading capability);
 * Memory (RAM): 96.0 GB
