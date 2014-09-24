@@ -107,6 +107,61 @@ These data managers provide TAZ, MAZ, and TAP level data to the various sub-mode
 
 ## Setup and Configuration
 
+This section provides details on setting up the travel model to run on a cluster of computers, including descriptions of the necessary configuration files.
+
+### Step 1: Create the required folder structure
+The MTC travel model is delivered as a compressed folder containing two directories, `CTRAMP` and `INPUT` and one MS-DOS batch file, `RunModel.bat`. These files can be placed in any directory on a computer designated as the main controller of the program flow. On MTC's set up, these files are placed on the `mainmodel` computer (see [System Design](#System-Design) section for more details).
+
+The `CTRAMP` directory contains all of the model configuration files, Java instructions, and Cube scripts required to run the travel model, organized in the following three folders:
+
+* model -- contains all of the [Utility Expression Calculators](http://analytics.mtc.ca.gov/foswiki/Main/UtilityExpressionCalculator) files that specify the choice models;
+* runtime -- contains all of the Java configuration and `JAR` (executable) files, as well as the files necessary for Java to communicate with Cube;
+* scripts -- contains all of the Cube scripts and associated helper files.
+
+The `INPUT` directory contains all of the input files (see the [Input Files](#Input-Files) section) required to run a specific scenario. MTC will deliver the model with a set of scenario-specific set of inputs. When configuring the model on a new computing system, one should make sure that the results from an established scenario can be recreated before developing and analyzing a new scenario. The `INPUT` directory contains the following folders:
+
+* hwy -- contains the input master network with all zone centroids as well (TAZ, MAZ, and TAP) (see the [Networks](#Networks) section);
+* trn -- contains all of the input transit network files (see the [Networks](#Networks) section);
+* landuse -- contains the MAZ and TAZ level socio-economic input land use files;
+* nonres -- contains the fixed, year-specific internal/external trip tables, the fixed, year-specific air passenger trip tables, and files used to support the commercial vehicle model;
+* popsyn -- contains the synthetic population files.
+
+The `RunModel.bat` script contains a list of MS-DOS instructions that control model flow.
+
+### Step 2: Map a network drive to share across computers
+As noted in the previous section, the MTC model files can be placed within any directory. After establishing this location, the user must map a network drive to a shared folder to allow other computers access. On MTC's machine, the directory `E:\MainModelShare` is first mapped to the letter drive `M:\` and this directory is then shared across on the network (`M:\ = \\MainModel\MainModelShare\`).
+
+Satellite computers should also map the letter drive `M:\` to this network location.
+
+Please note that the model components running on the main machine should use the local version of the directory (i.e. `M:\Projects\`) rather than the network version (i.e. `\\MainModel\MainModelShare\Projects\`).
+
+### Step 3: Configure the CT-RAMP and JPPF Services
+Much of the configuration of the CT-RAMP software is done automatically by the `RunModel.bat` batch file.  However, prior to executing a model run, the files controlling the CT-RAMP and JPPF services may need to be configured. Please see the [System Design](#System-Design) section for a broad overview of these services. When executing the travel model, the following start-up scripts need to be run separately on each computer. Each script specifies the tasks assigned to each computer and need not be configured exactly as described on the [System Design](#System-Design) section (we describe MTC's setup; numerous other configurations are possible). In the MTC setup, the following commands are executed:
+
+1. `runDriver.cmd` starts the JPPF Driver required for distributed model running; 
+2. `runHhMgr.cmd` starts the household manager on `satmodel1`;
+3. `runMtxMgr.cmd` starts the matrix manager on `satmodel1`;
+4. `runNode{X}.cmd` starts up JPPF worker nodes on the remaining node {X} machine(s);
+
+The `.cmd` files are MS-DOS batch scripts and can be edited in a text editor, such as Notepad.
+
+Each program requires an explicit amount of memory to be allocated to it.  The amount of memory allocated to each program is identified by the `-Xmx` parameter (`XXXm` allocates XXX megabytes; `Xg` allocates X gigabytes.  This may need to be adjusted depending on the model and hardware configurations.  An example is as follows:
+
+```dosbatch
+.. %JAVA_PATH%\bin\java -server -Xmx35000m ...
+```
+
+Most of the JPPF-related configuration parameters have been optimized for the MTC travel model application and, as such, need not be modified. There are, however, a handful of parameters described in the table below that may need to be modified to meet the specifications of the computing environment upon which the model is being executed. Each of the files listed below can be found in the `CTRAMP\runtime\config\` directory. 
+
+| *File Name* | *File Function* | *Statement* | *Purpose* |
+| `jppf-clientDistributed.properties` | JPPF Client Driver Control file | `driver1.jppf.server.host = 192.168.1.200` | IP address of the main computer (`mainmodel` at MTC) |
+| `jppf-clientLocal.properties` | JPPF Client Local Control file | `jppf.local.execution.threads = 22` | Number of threads to use for running the model on one machine for testing (mainly for debugging) |
+| `jppf-driver.properties` | JPPF Driver Control file | `jppf.server.host = 192.168.1.200` | IP address of the main computer (`mainmodel` at MTC) |
+| `jppf-node{x}.properties` | Remote JPPF Node Control file | `jppf.server.host = 192.168.1.200` | IP address of the main computer (`mainmodel` at MTC) |
+| ^ | ^ | `processing.threads = 12` | Number of computing cores on node {X} |
+| ^ | ^ | `other.jvm.options = -Xms48000m -Xmx48000m -Dnode.name=node0` | Maximum amount of memory, in MB, to allocate to node {X} and node name for logging | 
+
+
 ## Model Execution
 
 ## CT-RAMP Properties File
