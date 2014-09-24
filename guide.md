@@ -14,6 +14,7 @@ CONTENTS
 
 1. [Computing Environment](#Computing-Environment) 
 2. [System Design](#System-Design) 
+3. [Setup and Configuration section](#Setup-and-Configuration)
 
 ---
 
@@ -120,11 +121,11 @@ The `CTRAMP` directory contains all of the model configuration files, Java instr
 
 The `INPUT` directory contains all of the input files (see the [Input Files](#Input-Files) section) required to run a specific scenario. MTC will deliver the model with a set of scenario-specific set of inputs. When configuring the model on a new computing system, one should make sure that the results from an established scenario can be recreated before developing and analyzing a new scenario. The `INPUT` directory contains the following folders:
 
-* hwy -- contains the input master network with all zone centroids as well (TAZ, MAZ, and TAP) (see the [Networks](#Networks) section);
-* trn -- contains all of the input transit network files (see the [Networks](#Networks) section);
-* landuse -- contains the MAZ and TAZ level socio-economic input land use files;
-* nonres -- contains the fixed, year-specific internal/external trip tables, the fixed, year-specific air passenger trip tables, and files used to support the commercial vehicle model;
-* popsyn -- contains the synthetic population files.
+* `hwy` -- contains the input master network with all zone centroids as well (TAZ, MAZ, and TAP) (see the [Networks](#Networks) section);
+* `trn` -- contains all of the input transit network files (see the [Networks](#Networks) section);
+* `landuse` -- contains the MAZ and TAZ level socio-economic input land use files;
+* `nonres` -- contains the fixed, year-specific internal/external trip tables, the fixed, year-specific air passenger trip tables, and files used to support the commercial vehicle model;
+* `popsyn` -- contains the synthetic population files.
 
 The `RunModel.bat` script contains a list of MS-DOS instructions that control model flow.
 
@@ -154,6 +155,7 @@ Each program requires an explicit amount of memory to be allocated to it.  The a
 Most of the JPPF-related configuration parameters have been optimized for the MTC travel model application and, as such, need not be modified. There are, however, a handful of parameters described in the table below that may need to be modified to meet the specifications of the computing environment upon which the model is being executed. Each of the files listed below can be found in the `CTRAMP\runtime\config\` directory. 
 
 | *File Name* | *File Function* | *Statement* | *Purpose* |
+|:------------|-----------------|-------------|-----------|
 | `jppf-clientDistributed.properties` | JPPF Client Driver Control file | `driver1.jppf.server.host = 192.168.1.200` | IP address of the main computer (`mainmodel` at MTC) |
 | `jppf-clientLocal.properties` | JPPF Client Local Control file | `jppf.local.execution.threads = 22` | Number of threads to use for running the model on one machine for testing (mainly for debugging) |
 | `jppf-driver.properties` | JPPF Driver Control file | `jppf.server.host = 192.168.1.200` | IP address of the main computer (`mainmodel` at MTC) |
