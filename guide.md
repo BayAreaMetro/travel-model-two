@@ -14,7 +14,7 @@ CONTENTS
 
 1. [Computing Environment](#Computing-Environment) 
 2. [System Design](#System-Design) 
-3. [Setup and Configuration section](#Setup-and-Configuration)
+3. [Setup and Configuration](#Setup-and-Configuration)
 
 ---
 
@@ -170,12 +170,12 @@ The final configuration file that needs to be edited prior to executing a model 
 | `RunModel.MatrixServerAddress = 192.168.1.200`    | The IP address of the machine upon which the Matrix Manager is being executed (`satmodel1` at MTC)    |
 | `RunModel.HouseholdServerAddress = 192.168.1.200` | The IP address of the machine upon which the Household Manager is being executed (`satmodel1` at MTC) |
 
-### Step 4: Configure the `RunModel.bat`
+### Step 4: Configure `RunModel.bat`
 The final file in need of adjustment for the computing environment is the `RunModel.bat` MS-DOS batch file that executes the model stream. The following statements need to be configured within this file:
 
 | **Statement**                                                                | **Purpose** |
 |------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
-| ```dosbatch set JAVA_PATH=c:\program files\java\jdk1.7.0_13```               | Specify the 64-bit Java path; version 1.7.0+ |
+| ` set JAVA_PATH=c:\program files\java\jdk1.7.0_13`                           | Specify the 64-bit Java path; version 1.7.0+ |
 | `set TPP_PATH=c:\progam files(x86)\citilabs\cubevoyager`                     | Specify the Cube Voyager path |
 | `set CUBE_PATH=c:\progam files(x86)\citilabs\cube`                           | Specify the Cube path |
 | `set PYTHON_PATH=C:\Python27`                                                | Specify the Python path |
@@ -203,6 +203,28 @@ The final file in need of adjustment for the computing environment is the `RunMo
 Now that the model is configured, the user can run the model, as described in the [Model Execution](#Model-Execution) section.
 
 ## Model Execution
+
+This page describes how `RunModel.bat` executes the travel model. For: 
+
+* a description of the underlying computing environment, see [Computing Environment](#Computing-Environment); 
+* for a general description of the underlying system design, see [System Design](#System-Design); 
+* for a description of the configuration files that may need to be modified before executing the model, see [Setup and Configuration](#Setup-and-Configuration).
+
+### Step 1: Set globally-available environmental variables
+
+See  [Setup and Configuration](#Setup-and-Configuration) for complete details.
+
+### Step 2: Set relevant paths to access software
+
+See  [Setup and Configuration](#Setup-and-Configuration) for complete details.
+
+### Step 3: Create and populate a working directory of input files
+
+A working directory is created and populated with the input files, leaving the input files untouched in the process.  This step also create necessary directory structure for household and matrix data servers on the remote machine and copies over needed files.
+
+```dosbatch
+
+```
 
 ## CT-RAMP Properties File
 
