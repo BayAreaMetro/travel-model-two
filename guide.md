@@ -154,15 +154,53 @@ Each program requires an explicit amount of memory to be allocated to it.  The a
 
 Most of the JPPF-related configuration parameters have been optimized for the MTC travel model application and, as such, need not be modified. There are, however, a handful of parameters described in the table below that may need to be modified to meet the specifications of the computing environment upon which the model is being executed. Each of the files listed below can be found in the `CTRAMP\runtime\config\` directory. 
 
-| *File Name* | *File Function* | *Statement* | *Purpose* |
-|:------------|-----------------|-------------|-----------|
-| `jppf-clientDistributed.properties` | JPPF Client Driver Control file | `driver1.jppf.server.host = 192.168.1.200` | IP address of the main computer (`mainmodel` at MTC) |
-| `jppf-clientLocal.properties` | JPPF Client Local Control file | `jppf.local.execution.threads = 22` | Number of threads to use for running the model on one machine for testing (mainly for debugging) |
-| `jppf-driver.properties` | JPPF Driver Control file | `jppf.server.host = 192.168.1.200` | IP address of the main computer (`mainmodel` at MTC) |
-| `jppf-node{x}.properties` | Remote JPPF Node Control file | `jppf.server.host = 192.168.1.200` | IP address of the main computer (`mainmodel` at MTC) |
-| ^ | ^ | `processing.threads = 12` | Number of computing cores on node {X} |
-| ^ | ^ | `other.jvm.options = -Xms48000m -Xmx48000m -Dnode.name=node0` | Maximum amount of memory, in MB, to allocate to node {X} and node name for logging | 
+| **File Name**                             | **File Function**               | **Statement**                                                 | **Purpose**                                          |
+|:------------------------------------------|---------------------------------|---------------------------------------------------------------|------------------------------------------------------|
+| `jppf-clientDistributed.properties`       | JPPF Client Driver Control file | `driver1.jppf.server.host = 192.168.1.200`                    | IP address of the main computer (`mainmodel` at MTC) |
+| `jppf-clientLocal.properties`             | JPPF Client Local Control file  | `jppf.local.execution.threads = 22`                           | Number of threads to use for running the model on one machine for testing (mainly for debugging) |
+| `jppf-driver.properties`                  | JPPF Driver Control file        | `jppf.server.host = 192.168.1.200`                            | IP address of the main computer (`mainmodel` at MTC) |
+| `jppf-node{x}.properties`                 | Remote JPPF Node Control file   | `jppf.server.host = 192.168.1.200`                            | IP address of the main computer (`mainmodel` at MTC) |
+|                                           |                                 | `processing.threads = 12`                                     | Number of computing cores on node {X} |
+|                                           |                                 | `other.jvm.options = -Xms48000m -Xmx48000m -Dnode.name=node0` | Maximum amount of memory, in MB, to allocate to node {X} and node name for logging | 
 
+The final configuration file that needs to be edited prior to executing a model run is the `mtctm2.properties` file located in `CTRAMP\runtime\`. This file serves as the general control module for the entire CT-RAMP application. At this stage, the following variables need to be modified for the software to execute the model properly.
+
+| **Statement**                                     | **Purpose**                                                                                           |
+|---------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `RunModel.MatrixServerAddress = 192.168.1.200`    | The IP address of the machine upon which the Matrix Manager is being executed (`satmodel1` at MTC)    |
+| `RunModel.HouseholdServerAddress = 192.168.1.200` | The IP address of the machine upon which the Household Manager is being executed (`satmodel1` at MTC) |
+
+### Step 4: Configure the `RunModel.bat`
+The final file in need of adjustment for the computing environment is the `RunModel.bat` MS-DOS batch file that executes the model stream. The following statements need to be configured within this file:
+
+| **Statement**                                                                | **Purpose** |
+|------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| ```dosbatch set JAVA_PATH=c:\program files\java\jdk1.7.0_13```               | Specify the 64-bit Java path; version 1.7.0+ |
+| `set TPP_PATH=c:\progam files(x86)\citilabs\cubevoyager`                     | Specify the Cube Voyager path |
+| `set CUBE_PATH=c:\progam files(x86)\citilabs\cube`                           | Specify the Cube path |
+| `set PYTHON_PATH=C:\Python27`                                                | Specify the Python path |
+| `set RUNTIME=ctramp\runtime`                                                 | Specify the location of the CT-RAMP software (relative to the project directory) |
+| `set SAMPLERATE_ITERATION{iteration}=0.1`                                    | Set choice model household sample rate by iteration |
+| `set PATH=%RUNTIME%;%JAVA_PATH%/bin;%TPP_PATH%;%PYTHON_PATH%/bin;%OLD_PATH%` | Set the path DOS environment variable for the model run |
+| `set HOST_IP_ADDRESS=%IPADDRESS%`                                            | The IP address of the host machine, `mainmodel` at MTC, is automatically calculated |
+| `set MODEL_YEAR=2010`                                                        | Set model year |
+| `set BASE_SCRIPTS=CTRAMP\scripts`                                            | Set scripts folder |
+| `set /A MAX_ITERATION=2`                                                     | Set the model feedback iterations |
+| `set TAZ_COUNT=4509`                                                         | The number of tazs |
+| `set TAZ_EXTS_COUNT=4530`                                                    | The number of tazs + externals |
+| `set TAP_COUNT=6172`                                                         | The number of transit access point zones |
+| `set MATRIX_SERVER=\\w-ampdx-d-sag02`                                        | Machine running matrix data manager |
+| `set MATRIX_SERVER_BASE_DIR=%MATRIX_SERVER%\c$\projects\mtc\%SCEN%`          | Machine running matrix data manager base directory |
+| `set MATRIX_SERVER_ABSOLUTE_BASE_DIR=c:\projects\mtc\%SCEN%`                 | Machine running matrix data manager absolute directory |
+| `set MATRIX_SERVER_JAVA_PATH=C:\Program Files\Java\jdk1.7.0_25`              | Machine running matrix data manager Java install |
+| `set HH_SERVER=\\w-ampdx-d-sag02`                                            | Machine running household data manager |
+| `set HH_SERVER_BASE_DIR=%HH_SERVER%\c$\projects\mtc\%SCEN%`                  | Machine running household data manager base directory |
+| `set HH_SERVER_ABSOLUTE_BASE_DIR=c:\projects\mtc\%SCEN%`                     | Machine running household data manager absolute directory |
+| `set HH_SERVER_JAVA_PATH=C:\Program Files\Java\jdk1.7.0_25`                  | Machine running household data manager Java install |
+| `set UN=`                                                                    | Username for logging in to remote machines |
+| `set PWD=`                                                                   | Password for logging in to remote machines |
+
+Now that the model is configured, the user can run the model, as described in the [Model Execution](#Model-Execution) section.
 
 ## Model Execution
 
