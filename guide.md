@@ -16,6 +16,7 @@ CONTENTS
 2. [System Design](#System-Design) 
 3. [Setup and Configuration](#Setup-and-Configuration)
 4. [Model Execution](#Model-Execution) 
+5. [CT-RAMP Properties File](### CT-RAMP-Properties-File)
 
 ---
 
@@ -275,7 +276,66 @@ Several steps are needed to prepare the inputs for use in the model.  The follow
 * `CreateNonMotorizedNetwork.job` -- convert the roadway network into bike and ped networks
 * `tap_to_taz_for_parking.job` -- create the transit access point (TAP) data
 * `SetTolls.job` -- set network prices (i.e., bridge tolls, express lane tolls) in the roadway network
-* START HERE
+* `SetHovKferPenalties.job` -- add a penalty of X seconds for dummy links connecting HOV/express lanes and general purpose lanes
+* `SetCapClass.job` -- compute area type and populate the `CAPCLASS` network variable
+* `CreateFiveHighwayNetworks.job` -- create time-of-day-specific roadway networks
+* `BuildTazNetworks.job` -- create TAZ-scale networks for TAZ-scale roadway assignment
+
+### Step 5:  Build walk, bicycle, and nearby automobile level-of-service matrices
+Two scripts create the level-of-service information for the non-motorized modes and nearby automobile skims (for which, as a simplification, congestion is constant).  The following Cube scripts do the job:
+
+*  `NonMotorizedSkims.job` -- skim the walk and bicycle networks
+*  `MazMazSkims.job` -- builds short-distance MAZ-to-MAZ automobile skims
+
+### Step 6: Build air passenger demand matrices
+The `BuildAirPax.job` Cube script creates the air passenger demand estimates.  Air passenger demand is assumed to be independent of roadway level-of-service and, as such, can be computed a single time. 
+
+### Step 7: Build highway and transit skims
+The following steps create the highway and transit level-of-service matrices:
+
+* Copy data files to the remote househould data manager machine
+* Set the sampling rate based on `SAMPLERATE_ITERATION<iteration> global variable
+* `HwySkims.job` -- build the roadway skims
+* `BuildTransitNetworks.job` -- build the transit networks using the congested roadway times
+* `TransitSkims.job` -- build the transit skims
+* Copy the skims and related files to the remote household and matrix data manager machines
+
+### Step 8:  Execute the CT-RAMP models
+The core passenger travel demand models are executed via the CT-RAMP Java code via the following steps:
+
+*  Remote worker node(s), as specified, are started using `psexec`
+*  Remote household and matrix servers are started using `psexec`
+*  JPPF driver, as needed, is started via `CTRAMP/runtime/runDriver.cmd`
+*  CT-RAMP models are executed via `CTRAMP/runMTCTM2ABM.cmd`
+*  Stops remote servers using `pskill`
+*  Copies output matrices from the matrix manager machine back to the main machine
+*  `merge_demand_matrices.s` -- merges the output demand matrices
+
+### Step 9:  Execute the internal/external and commercial vehicle models
+These ancillary demand models are executed via a series of Cube scripts as follows:
+
+* `IxForecasts.job` -- create the internal/external demand matrices
+* `IxTimeOfDay.job` -- apply diurnal factors to the daily internal/external demand matrices
+* `IxTollChoice.job` -- apply a toll choice model for express lanes to the internal/external demand
+* `TruckTripGeneration.job` -- apply the commercial vehicle generation models
+* `TruckTripDistribution.job` -- apply the commercial vehicle distribution models
+* `TruckTimeOfDay.job` -- apply the commercial vehicle diurnal factors
+* `TruckTollChoice.job` -- apply a toll choice model for express lanes to the commercial vehicle demand
+
+### Step 10: Network Assignment
+Demand is located on mode-specific paths through the networks in the assignement step via the following steps:
+
+* `build_and_assign_maz_to_maz_auto.job` -- nearby automobile demand assigned to best path on MAZ-scale network
+* `HwyAssign.job` -- using nearby demand as background demand, demand assigned to TAZ-scale network
+* `AverageNetworkVolumes.job` -- method of successive averages (MSA) applied across overall model iterations
+* `CalculateAverageSpeed.job` -- using the averaged volumes, compute speeds
+* `MergeNetworks.job` -- merge time-of-day-specific networks into a single network
+* `IF` additional `ITERATION`s are needed, `GOTO` [Step 7: Build highway and transit skims](#Step-7:-Build-highway-and-transit-skims)
+* `ELSE` perform transit assignment with `TransitAssign.job`
+
+### Step 11: Clean up
+The final step of the model run moves all the TP+ printouts to the \logs folder and deletes all the temporary TP+ printouts and cluster files. 
+
 
 
 ## CT-RAMP Properties File
