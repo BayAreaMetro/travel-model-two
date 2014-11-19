@@ -15,6 +15,7 @@ CONTENTS
 1. [Computing Environment](#Computing-Environment) 
 2. [System Design](#System-Design) 
 3. [Setup and Configuration](#Setup-and-Configuration)
+4. [Model Execution](#Model-Execution) 
 
 ---
 
@@ -220,7 +221,7 @@ See  [Setup and Configuration](#Setup-and-Configuration) for complete details.
 
 ### Step 3: Create and populate a working directory of input files
 
-A working directory is created and populated with the input files, leaving the input files untouched in the process.  This step also create necessary directory structure for household and matrix data servers on the remote machine and copies over needed files.
+A working directory is created and populated with the input files, leaving the input files untouched in the process.  This step also creates the necessary directory structure for the household and matrix data servers on the remote machine and copies over needed files.
 
 ```dosbatch
 
