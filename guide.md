@@ -270,6 +270,7 @@ ROBOCOPY CTRAMP %MATRIX_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
 
 ### Step 4: Pre-process steps
 Several steps are needed to prepare the inputs for use in the model.  The following Cube scripts are executed to perform the following:
+
 * `zone_seq_net_builder.job` -- build an internal numbering scheme for the network nodes to play nice with Cube
 * `CreateNonMotorizedNetwork.job` -- convert the roadway network into bike and ped networks
 * `tap_to_taz_for_parking.job` -- create the transit access point (TAP) data
