@@ -224,8 +224,58 @@ See  [Setup and Configuration](#Setup-and-Configuration) for complete details.
 A working directory is created and populated with the input files, leaving the input files untouched in the process.  This step also creates the necessary directory structure for the household and matrix data servers on the remote machine and copies over needed files.
 
 ```dosbatch
+mkdir hwy
+mkdir trn
+mkdir skims
+mkdir landuse
+mkdir popsyn
+mkdir nonres
+mkdir main
+mkdir logs
+mkdir database
+mkdir ctramp_output
 
+:: Stamp the feedback report with the date and time of the model start
+echo STARTED MODEL RUN  %DATE% %TIME% >> logs\feedback.rpt 
+
+:: Move the input files, which are not accessed by the model, to the working directories
+copy INPUT\hwy\                 hwy\
+copy INPUT\trn\                 trn\
+copy INPUT\trn\transit_lines\   trn\
+copy INPUT\trn\transit_fares\   trn\ 
+copy INPUT\trn\transit_support\ trn\
+copy INPUT\landuse\             landuse\
+copy INPUT\popsyn\              popsyn\
+copy INPUT\nonres\              nonres\
+copy INPUT\warmstart\main\      main\
+copy INPUT\warmstart\nonres\    nonres\
 ```
+After the directories are created, copies are made to the remote machines for access by the household and matrix servers.
+
+```dosbatch
+SET HH_DEPENDENCIES=(hwy popsyn landuse skims trn CTRAMP logs)
+IF NOT EXIST %HH_SERVER_BASE_DIR% MKDIR %HH_SERVER_BASE_DIR%
+FOR %%A IN %HH_DEPENDENCIES% DO (
+    IF NOT EXIST %HH_SERVER_BASE_DIR%\%%A MKDIR %HH_SERVER_BASE_DIR%\%%A
+)
+ROBOCOPY CTRAMP %HH_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
+
+SET MATRIX_DEPENDENCIES=(skims CTRAMP logs ctramp_output)
+IF NOT EXIST %MATRIX_SERVER_BASE_DIR% MKDIR %MATRIX_SERVER_BASE_DIR%
+FOR %%A IN %MATRIX_DEPENDENCIES% DO (
+    IF NOT EXIST %MATRIX_SERVER_BASE_DIR%\%%A MKDIR %MATRIX_SERVER_BASE_DIR%\%%A
+)
+ROBOCOPY CTRAMP %MATRIX_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
+```
+
+### Step 4: Pre-process steps
+Several steps are needed to prepare the inputs for use in the model.  The following Cube scripts are executed to perform the following:
+* `zone_seq_net_builder.job` -- build an internal numbering scheme for the network nodes to play nice with Cube
+* `CreateNonMotorizedNetwork.job` -- convert the roadway network into bike and ped networks
+* `tap_to_taz_for_parking.job` -- create the transit access point (TAP) data
+* `SetTolls.job` -- set network prices (i.e., bridge tolls, express lane tolls) in the roadway network
+* START HERE
+
 
 ## CT-RAMP Properties File
 
