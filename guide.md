@@ -347,21 +347,21 @@ The table below contains brief descriptions of the input files required to execu
 
 | **File name** | **Purpose** | **Folder location** | **File type** | **File format** |
 |---------------|-------------|---------------------|---------------|-----------------|
-| `mtc<code>&#95</code>final<code>&#95</code>network.net` | Highway, bike, walk network | hwy\ | [Citilabs Cube](http://citilabs.com/products/cube)| Networks |
+| `mtc_final_network.net` | Highway, bike, walk network | hwy\ | [Citilabs Cube](http://citilabs.com/products/cube)| Networks |
 | `mazData.csv` | Micro zone data  | landuse\ | CSV | MazData |
 | `tazData.csv` | Travel analysis zone data | landuse\ | CSV | TazData |
 | `truckFF.dat` | Friction factors for the commercial vehicle distribution models | nonres\ | ASCII | TruckDistribution |
 | `truckkfact.k22.z1454.mat` | "K-factors" for the commercial vehicle distribution models | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | TruckDistribution |
-| `truck<code>&#95</code>kfactors<code>&#95</code>taz.csv` | "K-factors" for the commercial vehicle distribution models | nonres\ | CSV | TruckDistribution |
+| `truck_kfactors_taz.csv` | "K-factors" for the commercial vehicle distribution models | nonres\ | CSV | TruckDistribution |
 | `ixDailyYYYY.tpp` | Internal-external fixed trip table for year YYYY | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | FixedDemand |
 | `IXDaily2006x4.may2208.new` | Internal-external input fixed trip table | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | FixedDemand |
-|  `YYYY<code>&#95</code>fromtoAAA.csv` |  Airport passenger fixed trips for year YYYY and airport AAA  | nonres\ | CSV | FixedDemand |
-| `hhFile<code>&#95</code>YYYY<code>&#95</code>MAZ.csv` | Synthetic population household file at the MAZ level for year YYYY | popsyn\ | CSV | PopSynHousehold |
+|  `YYYY_romtoAAA.csv` |  Airport passenger fixed trips for year YYYY and airport AAA  | nonres\ | CSV | FixedDemand |
+| `hhFile_YYYY_MAZ.csv` | Synthetic population household file at the MAZ level for year YYYY | popsyn\ | CSV | PopSynHousehold |
 | `personFile.YYYY.csv` | Synthetic population person file for year YYYY | popsyn\ | CSV |   |
-| `activity<code>&#95</code>code<code>&#95</code>indcen.csv` | Census occupation to activity coding | popsyn\ | CSV |   |
-| `pecasvocc<code>&#95</code>occcen1.csv` | Census occupation to work occupation coding | popsyn\ | CSV |   |
+| `activity_code_indcen.csv` | Census occupation to activity coding | popsyn\ | CSV |   |
+| `pecasvocc_occcen1.csv` | Census occupation to work occupation coding | popsyn\ | CSV |   |
 | `transitLines.lin` | Transit lines | trn\transit_lines | [Citilabs Cube](http://citilabs.com/products/cube)| TransitNetwork  |
-| `transitFactors<code>&#95</code>MMMM.fac` | Cube Public Transport (PT) factor files by transit line haul mode MMMM | trn\transit_support | [Citilabs Cube](http://citilabs.com/products/cube) | TransitNetwork |
+| `transitFactors_MMMM.fac` | Cube Public Transport (PT) factor files by transit line haul mode MMMM | trn\transit_support | [Citilabs Cube](http://citilabs.com/products/cube) | TransitNetwork |
 
 ## Output Files
 
