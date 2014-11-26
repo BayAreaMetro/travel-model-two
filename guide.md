@@ -355,7 +355,7 @@ The table below contains brief descriptions of the input files required to execu
 | `truck_kfactors_taz.csv` | "K-factors" for the commercial vehicle distribution models | nonres\ | CSV | TruckDistribution |
 | `ixDailyYYYY.tpp` | Internal-external fixed trip table for year YYYY | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | FixedDemand |
 | `IXDaily2006x4.may2208.new` | Internal-external input fixed trip table | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | FixedDemand |
-|  `YYYY_romtoAAA.csv` |  Airport passenger fixed trips for year YYYY and airport AAA  | nonres\ | CSV | FixedDemand |
+|  `YYYY_fromtoAAA.csv` |  Airport passenger fixed trips for year YYYY and airport AAA  | nonres\ | CSV | FixedDemand |
 | `hhFile_YYYY_MAZ.csv` | Synthetic population household file at the MAZ level for year YYYY | popsyn\ | CSV | PopSynHousehold |
 | `personFile.YYYY.csv` | Synthetic population person file for year YYYY | popsyn\ | CSV |   |
 | `activity_code_indcen.csv` | Census occupation to activity coding | popsyn\ | CSV |   |
