@@ -1,7 +1,7 @@
 # Dependencies
-markdown: redcarpet2
+markdown: redcarpet
 redcarpet:
-  extensions: ["no_intra_emphasis", "tables"]
+  extensions: ["tables"]
 
 pygments:         true
 
