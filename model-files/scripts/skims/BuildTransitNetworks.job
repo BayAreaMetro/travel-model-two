@@ -1,0 +1,231 @@
+; ----------------------------------------------------------------------------------------------------------------
+;
+; BuildTransitNetworks.job
+;
+; A TP+ script that creates the transit network used for skimming/assignment. The transit skimming procedure is much
+; simpler than in models past, so there only needs to be one base network, based off of the base master network. The only 
+; thing removed from the base network are TAZ and MAZ connectors and bike links, since all skims/assignment is TAP->TAP. (As 
+; a reminder, all drive-to-transit is dealt with at a model level, so park-n-ride and other transit assignment/skimming 
+; sophistications  no longer are needed. Access/egress is automatically carried out by both the TAP-connectors and TAZ/MAZ<->TAP 
+; connections.)
+;
+; Five networks are eventually created, one for each time period. They only differ in the congested highway times (which are
+; used for calculating the (local bus) transit times).
+; 
+; All walk transfers occur stop->stop, which, to prevent an exponential proliferation of transfer links, is simplified
+; to be TAP->TAP. That is, every stop is associated (already) with a TAP, and so by building TAP->TAP walk connector
+; links, the stop->stop transfers can be facilitated along these. The only wrinkle is in keeping the distances between
+; the TAPs realistic, which requires the setting of (walk transfer) costs on stop->TAP connectors (which already exist)
+; to zero, and using the straight-line distance between TAPs as the (walk transfer) costs.
+; 
+; To create the TAP->TAP transfers, a TAP->TAP (walk) distance skim produced in the non-motorized skimming procedure is
+; used to identify which TAP pairs need transfers built between them. A Python program is used to build these connectors
+; (and distances) in a text file, which is then added to the final network.
+;
+; The actual transit lines are not read in until the PT skimming/assignment procedure. This process just sets up the network
+; such that the PT process can run without any additional work/preparation.
+;
+; 
+;  Input: (1) The base network which contains all highway, transit, pedestrian, and TAP connector links.
+;         (2) A TAP->TAP walk (distance) skim, in which distance has been capped at some predetermined value.
+; 
+;  Output: (1) A Cube network containing the TAP->TAP transfer links and the transit lines for each time period.
+;
+; See also: (1) NonMotorizedSkims.job -- Creates the TAP->TAP used to build the walk transfer links
+;           (2) TransitSkims.job -- Skims the networks created here to build level-of-service matrices
+;
+; version:  Travel Model Zed
+; authors:  crf (2013 08)
+;
+;
+; ----------------------------------------------------------------------------------------------------------------
+
+;export tap->node (stop) links and node locations so that connector links can be built
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = "hwy\mtc_final_network.net"
+    LINKO=hwy\mtc_tap_to_stop_connectors.txt FORMAT=TXT, FORM=15.0 INCLUDE=A,B
+    NODEO=hwy\mtc_transit_network_node_xy.txt FORMAT=TXT, FORM=15.0 INCLUDE=N,X,Y
+    PHASE=LINKMERGE
+        IF (CNTYPE='TAP')
+            ;keep
+        ELSE
+            DELETE
+        ENDIF
+    ENDPHASE
+ENDRUN
+
+;first, call python program to build walk links
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_walk_transfer_links.py skims\ped_distance_tap_tap.txt hwy\tap_direct_connectors.csv
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv hwy\tap_direct_connectors.csv 2 TAP TAP
+;now build walk connectors that bypass taps
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_walk_transfer_bypass_links.py hwy\tap_direct_connectors.csv hwy\mtc_tap_to_stop_connectors.txt hwy\mtc_transit_network_node_xy.txt hwy\tap_connector_nodes.csv hwy\tap_connectors.csv
+
+;now build transit network
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = "hwy\mtc_final_network.net"
+    NODEI[2] = hwy\tap_connector_nodes.csv VAR=N,X,Y
+    LINKI[2] = hwy\tap_connectors.csv VAR=A,B,CNTYPE(C),FEET
+    NETO = hwy\mtc_transit_network_temp1.net
+
+    PHASE=LINKMERGE
+        IF (CNTYPE='TRWALK')
+            WALKDIST = FEET
+            WALKTIME = FEET * (60.0 / 5280.0 / 3.0) ; 3 mph, in minutes
+            NTL_MODE = 2
+        ELSEIF (CNTYPE='TAP')
+            WALKDIST = 1                            ; trivial distance for all tap connectors
+            WALKTIME = 60.0 / 5280.0 / 3.0          ; 3 mph, in minutes
+            NTL_MODE = 1
+        ELSE
+            WALKDIST = 9999                         ; big distance
+            WALKTIME = 999                          ; big time
+            NTL_MODE = 0
+        ENDIF
+        
+        ;todo: fix this either from block lookup or internal coding on streets
+        IF (CNTYPE='CRAIL')
+            TRANTIME = FEET * (60.0 / 5280.0 / 30.0)    ; default to 30 mph for CRAIL
+        ELSEIF (CNTYPE='HRAIL')
+            TRANTIME = FEET * (60.0 / 5280.0 / 30.0)    ; default to 30 mph for HRAIL
+        ELSEIF (CNTYPE='LRAIL')
+            TRANTIME = FEET * (60.0 / 5280.0 / 20.0)    ; default to 20 mph for LRAIL
+        ELSEIF (CNTYPE='FERRY')
+            TRANTIME = FEET * (60.0 / 5280.0 / 15.0)    ; default to 15 mph for FERRY
+        ELSE
+            TRANTIME = FEET * (60.0 / 5280.0 / 15.0)    ; default to 15 mph for transit
+        ENDIF
+
+        IF (CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='PED' | CNTYPE='BIKE' | CNTYPE='EXT')
+            DELETE
+        ELSE
+            ;keep
+        ENDIF
+    ENDPHASE
+ENDRUN
+
+;build tap networks
+node_start = 1000000 ;all taps can fit beneath this
+tap_selector = '(N < 900000) & (N % 100000 > 90000)'
+
+;create sequential tap numbers
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = "hwy\mtc_transit_network_temp1.net"
+    NETO = "hwy\mtc_transit_network_temp2.net"
+    
+    PHASE = NODEMERGE
+        IF (@tap_selector@)  
+            NEW_NODE = TAPSEQ
+            OLD_NODE = N
+        ELSE
+            _j = _j + 1     
+            NEW_NODE = _j + @node_start@
+            OLD_NODE = N
+        ENDIF
+    ENDPHASE
+  
+    PHASE = LINKMERGE
+        A_NEW_NODE = A.NEW_NODE
+        OLD_A = A
+        B_NEW_NODE = B.NEW_NODE
+        OLD_B = B
+    ENDPHASE
+ENDRUN
+;copy these back to correct network values
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = "hwy\mtc_transit_network_temp2.net"
+    NETO = "hwy\mtc_transit_network_temp3.net"
+
+    PHASE = INPUT FILEI=NI.1
+        N = NEW_NODE
+    ENDPHASE
+
+    PHASE = INPUT FILEI=LI.1
+        A = A_NEW_NODE
+        B = B_NEW_NODE
+    ENDPHASE
+ENDRUN
+;set zone count
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = hwy\mtc_transit_network_temp3.net
+    NETO = hwy\mtc_transit_network.net
+    ZONES = %TAP_COUNT%
+ENDRUN
+;write out taz to node correspondence
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = hwy\mtc_transit_network.net
+    NODEO=hwy\mtc_transit_network_tap_to_node.txt FORMAT=TXT, FORM=15.0 INCLUDE=N,OLD_NODE
+ENDRUN
+
+*del hwy\mtc_transit_network_temp1.net
+*del hwy\mtc_transit_network_temp2.net
+*del hwy\mtc_transit_network_temp3.net
+
+;start cluster nodes
+*Cluster.exe MTC_TRANNET 1-5 start exit
+
+;now build transit times based on congested times from loaded network
+;loop over time period
+LOOP PERIOD = 1,5
+
+   ; do each time of day as a separate process
+   DistributeMultistep processid = 'MTC_TRANNET', processNum = @period@
+
+        ; a two letter token is used for each time period
+        IF (PERIOD = 1)   
+            TOKEN_PERIOD = 'EA' 
+        ELSEIF (PERIOD = 2)   
+            TOKEN_PERIOD = 'AM' 
+        ELSEIF (PERIOD = 3)   
+            TOKEN_PERIOD = 'MD' 
+        ELSEIF (PERIOD = 4)   
+            TOKEN_PERIOD = 'PM'
+        ELSEIF (PERIOD = 5)   
+            TOKEN_PERIOD = 'EV'
+        ENDIF
+
+        ;spit out congested times for time period
+        RUN PGM=NETWORK
+            PAR  NODES=10000000
+            NETI = "hwy\avgload@token_period@.net"
+            LINKO = "hwy\link_times_@TOKEN_PERIOD@_temp1.csv" FORMAT=TXT DELIMITER=',' INCLUDE=A,B,CTIM
+
+            PHASE=LINKMERGE
+                IF (CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='PED' | CNTYPE='BIKE' | CNTYPE='EXT')
+                    DELETE
+                ELSE
+                    ;keep
+                ENDIF
+            ENDPHASE
+        ENDRUN
+
+        ;run program to renumber nodes in congested time file
+        *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\change_link_node_numbers.py hwy\link_times_@TOKEN_PERIOD@_temp1.csv hwy\link_times_@TOKEN_PERIOD@_temp2.csv hwy\mtc_transit_network_tap_to_node.txt
+
+        ;read in congested times for transit network
+        RUN PGM=NETWORK
+            PAR  NODES=10000000
+            NETI = "hwy\mtc_transit_network.net"
+            LINKI[2] = "hwy\link_times_@TOKEN_PERIOD@_temp2.csv" VAR=A,B,TRANTIME
+            NETO = "hwy\mtc_transit_network_@TOKEN_PERIOD@.net"
+        ENDRUN
+
+        ;delete the link times file
+        *DEL hwy\link_times_@TOKEN_PERIOD@_temp1.csv
+        *DEL hwy\link_times_@TOKEN_PERIOD@_temp2.csv
+
+   EndDistributeMultistep
+ENDLOOP
+
+Wait4Files files = MTC_TRANNET1.script.end, MTC_TRANNET2.script.end, MTC_TRANNET3.script.end, MTC_TRANNET4.script.end, MTC_TRANNET5.script.end, 
+           printfiles = merge, deldistribfiles = t, CheckReturnCode = t
+
+
+;stop cluster nodes
+*Cluster.exe MTC_TRANNET 1-5 close exit
+

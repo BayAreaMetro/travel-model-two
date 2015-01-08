@@ -1,0 +1,306 @@
+; ----------------------------------------------------------------------------------------------------------------
+;
+; MazMazSkims.job
+;
+; TP+ script to compute personal vehicle vehicle highway skims tables for MAZ to MAZ travel. Because of the sheer
+; number of MAZs, a full skim (all MAZs to all MAZs) is infeasible, and, given the structure of the travel model
+; (including its use of TAZ to TAZ skims for longer trips), unnecessary. Furthermore, because these short trips are
+; assumed to be relatively insensitive to congestion, the skim is only performed for a single time period and mode
+; (MD and DA) and only captures distance and bridge tolls. The maximum distance for a MAZ to MAZ trip is set in the
+; maxCosts.block file, and is currently set at approximately 5 miles (generalized cost is used when selecting the
+; best path, so an approximation must be made).
+;
+; Like the non-motorized skims, this script uses the Cube shortest path script, which allows us to skim shortest
+; paths for each MAZ individually (and thus cap the generalized cost). In order to prevent trips from using MAZ
+; connectors as intermediate links, each MAZ connector is given a generalized cost equal to the maximum allowed
+; cost. Then, the maximum cost used in the script is 3 times the maximum allowed cost, which will make the shortest
+; path script correct since 2 times the maximum allowed cost is required to leave and enter MAZs.
+;
+; Like the highway skims, these skims are based on the shortest generalized cost path, which makes the following
+; assumptions:
+;    (a) the automobile operating cost is 14.2 cents ($2000) per mile, which is based on a state-wide agreed 
+;        upon approach (use EMFAC's implied fleetwide MPG combined with an agreed upon gas price);
+;    (b) the assumed personal vehicle value of time is $15 per hour ($2000); a value of time is needed to 
+;        determine if the value toll path is reasonable and one should lean towards a high value, which will 
+;        create a pay path, thus allowing the mode choice model the opportunity to evaluate it -- Vovsha 
+;        recommends a value of time in the $6 to $22 ($2008) per hour range, which we are in; 
+; All of these values are coded in the "hwyParam.block" file. 
+;
+; Input:  (1) A highway network with no toll roads (other than bridges) containing the following fields: 
+;             (a) CTIM, which is the congested time in minutes;
+;             (b) DISTANCE (which is skimmed)
+;             (c) TOLLMD_DA (this is the dollar value of the bridge toll)
+;             (d) USECLASS (which is a code defining which class of vehicles can use which link, 1 - everyone, 2 - two occupants, 3 -  three occupants, 4 - no large trucks). 
+;
+; Output: csv skim files with the following format: FROM_ZONE,TO_ZONE,TO_ZONE,GENERALIZED_COST,SKIM_VALUE
+;         The following files and skims are saved:
+;            (A) HWYSKIM_MAZMAZ_DIST_DA.csv - distance in feet
+;            (B) HWYSKIM_MAZMAZ_BTOLL_DA.csv - bridge toll in cents ($2000)
+;
+; See also: (1) SetTolls.job, which sets the tolls skimmed in this script
+;
+; version:  Travel Model Zed
+; authors:  crf (2013 09)
+;
+;
+; ----------------------------------------------------------------------------------------------------------------
+
+
+read file = %BASE_SCRIPTS%\block\maxCosts.block
+read file = %BASE_SCRIPTS%\block\hwyparam.block
+
+;now do maz-maz skims
+
+;county codes are X00,000 for zone nodes
+; 0 - San Francisco
+; 1 - San Mateo
+; 2 - Santa Clara
+; 3 - Alameda
+; 4 - Contra Costa
+; 5 - Solano
+; 6 - Napa
+; 7 - Sonoma
+; 8 - Marin
+county_selector_sf = '(N < 100000)'
+county_selector_sm = '(N < 200000) & (N > 100000)'
+county_selector_sc = '(N < 300000) & (N > 200000)'
+county_selector_al = '(N < 400000) & (N > 300000)'
+county_selector_cc = '(N < 500000) & (N > 400000)'
+county_selector_sl = '(N < 600000) & (N > 500000)'
+county_selector_np = '(N < 700000) & (N > 600000)'
+county_selector_sn = '(N < 800000) & (N > 700000)'
+county_selector_mn = '(N < 900000) & (N > 800000)'
+
+;zone is < 1,000,000
+zone_selector = '(N < 900000)'
+;maz is X10,001 - X89,999
+maz_selector = '(N % 100000 > 10000) & (N % 100000 < 90000)'
+maz_all = '(' + zone_selector + '  & ' + maz_selector + ')'
+
+; first, build the networks we need
+; do midday - leverage tolls and road already set in previous scripts
+TOKEN_PERIOD = 'MD'
+;loop over vehicle class
+LOOP CLASS = 1,1
+    ; a string token is used for each CLASS
+    IF (CLASS = 1)
+        TOKEN_CLASS = 'DA'
+        COST_SHARE = '1.0'
+        LINK_INCLUSION = '(USECLASS != 3) && (USECLASS != 2)'
+    ELSEIF (CLASS = 2)
+        TOKEN_CLASS = 'S2'
+        COST_SHARE = STR(sr2costShare,10,5)
+        LINK_INCLUSION = 'USECLASS != 3'
+    ELSEIF (CLASS = 3)
+        TOKEN_CLASS = 'S3'
+        COST_SHARE = STR(sr3costShare,10,5)
+        LINK_INCLUSION = 'FEET > 0' ;null exclusion
+    ENDIF
+    LINK_INCLUSION_FREE = 'TOLLBOOTH < ' + STR(firstValue,3,0) + '|| TOLL' + TOKEN_PERIOD + '_' + TOKEN_CLASS + ' = 0'
+    ; the generalized cost expression is the PREFIX + token_period + SUFFIX
+    ;note that 0.6 comes from (60 min/hr)*(1 $/100 cents) conversion factors
+    GENCOST = 'CTIM + (0.6 / ' + STR(vot,10,5) + ') * (FEET * ' + STR(autoOpCost,10,5) + ' / 5280.0 + TOLL' + TOKEN_PERIOD + '_' + TOKEN_CLASS + ' / ' + COST_SHARE + ')'
+    TOLLCOST = 'TOLL' + TOKEN_PERIOD + '_' + TOKEN_CLASS + ' / ' + COST_SHARE
+    
+    ;create networks with gencost and without excluded links
+    RUN PGM=NETWORK
+
+        PAR NODES=10000000
+
+        NETI = hwy\avgload@TOKEN_PERIOD@.net
+        NETO = hwy\maz_maz_network_@TOKEN_CLASS@.net
+        
+        PHASE=LINKMERGE
+            ;highway links, but only maz connectors
+             IF ((CNTYPE = 'MAZ' | CNTYPE = 'USE' | CNTYPE = 'TANA') & (@LINK_INCLUSION@) & (@LINK_INCLUSION_FREE@))
+                ;Keep record
+            ELSE
+                DELETE
+            ENDIF
+            IF (CNTYPE='MAZ')
+                GENCOST = @max_drive_gencost@
+            ELSE
+                GENCOST = @GENCOST@
+            ENDIF
+            IF (TOLLBOOTH < @firstValue@)
+                BRIDGE_TOLL = @TOLLCOST@
+            ELSEIF (TOLLBOOTH >= @firstValue@)
+                VALUE_TOLL = @TOLLCOST@
+            ELSE
+                BRIDGE_TOLL = 0
+                VALUE_TOLL = 0
+            ENDIF
+        ENDPHASE
+    ENDRUN
+    ; don't do this, but leaving it for future reference in case someone needs it then
+    ;;create networks with gencost and without excluded links
+    ;RUN PGM=NETWORK
+    ;    NETI = hwy\avgload@TOKEN_PERIOD@.net
+    ;    NETO = hwy\avgload@TOKEN_PERIOD@_@TOKEN_CLASS@_costs_toll.net
+    ;    
+    ;    PHASE=LINKMERGE
+    ;        ;highway links, but only maz connectors
+    ;         IF ((CNTYPE = 'MAZ' | CNTYPE = 'USE' | CNTYPE = 'TANA') & (@LINK_INCLUSION@))
+    ;            ;Keep record
+    ;        ELSE
+    ;            DELETE
+    ;        ENDIF
+    ;        IF (CNTYPE='MAZ')
+    ;            GENCOST = @max_drive_gencost@
+    ;        ELSE
+    ;            GENCOST = @GENCOST@
+    ;        ENDIF
+    ;        IF (TOLLBOOTH < @firstValue@)
+    ;            BRIDGE_TOLL = @TOLLCOST@
+    ;        ELSEIF (TOLLBOOTH >= @firstValue@)
+    ;            VALUE_TOLL = @TOLLCOST@
+    ;        ELSE
+    ;            BRIDGE_TOLL = 0
+    ;            VALUE_TOLL = 0
+    ;        ENDIF
+    ;    ENDPHASE
+ENDLOOP
+        
+;start cluster nodes
+*Cluster.exe MTC_HWYMAZSKIM 1-9 start exit
+
+;loop by county, but just use free flow speed
+LOOP PROC_COUNT=1,9
+    
+    DistributeMultistep ProcessID="MTC_HWYMAZSKIM",ProcessNum=PROC_COUNT
+
+        ;loop over vehicle class
+        LOOP CLASS = 1,1
+            ; a string token is used for each CLASS
+            IF (CLASS = 1)
+                TOKEN_CLASS = 'DA'
+            ELSEIF (CLASS = 2)
+                TOKEN_CLASS = 'S2'
+            ELSEIF (CLASS = 3)
+                TOKEN_CLASS = 'S3'
+            ENDIF
+            
+            *copy hwy\maz_maz_network_@TOKEN_CLASS@.net hwy\maz_maz_network_@TOKEN_CLASS@_@PROC_COUNT@.net
+            
+            ;skims
+            ; 1 - free time
+            ; 2 - free distance
+            ; 3 - free bridge cost
+            ; 4 - toll time
+            ; 5 - toll distance
+            ; 6 - toll bridge cost
+            ; 7 - toll value cost
+            
+            ;for now, just do distance and bridge cost - if we need the others we can add them
+            LOOP SKIMTYPE=2,3
+                IF (SKIMTYPE = 1)
+                    SKIM_NETWORK = 'hwy\maz_maz_network_' + TOKEN_CLASS
+                    SKIM_VARIABLE = 'CTIM'
+                    SKIM_NAME = 'TIME'
+                ELSEIF (SKIMTYPE = 2)
+                    SKIM_NETWORK = 'hwy\maz_maz_network_' + TOKEN_CLASS
+                    SKIM_VARIABLE = 'FEET'
+                    SKIM_NAME = 'DIST'
+                ELSEIF (SKIMTYPE = 3)
+                    SKIM_NETWORK = 'hwy\maz_maz_network_' + TOKEN_CLASS
+                    SKIM_VARIABLE = 'BRIDGE_TOLL'
+                    SKIM_NAME = 'BTOLL'
+                ELSEIF (SKIMTYPE = 4)
+                    SKIM_NETWORK = 'hwy\avgload' + TOKEN_PERIOD + '_' + TOKEN_CLASS + '_costs_toll.net'
+                    SKIM_VARIABLE = 'CTIM'
+                    SKIM_NAME = 'TOLLTIME'
+                ELSEIF (SKIMTYPE = 5)
+                    SKIM_NETWORK = 'hwy\avgload' + TOKEN_PERIOD + '_' + TOKEN_CLASS + '_costs_toll.net'
+                    SKIM_VARIABLE = 'FEET'
+                    SKIM_NAME = 'TOLLDIST'
+                ELSEIF (SKIMTYPE = 6)
+                    SKIM_NETWORK = 'hwy\avgload' + TOKEN_PERIOD + '_' + TOKEN_CLASS + '_costs_toll.net'
+                    SKIM_VARIABLE = 'BRIDGE_TOLL'
+                    SKIM_NAME = 'TOLLBTOLL'
+                ELSEIF (SKIMTYPE = 7)
+                    SKIM_NETWORK = 'hwy\avgload' + TOKEN_PERIOD + '_' + TOKEN_CLASS + '_costs_toll.net'
+                    SKIM_VARIABLE = 'VALUE_TOLL'
+                    SKIM_NAME = 'TOLLVTOLL'
+                ENDIF
+                SKIM_COUNTY = 1 + ((PROC_COUNT + SKIMTYPE) % 9)
+                SKIM_FULLNAME = 'HWYSKIM_MAZMAZ_' + SKIM_NAME + '_' + TOKEN_CLASS
+                SFILE = SKIM_FULLNAME
+                OUTFILE = '..\skims\' + SKIM_FULLNAME
+          
+                MAX_COST = max_drive_gencost*3
+    
+                ;write Cube script since can't pass tokens to RUN PGM = CUBE
+                RUN PGM=MATRIX
+                    ZONES=1
+                    FILEO PRINTO[1] = @SFILE@_@SKIM_COUNTY@.s
+                    PRINT LIST="RUN PGM = CUBE Parameters ='/Command /CloseWhenDone /Minimize /NoSplash'" PRINTO=1
+                    PRINT LIST=" PAR NODES=10000000" PRINTO=1
+                    PRINT LIST=" FUNCTION = BUILDPATH" PRINTO=1
+                    PRINT LIST=" neti = @SKIM_NETWORK@_@PROC_COUNT@.net" PRINTO=1
+                    PRINT LIST=" pathprinto = @OUTFILE@_@SKIM_COUNTY@.txt" PRINTO=1
+                    PRINT LIST=" CostSpec='GENCOST' " PRINTO=1
+                    ;PRINT LIST=" LinkSelection = ((CNTYPE != 'TAP') & (CNTYPE != 'TAZ'))" PRINTO=1
+                    PRINT LIST=" MaxPathCost = @MAX_COST@" PRINTO=1
+                    PRINT LIST=" PRINTMODE=SUMMARY" PRINTO=1
+                    ;same single quote problem here
+                    IF (@SKIM_COUNTY@ = 1)
+                        PRINT LIST=" Origin = '(@county_selector_sf@ & @maz_selector@)'" PRINTO=1
+                    ELSEIF (@SKIM_COUNTY@ = 2)
+                        PRINT LIST=" Origin = '(@county_selector_sm@ & @maz_selector@)'" PRINTO=1
+                    ELSEIF (@SKIM_COUNTY@ = 3)
+                        PRINT LIST=" Origin = '(@county_selector_sc@ & @maz_selector@)'" PRINTO=1
+                    ELSEIF (@SKIM_COUNTY@ = 4)
+                        PRINT LIST=" Origin = '(@county_selector_al@ & @maz_selector@)'" PRINTO=1
+                    ELSEIF (@SKIM_COUNTY@ = 5)
+                        PRINT LIST=" Origin = '(@county_selector_cc@ & @maz_selector@)'" PRINTO=1
+                    ELSEIF (@SKIM_COUNTY@ = 6)
+                        PRINT LIST=" Origin = '(@county_selector_sl@ & @maz_selector@)'" PRINTO=1
+                    ELSEIF (@SKIM_COUNTY@ = 7)
+                        PRINT LIST=" Origin = '(@county_selector_np@ & @maz_selector@)'" PRINTO=1
+                    ELSEIF (@SKIM_COUNTY@ = 8)
+                        PRINT LIST=" Origin = '(@county_selector_sn@ & @maz_selector@)'" PRINTO=1
+                    ELSEIF (@SKIM_COUNTY@ = 9)
+                        PRINT LIST=" Origin = '(@county_selector_mn@ & @maz_selector@)'" PRINTO=1
+                    ENDIF
+                    PRINT LIST=" AddTrace='@SKIM_VARIABLE@'" PRINTO=1
+                    PRINT LIST=" Destination = '@maz_all@'" PRINTO=1
+                    PRINT LIST=" CLOSE" PRINTO=1
+                    PRINT LIST=" ENDFUNCTION" PRINTO=1
+                    PRINT LIST="ENDRUN" PRINTO=1
+                 ENDRUN
+                 
+                ;run script
+                *"C:\Program Files (x86)\Citilabs\CubeVoyager\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
+                
+                ;clean-up
+                *del @SFILE@_@SKIM_COUNTY@.s
+                 
+                 
+            ENDLOOP
+            
+            ;*del hwy\avgload@TOKEN_PERIOD@_@TOKEN_CLASS@_costs_toll.net
+            *del hwy\maz_maz_network_@TOKEN_CLASS@_@PROC_COUNT@.net
+        ENDLOOP
+    EndDistributeMultistep
+ENDLOOP
+
+;wait for programs to complete
+Wait4Files Files=MTC_HWYMAZSKIM1.script.end, MTC_HWYMAZSKIM2.script.end, MTC_HWYMAZSKIM3.script.end, 
+                 MTC_HWYMAZSKIM4.script.end, MTC_HWYMAZSKIM5.script.end, MTC_HWYMAZSKIM6.script.end,
+                 MTC_HWYMAZSKIM7.script.end, MTC_HWYMAZSKIM8.script.end, MTC_HWYMAZSKIM9.script.end,
+          checkreturncode=T, printfiles=MERGE, deldistribfiles=T
+
+;stop cluster nodes
+*Cluster.exe MTC_HWYMAZSKIM 1-9 close exit
+
+;merge files
+
+*copy skims\HWYSKIM_MAZMAZ_DIST_DA_1.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_2.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_3.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_4.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_5.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_6.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_7.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_8.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_9.txt skims\HWYSKIM_MAZMAZ_DIST_DA.txt
+*del skims\HWYSKIM_MAZMAZ_DIST_DA_*.txt
+*copy skims\HWYSKIM_MAZMAZ_BTOLL_DA_1.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_2.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_3.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_4.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_5.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_6.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_7.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_8.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_9.txt skims\HWYSKIM_MAZMAZ_BTOLL_DA.txt
+*del skims\HWYSKIM_MAZMAZ_BTOLL_DA_*.txt
+
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\HWYSKIM_MAZMAZ_DIST_DA.txt 3
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\HWYSKIM_MAZMAZ_BTOLL_DA.txt 3
+
+

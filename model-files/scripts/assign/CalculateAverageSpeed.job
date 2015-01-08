@@ -1,0 +1,203 @@
+; ----------------------------------------------------------------------------------------------------------------
+; CalculateAverageSpeed.job
+;
+; TP+ script to compute the speeds from a highway network with successively averaged roadway volumes (see 
+; AverageNetworkVolumes.job for details).  The script first loops through the five time periods, which are: (a) early 
+; AM, 3 am to 6 am; (b) AM peak period, 6 am to 10 am; (c) midday, 10 am to 3 pm; (d) PM peak period, 3 pm to 7 pm; 
+; and, (e) evening, 7 pm to 3 am.  A dummy highway assignment is used to compute the speeds, therefore utilizing the
+; volume delay functions. 
+;
+;
+; Input:  (1) Five time-period-specific highway networks with the following variables: (a) VOL_DA, VOL_S2, etc, 
+;             which are the averaged volumes as computed by AverageNetworkVolumes.job; (b) FEET; 
+;             (c) FT, which is the facility type a code which determines the links' free-flow speed, capacity, 
+;             and volume/speed relationship; (d) TOLLBOOTH, which is a code, less than FIRSTVALUE - 1 (see hwyParam.block) 
+;             indicates the link is a bridge toll and a value higher than FIRSTVALUE indicates the link is a value toll; 
+;             (e) FFT,which is the free flow time (in minutes); (f) CAPCLASS, which is a speed/capacity look-up code (see 
+;             the "SpeedCapacity.block" file); and (g) TOLLXX_CC, where XX is a two-character time-period code and
+;             CC is a two or three-character vehicle class code, and the value is the dollar value of the toll to go 
+;             through the link in year 2000 dollars. 
+;
+; Output: (1) Five time-period-specific highway networks with the following link-specific variables which represent 
+;             the composite roadway conditions of all previous model iterations: (a) CTIM, which is the congested 
+;             travel time (minutes); (b) VC, which is the volume-to-capacity ratio; (c) CSPD, which is the congested
+;             travel speed (miles per hour); (d) VDT, which is the vehicle-distance traveled on each link (in vehicle
+;             times miles); and, (e) VHT, which is the vehicle-hours traveled on each link. 
+;
+;         (2) The congested time calculated for each link in this process is placed in the CTIM field in avgload[PERIOD].net
+;
+; See also: (1) AverageNetworkVolumes.job -- computes an average vehicle volume based on the current and previous
+;               model iterations. 
+;
+; version:  Travel Model One
+; authors:  dto (2010 08 10); gde (2009); crf (2014 03)
+;
+;
+; ----------------------------------------------------------------------------------------------------------------
+
+;read max cost parameters
+hwy_block_param = '%BASE_SCRIPTS%\block\hwyparam.block'
+speed_cap_block_param = '%BASE_SCRIPTS%\block\SpeedCapacity_1hour.block'
+free_flow_block_param = '%BASE_SCRIPTS%\block\FreeFlowSpeed.block'
+vdf_block_param = '%BASE_SCRIPTS%\block\SpeedFlowCurve.block'
+
+;start cluster nodes
+*Cluster.exe MTC_HWYMSAASN 1-25 start exit
+
+
+; do, more or less, the same skim procedure for each of the five time periods
+loop period = 1,5
+  
+    ; a two letter token is used for each time period
+    if (period = 1)   
+      token_period = 'EA'   
+      intrastep_range = '6-9'
+      token_capfac = 'parameters capfac = 3'
+    elseif (period = 2)   
+      token_period = 'AM'    
+      intrastep_range = '10-13'
+      token_capfac = 'parameters capfac = 4'
+    elseif (period = 3)   
+      token_period = 'MD'    
+      intrastep_range = '14-17'
+      token_capfac = 'parameters capfac = 5'
+    elseif (period = 4)   
+      token_period = 'PM'
+      intrastep_range = '18-21'
+      token_capfac = 'parameters capfac = 4'
+    elseif (period = 5)   
+      token_period = 'EV'
+      intrastep_range = '22-25'
+      token_capfac = 'parameters capfac = 8'
+    endif
+    ;REMOVE
+    token_maxiters = 'parameters maxiters = 1'
+    token_relativegap = 'parameters relativegap = 0.0005'
+    
+
+    ; do each time of day as a separate process
+    DistributeMultistep processid = 'MTC_HWYMSAASN', processNum = @period@
+    run pgm = highway
+        DistributeIntrastep processid = 'MTC_HWYMSAASN', processlist = @intrastep_range@ saveprn = f
+    
+        ; time-specific input msa highway network
+        neti = hwy\msaload@token_period@_taz.net
+    
+        ; loaded time-specific highway network
+        neto = hwy\msaspeed@token_period@.net
+    
+        ; set the assignment paramters -- equilibrium assignment, bi-conjugate
+        parameters combine = equi, enhance = 2            
+    
+        ; set the assignment parameters -- internal zones + ?? external zones
+        parameters zones = %TAZ_EXTS_COUNT%
+    
+        ; set the assignment parameters
+        @token_maxiters@ 
+        @token_relativegap@ 
+    
+        ; set the assignment parameters -- other closure criteria (do not use)
+        parameters gap = 0, aad = 0, raad = 0, rmse = 0
+    
+        ; set the number of hours in the assignment (see the loop tokens)
+        @token_capfac@ 
+    
+        ; hwyParam.bock contains variables used in the remainder of the script, particularly in the generalized cost expressions
+        read file = @hwy_block_param@
+    
+        ; read in the speed/capacity table
+        read file = @speed_cap_block_param@
+    
+        ; set the working variables
+    
+        ; set the working variables
+        phase = linkread
+        
+        
+            ; facility type is the linkclass (linkclass needs to be defined, but it's not used)
+            linkclass = li.FT 
+    
+            ; TOLLBOOTH set to distinguish value tolls from bridge tolls
+            lw.tollclass = li.TOLLBOOTH
+    
+            ; the speed/capacity table and the computation of the volume/delay function parameter (see FreeFlowSpeed.block) uses the capacity class code
+            ; which is area type * 10 + facility type
+            lw.capclass = li.CAPCLASS
+            
+            IF (li.FEET = 0)
+                lw.dist = 1.0 / 5280.0
+                distance = 1.0 / 5280.0
+            ELSE
+                lw.dist = li.FEET / 5280.0
+                distance = li.FEET / 5280.0
+            ENDIF
+            t0 = li.FFT
+            t1 = li.CTIM
+    
+            ; free-flow time is a function of free-flow speed and distance and is used in the generalized cost function
+            lw.fft = li.FFT
+    
+            ; link capacity is a function of the number of lanes
+            lw.lanes = li.NUMLANES
+    
+            read file = @free_flow_block_param@
+    
+            ; compute the generalized cost for passenger vehicles (we are not building paths, so only a dummy is required)
+            lw.gencost_da = lw.fft + (0.6/vot) * (lw.dist * autoopcost + li.TOLL@token_period@_DA)   
+    
+        endphase
+    
+        ; in order to compute speeds, one pathload statement is required, which is included with dummy volume
+        phase = iloop
+            pathload path = lw.gencost_da, vol[20] = 0
+        endphase
+    
+        ; compute the speeds with the volume delay curves
+        phase = adjust
+            ; total volume includes each of the 10 classes
+            function v = li.vol_da + li.vol_s2 + li.vol_s3 + li.vol_sm + trkpce * li.vol_hv + li.vol_daT + li.vol_s2T + li.vol_s3T + li.vol_smT + trkpce * li.vol_hvT
+                 
+            ; the volume delay functions are housed in the SpeedFlowCurve.block file
+            read file = @vdf_block_param@
+    
+            ; set the generalized cost functions (we are not building paths, so only a dummy is required)
+            lw.gencost_da = time + (0.6/vot) * (lw.dist * autoopcost + li.TOLL@token_period@_DA)
+        endphase
+    endrun   
+    
+    ;write out congested times as csv
+    RUN PGM=NETWORK
+      PAR  NODES=10000000
+      NETI = hwy\msaspeed@token_period@.net
+      LINKO = hwy\msa@token_period@_speeds.csv FORMAT=SDF, FORM=15.5 INCLUDE=A,B,CONTIME
+      PHASE = LINKMERGE
+          CONTIME = MAX(TIME_2,FFT)
+      ENDPHASE
+    ENDRUN 
+    
+    ;overwrite congestedtime in avgload (base assignment) network
+    RUN PGM=NETWORK
+      PAR  NODES=10000000
+      NETI = hwy\avgload@token_period@_taz.net
+      LINKI[2] = hwy\msa@token_period@_speeds.csv VAR=A,B,CTIM
+      NETO = hwy\avgload@token_period@_taz_temp.net
+      PHASE = LINKMERGE
+          CTIM = li.2.CTIM
+      ENDPHASE
+    ENDRUN 
+    
+    ;replace avgload network
+    *DEL hwy\avgload@token_period@_taz.net
+    *REN hwy\avgload@token_period@_taz_temp.net hwy\avgload@token_period@_taz.net
+    
+   EndDistributeMultistep
+  
+endloop ; time period loop
+
+Wait4Files files = MTC_HWYMSAASN1.script.end, MTC_HWYMSAASN2.script.end, MTC_HWYMSAASN3.script.end, MTC_HWYMSAASN4.script.end, MTC_HWYMSAASN5.script.end, 
+          PrintFiles = merge, DelDistribFiles = t, CheckReturnCode = t
+
+*Cluster.exe MTC_HWYMSAASN 1-25 close exit
+
+
+

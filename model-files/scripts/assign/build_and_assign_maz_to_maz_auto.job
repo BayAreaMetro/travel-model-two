@@ -1,0 +1,315 @@
+; ----------------------------------------------------------------------------------------------------------------
+;
+; build_and_assign_maz_to_maz_auto.job
+;
+; TP+ script to build three local MAZ to MAZ networks for MAZ to MAZ assignment 
+; for near trips for preloading for TAZ to TAZ highway assignment
+;
+; MAZ to MAZ local networks are as follows: 
+;         (1) counties 1, 2, and 3
+;         (2) counties 4 and 5
+;         (3) counties 6, 7, 8, and 9
+;
+; Input:  (1) hwy\avgload@token_period@.net - TAZ output network for skimming by time period
+;         (2) hwy\hwyparam.block - highway assignment generalized cost parameters
+;         (3) MAZ_Demand_@mazset@_@token_period@.mat - MAZ to MAZ auto demand for each local network
+;
+; Output: (1) maz_preload_@token_period@.net - Network by time period with link attribute MAZMAZVOL
+;             for copying over to the TAZ to TAZ highway assignment
+;
+; version:  Travel Model Zed
+; authors:  bts (2014 02 05)
+; ----------------------------------------------------------------------------------------------------------------
+
+;parameters
+node_start = 1000000 ;all tazs or mazs can fit beneath this
+taz_selector = '(N < 900000) & (N % 100000 < 10000)'
+ext_selector = '(N < 1000000) & (N > 900000)'
+hwy_block_param = '%BASE_SCRIPTS%\block\hwyparam.block'
+
+;start cluster nodes
+*Cluster.exe MTC 1-25 start exit
+
+; create 3 maz to maz networks for each time period
+loop period = 1, 5
+    
+   ; a two letter token is used for each time period
+   if (period = 1)   
+      token_period = 'EA'   
+      intrastep_range = '6-8'
+   elseif (period = 2)   
+      token_period = 'AM'    
+      intrastep_range = '9-11'
+   elseif (period = 3)   
+      token_period = 'MD'    
+      intrastep_range = '12-14'
+   elseif (period = 4)   
+      token_period = 'PM'
+      intrastep_range = '15-17'
+   elseif (period = 5)   
+      token_period = 'EV'
+      intrastep_range = '18-20'
+   endif
+   
+   ; do each time of day as a separate process
+   DistributeMultistep processid = 'MTC', processNum = @period@
+
+      ;create sequential taz numbers
+      RUN PGM=NETWORK
+          PAR NODES=10000000
+          NETI = hwy\avgload@token_period@.net
+          NETO = hwy\temp@token_period@.net
+          
+          PHASE = NODEMERGE
+              IF (@taz_selector@)    
+                  NEW_NODE = TAZSEQ
+                  OLD_NODE = N
+              ELSEIF (@ext_selector@)    
+                  NEW_NODE = EXTSEQ
+                  OLD_NODE = N
+              ELSE
+                  _j = _j + 1     
+                  NEW_NODE = _j + @node_start@
+                  OLD_NODE = N
+              ENDIF
+          ENDPHASE
+        
+          PHASE = LINKMERGE
+              A_NEW_NODE = A.NEW_NODE
+              OLD_A = A
+              B_NEW_NODE = B.NEW_NODE
+              OLD_B = B
+              
+              IF (CNTYPE = 'TAZ' | CNTYPE = 'TANA' | CNTYPE = 'USE' | CNTYPE = 'MAZ' | CNTYPE = 'EXT')
+                  ;keep
+              ELSE
+                  DELETE
+              ENDIF
+          ENDPHASE
+      ENDRUN
+      
+      ;copy these back to correct network values
+      RUN PGM=NETWORK
+          PAR  NODES=10000000
+          NETI = hwy\temp@token_period@.net
+          NETO = hwy\avgload@token_period@_maz_taz.net
+      
+          PHASE = INPUT FILEI=NI.1
+              N = NEW_NODE
+          ENDPHASE
+      
+          PHASE = INPUT FILEI=LI.1
+              A = A_NEW_NODE
+              B = B_NEW_NODE
+          ENDPHASE
+      ENDRUN
+      
+      *del hwy\temp@token_period@.net
+      
+      ; create 3 maz to maz networks for each time period
+      loop mazset = 1,3
+      
+          IF (mazset = 1)   
+            SWITCH_1  = ' '
+            SWITCH_2  = ';'  
+            SWITCH_3  = ';'  
+          ELSEIF (mazset = 2)
+            SWITCH_1  = ';'
+            SWITCH_2  = ' '  
+            SWITCH_3  = ';'  
+          ELSE
+            SWITCH_1  = ';'
+            SWITCH_2  = ';'  
+            SWITCH_3  = ' '  
+          ENDIF
+          
+          ;create sequential maz numbers
+          RUN PGM=NETWORK
+              PAR NODES=10000000
+              NETI = hwy\avgload@token_period@_maz_taz.net
+              NETO = hwy\temp_@mazset@_@token_period@.net
+              
+              PHASE = NODEMERGE
+                  
+                  ;delete taz nodes
+                  IF (TAZSEQ>0)
+                      DELETE
+                  ELSEIF (EXTSEQ>0)
+                      DELETE
+                  ENDIF
+                  
+                  ;depending on maz set
+      @SWITCH_1@  IF (MAZSEQ > 0 & (COUNTY < 4))
+      @SWITCH_2@  IF (MAZSEQ > 0 & (COUNTY > 3 & COUNTY < 6))
+      @SWITCH_3@  IF (MAZSEQ > 0 & (COUNTY > 5))
+                      NEW_NODE = _i
+                      _i = _i + 1
+                      PRINT, FILE="hwy\ZONES_@mazset@_@token_period@.txt", REWIND=T, LIST="ZONES=",_i(I)
+                  ELSE
+                      NEW_NODE = N
+                  ENDIF
+              ENDPHASE
+            
+              PHASE = LINKMERGE
+                  A_NEW_NODE = A.NEW_NODE
+                  B_NEW_NODE = B.NEW_NODE
+                  
+                  IF (CNTYPE = 'MAZ' | CNTYPE = 'TANA' | CNTYPE = 'USE')
+                      ;keep
+                  ELSE
+                      DELETE
+                  ENDIF
+              ENDPHASE
+          ENDRUN
+          
+          ;copy these back to correct network values
+          RUN PGM=NETWORK
+              PAR  NODES=10000000
+              NETI = hwy\temp_@mazset@_@token_period@.net
+              NETO = hwy\avgload_@mazset@_@token_period@_maz.net
+          
+              PHASE = INPUT FILEI=NI.1
+                  N = NEW_NODE
+              ENDPHASE
+          
+              PHASE = INPUT FILEI=LI.1
+                  A = A_NEW_NODE
+                  B = B_NEW_NODE
+              ENDPHASE
+          ENDRUN
+      
+          *del hwy\temp_@mazset@_@token_period@.net
+          
+          ;run assignment
+          run pgm = highway
+          
+            ; give each time of day additional processors to work with   
+            DistributeIntrastep processid = 'MTC', processlist = @intrastep_range@ saveprn = f
+          
+            ; time-specific input highway network
+            neti = hwy\avgload_@mazset@_@token_period@_maz.net
+        
+            ; near (MAZ to MAZ) trips
+            mati[1] = ctramp_output\auto_@token_period@_MAZ_AUTO_@mazset@_@token_period@.mat
+        
+            ; loaded time-specific highway network
+            neto = hwy\load_@mazset@_@token_period@_maz.net
+        
+            ; set the assignment parameters
+            READ, FILE=hwy\ZONES_@mazset@_@token_period@.txt
+        
+            ; set the assignment parameters
+            parameters maxiters = 1
+        
+            ; generalized cost expressions
+            read file = @hwy_block_param@
+        
+            ; set the working variables
+             phase = linkread
+             
+                ; the time variable is congested time specific to each time period
+                lw.time = li.CTIM 
+                
+                ; distance is coded as "distance" in the networks
+                IF (li.FEET = 0)
+                    lw.dist = 1.0 / 5280.0
+                    distance = 1
+                ELSE
+                    lw.dist = li.FEET / 5280.0
+                    distance = li.FEET / 5280.0
+                ENDIF
+        
+                ; set the generalized cost
+                lw.gencost_da  = lw.time + (0.6 / vot) * (lw.dist * autoOpCost)
+        
+             endphase
+        
+            ; set the pathload parameters
+            phase = iloop
+              pathload path = lw.gencost_da, vol[1] = mi.1.1
+            endphase 
+            
+          endrun
+      
+      endloop ; mazset
+      
+      ;merge results
+      RUN PGM=NETWORK
+          PAR  NODES=10000000
+          NETI[1] = hwy\load_1_@token_period@_maz.net
+          NETI[2] = hwy\load_2_@token_period@_maz.net
+          NETI[3] = hwy\load_3_@token_period@_maz.net
+          NETO    = hwy\load_@token_period@_maz.net
+          
+          ;delete maz nodes
+          PHASE=INPUT,FILEI=NI.1
+            IF (MAZSEQ>0)
+                DELETE
+            ENDIF
+          ENDPHASE
+          
+          PHASE=INPUT,FILEI=NI.2
+            IF (MAZSEQ>0)
+                DELETE
+            ENDIF
+          ENDPHASE
+          
+          PHASE=INPUT,FILEI=NI.3
+            IF (MAZSEQ>0)
+                DELETE
+            ENDIF
+          ENDPHASE
+          
+          ;delete maz connectors and merge volumes
+          PHASE = LINKMERGE
+          
+            IF (CNTYPE = 'MAZ')
+              DELETE
+            ENDIF
+          
+            SET1VOL = LI.1.V_1
+            SET2VOL = LI.2.V_1
+            SET3VOL = LI.3.V_1
+          ENDPHASE
+      ENDRUN
+      
+      RUN PGM=NETWORK
+          PAR  NODES=10000000
+          NETI    = hwy\load_@token_period@_maz.net
+          NETO    = hwy\maz_preload_@token_period@.net
+      
+          PHASE = LINKMERGE
+             MAZMAZVOL = SET1VOL + SET2VOL + SET3VOL
+          ENDPHASE
+      ENDRUN
+      
+      ;output maz-maz volumes as csv for importing into other network as a preload
+      RUN PGM=NETWORK
+          PAR  NODES=10000000
+          NETI = hwy\maz_preload_@token_period@.net
+          LINKO = hwy\maz_preload_@token_period@_vols.csv FORMAT=SDF, FORM=15.0 INCLUDE=OLD_A,OLD_B,MAZMAZVOL
+      ENDRUN
+      
+      ;delete intermediate files
+      *del hwy\avgload@token_period@_maz_taz.net
+      *del hwy\load_1_@token_period@_maz.net
+      *del hwy\load_2_@token_period@_maz.net
+      *del hwy\load_3_@token_period@_maz.net
+      *del hwy\avgload_1_@token_period@_maz.net
+      *del hwy\avgload_2_@token_period@_maz.net
+      *del hwy\avgload_3_@token_period@_maz.net      
+      *del hwy\ZONES_1_@token_period@.txt
+      *del hwy\ZONES_2_@token_period@.txt
+      *del hwy\ZONES_3_@token_period@.txt
+      *del hwy\load_@token_period@_maz.net
+      
+    EndDistributeMultistep
+    
+endloop ; period
+
+Wait4Files files = MTC1.script.end, MTC2.script.end, MTC3.script.end, MTC4.script.end, MTC5.script.end, 
+  printfiles = merge, deldistribfiles = t, CheckReturnCode = t
+
+;stop cluster nodes
+*Cluster.exe MTC 1-25 close exit
+

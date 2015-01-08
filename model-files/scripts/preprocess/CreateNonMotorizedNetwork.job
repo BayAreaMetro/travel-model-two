@@ -1,0 +1,123 @@
+; ----------------------------------------------------------------------------------------------------------------
+;
+; CreateNonMotorizedNetwork.job
+;
+; TP+ script to create a non-motorized network, from which the distance can be skimmed.  For pedestrians, this 
+; basically performs two tasks: 
+;      (1) Take all of the one-way links in the network, and add the opposite direction for pedestrians.
+;      (2) Drop all non-pedestrian links. This means include all non-highway road links and pedestrian paths.
+; For bicycle, all non-highway road links as well as bike paths/trails are retained.
+;
+; In order to have the non-motorized skims bypass zone connectors on their shortest paths (except for the head and tail
+; of the path), each zone connector is set to the max distance (cost) for the path it is associated with. When the skim
+; is actually run (in NonMotorizedSkims.job) the max shortest-path cost is set to three times the allowed cost, and,
+; with the network set as it is, only two zone connectors can be used (one at the beginning and on at the end), with
+; the actual cost being shortest-path cost - 2*max cost.
+;
+; Input:  (1) A highway network containing the fields FT (functional type), BIKEPEDOK, CNTYPE (link type), and ONEWAY
+;
+; Output: (1) A pedestrian walk network, a pedestrian tap-tap walk network (with a different max distance from the former), 
+;             and a bicycle network.
+;
+;
+; version:  Travel Model Zed
+; authors:  dto (2010 03 25); gde (2008 04 03); crf (2013 07)
+;
+;
+; ----------------------------------------------------------------------------------------------------------------
+
+;read max cost parameters
+read file=%BASE_SCRIPTS%\block\maxCosts.block
+
+;first create the pedestrian network
+;create temporary network with one-way links allowing walking in both directions
+;write network link dbf
+RUN PGM = NETWORK
+    PAR  NODES=10000000
+    NETI = hwy\mtc_final_network.net
+    LINKO = hwy\temp_mtc_final_network_links.dbf, EXCLUDE=REPRIORITIZE
+ENDRUN
+;swap and and b links
+RUN PGM=MATRIX
+    FILEI RECI = hwy\temp_mtc_final_network_links.dbf
+    FILEO RECO[1] = hwy\temp_ped_reverse_links.dbf, FIELDS=A,B,RECI.ALLFIELDS,EXCLUDERECI=A,B
+    RO.A=RI.B
+    RO.B=RI.A
+    IF (RI.ONEWAY == 'TF')
+        RO.ONEWAY = 'FT'
+    ELSEIF (RI.ONEWAY == 'FT') 
+        RO.ONEWAY = 'TF'
+    ELSE
+        CONTINUE
+    ENDIF
+    WRITE RECO=1
+ENDRUN
+
+;merge networks, retaining only pedestrian links
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = hwy\mtc_final_network.net
+    LINKI[2] = hwy\temp_ped_reverse_links.dbf
+    NETO = hwy\mtc_ped_network.net
+    
+    PHASE=LINKMERGE
+        ;pedestrian links only; FRC != 8 is used to drop off TANA ferry and other non-street links; EXT links are not included in non-motorized network
+        IF (((FT=0 | FT=3 | FT=4 | FT=6 | FT=7) & (CNTYPE='TANA' | CNTYPE='PED' | CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='TAP')) | (BIKEPEDOK=1))
+            ;Keep record
+        ELSE
+            DELETE
+        ENDIF
+        ; tap link may be split (by bike lane), so only the actual connector to a TAP should have max ped distance
+        IF ((CNTYPE='MAZ') | (CNTYPE='TAP' && (A < 900000 | B < 900000)))
+            SP_DISTANCE = @max_ped_distance@
+        ELSEIF (CNTYPE='TAZ')
+            SP_DISTANCE = @nomax_bike_distance@
+        ELSE
+            SP_DISTANCE = FEET
+        ENDIF
+    ENDPHASE
+ENDRUN
+
+;create tap-tap network
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = hwy\mtc_ped_network.net
+    NETO = hwy\mtc_tap_ped_network.net
+    
+    PHASE=LINKMERGE
+        ; tap link may be split (by bike lane), so only the actual connector to a TAP should have max ped distance
+        IF (CNTYPE='TAP' && (A < 900000 | B < 900000))
+            SP_DISTANCE = @max_tap_ped_distance@
+        ENDIF
+    ENDPHASE
+ENDRUN
+
+
+
+;delete temp files
+*"IF EXIST hwy\temp_mtc_final_network_links.dbf DEL /S /Q hwy\temp_mtc_final_network_links.dbf"
+*"IF EXIST hwy\temp_ped_reverse_links.dbf DEL /S /Q hwy\temp_ped_reverse_links.dbf"
+
+;now create bike network
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = hwy\mtc_final_network.net
+    NETO = hwy\mtc_bike_network.net
+    
+    PHASE=LINKMERGE
+        ;bike links only; FRC != 8 is used to drop off TANA ferry and other non-street links
+        IF (((FT=0 | FT=3 | FT=4 | FT=6 | FT=7) & (CNTYPE='TANA' | CNTYPE='BIKE' | CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='TAP')) | (BIKEPEDOK=1))
+            ;Keep record
+        ELSE
+            DELETE
+        ENDIF
+        IF ((CNTYPE='MAZ') | (CNTYPE='TAP'))
+            SP_DISTANCE = @max_bike_short_distance@
+        ELSEIF (CNTYPE='TAZ')
+            SP_DISTANCE = @nomax_bike_distance@
+        ELSE
+            SP_DISTANCE = FEET
+        ENDIF
+    ENDPHASE
+ENDRUN
+

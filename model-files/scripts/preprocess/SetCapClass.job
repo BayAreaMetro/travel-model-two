@@ -1,0 +1,52 @@
+; ----------------------------------------------------------------------------------------------------------------
+;
+; SetCapClass.job
+;
+; TP+ script to set the CAPCLASS for the network. This field is a combination of functional class (FC) and area 
+; type, the latter of which is callculated in this script via a call to a python program, which maps the area
+; type of the zone that a link endnode belongs in to the linkn
+;
+;
+; Input:  A highway network after HOV transfer penalties have been added.  
+;
+; Output: A highway network containing the following fields: AT,CAPCLASS
+;
+; version:  Travel Model Zed
+; authors:  crf (2014 01)
+;
+;
+; ----------------------------------------------------------------------------------------------------------------
+
+;write out the links and nodes as csv files
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = hwy\mtc_final_network_with_tolls.net
+    NODEO = hwy\mtc_final_network_with_tolls_nodes.csv FORMAT=SDF, FORM=15.0 INCLUDE=N,X,Y
+    LINKO = hwy\mtc_final_network_with_tolls_links.csv FORMAT=SDF, FORM=15.0 INCLUDE=A,B,CNTYPE
+ENDRUN
+
+;run script to add area type to network links
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\codeLinkAreaType.py .
+
+;read in link data with area type and calculate capclass
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = hwy\mtc_final_network_with_tolls.net
+    LINKI[2] = hwy\link_area_type.csv VAR=A,B,AT
+    NETO = hwy\mtc_final_network_with_tolls_areatype.net
+
+    PHASE=LINKMERGE
+        IF (AT < 0)
+            CAPCLASS = -1
+        ELSE
+            CAPCLASS = 10*AT + FT
+        ENDIF
+    ENDPHASE
+ENDRUN
+
+;clean out temporary files
+* DEL hwy\mtc_final_network_with_tolls.net
+* copy hwy\mtc_final_network_with_tolls_areatype.net hwy\mtc_final_network_with_tolls.net
+* DEL hwy\mtc_final_network_with_tolls_nodes.csv
+* DEL hwy\mtc_final_network_with_tolls_links.csv
+* DEL hwy\mtc_final_network_with_tolls_areatype.net

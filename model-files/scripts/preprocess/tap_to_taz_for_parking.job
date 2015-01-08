@@ -1,0 +1,39 @@
+; ----------------------------------------------------------------------------------------------------------------
+; tap_to_taz_for_parking.job
+; 
+; This simple script just builds a (limited) shortest path tree from taps to tazs based on walk distance.
+; This is used to build a tap-taz correspondence. The skimming procedure builds the closest tap for each 
+; taz, whereas this script's results are used to build the closest taz for each tap.
+;
+; As a last step, this script calls the python script which builds the tap data file.
+;
+; Inputs: mtc_ped_network.net - the pedestrian walk network
+; Outputs: tap_to_taz_for_parking.txt - csv file holding shortest path tree, with the following columns:
+;              tap - the origin tap
+;              taz - the destination taz
+;              taz - the destination taz (listed twice)
+;              distance - the network distance
+;              feet - the distance in feet
+;
+; version:  Travel Model Zed
+; authors:  crf (2013 11)
+; ----------------------------------------------------------------------------------------------------------------
+
+RUN PGM = CUBE Parameters ='/Command /CloseWhenDone /Minimize /NoSplash'
+ PAR  NODES=10000000
+ FUNCTION = BUILDPATH
+     neti = hwy\mtc_ped_network.net
+     pathprinto = ..\hwy\tap_to_taz_for_parking.txt
+     CostSpec='SP_DISTANCE' 
+     LinkSelection = (CNTYPE != 'MAZ')
+     ;1500000 + 15840 + 15840
+     MaxPathCost = 1531680
+     PRINTMODE=SUMMARY
+     Origin = '(N < 900000) & (N % 100000 > 90000)'
+     AddTrace='FEET'
+     Destination = '(N < 900000) & (N % 100000 < 10000)'
+     CLOSE
+ ENDFUNCTION
+ENDRUN
+
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\tap_data_builder.py .

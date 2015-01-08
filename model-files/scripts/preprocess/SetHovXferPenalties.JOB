@@ -1,0 +1,39 @@
+; ----------------------------------------------------------------------------------------------------------------
+;
+; SetHovXferPenalties.job
+;
+; TP+ script to set the HOV transfer penalties for going from HOV to non-HOV road. Currently does nothing, as it
+; is unclear if this translates to anything in new model/network.
+;
+;
+; Input:  A highway network after tolls were added.  
+;
+; Output: A highway network containing the following fields: HovXPen
+;
+; version:  Travel Model Zed
+; authors:  dto (2010 08 10); gde (2009 03 12); crf (2013 07)
+;
+;
+; ----------------------------------------------------------------------------------------------------------------
+
+
+run pgm = hwynet
+
+    PAR NODES=10000000
+
+   ; begin with the standard input network
+   neti = hwy\mtc_final_network_with_tolls.net
+
+   ; write out to the same name with the added variables   
+   neto = hwy\mtc_final_network_with_tolls_with_xferpenalties.net
+   
+   ; set a generic bridge toll value and only change the bridge-specific values below as needed
+   ;if (FT=6 && A>1475 && B>1475 && DISTANCE=0)
+  ; 
+  ;    HovXPen  = 0.5 
+  ;    
+  ; endif
+   
+endrun
+
+* copy hwy\mtc_final_network_with_tolls_with_xferpenalties.net hwy\mtc_final_network_with_tolls.net
