@@ -363,6 +363,46 @@ The table below contains brief descriptions of the input files required to execu
 | `transitLines.lin` | Transit lines | trn\transit_lines | [Citilabs Cube](http://citilabs.com/products/cube)| TransitNetwork  |
 | `transitFactors_MMMM.fac` | Cube Public Transport (PT) factor files by transit line haul mode MMMM | trn\transit_support | [Citilabs Cube](http://citilabs.com/products/cube) | TransitNetwork |
 
+### Highway Network
+
+The all streets highway network was developed from the [TomTom](http://www.tomtom.com/en_gb/licensing/) (previously TeleAtlas) North America routable network database.  The *projection* is NAD83 California State Plane FIPS VI.
+
+#### County Node Numbering System
+
+The highway network uses a numbering system whereby each county has a reserved block of nodes. Within each county’s block, nodes 1 through 9,999 are reserved for TAZs, 10,001 through 89,999 are for MAZs, and 90,001 through 99,999 for transit access points or TAPs. The blocks are assigned to the nine counties per MTC’s numbering scheme, as shown in the table below.
+
+TeleAtlas network nodes are numbered by county as well and range from 1,000,000 to 10,000,000 as shown below. HOV lane nodes are those nodes corresponding to general purpose lane nodes.   
+
+Code  | County | TAZs | MAZs |  TAPs | Network Node | HOV Lane Node
+|:---:|:-------|:-----|:-----|:------|:-------------|:-------------
+1 | San Francisco |	1 - 9,999 |	10,001 – 89,999 |	90,001 – 99,999 |	1,000,000 – 1,500,000 |	5,500,000 – 6,000,000
+2 |	San Mateo |	100,001 – 109,999 |	110,001 – 189,999 |	190,001 – 199,999 |	1,500,000 – 2,000,000 |	6,000,000 – 6,500,000
+3 |	Santa Clara |	200,001 – 209,999 |	210,001 – 289,999 |	290,001 – 299,999 |	2,000,000 – 2,500,000 |	6,500,000 – 7,000,000
+4 |	Alameda |	300,001 – 309,999 |	310,001 – 389,999 |	390,001 – 399,999 |	2,500,000 – 3,000,000 | 7,000,000 – 7,500,000
+5 |	Contra Costa |	400,001 – 409,999 |	410,001 – 489,999 |	490,001 – 499,999 |	3,000,000 – 3,500,000 |	7,500,000 – 8,000,000
+6 |	Solano |	500,001 – 509,999 |	510,001 – 589,999 |	590,001 – 599,999 |	3,500,000 – 4,000,000 |	8,000,000 – 8,500,000
+7 |	Napa |	600,001 – 609,999 |	610,001 – 689,999 |	690,001 – 699,999 |	4,000,000 – 4,500,000 |	8,500,000 – 9,000,000
+8 |	Sonoma |	700,001 – 709,999 |	710,001 – 789,999 |	790,001 – 799,999 |	4,500,000 – 5,000,000 |	9,000,000 – 9,000,000
+9 |	Marin |	800,001 – 809,999 |	810,001 – 889,999 |	890,001 – 899,999 |	5,000,000 – 5,500,000 |	9,500,000 – 9,999,999 
+
+#### Node Attributes
+
+The following node attributes are included in the master network.
+Field | Description | Data Type
+------|-------------|----------
+N | Node Number | Integer
+X | X coordinate (feet) | Float
+Y | Y coordinate (feet) | Float
+COUNTY | County Code | Integer
+MODE | Best transit ode served | Integer
+STOP | Transit stop or terminal name of the node | String
+PNR_CAP |  Number of parking spaces at the stop or terminal if a parking facility is available | Integer
+PNR<TimePeriod> | Is parking available at the stop or terminal by time period? | Integer (1=available)
+PNR_Fee<Timeperiod> | Parking fee at the stop by time period | Float
+FAREZONE | Unique sequential fare zone ID for transit skimming and assignment | Integer
+
+#### Link Attributes
+
 ## Output Files
 
 ## Model Schematic
