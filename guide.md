@@ -388,6 +388,7 @@ Code  | County | TAZs | MAZs |  TAPs | Network Node | HOV Lane Node
 #### Node Attributes
 
 The following node attributes are included in the master network.
+
 Field | Description | Data Type
 ------|-------------|----------
 N | Node Number | Integer
