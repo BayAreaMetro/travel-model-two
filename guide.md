@@ -426,9 +426,9 @@ The following link attributes are included on the master network.
 | FEET | Calculated from TANA Meters field | Integer | TomTom |
 | RTEDIR | Route Directional<br />&bull; Blank: Not Applicable (default)<br />&bull; N: Northbound<br />&bull; E: Eastbound<br />&bull; S: Southbound<br />&bull; O / W: Westbound | String | TomTom |
 | ASSIGNABLE | Is link used for assignment (1=True, 0=False) | Integer |   |
-| CNTYPE | <p>Link connector type<br /><br /></p> <ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul> | String |   |
+| CNTYPE | Link connector type<br /><ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul> | String |   |
 | TRANSIT | Is Transit link | Integer |   |
-| USECLASS | <p>Link user class</p> <p>0 - NA; link open to everyone<br />2 - HOV 2+<br />3 - HOV 3+<br />4 - No combination trucks</p> | Integer |   |
+| USECLASS | Link user class<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+<li/> <li>3 - HOV 3+<li/> <li>4 - No combination trucks</li></ul> | Integer |   |
 | TOLLBOOTH | <p>Toll link</p> <p>1 - Benicia-Martinez Bridge<br />2 - Carquinez Bridge<br />3 - Richmond Bridge<br />4 - Golden Gate Bridge<br />5 - San Francisco/Oakland Bay Bridge<br />6 - San Mateo Bridge<br />7 - Dumbarton Bridge<br />8 - Antioch Bridge<br />12 - I-680 express lane</p> | Integer |   |
 | FT | <p>Facility type</p> <p>0 - Connector<br />1 - Freeway to Freeway<br />2 - Freeway<br />3 - Expressway<br />4 - Collector<br />5 - Ramp<br />7 - Major Arterial</p> | Integer |   |
 | FFS | Free flow speed calculated from TANA KPH | Integer |   |
