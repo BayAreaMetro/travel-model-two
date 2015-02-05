@@ -407,6 +407,7 @@ FAREZONE | Unique sequential fare zone ID for transit skimming and assignment | 
 The following link attributes are included on the master network.
 
 | Field | Description | Data Type | Source |
+|-------|-------------|-----------|--------|
 | A | from node | Integer (see [Node Numbering](#County-Node-Numbering-System)) |
 | B | to node | Integer (see [Node Numbering](#County-Node-Numbering-System)) |
 | F_JNCTID | TomTom from node | Long integer | TomTom |
