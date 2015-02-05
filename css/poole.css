@@ -56,6 +56,9 @@ html {
   html {
     font-size: 20px;
   }
+  .container {
+     max-width: 38rem;
+  }
 }
 @media (min-width: 50rem) {
   html {
@@ -266,7 +269,6 @@ tbody tr:nth-child(odd) th {
  */
 
 .container {
-  max-width: 38rem;
   padding-left:  1rem;
   padding-right: 1rem;
   margin-left:  auto;
