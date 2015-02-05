@@ -422,21 +422,21 @@ The following link attributes are included on the master network.
 | CARRIAGE | Carriageway Type<br />&bull; Blank: Not Applicable<br />&bull; 1: Car Pool<br />&bull; 2: Express<br />&bull; 3: Local | Integer | TomTom |
 | LANES | TANA Number of lanes | Integer | TomTom |
 | RAMP | Exit / Entrance Ramp<br />&bull; 0: No Exit/Entrance Ramp - Default<br />&bull; 1: Exit<br />&bull; 2: Entrance | Integer | TomTom |
-| SPEEDCAT | Speed Category<br />&bull; 1: &gt; 130 km/h<br />&bull; 2: 101 - 130 km/h<br />&bull; 3: 91 - 100 km/h<br />&bull; 4: 71 - 90 km/h<br />&bull; 5: 51 - 70 km/h<br />&bull; 6: 31 - 50 km/h<br />&bull; 7: 11 - 30 km/h<br />&bull; 8: &lt; 11 km/h | Integer | TomTom |
+| SPEEDCAT | Speed Category<br /><ul><li>1: &gt; 130 km/h</li> <li>2: 101 - 130 km/h</li> <li>3: 91 - 100 km/h</li> <li>4: 71 - 90 km/h</li> <li>5: 51 - 70 km/h</li> <li>6: 31 - 50 km/h</li> <li>7: 11 - 30 km/h</li><li>8: &lt; 11 km/h</li></ul> | Integer | TomTom |
 | FEET | Calculated from TANA Meters field | Integer | TomTom |
-| RTEDIR | Route Directional<br />&bull; Blank: Not Applicable (default)<br />&bull; N: Northbound<br />&bull; E: Eastbound<br />&bull; S: Southbound<br />&bull; O / W: Westbound | String | TomTom |
+| RTEDIR | Route Directional<br /><ul><li>Blank: Not Applicable (default)</li> <li>N: Northbound</li> <li>E: Eastbound</li> <li>S: Southbound</li> <li>O / W: Westbound<li></ul> | String | TomTom |
 | ASSIGNABLE | Is link used for assignment (1=True, 0=False) | Integer |   |
 | CNTYPE | Link connector type<br /><ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul> | String |   |
 | TRANSIT | Is Transit link | Integer |   |
-| USECLASS | Link user class<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+<li/> <li>3 - HOV 3+<li/> <li>4 - No combination trucks</li></ul> | Integer |   |
-| TOLLBOOTH | <p>Toll link</p> <p>1 - Benicia-Martinez Bridge<br />2 - Carquinez Bridge<br />3 - Richmond Bridge<br />4 - Golden Gate Bridge<br />5 - San Francisco/Oakland Bay Bridge<br />6 - San Mateo Bridge<br />7 - Dumbarton Bridge<br />8 - Antioch Bridge<br />12 - I-680 express lane</p> | Integer |   |
-| FT | <p>Facility type</p> <p>0 - Connector<br />1 - Freeway to Freeway<br />2 - Freeway<br />3 - Expressway<br />4 - Collector<br />5 - Ramp<br />7 - Major Arterial</p> | Integer |   |
+| USECLASS | Link user class<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul> | Integer |   |
+| TOLLBOOTH | Toll link<br /> <ul><li>1 - Benicia-Martinez Bridge</li> <li>2 - Carquinez Bridge</li> <li>3 - Richmond Bridge</li> <li>4 - Golden Gate Bridge</li> <li>5 - San Francisco/Oakland Bay Bridge</li> <li>6 - San Mateo Bridge</li> <li>7 - Dumbarton Bridge</li> <li>8 - Antioch Bridge</li> <li>12 - I-680 express lane</li></ul> | Integer |   |
+| FT | Facility type<br /> <ul><li>0 - Connector</li> <li>1 - Freeway to Freeway</li> <li>2 - Freeway</li> <li>3 - Expressway</li> <li>4 - Collector</li> <li>5 - Ramp</li> <li>7 - Major Arterial</li></ul> | Integer |   |
 | FFS | Free flow speed calculated from TANA KPH | Integer |   |
 | NUMLANES | Model number of lanes | Integer |   |
-| HIGHWAYT | <p>Highway type</p> <ul> <li>footway</li> <li>footway_unconstructed</li> <li>pedestrian</li> <li>steps</li> </ul> | String | Open Street Map |
-| B_CLASS | <p>Bike Class</p> <p>0 - Unclassified Street<br />1 - Class I Trail<br />2 - Class II Route<br />3 - Class III Route</p> | Integer | BikeMapper |
-| REPRIOR | <p>Priority</p> <p>2 - Highly Desirable<br />1 - Desirable<br />0 - No Preference<br />-1 - Undesirable<br />-2 - Highly Undesirable</p> | Integer | BikeMapper |
-| GRADE_CAT | <p>Grade class</p> <p>4 - 18% or High Grade<br />3 - 10-18% Grade<br />2 - 5-10% Grade<br />1 - 0-5% Grade</p> | Integer | BikeMapper |
+| HIGHWAYT | Highway type<br /> <ul> <li>footway</li> <li>footway_unconstructed</li> <li>pedestrian</li> <li>steps</li> </ul> | String | Open Street Map |
+| B_CLASS | Bike Class<br /> <ul><li>0 - Unclassified Street</li> <li>1 - Class I Trail</li> <li>2 - Class II Route</li> <li>3 - Class III Route</li></ul> | Integer | BikeMapper |
+| REPRIOR | Priority<br/> <ul><li>2 - Highly Desirable</li> <li>1 - Desirable</li> <li>0 - No Preference</li> <li>-1 - Undesirable</li> <li>-2 - Highly Undesirable</li></ul> | Integer | BikeMapper |
+| GRADE_CAT | Grade class<br /> <ul><li>4 - 18% or High Grade</li> <li>3 - 10-18% Grade</li> <li>2 - 5-10% Grade</li> <li>1 - 0-5% Grade</li></ul> | Integer | BikeMapper |
 | PED_FLAG | Pedestrian access (Y=yes; blank=no) | String | BikeMapper |
 | BIKEPEDOK | Bridge that allows bike and peds (1=true, 0=false) | Integer | BikeMapper |
 | PEMSID | PEMS ID | Integer | PEMS |
