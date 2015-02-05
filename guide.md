@@ -413,7 +413,6 @@ The following link attributes are included on the master network.
 | F_JNCTID | TomTom from node | Long integer | TomTom |
 | T_JNCTID | TomTom to node | Long integer | TomTom |
 | FRC | Functional Road Class<br />&bull; -1: Not Applicable<br />&bull; 0: Motorway, Freeway, or Other Major Road<br />&bull; 1: a Major Road Less Important than a Motorway<br />&bull; 2: Other Major Road<br />&bull; 3: Secondary Road<br />&bull; 4: Local Connecting Road<br />&bull; 5: Local Road of High Importance<br />&bull; 6: Local Road<br />&bull; 7: Local Road of Minor Importance<br />&bull; 8: Other Road | Float | TomTom |
-
 | NAME | Road name | String | TomTom |
 | FREEWAY | Freeway<br />&bull; 0: No Part of Freeway (default)<br />&bull; 1: Part of Freeway | Integer | TomTom |
 | TOLLRD | Toll Road<br />&bull; Blank: No Toll Road (default)<br />&bull; B: Toll Road in Both Directions<br />&bull; FT: Toll Road in Positive Direction<br />&bull; TF: Toll Road in Negative Direction | String | TomTom |
