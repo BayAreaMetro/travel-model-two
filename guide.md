@@ -391,18 +391,59 @@ The following node attributes are included in the master network.
 
 Field | Description | Data Type
 ------|-------------|----------
-N | Node Number | Integer
+N | Node Number | Integer (see [Node Numbering](#County-Node-Numbering-System))
 X | X coordinate (feet) | Float
 Y | Y coordinate (feet) | Float
 COUNTY | County Code | Integer
 MODE | Best transit ode served | Integer
 STOP | Transit stop or terminal name of the node | String
 PNR_CAP |  Number of parking spaces at the stop or terminal if a parking facility is available | Integer
-PNR<TimePeriod> | Is parking available at the stop or terminal by time period? | Integer (1=available)
-PNR_Fee<Timeperiod> | Parking fee at the stop by time period | Float
+PNR&lt;TimePeriod&gt; | Is parking available at the stop or terminal by time period? | Integer (1=available)
+PNR_Fee&lt;Timeperiod&gt; | Parking fee at the stop by time period | Float
 FAREZONE | Unique sequential fare zone ID for transit skimming and assignment | Integer
 
 #### Link Attributes
+
+The following link attributes are included on the master network.
+
+| Field | Description | Data Type | Source |
+| A | from node | Integer (see [Node Numbering](#County-Node-Numbering-System)) |
+| B | to node | Integer (see [Node Numbering](#County-Node-Numbering-System)) |
+| F_JNCTID | TomTom from node | Long integer | TomTom |
+| T_JNCTID | TomTom to node | Long integer | TomTom |
+| FRC | Functional Road Class<br />&bull; -1: Not Applicable<br />&bull; 0: Motorway, Freeway, or Other Major Road<br />&bull; 1: a Major Road Less Important than a Motorway<br />&bull; 2: Other Major Road<br />&bull; 3: Secondary Road<br />&bull; 4: Local Connecting Road<br />&bull; 5: Local Road of High Importance<br />&bull; 6: Local Road<br />&bull; 7: Local Road of Minor Importance<br />&bull; 8: Other Road | Float | TomTom |
+| NAME | Road name | String | TomTom |
+| FREEWAY | Freeway<br />&bull; 0: No Part of Freeway (default)<br />&bull; 1: Part of Freeway | Integer | TomTom |
+| TOLLRD | Toll Road<br />&bull; Blank: No Toll Road (default)<br />&bull; B: Toll Road in Both Directions<br />&bull; FT: Toll Road in Positive Direction<br />&bull; TF: Toll Road in Negative Direction | String | TomTom |
+| ONEWAY |  Direction of Traffic Flow<br />&bull; Blank: Open in Both Directions (default)<br />&bull; FT: Open in Positive Direction<br />&bull; N: Closed in Both Directions<br />&bull; TF: Open in Negative Direction | String | TomTom |
+| KPH | Calculated Average Speed (kilometers per hour) | Integer | TomTom |
+| MINUTES | Travel Time (minutes) | Integer | TomTom |
+| CARRIAGE | Carriageway Type<br />&bull; Blank: Not Applicable<br />&bull; 1: Car Pool<br />&bull; 2: Express<br />&bull; 3: Local | Integer | TomTom |
+| LANES | TANA Number of lanes | Integer | TomTom |
+| RAMP | Exit / Entrance Ramp<br />&bull; 0: No Exit/Entrance Ramp - Default<br />&bull; 1: Exit<br />&bull; 2: Entrance | Integer | TomTom |
+| SPEEDCAT | Speed Category<br />&bull; 1: &gt; 130 km/h<br />&bull; 2: 101 - 130 km/h<br />&bull; 3: 91 - 100 km/h<br />&bull; 4: 71 - 90 km/h<br />&bull; 5: 51 - 70 km/h<br />&bull; 6: 31 - 50 km/h<br />&bull; 7: 11 - 30 km/h<br />&bull; 8: &lt; 11 km/h | Integer | TomTom |
+| FEET | Calculated from TANA Meters field | Integer | TomTom |
+| RTEDIR | Route Directional<br />&bull; Blank: Not Applicable (default)<br />&bull; N: Northbound<br />&bull; E: Eastbound<br />&bull; S: Southbound<br />&bull; O / W: Westbound | String | TomTom |
+| ASSIGNABLE | Is link used for assignment (1=True, 0=False) | Integer |   |
+| CNTYPE | <p>Link connector type<br /><br /></p> <ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul> | String |   |
+| TRANSIT | Is Transit link | Integer |   |
+| USECLASS | <p>Link user class</p> <p>0 - NA; link open to everyone<br />2 - HOV 2+<br />3 - HOV 3+<br />4 - No combination trucks</p> | Integer |   |
+| TOLLBOOTH | <p>Toll link</p> <p>1 - Benicia-Martinez Bridge<br />2 - Carquinez Bridge<br />3 - Richmond Bridge<br />4 - Golden Gate Bridge<br />5 - San Francisco/Oakland Bay Bridge<br />6 - San Mateo Bridge<br />7 - Dumbarton Bridge<br />8 - Antioch Bridge<br />12 - I-680 express lane</p> | Integer |   |
+| FT | <p>Facility type</p> <p>0 - Connector<br />1 - Freeway to Freeway<br />2 - Freeway<br />3 - Expressway<br />4 - Collector<br />5 - Ramp<br />7 - Major Arterial</p> | Integer |   |
+| FFS | Free flow speed calculated from TANA KPH | Integer |   |
+| NUMLANES | Model number of lanes | Integer |   |
+| HIGHWAYT | <p>Highway type</p> <ul> <li>footway</li> <li>footway_unconstructed</li> <li>pedestrian</li> <li>steps</li> </ul> | String | Open Street Map |
+| B_CLASS | <p>Bike Class</p> <p>0 - Unclassified Street<br />1 - Class I Trail<br />2 - Class II Route<br />3 - Class III Route</p> | Integer | BikeMapper |
+| REPRIOR | <p>Priority</p> <p>2 - Highly Desirable<br />1 - Desirable<br />0 - No Preference<br />-1 - Undesirable<br />-2 - Highly Undesirable</p> | Integer | BikeMapper |
+| GRADE_CAT | <p>Grade class</p> <p>4 - 18% or High Grade<br />3 - 10-18% Grade<br />2 - 5-10% Grade<br />1 - 0-5% Grade</p> | Integer | BikeMapper |
+| PED_FLAG | Pedestrian access (Y=yes; blank=no) | String | BikeMapper |
+| BIKEPEDOK | Bridge that allows bike and peds (1=true, 0=false) | Integer | BikeMapper |
+| PEMSID | PEMS ID | Integer | PEMS |
+| PEMSLANES | PEMS number of lanes | Integer | PEMS |
+| PEMSDIST | Distance from link to PEMS station | Float | PEMS |
+| TAP_DRIVE | TAP link to parking lot (1=true) | Int | MTC |
+   
+
 
 ## Output Files
 
