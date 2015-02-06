@@ -451,8 +451,9 @@ The following link attributes are included on the master network.
 ### Micro Zonal Data
 
 | *Column Name* | *Description* |
-| MAZ | MAZ |
-| TAZ | TAZ |
+|---------------|---------------|
+| MAZ | Micro Zone Number |
+| TAZ | Travel Analysis Zone Number |
 | hh | Total number of households |
 | pop | Total population |
 | emp_self | Self-employed |
@@ -492,14 +493,14 @@ The following link attributes are included on the master network.
 | emp_st_lcl_gov_accts | State and Local Government Accounts employment |
 | emp_cap_accts | Capital Accounts employment |
 | emp_total | Total employment |
-| !EnrollGradeKto8 | Grade School K-8 enrollment |
-| !EnrollGrade9to12 | Grade School 9-12 enrollment |
+| EnrollGradeKto8 | Grade School K-8 enrollment |
+| EnrollGrade9to12 | Grade School 9-12 enrollment |
 | collegeEnroll | Major College enrollment |
 | otherCollegeEnroll | Other College enrollment |
-| !AdultSchEnrl | Adult School enrollment |
+| AdultSchEnrl | Adult School enrollment |
 | ech_dist | Elementary school district |
 | hch_dist | High school district |
-| parkarea | <p>1: Trips with destinations in this MAZ may choose to park in a different MAZ, parking charges apply (downtown)</p> <p>2: Trips with destinations in parkarea 1 may choose to park in this MAZ, parking charges might apply (quarter mile buffer around downtown)</p> <p>3: Only trips with destinations in this MAZ may park here, parking charges apply (outside downtown paid parking, only show cost no capacity issue)</p> <p>4: Only trips with destinations in this MAZ may park here, parking charges do not apply (outside downtown, free parking)</p> |
+| parkarea | <ul><li>1: Trips with destinations in this MAZ may choose to park in a different MAZ, parking charges apply (downtown)</li> <li>2: Trips with destinations in parkarea 1 may choose to park in this MAZ, parking charges might apply (quarter mile buffer around downtown)</li> <li>3: Only trips with destinations in this MAZ may park here, parking charges apply (outside downtown paid parking, only show cost no capacity issue)</li> <li>4: Only trips with destinations in this MAZ may park here, parking charges do not apply (outside downtown, free parking)</li> </ul> |
 | hstallsoth | Number of stalls allowing hourly parking for trips with destinations in other MAZs |
 | hstallssam | Number of stalls allowing hourly parking for trips with destinations in the same MAZ |
 | hparkcost | Average cost of parking for one hour in hourly stalls in this MAZ, dollars |
@@ -510,14 +511,14 @@ The following link attributes are included on the master network.
 | mstallsoth | Stalls allowing monthly parking for trips with destinations in other MAZs |
 | mstallssam | Stalls allowing monthly parking for trips with destinations in the same MAZ |
 | mparkcost | Average cost of parking for one day in monthly stalls, amortized over 22 workdays, dollars |
-| !TotInt | Total intersections |
+| TotInt | Total intersections |
 | DUDen | Dwelling unit density |
-| !EmpDen | Employment density |
-| !PopDen | Population density |
-| !RetEmpDen | Retail employment density |
-| !TotIntBin | Total intersection bin |
-| !EmpDenBin | Employment density bin |
-| !DuDenBin | Dwelling unit density bin |
+| EmpDen | Employment density |
+| PopDen | Population density |
+| RetEmpDen | Retail employment density |
+| TotIntBin | Total intersection bin |
+| EmpDenBin | Employment density bin |
+| DuDenBin | Dwelling unit density bin |
 | ACRES | MAZ acres |
 
 ### Zonal Data
