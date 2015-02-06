@@ -347,9 +347,9 @@ The table below contains brief descriptions of the input files required to execu
 
 | **File name** | **Purpose** | **Folder location** | **File type** | **File format** |
 |---------------|-------------|---------------------|---------------|-----------------|
-| `mtc_final_network.net` | Highway, bike, walk network | hwy\ | [Citilabs Cube](http://citilabs.com/products/cube)| [Roadway Network](#roadway-network) |
-| `mazData.csv` | Micro zone data  | landuse\ | CSV | [Micro Zonal Data](#micro-zonal-data) |
-| `tazData.csv` | Travel analysis zone data | landuse\ | CSV | [Zonal Data](#zonal-data) |
+| `mtc_final_network.net` | Highway, bike, walk network | hwy\ | [Citilabs Cube](http://citilabs.com/products/cube)| [Roadway Network](#Roadway-Network) |
+| `mazData.csv` | Micro zone data  | landuse\ | CSV | [Micro Zonal Data](#Micro-Zonal-Data) |
+| `tazData.csv` | Travel analysis zone data | landuse\ | CSV | [Zonal Data](#Zonal-Data) |
 | `truckFF.dat` | Friction factors for the commercial vehicle distribution models | nonres\ | ASCII | TruckDistribution |
 | `truckkfact.k22.z1454.mat` | "K-factors" for the commercial vehicle distribution models | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | TruckDistribution |
 | `truck_kfactors_taz.csv` | "K-factors" for the commercial vehicle distribution models | nonres\ | CSV | TruckDistribution |
