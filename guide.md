@@ -350,12 +350,12 @@ The table below contains brief descriptions of the input files required to execu
 | `mtc_final_network.net` | Highway, bike, walk network | hwy\ | [Citilabs Cube](http://citilabs.com/products/cube)| [Roadway Network](#Roadway-Network) |
 | `mazData.csv` | Micro zone data  | landuse\ | CSV | [Micro Zonal Data](#Micro-Zonal-Data) |
 | `tazData.csv` | Travel analysis zone data | landuse\ | CSV | [Zonal Data](#Zonal-Data) |
-| `truckFF.dat` | Friction factors for the commercial vehicle distribution models | nonres\ | ASCII | TruckDistribution |
-| `truckkfact.k22.z1454.mat` | "K-factors" for the commercial vehicle distribution models | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | TruckDistribution |
-| `truck_kfactors_taz.csv` | "K-factors" for the commercial vehicle distribution models | nonres\ | CSV | TruckDistribution |
-| `ixDailyYYYY.tpp` | Internal-external fixed trip table for year YYYY | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | FixedDemand |
-| `IXDaily2006x4.may2208.new` | Internal-external input fixed trip table | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | FixedDemand |
-|  `YYYY_fromtoAAA.csv` |  Airport passenger fixed trips for year YYYY and airport AAA  | nonres\ | CSV | FixedDemand |
+| `truckFF.dat` | Friction factors for the commercial vehicle distribution models | nonres\ | ASCII | [Truck Distribution](#Truck-Distribution) |
+| `truckkfact.k22.z1454.mat` | "K-factors" for the commercial vehicle distribution models | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Truck Distribution](#Truck-Distribution) |
+| `truck_kfactors_taz.csv` | "K-factors" for the commercial vehicle distribution models | nonres\ | CSV | [Truck Distribution](#Truck-Distribution) |
+| `ixDailyYYYY.tpp` | Internal-external fixed trip table for year YYYY | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Fixed Demand](#Fixed-Demand) |
+| `IXDaily2006x4.may2208.new` | Internal-external input fixed trip table | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Fixed Demand](#Fixed-Demand) |
+|  `YYYY_fromtoAAA.csv` |  Airport passenger fixed trips for year YYYY and airport AAA  | nonres\ | CSV | [Fixed Demand](#Fixed-Demand) |
 | `hhFile_YYYY_MAZ.csv` | Synthetic population household file at the MAZ level for year YYYY | popsyn\ | CSV | PopSynHousehold |
 | `personFile.YYYY.csv` | Synthetic population person file for year YYYY | popsyn\ | CSV |   |
 | `activity_code_indcen.csv` | Census occupation to activity coding | popsyn\ | CSV |   |
@@ -548,6 +548,27 @@ The trip distribution step uses a standard gravity model with a blended travel t
 
 The trip distribution step also uses a matrix of K-factors to adjust the distribution results to better match observed data. This matrix contains a unit-less adjustment value; the higher the number, the more attractive the production/attraction pair.
 
+### Fixed Demand
+
+MTC uses representations of internal/external and air passenger demand that is year-, but not scenario-, specific -- meaning simple sketch methods are used to estimate this demand from past trends. This demand is then fixed for each forecast year and does not respond to changes in land use or the transport network.
+
+#### Internal/external
+
+So-called internal/external demand is travel that either begins or ends in the nine county Bay Area. This demand is based on Census journey-to-work data and captures all passenger (i.e. non-commercial) vehicle demand. This demand is introduced to the model via a matrix that contains the following four demand tables in production-attraction format:
+ * Daily single-occupant vehicle flows;
+ * Daily two-occupant vehicle flows;
+ * Daily three-or-more occupant vehicle flows; and,
+ * Daily vehicle flows, which is the sum of the first three tables and not used by the travel model.
+
+#### Air Passenger
+
+Air passenger demand is based on surveys of air passenger and captures demand from the following travel modes: passenger vehicles, rental cars, taxis, limousines, shared ride vans, hotel shuttles, and charter buses. This demand is introduced to the model via Main.TimePeriods specific matrices that contain the following six flow tables:
+ * Single-occupant vehicles;
+ * Two-occupant vehicles;
+ * Three-occupant vehicles;
+ * Single-occupant vehicles that are willing to pay a high-occupancy toll lane fee;
+ * Two-occupant vehicles that are willing to pay a high-occupancy toll lane fee; and,
+ * Three-occupant vehicles that are willing to pay a high-occupancy toll lane fee.
 
 ## Output Files
 
