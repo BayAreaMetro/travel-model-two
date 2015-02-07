@@ -452,8 +452,8 @@ The following link attributes are included on the master network.
 
 | *Column Name* | *Description* |
 |---------------|---------------|
-| MAZ | Micro Zone Number |
-| TAZ | Travel Analysis Zone Number |
+| MAZ_ORIGINAL | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#County-Node-Numbering-System) |
+| TAZ_ORIGINAL | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#County-Node-Numbering-System)  |
 | hh | Total number of households |
 | pop | Total population |
 | emp_self | Self-employed |
@@ -525,7 +525,7 @@ The following link attributes are included on the master network.
 
 | *Field* | *Description* |
 |---------|---------------|
-| TAZ | TAZ |
+| TAZ_ORIGINAL | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#County-Node-Numbering-System)  |
 | AVGTTS | Average travel time savings for transponder ownership model |
 | DIST | Distance for transponder ownership model |
 | PCTDETOUR | Percent detour for transponder ownership model |
