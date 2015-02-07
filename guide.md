@@ -394,7 +394,7 @@ Code  | County | TAZs | MAZs |  TAPs | Network Node | HOV Lane Node
 The following node attributes are included in the master network.
 
 Field | Description | Data Type
-------|-------------|----------
+|:---:|-------------|----------
 N | Node Number | Integer (see [Node Numbering](#County-Node-Numbering-System))
 X | X coordinate (feet) | Float
 Y | Y coordinate (feet) | Float
@@ -411,7 +411,7 @@ FAREZONE | Unique sequential fare zone ID for transit skimming and assignment | 
 The following link attributes are included on the master network.
 
 | *Field* | *Description* | *Data Type* | *Source* |
-|---------|---------------|-------------|----------|
+|:-------:|---------------|-------------|----------|
 | A | from node | Integer (see [Node Numbering](#County-Node-Numbering-System)) |
 | B | to node | Integer (see [Node Numbering](#County-Node-Numbering-System)) |
 | F_JNCTID | TomTom from node | Long integer | TomTom |
@@ -451,7 +451,7 @@ The following link attributes are included on the master network.
 ### Micro Zonal Data
 
 | *Column Name* | *Description* |
-|---------------|---------------|
+|:-------------:|---------------|
 | MAZ_ORIGINAL | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#County-Node-Numbering-System) |
 | TAZ_ORIGINAL | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#County-Node-Numbering-System)  |
 | hh | Total number of households |
@@ -524,7 +524,7 @@ The following link attributes are included on the master network.
 ### Zonal Data
 
 | *Field* | *Description* |
-|---------|---------------|
+|:-------:|---------------|
 | TAZ_ORIGINAL | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#County-Node-Numbering-System)  |
 | AVGTTS | Average travel time savings for transponder ownership model |
 | DIST | Distance for transponder ownership model |
