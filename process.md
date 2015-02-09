@@ -31,5 +31,7 @@ title: Modeling Process
 
 1. `preprocess\CreateNonMotorizedNetwork.job`
    * Summary: Create pedestrian, bicycle and pedestrian TAP (Transit Access Point) to TAP networks.
-   * Input: `CTRAMP\scripts\block\maxCosts.block`
+   * Input: 
+     1. `CTRAMP\scripts\block\maxCosts.block` - sets maximum pedestrian distance, maximum bike distances, maximum driving generalized cost, maximum tap-tap pedestrian distance
+     2. `hwy\mtc_final_network.net`, the roadway network
    * Output:
