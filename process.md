@@ -35,3 +35,4 @@ title: Modeling Process
      1. `CTRAMP\scripts\block\maxCosts.block` - sets maximum pedestrian distance, maximum bike distances, maximum driving generalized cost, maximum tap-tap pedestrian distance
      2. `hwy\mtc_final_network.net`, the roadway network
    * Output:
+     1. `hwy\mtc_ped_network.net`, the pedestrian network.
