@@ -30,9 +30,11 @@ title: Modeling Process
      6. `CTRAMP\model\ParkLocationSampleAlts.csv`  **TODO**: what are these?  Move this from _CTRAMP_
 
 1. `preprocess\CreateNonMotorizedNetwork.job`
-   * Summary: Create pedestrian, bicycle and pedestrian TAP (Transit Access Point) to TAP networks.
+   * Summary: Create pedestrian, bicycle and pedestrian TAP (Transit Access Point) to TAP networks.  The procedure to create the non-motorized networks (walk and bike) extracts the links from the network which have **CNTYPE** equal to TANA, PED/BIKE, MAZ, TAZ, or TAP and which are not freeways, or which have the BIKEPEDOK flag set to true (1). For the pedestrian network, any link that is one-way has an opposite direction link generated. 
    * Input: 
      1. `CTRAMP\scripts\block\maxCosts.block` - sets maximum pedestrian distance, maximum bike distances, maximum driving generalized cost, maximum tap-tap pedestrian distance
      2. `hwy\mtc_final_network.net`, the roadway network
    * Output:
-     1. `hwy\mtc_ped_network.net`, the pedestrian network.
+     1. `hwy\mtc_ped_network.net`, the pedestrian network.  Link attributes are the same as the roadway network, plus **SP_DISTANCE** (? What is this?)
+     2. `hwy\mtc_tap_ped_network.net`, the tap-tap pedestrian network.  This is the same as the pedestrian network but with **SP_DISTANCE** for TAP links modified to max tap ped distance.  (?)
+     3. `hwy\mtc_bike_network.net`, the bike network.  This is the same as the pedestrian network but with **SP_DISTANCE** different.
