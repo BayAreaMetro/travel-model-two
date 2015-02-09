@@ -45,7 +45,7 @@ title: Modeling Process
 1. [`preprocess\tap_to_taz_for_parking.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/tap_to_taz_for_parking.job)
    * Summary: Finds shortest paths from TAP nodes to TAZ nodes.  Max cost = `@nomax_bike_distance@ + @max_ped_distance@ + @max_ped_distance@`.
    * Input: `hwy\mtc_ped_network.net`, the pedestrian network
-   * Output: `hwy\tap_tp_taz_for_parking.txt`, a CSV with columns
+   * Output: `hwy\tap_to_taz_for_parking.txt`, a CSV with columns
       1. origin TAP
       2. destination TAZ
       3. destination TAZ (repeated)
