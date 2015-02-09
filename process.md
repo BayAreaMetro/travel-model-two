@@ -7,7 +7,7 @@ title: Modeling Process
 
 # Modeling Process
 
-1. `preprocess\zone_seq_net_builder.job`
+1. [`preprocess\zone_seq_net_builder.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/zone_seq_net_builder.job)
    * Summary: Builds a sequential zone numbering system for TAZs, MAZs, TAPs and Externals 
      given the [node number conventions](/travel-model-two/guide/#County-Node-Numbering-System).
    * Input: `hwy\mtc_final_network_base.net`, the roadway network
@@ -15,7 +15,7 @@ title: Modeling Process
      1. `hwy\mtc_final_network.net` with additional link attributes, _TAZSEQ_, _MAZSEQ_, _TAPSEQ_ and _EXTSEQ_
      2. `hwy\mtc_final_network_zone_seq.csv` with columns _N_, _TAZSEQ_, _MAZSEQ_, _TAPSEQ_ and _EXTSEQ_
      
-1. `preprocess\zone_seq_disseminator.py` 
+1. [`preprocess\zone_seq_disseminator.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/zone_seq_disseminator.py)
    * Summary: Builds other files with zone numbers
    * Input: 
      1. `hwy\mtc_final_network_zone_seq.csv`
@@ -29,7 +29,7 @@ title: Modeling Process
      5. `CTRAMP\model\SoaTazDistAlternatives.csv`  **TODO**: what are these?  Move this from _CTRAMP_
      6. `CTRAMP\model\ParkLocationSampleAlts.csv`  **TODO**: what are these?  Move this from _CTRAMP_
 
-1. `preprocess\CreateNonMotorizedNetwork.job`
+1. [`preprocess\CreateNonMotorizedNetwork.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/CreateNonMotorizedNetwork.job)
    * Summary: Create pedestrian, bicycle and pedestrian TAP (Transit Access Point) to TAP networks.  The procedure to create the non-motorized networks (walk and bike) extracts the links from the network which have **CNTYPE** equal to TANA, PED/BIKE, MAZ, TAZ, or TAP and which are not freeways, or which have the BIKEPEDOK flag set to true (1). For the pedestrian network, any link that is one-way has an opposite direction link generated. 
    * Input: 
      1. `CTRAMP\scripts\block\maxCosts.block` - sets maximum pedestrian distance, maximum bike distances, maximum driving generalized cost, maximum tap-tap pedestrian distance
