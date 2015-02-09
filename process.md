@@ -36,8 +36,8 @@ title: Modeling Process
      2. `hwy\mtc_final_network.net`, the roadway network
    * Output:
      1. `hwy\mtc_ped_network.net`, the pedestrian network.  Link attributes are the same as the roadway network, plus **SP_DISTANCE**, or Shortest Path Distance.  This is set to:
-      * `@max_ped_distance@` for _MAZ_ links and _TAP_ links originating from TAZs or MAZs,
-      * `@nomax_bike_distance@` for _TAZ_ links
-      * `FEET` otherwise
+       * `@max_ped_distance@` for _MAZ_ links and _TAP_ links originating from TAZs or MAZs,
+       * `@nomax_bike_distance@` for _TAZ_ links
+       * `FEET` otherwise
      2. `hwy\mtc_tap_ped_network.net`, the tap-tap pedestrian network.  This is the same as the pedestrian network but with **SP_DISTANCE** for TAP links modified to max tap ped distance.  (?)
      3. `hwy\mtc_bike_network.net`, the bike network.  This is extracted in a similar fashion as the pedestrian network, but **CNTYPE** = 'BIKE' links are included instead of **CNTYPE** = 'PED'.
