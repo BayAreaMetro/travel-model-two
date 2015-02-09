@@ -38,6 +38,16 @@ title: Modeling Process
      1. `hwy\mtc_ped_network.net`, the pedestrian network.  Link attributes are the same as the roadway network, plus **SP_DISTANCE**, or Shortest Path Distance.  This is set to:
         * `@max_ped_distance@` for _MAZ_ links and _TAP_ links originating from TAZs or MAZs,
         * `@nomax_bike_distance@` for _TAZ_ links
-        * `FEET` otherwise
+        * **FEET** otherwise
      2. `hwy\mtc_tap_ped_network.net`, the tap-tap pedestrian network.  This is the same as the pedestrian network but with **SP_DISTANCE** for TAP links modified to max tap ped distance.  (?)
      3. `hwy\mtc_bike_network.net`, the bike network.  This is extracted in a similar fashion as the pedestrian network, but **CNTYPE** = 'BIKE' links are included instead of **CNTYPE** = 'PED'.
+
+1. [`preprocess\tap_to_taz_for_parking.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/tap_to_taz_for_parking.job)
+   * Summary: Finds shortest paths from TAP nodes to TAZ nodes.  Max cost = `@nomax_bike_distance@ + @max_ped_distance@ + @max_ped_distance@`.
+   * Input: `hwy\mtc_ped_network.net`, the pedestrian network
+   * Output: `hwy\tap_tp_taz_for_parking.txt`, a CSV with columns
+      1. origin TAP
+      2. destination TAZ
+      3. destination TAZ (repeated)
+      4. total **SP_DISTANCE**
+      5. total **FEET**
