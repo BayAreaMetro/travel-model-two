@@ -53,7 +53,7 @@ title: Modeling Process
       5. total **FEET**
 
 1. [`preprocess\tap_data_builder.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/tap_data_builder.py)
-   * Summary: Maps TAPs to the closest TAZ for that TAP (via **SP_DISTANCE**).
+   * Summary: Maps TAPs to the closest TAZ for that TAP (via **FEET**).
    * Input:
       1. `hwy\mtc_final_network_zone_seq.csv`, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs
       2. `hwy\tap_to_taz_for_parking.txt`, listing the shortest paths from all TAPs to all TAZs
