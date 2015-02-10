@@ -60,6 +60,6 @@ title: Modeling Process
    * Output: `hwy\tap_data.csv` (**TODO**: name this better?), a CSV with columns
       1. TAP - the tap number (in CTRAMP sequential numbering)
       2. TAP_original - the original tap number (in the CUBE network)
-      3. lotid - the lot id; this is the same as tap
+      3. lotid - the lot id; this is the same as TAP right now
       4. TAP - the taz the tap is associated with (see tap_to_taz_for_parking.job)
       5.capacity - the capacity of the lot; this is set to 9999 by default, but could be changed after this process has run
