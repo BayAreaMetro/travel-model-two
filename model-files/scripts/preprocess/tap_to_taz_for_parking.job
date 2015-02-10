@@ -36,4 +36,3 @@ RUN PGM = CUBE Parameters ='/Command /CloseWhenDone /Minimize /NoSplash'
  ENDFUNCTION
 ENDRUN
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
