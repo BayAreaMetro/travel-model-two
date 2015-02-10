@@ -13,12 +13,12 @@ title: Modeling Process
    * Input: `hwy\mtc_final_network_base.net`, the roadway network
    * Output:
      1. `hwy\mtc_final_network.net` with additional link attributes, _TAZSEQ_, _MAZSEQ_, _TAPSEQ_ and _EXTSEQ_
-     2. `hwy\mtc_final_network_zone_seq.csv` with columns _N_, _TAZSEQ_, _MAZSEQ_, _TAPSEQ_ and _EXTSEQ_
+     2. `hwy\mtc_final_network_zone_seq.csv`, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs.  Columns are _N_, _TAZSEQ_, _MAZSEQ_, _TAPSEQ_ and _EXTSEQ_
      
 1. [`preprocess\zone_seq_disseminator.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/zone_seq_disseminator.py)
    * Summary: Builds other files with zone numbers
    * Input: 
-     1. `hwy\mtc_final_network_zone_seq.csv`
+     1. `hwy\mtc_final_network_zone_seq.csv`, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs
      2. `landuse\taz_data.csv` - [Zonal Data](/travel-model-two/guide/#Zonal-Data)
      3. `landuse\maz_data.csv` - [Micro Zonal Data](/travel-model-two/guide/#Micro-Zonal-Data)
    * Output:
@@ -51,3 +51,15 @@ title: Modeling Process
       3. destination TAZ (repeated)
       4. total **SP_DISTANCE**
       5. total **FEET**
+
+1. [`preprocess\tap_data_builder.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/tap_data_builder.py)
+   * Summary: Maps TAPs to the closest TAZ for that TAP (via **SP_DISTANCE**).
+   * Input:
+      1. `hwy\mtc_final_network_zone_seq.csv`, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs
+      2. `hwy\tap_to_taz_for_parking.txt`, listing the shortest paths from all TAPs to all TAZs
+   * Output: `hwy\tap_data.csv` (**TODO**: name this better?), a CSV with columns
+      1. TAP - the tap number (in CTRAMP sequential numbering)
+      2. TAP_original - the original tap number (in the CUBE network)
+      3. lotid - the lot id; this is the same as tap
+      4. TAP - the taz the tap is associated with (see tap_to_taz_for_parking.job)
+      5.capacity - the capacity of the lot; this is set to 9999 by default, but could be changed after this process has run
