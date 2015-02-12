@@ -162,6 +162,7 @@ ROBOCOPY CTRAMP %MATRIX_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
 
 :: Build sequential numberings
 runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
+IF ERRORLEVEL 2 goto done
 
 :: Create all necessary input files based on updated sequential zone numbering
 python %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
