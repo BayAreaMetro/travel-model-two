@@ -65,4 +65,11 @@ title: Modeling Process
       5. capacity - the capacity of the lot; this is set to 9999 by default, but could be changed after this process has run
 
 1. [`preprocess\SetTolls.JOB`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/SetTolls.JOB)
-   * Summary: Converts **TOLLBOOTH** attribute to 
+   * Summary: Converts **TOLLBOOTH** attribute to tolls on the network.
+   * Input:
+      1. `hwy\mtc_final_network.net`, the roadway network
+      2. `hwy\bridge_tolls.csv`, maps **TOLLBOOTH** to bridge tolls.  See [hwy Readme](https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/hwy/Readme.md) for details.
+      3. `hwy\value_tolls.csv`, maps **TOLLBOOTH** to value tolls, which can be distance-based.
+   * Output: `hwy\mtc_final_network_with_tolls.net`, the roadway network with additional link attributes **TOLLXX_YY**, where XX is the timeperiod and YY is the vehicle class.
+
+
