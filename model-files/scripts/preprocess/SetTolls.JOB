@@ -30,10 +30,10 @@
 ; Input:  hwy\mtc_final_network.net: A highway network containing the field TOLLBOOTH, which holds an integer
 ;         representing the toll booth at each bridge or the links containing value tolls.
 ;
-;         INPUT\hwy\bridge_tolls.csv: A mapping from the TOLLBOOTH to the bridge tolls
+;         hwy\bridge_tolls.csv: A mapping from the TOLLBOOTH to the bridge tolls
 ;         for each vehicle class for each time period.
 ;
-;         INPUT\hwy\value_tolls.csv: A mapping from the TOLLBOOTH to the value tolls
+;         hwy\value_tolls.csv: A mapping from the TOLLBOOTH to the value tolls
 ;         for each vehicle class for each time period.  The tolls can be flat or distance-multipliers.
 ;
 ; Output: A highway network containing the following fields:TOLLXX_YY, where XX is a two-letter code
@@ -71,7 +71,7 @@ run pgm = hwynet
      lookup[7] = 4, result = 11, ; toll for large (combination) commercial trucks
      fail = -1,-1,-1,
      interpolate = N,
-     file = INPUT\hwy\bridge_tolls.csv
+     file = hwy\bridge_tolls.csv
 
    lookup name=valtoll,
      lookup[1] = 4, result = 5,  ; toll for drive alone
@@ -84,7 +84,7 @@ run pgm = hwynet
      lookup[8] = 4, result = 12, ; feet multiplier? 1 if multiply by FEET, 0 if flat toll
      fail = -1,-1,-1,
      interpolate = N,
-     file = INPUT\hwy\value_tolls.csv
+     file = hwy\value_tolls.csv
    ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~BRIDGE~TOLLS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    if (TOLLBOOTH > 0 && TOLLBOOTH < FIRSTVALUE)
