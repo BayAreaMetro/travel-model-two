@@ -12,12 +12,12 @@ title: Guide
 ---
 CONTENTS
 
-1. [Computing Environment](#Computing-Environment) 
-2. [System Design](#System-Design) 
-3. [Setup and Configuration](#Setup-and-Configuration)
-4. [Model Execution](#Model-Execution) 
-5. [CT-RAMP Properties File](#CT-RAMP-Properties-File)
-6. [Input Files](#Input-Files)
+1. [Computing Environment](#computing-environment) 
+2. [System Design](#system-design) 
+3. [Setup and Configuration](#setup-and-configuration)
+4. [Model Execution](#model-execution) 
+5. [CT-RAMP Properties File](#ct-ramp-properties-File)
+6. [Input Files](#input-files)
 
 ---
 
@@ -32,7 +32,7 @@ MTC uses four identical servers with the following characteristics:
 * Processors: Two Intel Xeon X5570 @ 2.93 GHz (i.e., two quad-core processors with hyper-threading capability);
 * Memory (RAM): 96.0 GB
 
-As discussed in the [System Design](#System-Design) section, these four computers can act in different roles, each requiring different amounts of memory and computing power. The four computers are named as follows: `mainmodel`, `satmodel` (for satellite), `satmodel2`, and `satmodel3`. As discussed in the [System Design](##System Design) section, the `mainmodel` computer plays a specialized role in the system design; the satellite machines each play identical and completely interchangeable roles.
+As discussed in the [System Design](#system-design) section, these four computers can act in different roles, each requiring different amounts of memory and computing power. The four computers are named as follows: `mainmodel`, `satmodel` (for satellite), `satmodel2`, and `satmodel3`. As discussed in the [System Design](#system-design) section, the `mainmodel` computer plays a specialized role in the system design; the satellite machines each play identical and completely interchangeable roles.
 
 ### Software
 The following software are required to execute the MTC travel model.
@@ -51,7 +51,7 @@ The CT-RAMP software, as discussed below, needs to access data stored in a forma
 The [Cube Cluster software](http://citilabs.com/software/products/cube/cube-cluster) allows Cube scripts to be multi-threaded. In the current approach, the travel model uses 64 computing nodes across four machines. The Cube scripts can be manipulated to use any number of computing nodes across any number of machines, provided each machine has, at a minimum, a Cube Voyager node license (for the time being, MTC has found 64 nodes on a single machine to be the most effective approach -- in terms of reliability and run time). Cube Cluster is not strictly necessary, as the Cube scripts can be modified to use only a single computing node. Such an approach would dramatically increase run times.
 
 #### Java and CT-RAMP
-MTC's travel model operates on the open-source Coordinated Travel - Regional Activity-based Modeling Platform (or CT-RAMP) developed by [Parsons Brinckerhoff](pbworld.com). The software is written in the [Java](http://java.com/en) programming language.  CT-RAMP requires the 64-bit Java Development Kit version 1.6 or later to be installed on each computer running the CT-RAMP software. The Java Development Kit includes the Java Runtime Environment. The 64-bit version of the software allows CT-RAMP to take advantage of larger memory addresses. The details of setting up and configuring the software are presented in the [Setup and Configuration section](#Setup-and-Configuration) of this guide.
+MTC's travel model operates on the open-source Coordinated Travel - Regional Activity-based Modeling Platform (or CT-RAMP) developed by [Parsons Brinckerhoff](pbworld.com). The software is written in the [Java](http://java.com/en) programming language.  CT-RAMP requires the 64-bit Java Development Kit version 1.6 or later to be installed on each computer running the CT-RAMP software. The Java Development Kit includes the Java Runtime Environment. The 64-bit version of the software allows CT-RAMP to take advantage of larger memory addresses. The details of setting up and configuring the software are presented in the [Setup and Configuration section](#setup-and-configuration) of this guide.
 
 #### Python
 Certain network processing programs are written in [Python](https://www.python.org/). Python must be installed on the computer executing the Cube scripts -- `mainmodel` in MTC's configuration.
@@ -67,7 +67,7 @@ The Microsoft [`PsKill`](http://technet.microsoft.com/en-us/sysinternals/bb89668
 
 ## System Design
 
-Here, we describe the manner in which the software is configured to take advantage of the available hardware (see the [Computing Environment](#Computing-Environment) section for details on the hardware and software used in the travel model; see the [Setup and Configuration](#Setup-and-Configuration) section for details on setting up and configuring the MTC to run on a given set of hardware).
+Here, we describe the manner in which the software is configured to take advantage of the available hardware (see the [Computing Environment](#computing-environment) section for details on the hardware and software used in the travel model; see the [Setup and Configuration](#setup-and-configuration) section for details on setting up and configuring the MTC to run on a given set of hardware).
 
 ### Distributed Computing
 The MTC travel model uses two types of distributed applications. The first is facilitated by the Cube Cluster software and allows the skim building and assignment steps to utilize multiple threads. The second is faciltated by the CT-RAMP software, which allows the choice models to be distributed across multiple threads and multiple computers. A brief overview of both of these applications is provided below.
@@ -78,7 +78,7 @@ Citilabs Cube scripts facilitate two types of distribution, both of which are hi
 * Intra-step threading: The `DistributeINTRAStep` keyword keyword allows calculations that are performed across a matrix of data to be performed in blocks -- specifically rows of data -- across multiple threads. MTC uses intra-step threading in highway assignment, allowing shortest paths to be constructed for more than one origin at a time. Complex matrix calculations can also benefit from intra-step threading.
 * Multi-step threading: The `DistributeMULTIStep` keyword allows blocks of code to be distributed across multiple threads. For example, if the same calculations are being performed for five different time periods, the same block of code (with variables) can be distributed across computers for parallel processing. This type of Cube multi-threading is a bit less flexible than the intra-step threading as it requires threads to be identified *a priori* (e.g., thread one will do the calculations for time period A), where the intra-step threading can be given a list of available processes and use what is available. MTC uses multi-step threading for highwway skimming, transit skimming, highway assignment, the conversion of trip lists to trip matrices, highway assignment, and transit assignment.
 
-As noted in the [Computing Environment](#Computing-Environment) section, the MTC travel model specifies the Cube scripts to take advantage of 64 threads. A knowledgeable user can easily adjust the necessary scripts to take advantage of more or fewer processors.
+As noted in the [Computing Environment](#computing-environment) section, the MTC travel model specifies the Cube scripts to take advantage of 64 threads. A knowledgeable user can easily adjust the necessary scripts to take advantage of more or fewer processors.
 
 #### CT-RAMP
 The CT-RAMP software allows for the choice models to be distributed across threads and machines. The MTC application currently uses four machines, but the CT-RAMP software can be configured fairly easy to utilize fewer or more machines. CT-RAMP uses the [Java Parallel Processing Framework](http://www.jppf.org/), or JPPF, to manage the distribution of tasks. JPPF is an open-source Java package. The JPPF framework consists of three main parts as follows: 
@@ -87,9 +87,9 @@ The CT-RAMP software allows for the choice models to be distributed across threa
 2. one or more nodes, typically one node is established on each machine; and,
 3. a client, the CT-RAMP software in this case.
 
-As noted on the [Computing Environment](#Computing-Environment) section, MTC uses four computers with the names `mainmodel`, `satmodel`, `satmodel2`, and `satmodel3`. The JPPF driver process is executed on `mainmodel` and acts like a traffic cop by acquiring tasks from the client and distributing those tasks to the node processes. When the node processes complete tasks, the results are returned back to the client via the JPPF driver. Three nodes are used in the MTC application, one each on `satmodel`, `satmodel2`, and `satmodel3` (each node runs 12 processes). These three nodes are created prior to executing a model run. After being created, each node listens for tasks from the JPPF driver.
+As noted on the [Computing Environment](#computing-environment) section, MTC uses four computers with the names `mainmodel`, `satmodel`, `satmodel2`, and `satmodel3`. The JPPF driver process is executed on `mainmodel` and acts like a traffic cop by acquiring tasks from the client and distributing those tasks to the node processes. When the node processes complete tasks, the results are returned back to the client via the JPPF driver. Three nodes are used in the MTC application, one each on `satmodel`, `satmodel2`, and `satmodel3` (each node runs 12 processes). These three nodes are created prior to executing a model run. After being created, each node listens for tasks from the JPPF driver.
  
-Node processes receive tasks, perform those tasks, and return the results. Nodes are configured to communicate with the driver process when they are started. MTC configures the nodes to use 90 GB of memory and 12 threads (see the [Setup and Configuration](#Setup-and-Configuration) section for details on where these parameters are specified). The JPPF driver attempts to balance computational loads across available nodes. The driver also retrieves class files, i.e. sets of Java code, from the client application and passes those to the nodes as needed.
+Node processes receive tasks, perform those tasks, and return the results. Nodes are configured to communicate with the driver process when they are started. MTC configures the nodes to use 90 GB of memory and 12 threads (see the [Setup and Configuration](#setup-and-configuration) section for details on where these parameters are specified). The JPPF driver attempts to balance computational loads across available nodes. The driver also retrieves class files, i.e. sets of Java code, from the client application and passes those to the nodes as needed.
 
 The CT-RAMP software, which serves as the client, is responsible for creating task objects that can be run in parallel and submitting those to the driver. Because the MTC travel model simulates households, the CT-RAMP software creates packets of `N` (a user-configurable quantity, e.g. 500) households and sends those packets to the nodes for processing. As the nodes complete tasks and returns them to the driver, the driver gives the nodes new tasks, attempting to keep each node uniformly busy.
 
@@ -114,7 +114,7 @@ These data managers provide TAZ, MAZ, and TAP level data to the various sub-mode
 This section provides details on setting up the travel model to run on a cluster of computers, including descriptions of the necessary configuration files.
 
 ### Step 1: Create the required folder structure
-The MTC travel model is delivered as a compressed folder containing two directories, `CTRAMP` and `INPUT` and one MS-DOS batch file, `RunModel.bat`. These files can be placed in any directory on a computer designated as the main controller of the program flow. On MTC's set up, these files are placed on the `mainmodel` computer (see [System Design](#System-Design) section for more details).
+The MTC travel model is delivered as a compressed folder containing two directories, `CTRAMP` and `INPUT` and one MS-DOS batch file, `RunModel.bat`. These files can be placed in any directory on a computer designated as the main controller of the program flow. On MTC's set up, these files are placed on the `mainmodel` computer (see [System Design](#system-design) section for more details).
 
 The `CTRAMP` directory contains all of the model configuration files, Java instructions, and Cube scripts required to run the travel model, organized in the following three folders:
 
@@ -122,10 +122,10 @@ The `CTRAMP` directory contains all of the model configuration files, Java instr
 * [runtime](https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/runtime) -- contains all of the Java configuration and `JAR` (executable) files, as well as the files necessary for Java to communicate with Cube;
 * [scripts](https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/scripts) -- contains all of the Cube scripts and associated helper files.
 
-The `INPUT` directory contains all of the input files (see the [Input Files](#Input-Files) section) required to run a specific scenario. MTC will deliver the model with a set of scenario-specific set of inputs. When configuring the model on a new computing system, one should make sure that the results from an established scenario can be recreated before developing and analyzing a new scenario. The `INPUT` directory contains the following folders:
+The `INPUT` directory contains all of the input files (see the [Input Files](#input-files) section) required to run a specific scenario. MTC will deliver the model with a set of scenario-specific set of inputs. When configuring the model on a new computing system, one should make sure that the results from an established scenario can be recreated before developing and analyzing a new scenario. The `INPUT` directory contains the following folders:
 
-* `hwy` -- contains the input master network with all zone centroids as well (TAZ, MAZ, and TAP) (see the [Networks](#Networks) section);
-* `trn` -- contains all of the input transit network files (see the [Networks](#Networks) section);
+* `hwy` -- contains the input master network with all zone centroids as well (TAZ, MAZ, and TAP) (see the [Networks](#networks) section);
+* `trn` -- contains all of the input transit network files (see the [Networks](#networks) section);
 * `landuse` -- contains the MAZ and TAZ level socio-economic input land use files;
 * `nonres` -- contains the fixed, year-specific internal/external trip tables, the fixed, year-specific air passenger trip tables, and files used to support the commercial vehicle model;
 * `popsyn` -- contains the synthetic population files.
@@ -140,7 +140,7 @@ Satellite computers should also map the letter drive `M:\` to this network locat
 Please note that the model components running on the main machine should use the local version of the directory (i.e. `M:\Projects\`) rather than the network version (i.e. `\\MainModel\MainModelShare\Projects\`).
 
 ### Step 3: Configure the CT-RAMP and JPPF Services
-Much of the configuration of the CT-RAMP software is done automatically by the `RunModel.bat` batch file.  However, prior to executing a model run, the files controlling the CT-RAMP and JPPF services may need to be configured. Please see the [System Design](#System-Design) section for a broad overview of these services. When executing the travel model, the following start-up scripts need to be run separately on each computer. Each script specifies the tasks assigned to each computer and need not be configured exactly as described on the [System Design](#System-Design) section (we describe MTC's setup; numerous other configurations are possible). In the MTC setup, the following commands are executed:
+Much of the configuration of the CT-RAMP software is done automatically by the `RunModel.bat` batch file.  However, prior to executing a model run, the files controlling the CT-RAMP and JPPF services may need to be configured. Please see the [System Design](#system-design) section for a broad overview of these services. When executing the travel model, the following start-up scripts need to be run separately on each computer. Each script specifies the tasks assigned to each computer and need not be configured exactly as described on the [System Design](#system-design) section (we describe MTC's setup; numerous other configurations are possible). In the MTC setup, the following commands are executed:
 
 1. `runDriver.cmd` starts the JPPF Driver required for distributed model running; 
 2. `runHhMgr.cmd` starts the household manager on `satmodel1`;
@@ -203,23 +203,23 @@ The final file in need of adjustment for the computing environment is the `RunMo
 | `set UN=`                                                                    | Username for logging in to remote machines |
 | `set PWD=`                                                                   | Password for logging in to remote machines |
 
-Now that the model is configured, the user can run the model, as described in the [Model Execution](#Model-Execution) section.
+Now that the model is configured, the user can run the model, as described in the [Model Execution](#model-execution) section.
 
 ## Model Execution
 
 This page describes how `RunModel.bat` executes the travel model. For: 
 
-* a description of the underlying computing environment, see [Computing Environment](#Computing-Environment); 
-* for a general description of the underlying system design, see [System Design](#System-Design); 
-* for a description of the configuration files that may need to be modified before executing the model, see [Setup and Configuration](#Setup-and-Configuration).
+* a description of the underlying computing environment, see [Computing Environment](#computing-environment); 
+* for a general description of the underlying system design, see [System Design](#system-design); 
+* for a description of the configuration files that may need to be modified before executing the model, see [Setup and Configuration](#setup-and-configuration).
 
 ### Step 1: Set globally-available environmental variables
 
-See  [Setup and Configuration](#Setup-and-Configuration) for complete details.
+See  [Setup and Configuration](#setup-and-configuration) for complete details.
 
 ### Step 2: Set relevant paths to access software
 
-See  [Setup and Configuration](#Setup-and-Configuration) for complete details.
+See  [Setup and Configuration](#setup-and-configuration) for complete details.
 
 ### Step 3: Create and populate a working directory of input files
 
@@ -331,7 +331,7 @@ Demand is located on mode-specific paths through the networks in the assignement
 * `AverageNetworkVolumes.job` -- method of successive averages (MSA) applied across overall model iterations
 * `CalculateAverageSpeed.job` -- using the averaged volumes, compute speeds
 * `MergeNetworks.job` -- merge time-of-day-specific networks into a single network
-* `IF` additional `ITERATION`s are needed, `GOTO` [Step 7: Build highway and transit skims](#Step-7:-Build-highway-and-transit-skims)
+* `IF` additional `ITERATION`s are needed, `GOTO` [Step 7: Build highway and transit skims](#step-7:-build-highway-and-transit-skims)
 * `ELSE` perform transit assignment with `TransitAssign.job`
 
 ### Step 11: Clean up
@@ -347,15 +347,15 @@ The table below contains brief descriptions of the input files required to execu
 
 | **File name** | **Purpose** | **Folder location** | **File type** | **File format** |
 |---------------|-------------|---------------------|---------------|-----------------|
-| `mtc_final_network.net` | Highway, bike, walk network | hwy\ | [Citilabs Cube](http://citilabs.com/products/cube)| [Roadway Network](#Roadway-Network) |
-| `mazData.csv` | Micro zone data  | landuse\ | CSV | [Micro Zonal Data](#Micro-Zonal-Data) |
-| `tazData.csv` | Travel analysis zone data | landuse\ | CSV | [Zonal Data](#Zonal-Data) |
-| `truckFF.dat` | Friction factors for the commercial vehicle distribution models | nonres\ | ASCII | [Truck Distribution](#Truck-Distribution) |
-| `truckkfact.k22.z1454.mat` | "K-factors" for the commercial vehicle distribution models | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Truck Distribution](#Truck-Distribution) |
-| `truck_kfactors_taz.csv` | "K-factors" for the commercial vehicle distribution models | nonres\ | CSV | [Truck Distribution](#Truck-Distribution) |
-| `ixDailyYYYY.tpp` | Internal-external fixed trip table for year YYYY | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Fixed Demand](#Fixed-Demand) |
-| `IXDaily2006x4.may2208.new` | Internal-external input fixed trip table | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Fixed Demand](#Fixed-Demand) |
-|  `YYYY_fromtoAAA.csv` |  Airport passenger fixed trips for year YYYY and airport AAA  | nonres\ | CSV | [Fixed Demand](#Fixed-Demand) |
+| `mtc_final_network.net` | Highway, bike, walk network | hwy\ | [Citilabs Cube](http://citilabs.com/products/cube)| [Roadway Network](#roadway-network) |
+| `mazData.csv` | Micro zone data  | landuse\ | CSV | [Micro Zonal Data](#micro-zonal-data) |
+| `tazData.csv` | Travel analysis zone data | landuse\ | CSV | [Zonal Data](#zonal-data) |
+| `truckFF.dat` | Friction factors for the commercial vehicle distribution models | nonres\ | ASCII | [Truck Distribution](#truck-distribution) |
+| `truckkfact.k22.z1454.mat` | "K-factors" for the commercial vehicle distribution models | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Truck Distribution](#truck-distribution) |
+| `truck_kfactors_taz.csv` | "K-factors" for the commercial vehicle distribution models | nonres\ | CSV | [Truck Distribution](#truck-distribution) |
+| `ixDailyYYYY.tpp` | Internal-external fixed trip table for year YYYY | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Fixed Demand](#fixed-demand) |
+| `IXDaily2006x4.may2208.new` | Internal-external input fixed trip table | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Fixed Demand](#fixed-demand) |
+|  `YYYY_fromtoAAA.csv` |  Airport passenger fixed trips for year YYYY and airport AAA  | nonres\ | CSV | [Fixed Demand](#fixed-demand) |
 | `hhFile_YYYY_MAZ.csv` | Synthetic population household file at the MAZ level for year YYYY | popsyn\ | CSV | PopSynHousehold |
 | `personFile.YYYY.csv` | Synthetic population person file for year YYYY | popsyn\ | CSV |   |
 | `activity_code_indcen.csv` | Census occupation to activity coding | popsyn\ | CSV |   |
@@ -395,7 +395,7 @@ The following node attributes are included in the master network.
 
 Field | Description | Data Type
 |:---:|-------------|----------
-N | Node Number | Integer (see [Node Numbering](#County-Node-Numbering-System))
+N | Node Number | Integer (see [Node Numbering](#county-node-numbering-system))
 X | X coordinate (feet) | Float
 Y | Y coordinate (feet) | Float
 COUNTY | County Code | Integer
@@ -412,8 +412,8 @@ The following link attributes are included on the master network.
 
 | *Field* | *Description* | *Data Type* | *Source* |
 |:-------:|---------------|-------------|----------|
-| **A** | from node | Integer (see [Node Numbering](#County-Node-Numbering-System)) |
-| **B** | to node | Integer (see [Node Numbering](#County-Node-Numbering-System)) |
+| **A** | from node | Integer (see [Node Numbering](#county-node-numbering-system)) |
+| **B** | to node | Integer (see [Node Numbering](#county-node-numbering-system)) |
 | **F_JNCTID** | TomTom from node | Long integer | TomTom |
 | **T_JNCTID** | TomTom to node | Long integer | TomTom |
 | **FRC** | Functional Road Class<br /> <ul><li>-1: Not Applicable</li> <li>0: Motorway, Freeway, or Other Major Road</li>  <li>1: a Major Road Less Important than a Motorway</li> <li>2: Other Major Road</li> <li>3: Secondary Road</li> <li>4: Local Connecting Road</li> <li>5: Local Road of High Importance</li> <li>6: Local Road</li> <li>7: Local Road of Minor Importance</li> <li>8: Other Road</li> </ul> | Float | TomTom |
@@ -452,8 +452,8 @@ The following link attributes are included on the master network.
 
 | *Column Name* | *Description* |
 |:-------------:|---------------|
-| MAZ_ORIGINAL | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#County-Node-Numbering-System) |
-| TAZ_ORIGINAL | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#County-Node-Numbering-System)  |
+| MAZ_ORIGINAL | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system) |
+| TAZ_ORIGINAL | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  |
 | hh | Total number of households |
 | pop | Total population |
 | emp_self | Self-employed |
@@ -525,7 +525,7 @@ The following link attributes are included on the master network.
 
 | *Field* | *Description* |
 |:-------:|---------------|
-| TAZ_ORIGINAL | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#County-Node-Numbering-System)  |
+| TAZ_ORIGINAL | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  |
 | AVGTTS | Average travel time savings for transponder ownership model |
 | DIST | Distance for transponder ownership model |
 | PCTDETOUR | Percent detour for transponder ownership model |
