@@ -9,7 +9,7 @@ title: Modeling Process
 
 1. [`preprocess\zone_seq_net_builder.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/zone_seq_net_builder.job)
    * Summary: Builds a sequential zone numbering system for TAZs, MAZs, TAPs and Externals 
-     given the [node number conventions](/travel-model-two/guide/#County-Node-Numbering-System).
+     given the [node number conventions](/travel-model-two/guide/#county-node-numbering-system).
    * Input: `hwy\mtc_final_network_base.net`, the roadway network
    * Output:
      1. `hwy\mtc_final_network.net` with additional link attributes, _TAZSEQ_, _MAZSEQ_, _TAPSEQ_ and _EXTSEQ_
@@ -19,8 +19,8 @@ title: Modeling Process
    * Summary: Builds other files with zone numbers
    * Input: 
      1. `hwy\mtc_final_network_zone_seq.csv`, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs
-     2. `landuse\taz_data.csv` - [Zonal Data](/travel-model-two/guide/#Zonal-Data)
-     3. `landuse\maz_data.csv` - [Micro Zonal Data](/travel-model-two/guide/#Micro-Zonal-Data)
+     2. `landuse\taz_data.csv` - [Zonal Data](/travel-model-two/guide/#zonal-data)
+     3. `landuse\maz_data.csv` - [Micro Zonal Data](/travel-model-two/guide/#micro-zonal-data)
    * Output:
      1. `landuse\taz_data.csv` - Adds (or rewrites) column **TAZ** (renumbered version of **TAZ_ORIGINAL**)
      2. `landuse\maz_data.csv` - Adds (or rewrites) columns **TAZ** and **MTAZ** (renumbered versions of **TAZ_ORIGINAL** and **MTAZ_ORIGINAL**)
