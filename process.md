@@ -80,7 +80,7 @@ title: Modeling Process
 1. [`preprocess\SetCapClass.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/SetCapClass.job)
    * Summary: Adds area type and capcity class to the roadway network based on the weighted population and employment density of the nearby MAZs for the link.
    * Input: `hwy\mtc_final_network_with_tolls.net`, the roadway network
-   * Output: same with **AT** attribute added to those links with **CNTYPE** one of ("TANA","USE","TAZ","EXT"), set to -1 otherwise.  **CAPCLASS* = 10x**AT** + **FT**.  Area types are as follows:
+   * Output: same with **AT** attribute added to those links with **CNTYPE** one of ("TANA","USE","TAZ","EXT"), set to -1 otherwise.  **CAPCLASS** = 10x **AT** + **FT**.  Area types are as follows:
       * 0: regional core
       * 1: central business district
       * 2: urban business
