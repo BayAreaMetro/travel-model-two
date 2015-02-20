@@ -78,7 +78,7 @@ title: Modeling Process
    * Output: same with **HovXPen** attribute added if this ever comes back.  [Travel Model One sets it to 0.5.](https://github.com/MetropolitanTransportationCommission/travel-model-one/blob/master/model-files/scripts/preprocess/SetHovXferPenalties.JOB)
 
 1. [`preprocess\SetCapClass.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/SetCapClass.job)
-   * Summary: Adds area type and capcity class to the roadway network based on the weighted population and employment density of the nearby MAZs for the link.
+   * Summary: Adds area type and capcity class to the roadway network based on the weighted population and employment density of the nearby MAZs for the link (via [`preprocess\codeLinkAreaType.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/codeLinkAreaType.py)
    * Input: `hwy\mtc_final_network_with_tolls.net`, the roadway network
    * Output: same with **AT** attribute added to those links with **CNTYPE** one of ("TANA","USE","TAZ","EXT"), set to -1 otherwise.  **CAPCLASS** = 10x **AT** + **FT**.  Area types are as follows:
       * 0: regional core
@@ -87,4 +87,14 @@ title: Modeling Process
       * 3: urban
       * 4: suburban
       * 5: rural
-    
+
+1. [`preprocess\CreateFiveHighwayNetworks.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/CreateFiveHighwayNetworks.job)
+   * Summary: Creates per-timeperiod roadway networks for assignment and skimming
+      1. Deletes links with **ASSIGNABLE** = 0
+      2. Deletes links with **CNTYPE** = 'TANA' and **NUMLANES** = 0
+      3. Deletes links with **CNTYPE** not one of ("TANA","MAZ","TAZ","TAP","EXT")
+      4. Sets freeflow time (in minutes) **FFT** based on **FEET** and **FFS**, freeflow speed.
+      5. Variously deletes/changes **USECLASS**, **NUMLANES**, **FFT** or new field **CTIM** (congested time, which is set to be equal to **FFT** here) for special (mostly bridge) links. 
+      6. **TODO**: **CTIM** == **FFT**
+   * Input: `hwy\mtc_final_network_with_tolls.net`, the roadway network
+   * Output: `hwy\avgload[EA,AM,MD,PM,EV].net`, the per-timeperiod roadway networks
