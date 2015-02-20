@@ -95,6 +95,6 @@ title: Modeling Process
       3. Deletes links with **CNTYPE** not one of ("TANA","MAZ","TAZ","TAP","EXT")
       4. Sets freeflow time (in minutes) **FFT** based on **FEET** and **FFS**, freeflow speed.
       5. Variously deletes/changes **USECLASS**, **NUMLANES**, **FFT** or new field **CTIM** (congested time, which is set to be equal to **FFT** here) for special (mostly bridge) links. 
-      6. **TODO**: **CTIM** == **FFT**
+      6. **TODO**: **CTIM** == **FFT** so not sure why this is added here?  Also, the reversible lanes links and the shared road bypass links with their nodes are all hard-coded into the script... why not configure this?
    * Input: `hwy\mtc_final_network_with_tolls.net`, the roadway network
    * Output: `hwy\avgload[EA,AM,MD,PM,EV].net`, the per-timeperiod roadway networks
