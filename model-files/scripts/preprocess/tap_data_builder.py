@@ -1,26 +1,29 @@
 """
-    tap_data_builder.py base_dir 
+  Usage: python tap_data_builder.py base_dir 
 
-    inputs: base_dir - the directory the model is running in (directory with INPUTS, hwy, etc.)
+  This script builds the tap csv data file which maps all TAPs to the closest TAZ for that TAP.
 
-    This script builds the tap csv data file which maps all TAPs to the closest TAZ for that TAP.
+  Input:
 
-    Input:
-    
-        hwy\mtc_final_network_zone_seq.csv - the file holding the correspondence between network zone numbers and
-                                             CTRAMP sequential numbering
-        hwy\tap_to_taz_for_parking.txt - the file holding the walk distance shortest path tree from taps to tazs
-        
-    Output: hwy\tap_data.csv with the following columns
+      base_dir argument - the directory in which the model runs (directory with INPUTS, hwy, etc.)
 
+      base_dir\hwy\mtc_final_network_zone_seq.csv - the file holding the correspondence
+        between network zone numbers and CTRAMP sequential numbering
+
+      base_dir\hwy\tap_to_taz_for_parking.txt - the file holding the walk distance
+        shortest path tree from taps to tazs
+      
+  Output: 
+
+      base_dir\hwy\tap_data.csv with the following columns
         TAP - the tap number (in CTRAMP sequential numbering)
         TAP_original - the original tap number (in the CUBE network)
         lotid - the lot id; this is the same as tap
         TAP - the taz the tap is associated with (see tap_to_taz_for_parking.job)
         capacity - the capacity of the lot; this is set to 9999 by default, but could be changed after 
                    this process has run
-    
-    crf 11/2013
+  
+  crf 11/2013
 
 """
 

@@ -1,7 +1,7 @@
 """
-    zone_seq_disseminator.py base_dir 
+    Usage: python zone_seq_disseminator.py base_dir 
 
-    inputs: base_dir - the directory the model is running in (directory with INPUTS, hwy, etc.)
+    where base_dir is the directory in which the model runs (directory with INPUTS, hwy, etc.)
 
     This script builds all of the CTRAMP files that use zone numbers in them. It is necessary to
     script this because the zone numbers that CTRAMP uses must be sequential and my change with
@@ -11,20 +11,21 @@
     This script first reads in the zone sequence correspondence, and builds mappings from/to the
     (CUBE) network zone numbers to the (CTRAMP) sequential zone numbers. This file is:
    
-        hwy\mtc_final_netwok_zone_seq.csv
+        base_dir\hwy\mtc_final_netwok_zone_seq.csv
         
     Then this script builds a number of output files, replacing the existing one, only with updated/added
     sequential numbers:
     
-        landuse\taz_data.csv - the taz data file; the sequential numbers are listed under TAZ, and the original zone
-                       numbers under TAZ_ORIGINAL
-        landuse\maz_data.csv - the maz data file; the sequential numbers are listed under MAZ, and the original zone
-                       numbers under MAZ_ORIGINAL
-        CTRAMP\model\ParkLocationAlts.csv - park location alternatives; basically a list of mazs built from maz_data.csv
-        CTRAMP\model\DestinationChoiceAlternatives.csv - destination choice alternatives; basically a list of mazs and
-                                        corresponding tazs built from maz_data.csv
-        CTRAMP\model\SoaTazDistAlternatives.csv - taz alternatives; basically a list of tazs
-        CTRAMP\model\ParkLocationSampleAlts.csv - park location sample alts; basically a list of mazs
+        base_dir\landuse\taz_data.csv - the taz data file; the sequential numbers are listed under TAZ,
+            and the original zone numbers under TAZ_ORIGINAL
+        base_dir\landuse\maz_data.csv - the maz data file; the sequential numbers are listed under MAZ,
+            and the original zone numbers under MAZ_ORIGINAL
+        base_dir\CTRAMP\model\ParkLocationAlts.csv - park location alternatives; basically a list of
+            mazs built from maz_data.csv
+        base_dir\CTRAMP\model\DestinationChoiceAlternatives.csv - destination choice alternatives; 
+            basically a list of mazs and corresponding tazs built from maz_data.csv
+        base_dir\CTRAMP\model\SoaTazDistAlternatives.csv - taz alternatives; basically a list of tazs
+        base_dir\CTRAMP\model\ParkLocationSampleAlts.csv - park location sample alts; basically a list of mazs
         
     crf 11/2013
 
