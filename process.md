@@ -7,6 +7,8 @@ title: Modeling Process
 
 # Modeling Process
 
+## Preprocessing
+
 1. [`preprocess\zone_seq_net_builder.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/zone_seq_net_builder.job)
    * Summary: Builds a sequential zone numbering system for TAZs, MAZs, TAPs and Externals 
      given the [node number conventions](/travel-model-two/guide/#county-node-numbering-system).
@@ -36,9 +38,9 @@ title: Modeling Process
      2. `hwy\mtc_final_network.net`, the roadway network
    * Output:
      1. `hwy\mtc_ped_network.net`, the pedestrian network.  Link attributes are the same as the roadway network, plus **SP_DISTANCE**, or Shortest Path Distance.  This is set to:
-        * `@max_ped_distance@` for **CNTYPE**=_MAZ_ links and **CNTYPE**=_TAP_ links with a TAZ/MAZ/TAP origin or destination,
-        * `@nomax_bike_distance@` for _TAZ_ links
-        * **FEET** otherwise
+       * `@max_ped_distance@` for **CNTYPE**=_MAZ_ links and **CNTYPE**=_TAP_ links with a TAZ/MAZ/TAP origin or destination,
+       * `@nomax_bike_distance@` for _TAZ_ links
+       * **FEET** otherwise
      2. `hwy\mtc_tap_ped_network.net`, the tap-tap pedestrian network.  This is the same as the pedestrian network but with **SP_DISTANCE** for TAP links modified to max tap ped distance.  (?)
      3. `hwy\mtc_bike_network.net`, the bike network.  This is extracted in a similar fashion as the pedestrian network, but **CNTYPE** = 'BIKE' links are included instead of **CNTYPE** = 'PED'.
 
@@ -99,10 +101,27 @@ title: Modeling Process
    * Input: `hwy\mtc_final_network_with_tolls.net`, the roadway network
    * Output: `hwy\avgload[EA,AM,MD,PM,EV].net`, the per-timeperiod roadway networks
 
-1. [`preprocess\BuildTAzNetworks.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/BuildTazNetworks.job)
+1. [`preprocess\BuildTazNetworks.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/BuildTazNetworks.job)
     * Summary: Create TAZ-based roadway networks for skimming and assignments by renumbering the nodes so TAZs (and externals TAZs) are sequential and start at 1 and the rest of the nodes are sequential and start at 1,000,001.
    * Input: `hwy\avgload[EA,AM,MD,PM,EV].net`, the per-timeperiod roadway networks
    * Output: 
       1. `hwy\avgload[EA,AM,MD,PM,EV]_taz.net`, the per-timeperiod roadway networks with renumbered nodes.  New node attribute **OLD_NODE** preserves mapping to original node number, as does new link attribues **OLD_A** and **OLD_B**.
       2. `hwy\avgload[EA,AM,MD,PM,EV]_taz_to_node.txt`, text version (**TODO**: for what?)
       3. `hwy\msaload[EA,AM,MD,PM,EV]_taz.net` is the same as `hwy\avgload[EA,AM,MD,PM,EV]_taz.net` but with new link variables **vol**, **vc**, **vol_[da,s2,s3,sm,hv][T?]**, and **volT** initialized to zero.
+
+## Non-Motorized Skims
+
+1. [`skims\NonMotorizedSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/NonMotorizedSkims.job)
+    * Summary: Creates 6 types of non-motorized shortest-path skims.
+    * Input: 
+      1. `block\maxCosts.block`
+      2. `hwy\mtc_ped_network.net`, the pedestrian network
+      3. `hwy\mtc_bike_network.net`, the bike network
+      4. `hwy\mtc_tap_ped_network.net`, the tap-tap pedestrian network
+    * Output: 
+      1. `skims\ped_distance_maz_maz.txt`, the pedestrian MAZ to MAZ skims
+      2. `skims\ped_distance_maz_tap.txt`, the pedestrian MAZ to TAP skims
+      3. `skims\bike_distance_maz_maz.txt`, the bicycle MAZ to MAZ skims
+      4. `skims\bike_distance_maz_tap.txt`, the bicycle MAZ to TAP skims
+      5. `skims\bike_distance_taz_taz.txt`, the bicycle TAZ to TAZ skims
+      6. `skims\ped_distance_tap_tap.txt`, the pedestrian TAP to TAP skims
