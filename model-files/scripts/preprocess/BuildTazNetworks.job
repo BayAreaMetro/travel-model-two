@@ -3,13 +3,13 @@
 ; BuildTazNetworks.job
 ;
 ; TP+ script to create TAZ networks from the base highway network. These networks form the base structure for
-; assignment, volume averageing, etc. This script essentially renumbers the nodes  node so that the TAZs are
+; assignment, volume averaging, etc. This script essentially renumbers the nodes so that the TAZs are
 ; sequentially numbered starting at 1. So that all subsequent model results are consistent with each other (or
-; at least easy to compare), this process is only performed once in a model run. 
+; at least easy to compare), this process is only performed once in a model run.
 ;
-; Input: Five time-of-day-specific highway networks. 
+; Input: Five time-of-day-specific highway networks.
 ;
-; Output: Five time-of-day-specific highway networks to be used in skimming and assignment. 
+; Output: Five time-of-day-specific highway networks to be used in skimming and assignment.
 ;
 ; version:  Travel Model Zed
 ; authors:  crf (2014 03)
@@ -103,7 +103,7 @@ loop period = 1, 5
     RUN PGM=NETWORK
         PAR NODES=10000000
         NETI = hwy\avgload@token_period@_taz.net
-        NODEO=hwy\avgload@token_period@_taz_to_node.txt FORMAT=TXT, FORM=25.5 INCLUDE=N,OLD_NODE,X,Y
+        NODEO= hwy\avgload@token_period@_taz_to_node.txt FORMAT=TXT, FORM=25.5 INCLUDE=N,OLD_NODE,X,Y
     ENDRUN
     
     ;build network which will store MSA volume
