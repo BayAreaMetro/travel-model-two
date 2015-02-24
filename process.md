@@ -122,6 +122,7 @@ title: Modeling Process
       2. `hwy\mtc_ped_network.net`, the pedestrian network
       3. `hwy\mtc_bike_network.net`, the bike network
       4. `hwy\mtc_tap_ped_network.net`, the tap-tap pedestrian network
+      5. `hwy\mtc_final_network_zone_seq.csv`, used to [resequence columns](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/resequence_columns.py) in the skims
     * Output: 
       1. `skims\ped_distance_maz_maz.csv`, the pedestrian MAZ to MAZ skims
       2. `skims\ped_distance_maz_tap.csv`, the pedestrian MAZ to TAP skims
