@@ -8,7 +8,7 @@ title: Modeling Process
 # Contents
 1. [Modeling Process](#modeling-process)
   1. [Preprocessing](#preprocessing)
-  2. [Non-Motorized Skims](#non-motorized-skims)
+  2. [Shorest Path Skims](#shortest-path-skims)
 
 # Modeling Process
 
@@ -114,10 +114,10 @@ title: Modeling Process
       2. `hwy\avgload[EA,AM,MD,PM,EV]_taz_to_node.txt`, text version (**TODO**: for what?)
       3. `hwy\msaload[EA,AM,MD,PM,EV]_taz.net` is the same as `hwy\avgload[EA,AM,MD,PM,EV]_taz.net` but with new link variables **vol**, **vc**, **vol_[da,s2,s3,sm,hv][T?]**, and **volT** initialized to zero.
 
-## Non-Motorized Skims
+## Shortest Path Skims
 
 1. [`skims\NonMotorizedSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/NonMotorizedSkims.job)
-    * Summary: Creates 6 types of non-motorized shortest-path skims.  Uses Cube's shortest-paths.
+    * Summary: Creates 6 types of non-motorized shortest-path skims using Cube's shortest-path utility.
     * **TODO**: This creates uses cube to create a bunch of cube scripts which I find pretty awkward.  It also could
       do more parallelizing and is limited to 9 (one per county) at present. 
       Use python to create the cubescript?  It would be easier to make flexible and run the pieces
@@ -135,3 +135,12 @@ title: Modeling Process
       4. `skims\bike_distance_maz_tap.csv`, the bicycle MAZ to TAP skims
       5. `skims\bike_distance_taz_taz.csv`, the bicycle TAZ to TAZ skims
       6. `skims\ped_distance_tap_tap.csv`, the pedestrian TAP to TAP skims
+
+1. [`skims\MazMazSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/MazMazSkims.job)
+    * Summary: Creates auto shortest-path skims for MAZ-to-MAZ using Cube's shortest-paths utility.
+    * **TODO**: Same note as `NonMotorizedSkims.job`.  Could share same python scripts for distributing and for creating scripts.
+    * Input:
+      1. [`CTRAMP\scripts\block\maxCosts.block`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/maxCosts.block), which limits the _max_drive_gencost_
+      2. [`CTRAMP\scripts\block\hwyparam.block`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyparam.block)
+      3. `hwy\avgload[EA,AM,MD,PM,EV].net`, the per-timeperiod roadway networks with renumbered nodes
+    * Output: `skims\HWYSKIM_MAZMAZ_DA.csv`, the auto MAZ to MAZ skims.  Columns are: _ORIG_MAZ_, _DEST_MAZ_, _DEST2_MAZ_, _GENCOST_, _FEET_, _BRIDGE_TOLL_
