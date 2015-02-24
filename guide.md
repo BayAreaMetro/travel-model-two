@@ -339,7 +339,7 @@ The final step of the model run moves all the TP+ printouts to the `/logs` folde
 
 
 ## CT-RAMP Properties File
-The CT-RAMP software is controlled by a standard Java properties file.  The _forthcoming_ {table, link} below identifies, describes, and provides on example of, each of the variables CT-RAMP expects to be in the properties file.  After the initial configuration, only a handful of these properties willl be modified in a typical application of the travel model.  The primary use for many of the variables is to facilitate model calibration and/or debugging.  Comments in the properties file preceeded with a pound (#) are ignored.
+The CT-RAMP software is controlled by a standard Java [properties file](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties).  The _forthcoming_ {table, link} below identifies, describes, and provides on example of, each of the variables CT-RAMP expects to be in the properties file.  After the initial configuration, only a handful of these properties willl be modified in a typical application of the travel model.  The primary use for many of the variables is to facilitate model calibration and/or debugging.  Comments in the properties file preceeded with a pound (#) are ignored.
 
 
 ## Input Files
