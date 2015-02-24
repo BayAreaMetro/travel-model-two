@@ -18,6 +18,9 @@ CONTENTS
 4. [Model Execution](#model-execution) 
 5. [CT-RAMP Properties File](#ct-ramp-properties-File)
 6. [Input Files](#input-files)
+7. [Output Files](#output-files)
+8. [Model Schematic](#model-schematic)
+9. [Level of Service Information](#level-of-service-information)
 
 ---
 
