@@ -112,16 +112,20 @@ title: Modeling Process
 ## Non-Motorized Skims
 
 1. [`skims\NonMotorizedSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/NonMotorizedSkims.job)
-    * Summary: Creates 6 types of non-motorized shortest-path skims.
+    * Summary: Creates 6 types of non-motorized shortest-path skims.  Uses Cube's shortest-paths.
+    * **TODO**: This creates uses cube to create a bunch of cube scripts which I find pretty awkward.  It also could
+      do more parallelizing and is limited to 9 (one per county) at present. 
+      Use python to create the cubescript?  It would be easier to make flexible and run the pieces
+      on an arbitrary number of nodes.
     * Input: 
       1. [`CTRAMP\scripts\block\maxCosts.block`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/maxCosts.block)
       2. `hwy\mtc_ped_network.net`, the pedestrian network
       3. `hwy\mtc_bike_network.net`, the bike network
       4. `hwy\mtc_tap_ped_network.net`, the tap-tap pedestrian network
     * Output: 
-      1. `skims\ped_distance_maz_maz.txt`, the pedestrian MAZ to MAZ skims
-      2. `skims\ped_distance_maz_tap.txt`, the pedestrian MAZ to TAP skims
-      3. `skims\bike_distance_maz_maz.txt`, the bicycle MAZ to MAZ skims
-      4. `skims\bike_distance_maz_tap.txt`, the bicycle MAZ to TAP skims
-      5. `skims\bike_distance_taz_taz.txt`, the bicycle TAZ to TAZ skims
-      6. `skims\ped_distance_tap_tap.txt`, the pedestrian TAP to TAP skims
+      1. `skims\ped_distance_maz_maz.csv`, the pedestrian MAZ to MAZ skims
+      2. `skims\ped_distance_maz_tap.csv`, the pedestrian MAZ to TAP skims
+      3. `skims\bike_distance_maz_maz.csv`, the bicycle MAZ to MAZ skims
+      4. `skims\bike_distance_maz_tap.csv`, the bicycle MAZ to TAP skims
+      5. `skims\bike_distance_taz_taz.csv`, the bicycle TAZ to TAZ skims
+      6. `skims\ped_distance_tap_tap.csv`, the pedestrian TAP to TAP skims
