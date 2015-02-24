@@ -576,5 +576,34 @@ Air passenger demand is based on surveys of air passenger and captures demand fr
 
 ## Level of Service Information
 
+Travel Model Two employs a tiered spatial system to allow level-of-service indicators to be computed at a fine or coarser geography, as appropriate.  Two spatial systems are defined: 1) a travel analysis zone (TAZ) system and 2) a micro-analysis zone (MAZ) system.  MAZs nest within TAZs.  For travel done at a "micro" scale (in the regional context, meaning less than five miles or so), the MAZ system is used; for travel done at a larger scale, the TAZ system is used.
+
+Further, transit travel is represented as a combination of the following three movements:
+  1. Access.  An access movement from an MAZ to a so-called transit access point (or TAP), which is a single transit stop or an abstract location representing a collection of bus stops.
+  2. Line haul.  A line-haul movement from a boarding TAP to an alighting TAP, which can include a transfer (moving from one TAP to another TAP) between services.
+  3. Egress.  An egress movement from the alighting TAP to the destination MAZ. 
+
+The motivation for the MAZ and TAP model design was to more precisely represent neighborhood-level travel while avoiding the steep computational price required to maintain a full set of MAZ-to-MAZ level-of-service matrices.  This design concept originated at the San Diego Association of Governments (SANDAG) and is being adopted by other planning organizations.
+
+The MAZ and TAP model design requires transit paths be built "on the fly" (i.e. outside the commercial software used by the travel model) by intelligently building and combining the MAZ-to-TAP, TAP-to-TAP, and TAP-to-MAZ trip components into logical, efficient potential paths for evaluation in probabilistic models of mode/transit route choice. 
+
+The table below presents the manner in which level-of-service indicators are extracted from the model network.  
+| *Level-of-service component* | *Separation of origin and destination* | *Geography* | *Source* |
+|------------------------------|----------------------------------------|-------------|----------|
+| Automobile times, distances, and costs | Near | MAZ to MAZ | MAZ-scale single best least-cost path |
+| Automobile times, distances, and costs | Far | TAZ to TAZ | TAZ-scale equilibrium assignment path |
+| Transit line-haul | All | TAP to TAP | N least-cost path determination |
+| Transit walk access and egress | All | MAZ to TAP | N least-cost path determination |
+| Transit bicycle access and egress | All | MAZ to TAP | N least-cost path determination |
+| Transit drive access and egress | All | TAZ to nearest TAP TAZ | TAZ-scale equilibrium assignment path |
+| Walk | Near (assume all walk travel is near) | MAZ to MAZ | MAZ-scale single best least-cost path |
+| Bicycle | Near | MAZ to MAZ | MAZ-scale single best least-cost path |
+| Bicycle | Far | TAZ to TAZ | TAZ-scale single best least-cost path |
+
+Three distinct methods of extracting times from the network are employed, as follows:
+  1. Equilibrium assignment. For automobile travel, congestion effects impact path choice, so a traditional equilibrium assignment is performed at the TAZ-scale.
+  2. N best least-cost paths. For transit movements, the model builds, &ldquo;on the fly&rdquo;, the N best least-cost paths between MAZ pairs. The N best least-cost paths are then evaluated in the mode/transit route choice model.
+  3. Single best least-cost path. For close-proximity automobile, bicycle, and walk travel, a single best mode-specific least-cost path is computed from the MAZ level all streets network. Because the full MAZ level network is not assigned due to computational cost, the impact of congestion on MAZ level path decisions is not taken into account. As a compromise (for gaining the spatial fidelity offered by the MAZ level network), the model implicitly assumes that automobile, pedestrian, and bicycle congestion have a negligible impact on path choice decisions and assigns each MAZ-to-MAZ movement to a single best least-cost path.
+   
 ## Networks
 
