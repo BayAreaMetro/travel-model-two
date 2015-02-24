@@ -49,6 +49,7 @@ RUN PGM=NETWORK
             MAZSEQ = 0
             TAPSEQ = 0
             EXTSEQ = 0
+            if (TAZSEQ > %TAZ_COUNT%) ABORT msg="TAZSEQ > TAZ_COUNT environment variable %TAZ_COUNT%"
         ELSEIF (@maz_selector@)
             _j = _j + 1 
             TAZSEQ = 0
