@@ -18,19 +18,20 @@
 ;
 ; Like the highway skims, these skims are based on the shortest generalized cost path, which makes the following
 ; assumptions:
-;    (a) the automobile operating cost is 14.2 cents ($2000) per mile, which is based on a state-wide agreed 
+;    (a) the automobile operating cost is 14.2 cents ($2000) per mile, which is based on a state-wide agreed
 ;        upon approach (use EMFAC's implied fleetwide MPG combined with an agreed upon gas price);
-;    (b) the assumed personal vehicle value of time is $15 per hour ($2000); a value of time is needed to 
-;        determine if the value toll path is reasonable and one should lean towards a high value, which will 
-;        create a pay path, thus allowing the mode choice model the opportunity to evaluate it -- Vovsha 
-;        recommends a value of time in the $6 to $22 ($2008) per hour range, which we are in; 
-; All of these values are coded in the "hwyParam.block" file. 
+;    (b) the assumed personal vehicle value of time is $15 per hour ($2000); a value of time is needed to
+;        determine if the value toll path is reasonable and one should lean towards a high value, which will
+;        create a pay path, thus allowing the mode choice model the opportunity to evaluate it -- Vovsha
+;        recommends a value of time in the $6 to $22 ($2008) per hour range, which we are in;
+; All of these values are coded in the "hwyParam.block" file.
 ;
-; Input:  (1) A highway network with no toll roads (other than bridges) containing the following fields: 
+; Input:  (1) A highway network with no toll roads (other than bridges) containing the following fields:
 ;             (a) CTIM, which is the congested time in minutes;
 ;             (b) DISTANCE (which is skimmed)
 ;             (c) TOLLMD_DA (this is the dollar value of the bridge toll)
-;             (d) USECLASS (which is a code defining which class of vehicles can use which link, 1 - everyone, 2 - two occupants, 3 -  three occupants, 4 - no large trucks). 
+;             (d) USECLASS (which is a code defining which class of vehicles can use which link,
+;                 1: everyone, 2: two+ occupants, 3: three+ occupants, 4: no large trucks).
 ;
 ; Output: csv skim files with the following format: FROM_ZONE,TO_ZONE,TO_ZONE,GENERALIZED_COST,SKIM_VALUE
 ;         The following files and skims are saved:
@@ -48,8 +49,6 @@
 
 read file = %BASE_SCRIPTS%\block\maxCosts.block
 read file = %BASE_SCRIPTS%\block\hwyparam.block
-
-;now do maz-maz skims
 
 ;county codes are X00,000 for zone nodes
 ; 0 - San Francisco
@@ -237,7 +236,7 @@ LOOP PROC_COUNT=1,9
                     PRINT LIST=" PAR NODES=10000000" PRINTO=1
                     PRINT LIST=" FUNCTION = BUILDPATH" PRINTO=1
                     PRINT LIST=" neti = @SKIM_NETWORK@_@PROC_COUNT@.net" PRINTO=1
-                    PRINT LIST=" pathprinto = @OUTFILE@_@SKIM_COUNTY@.txt" PRINTO=1
+                    PRINT LIST=" pathprinto = @OUTFILE@_@SKIM_COUNTY@.csv" PRINTO=1
                     PRINT LIST=" CostSpec='GENCOST' " PRINTO=1
                     ;PRINT LIST=" LinkSelection = ((CNTYPE != 'TAP') & (CNTYPE != 'TAZ'))" PRINTO=1
                     PRINT LIST=" MaxPathCost = @MAX_COST@" PRINTO=1
@@ -293,14 +292,20 @@ Wait4Files Files=MTC_HWYMAZSKIM1.script.end, MTC_HWYMAZSKIM2.script.end, MTC_HWY
 ;stop cluster nodes
 *Cluster.exe MTC_HWYMAZSKIM 1-9 close exit
 
-;merge files
+;header
+*echo ORIG_MAZ_N,DEST_MAZ_N,DEST2_MAZ_N,GENCOST,FEET > skims\HWYSKIM_MAZMAZ_DIST_DA_header.csv
+*echo ORIG_MAZ_N,DEST_MAZ_N,DEST2_MAZ_N,GENCOST,BRIDGE_TOLL > skims\HWYSKIM_MAZMAZ_BTOLL_DA_header.csv
 
-*copy skims\HWYSKIM_MAZMAZ_DIST_DA_1.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_2.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_3.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_4.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_5.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_6.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_7.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_8.txt+skims\HWYSKIM_MAZMAZ_DIST_DA_9.txt skims\HWYSKIM_MAZMAZ_DIST_DA.txt
-*del skims\HWYSKIM_MAZMAZ_DIST_DA_*.txt
-*copy skims\HWYSKIM_MAZMAZ_BTOLL_DA_1.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_2.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_3.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_4.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_5.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_6.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_7.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_8.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_9.txt skims\HWYSKIM_MAZMAZ_BTOLL_DA.txt
-*del skims\HWYSKIM_MAZMAZ_BTOLL_DA_*.txt
+;merge files       Suffix=-origN indicates that the nodes need renumbering to MAZ
+*copy skims\HWYSKIM_MAZMAZ_DIST_DA_header.csv+skims\HWYSKIM_MAZMAZ_DIST_DA_1.csv+skims\HWYSKIM_MAZMAZ_DIST_DA_2.csv+skims\HWYSKIM_MAZMAZ_DIST_DA_3.csv+skims\HWYSKIM_MAZMAZ_DIST_DA_4.csv+skims\HWYSKIM_MAZMAZ_DIST_DA_5.csv+skims\HWYSKIM_MAZMAZ_DIST_DA_6.csv+skims\HWYSKIM_MAZMAZ_DIST_DA_7.csv+skims\HWYSKIM_MAZMAZ_DIST_DA_8.csv+skims\HWYSKIM_MAZMAZ_DIST_DA_9.csv skims\HWYSKIM_MAZMAZ_DIST_DA-origN.csv
+*del skims\HWYSKIM_MAZMAZ_DIST_DA_*.csv
+*copy skims\HWYSKIM_MAZMAZ_BTOLL_DA_header.csv+skims\HWYSKIM_MAZMAZ_BTOLL_DA_1.csv+skims\HWYSKIM_MAZMAZ_BTOLL_DA_2.csv+skims\HWYSKIM_MAZMAZ_BTOLL_DA_3.csv+skims\HWYSKIM_MAZMAZ_BTOLL_DA_4.csv+skims\HWYSKIM_MAZMAZ_BTOLL_DA_5.csv+skims\HWYSKIM_MAZMAZ_BTOLL_DA_6.csv+skims\HWYSKIM_MAZMAZ_BTOLL_DA_7.csv+skims\HWYSKIM_MAZMAZ_BTOLL_DA_8.csv+skims\HWYSKIM_MAZMAZ_BTOLL_DA_9.csv skims\HWYSKIM_MAZMAZ_BTOLL_DA-origN.csv
+*del skims\HWYSKIM_MAZMAZ_BTOLL_DA_*.csv
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\HWYSKIM_MAZMAZ_DIST_DA.txt 3
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\HWYSKIM_MAZMAZ_BTOLL_DA.txt 3
+; Make sure these end with a newline
+*echo.>>skims\HWYSKIM_MAZMAZ_DIST_DA-origN.csv
+*echo.>>skims\HWYSKIM_MAZMAZ_BTOLL_DA-origN.csv
 
-
+; Join them an resequence
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\resequence_columns.py skims\HWYSKIM_MAZMAZ_DIST_DA-origN.csv skims\HWYSKIM_MAZMAZ_BTOLL_DA-origN.csv skims\HWYSKIM_MAZMAZ_DA.csv
+IF (ReturnCode != 0) ABORT

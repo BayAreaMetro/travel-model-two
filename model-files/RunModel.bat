@@ -202,11 +202,11 @@ if ERRORLEVEL 2 goto done
 
 :: ------------------------------------------------------------------------------------------------------
 ::
-:: Step 4:  Build non-motorized level-of-service matrices
+:: Step 4:  Build shortest-path level-of-service matrices
 ::
 :: ------------------------------------------------------------------------------------------------------
 
-:: Non-Motorized Skims
+:: Shortest Path Skims
 
 :: Build the skim tables
 runtpp %BASE_SCRIPTS%\skims\NonMotorizedSkims.job
