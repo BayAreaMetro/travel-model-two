@@ -582,9 +582,9 @@ Air passenger demand is based on surveys of air passenger and captures demand fr
 Travel Model Two employs a tiered spatial system to allow level-of-service indicators to be computed at a fine or coarser geography, as appropriate.  Two spatial systems are defined: 1) a travel analysis zone (TAZ) system and 2) a micro-analysis zone (MAZ) system.  MAZs nest within TAZs.  For travel done at a "micro" scale (in the regional context, meaning less than five miles or so), the MAZ system is used; for travel done at a larger scale, the TAZ system is used.
 
 Further, transit travel is represented as a combination of the following three movements:
-  1. Access.  An access movement from an MAZ to a so-called transit access point (or TAP), which is a single transit stop or an abstract location representing a collection of bus stops.
-  2. Line haul.  A line-haul movement from a boarding TAP to an alighting TAP, which can include a transfer (moving from one TAP to another TAP) between services.
-  3. Egress.  An egress movement from the alighting TAP to the destination MAZ. 
+ 1. Access.  An access movement from an MAZ to a so-called transit access point (or TAP), which is a single transit stop or an abstract location representing a collection of bus stops.
+ 2. Line haul.  A line-haul movement from a boarding TAP to an alighting TAP, which can include a transfer (moving from one TAP to another TAP) between services.
+ 3. Egress.  An egress movement from the alighting TAP to the destination MAZ. 
 
 The motivation for the MAZ and TAP model design was to more precisely represent neighborhood-level travel while avoiding the steep computational price required to maintain a full set of MAZ-to-MAZ level-of-service matrices.  This design concept originated at the San Diego Association of Governments (SANDAG) and is being adopted by other planning organizations.
 
@@ -605,9 +605,9 @@ The table below presents the manner in which level-of-service indicators are ext
 | Bicycle | Far | TAZ to TAZ | TAZ-scale single best least-cost path |
 
 Three distinct methods of extracting times from the network are employed, as follows:
-  1. Equilibrium assignment. For automobile travel, congestion effects impact path choice, so a traditional equilibrium assignment is performed at the TAZ-scale.
-  2. N best least-cost paths. For transit movements, the model builds, &ldquo;on the fly&rdquo;, the N best least-cost paths between MAZ pairs. The N best least-cost paths are then evaluated in the mode/transit route choice model.
-  3. Single best least-cost path. For close-proximity automobile, bicycle, and walk travel, a single best mode-specific least-cost path is computed from the MAZ level all streets network. Because the full MAZ level network is not assigned due to computational cost, the impact of congestion on MAZ level path decisions is not taken into account. As a compromise (for gaining the spatial fidelity offered by the MAZ level network), the model implicitly assumes that automobile, pedestrian, and bicycle congestion have a negligible impact on path choice decisions and assigns each MAZ-to-MAZ movement to a single best least-cost path.
+ 1. Equilibrium assignment. For automobile travel, congestion effects impact path choice, so a traditional equilibrium assignment is performed at the TAZ-scale.
+ 2. N best least-cost paths. For transit movements, the model builds, &ldquo;on the fly&rdquo;, the N best least-cost paths between MAZ pairs. The N best least-cost paths are then evaluated in the mode/transit route choice model.
+ 3. Single best least-cost path. For close-proximity automobile, bicycle, and walk travel, a single best mode-specific least-cost path is computed from the MAZ level all streets network. Because the full MAZ level network is not assigned due to computational cost, the impact of congestion on MAZ level path decisions is not taken into account. As a compromise (for gaining the spatial fidelity offered by the MAZ level network), the model implicitly assumes that automobile, pedestrian, and bicycle congestion have a negligible impact on path choice decisions and assigns each MAZ-to-MAZ movement to a single best least-cost path.
    
 ## Networks
 
