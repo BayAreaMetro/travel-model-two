@@ -18,13 +18,14 @@
 ;
 ; Like the highway skims, these skims are based on the shortest generalized cost path, which makes the following
 ; assumptions:
-;    (a) the automobile operating cost is 14.2 cents ($2000) per mile, which is based on a state-wide agreed
-;        upon approach (use EMFAC's implied fleetwide MPG combined with an agreed upon gas price);
-;    (b) the assumed personal vehicle value of time is $15 per hour ($2000); a value of time is needed to
+;    (a) the automobile operating is based on a state-wide agreed upon approach
+;        (use EMFAC's implied fleetwide MPG combined with an agreed upon gas price);
+;        The value differs by year and is defined in INPUT\hwy\autoopcost.properties.
+;    (b) the assumed personal vehicle value of time is $18.9 per hour ($2010); a value of time is needed to
 ;        determine if the value toll path is reasonable and one should lean towards a high value, which will
 ;        create a pay path, thus allowing the mode choice model the opportunity to evaluate it -- Vovsha
 ;        recommends a value of time in the $6 to $22 ($2008) per hour range, which we are in;
-; All of these values are coded in the "hwyParam.block" file.
+;        Value of time is defined in CTRAMP\scrips\block\hwyParam.block
 ;
 ; Input:  (1) A highway network with no toll roads (other than bridges) containing the following fields:
 ;             (a) CTIM, which is the congested time in minutes;
@@ -33,10 +34,8 @@
 ;             (d) USECLASS (which is a code defining which class of vehicles can use which link,
 ;                 1: everyone, 2: two+ occupants, 3: three+ occupants, 4: no large trucks).
 ;
-; Output: csv skim files with the following format: FROM_ZONE,TO_ZONE,TO_ZONE,GENERALIZED_COST,SKIM_VALUE
-;         The following files and skims are saved:
-;            (A) HWYSKIM_MAZMAZ_DIST_DA.csv - distance in feet
-;            (B) HWYSKIM_MAZMAZ_BTOLL_DA.csv - bridge toll in cents ($2000)
+; Output: skims\HWYSKIM_MAZMAZ_DA.csv skim file with the following columns:
+;         ORIG_MAZ,DEST_MAZ,DEST2_MAZ,GEN_COST,FEET,BRIDGE_TOLL
 ;
 ; See also: (1) SetTolls.job, which sets the tolls skimmed in this script
 ;
@@ -49,7 +48,7 @@
 
 read file = %BASE_SCRIPTS%\block\maxCosts.block
 read file = %BASE_SCRIPTS%\block\hwyparam.block
-
+read file = hwy\autoopcost.properties, '#'=';'   ; convert properties comment to CUBE comment
 ;county codes are X00,000 for zone nodes
 ; 0 - San Francisco
 ; 1 - San Mateo
