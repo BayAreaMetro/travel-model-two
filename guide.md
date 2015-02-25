@@ -590,9 +590,10 @@ The motivation for the MAZ and TAP model design was to more precisely represent 
 
 The MAZ and TAP model design requires transit paths be built "on the fly" (i.e. outside the commercial software used by the travel model) by intelligently building and combining the MAZ-to-TAP, TAP-to-TAP, and TAP-to-MAZ trip components into logical, efficient potential paths for evaluation in probabilistic models of mode/transit route choice. 
 
-The table below presents the manner in which level-of-service indicators are extracted from the model network.  
-| *Level-of-service component* | *Separation of origin and destination* | *Geography* | *Source* |
-|------------------------------|----------------------------------------|-------------|----------|
+The table below presents the manner in which level-of-service indicators are extracted from the model network.
+
+| **Level-of-service component** | **Separation of origin and destination** | **Geography** | **Source** |
+|--------------------------------|------------------------------------------|---------------|------------|
 | Automobile times, distances, and costs | Near | MAZ to MAZ | MAZ-scale single best least-cost path |
 | Automobile times, distances, and costs | Far | TAZ to TAZ | TAZ-scale equilibrium assignment path |
 | Transit line-haul | All | TAP to TAP | N least-cost path determination |
