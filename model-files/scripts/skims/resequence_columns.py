@@ -29,6 +29,7 @@ if __name__ == '__main__':
 
     sequence_mapping        = pandas.DataFrame.from_csv(zone_seq_mapping_file)
     sequence_mapping.reset_index(inplace=True)
+    actions_performed       = 0
 
     # read the input skims, joining if necessary
     skim_df                 = None
@@ -45,6 +46,7 @@ if __name__ == '__main__':
             assert(my_skim_df.shape[0] == prev_len)
             skim_df         = skim_df.merge(right=my_skim_df, how='inner')
             assert(   skim_df.shape[0] == prev_len)
+            actions_performed += 1
     print "%s input skims read" % datetime.datetime.now().strftime("%c")
 
     # resequence
@@ -58,13 +60,22 @@ if __name__ == '__main__':
             seq_df.rename(columns={'N':colname, seq_colname:new_colname}, inplace=True)
             skim_df     = pandas.merge(left=skim_df, right=seq_df, how='left')
             new_colnames.append(new_colname)
+            actions_performed += 1
         else:
             new_colnames.append(colname)
 
     skim_df = skim_df[new_colnames]
 
+    # verify we did *something*
+    if actions_performed == 0:
+        print "No actions performed -- something must be wrong"
+        sys.exit(2)
+
     # verify no joins failed
-    for colname in new_colnames: assert(sum(skim_df[colname].isnull())==0)
+    for colname in new_colnames:
+        if sum(skim_df[colname].isnull()) > 0:
+            print "There are %d instances of null %s." % (sum(skim_df[colname].isnull()), colname)
+            sys.exit(2)
 
     skim_df.to_csv(skim_outfile, index=False)
-    print "%s done" % datetime.datetime.now().strftime("%c")
+    print "%s done with %d actions performed" % (datetime.datetime.now().strftime("%c"), actions_performed)
