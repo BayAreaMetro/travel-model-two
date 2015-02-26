@@ -8,7 +8,8 @@ title: Modeling Process
 # Contents
 1. [Modeling Process](#modeling-process)
   1. [Preprocessing](#preprocessing)
-  2. [Shorest Path Skims](#shortest-path-skims)
+  2. [Shortest Path Skims](#shortest-path-skims)
+  3. [Build Airport Trip Matrices](#build-airport-trip-matrices)
 
 # Modeling Process
 
@@ -145,3 +146,11 @@ title: Modeling Process
       3. `hwy\autoopcost.properties`, auto and truck operating costs
       4. `hwy\avgload[EA,AM,MD,PM,EV].net`, the per-timeperiod roadway networks with renumbered nodes
     * Output: `skims\HWYSKIM_MAZMAZ_DA.csv`, the auto MAZ to MAZ skims.  Columns are: _ORIG_MAZ_, _DEST_MAZ_, _DEST2_MAZ_, _GENCOST_, _FEET_, _BRIDGE_TOLL_
+
+## Build Airport Trip Matrices
+
+1. [`nonres\BuildAirPax.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/nonres/BuildAirPax.job)
+    * Summary: Creates air passenger vehicle trip tables based on 2006 survey data and 2035 predictions of air travel for the three bay area airports.
+    * Input: `nonres\[2007,2035]_[to,from][OAK,SFO,SJC].csv`, trip tables for TAZ origins & destinations for the airports by time-of-day and mode (escort, park, rental car, taxi, limo, shared rid van, hotel shuttle, charter bus).
+    * Output: `nonres\tripsAirPaxAM[EA,AM,MD,PM,EV].mtx`, trip tables for resequenced (consecutive) origin/destination TAZs for modes [DA,SR2,SR3][TOLL]?
+
