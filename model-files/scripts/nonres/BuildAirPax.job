@@ -6,20 +6,20 @@
 ; OAK, and SJC.  Geoff Gosling, a consultant, created vehicle trip tables segmented by time of day, travel mode,
 ; and access/egress direction (i.e. to the airport or from the airport) for years 2007 and 2035.  The tables are
 ; based on a 2006 Air Passenger survey, which was conducted at SFO and OAK (but not SJC).  The five time
-; periods correspond to the time periods used by the travel model and are as follows: (a) early AM, before 6 am; 
-; (b) AM peak period, 6 am to 10 am; (c) midday, 10 am to 3 pm; (d) PM peak period, 3 pm to 7 pm; and, (e) evening, 
-; after 7 pm.  The travel modes are as follows: (a) escort (drive alone, shared ride 2, and shared ride 3+); (b) 
+; periods correspond to the time periods used by the travel model and are as follows: (a) early AM, before 6 am;
+; (b) AM peak period, 6 am to 10 am; (c) midday, 10 am to 3 pm; (d) PM peak period, 3 pm to 7 pm; and, (e) evening,
+; after 7 pm.  The travel modes are as follows: (a) escort (drive alone, shared ride 2, and shared ride 3+); (b)
 ; park (da, sr2, & sr3+); (c) rental car (da, sr2, & sr3+); (d) taxi ((da, sr2, & sr3+); (e) limo (da, sr2, & sr3+);
 ; (f) shared ride van (all assumed to be sr3); (g) hotel shuttle (all assumed to be sr3); and, (h) charter bus (all
-; assumed to be sr3).  The shared ride van, hotel shuttle, and charter bus modes are assumed to have no deadhead travel. 
-; The return escort trip is included, as are the deadhead limo and taxi trips. 
+; assumed to be sr3).  The shared ride van, hotel shuttle, and charter bus modes are assumed to have no deadhead travel.
+; The return escort trip is included, as are the deadhead limo and taxi trips.
 ;
 ; The scripts reads in csv files adapted from Mr. Gosling's Excel files, then creates a Cube matrix for each of the
-; file.  Next, a highway-assignment ready matrix file is creating for each time-of-day interval.  Here, we 
-; assume that no air passengers use HOT lanes (probably not exactly true in certain future year scenarios, but the 
+; file.  Next, a highway-assignment ready matrix file is creating for each time-of-day interval.  Here, we
+; assume that no air passengers use HOT lanes (probably not exactly true in certain future year scenarios, but the
 ; assumption is made here as a simplification).  Simple linear interpolations are used to estimate vehicle demand in
-; years other than 2007 and 2035, including 2015, 2020, 2025, 2030, and 2040.  The 2007 table is used for years 2000,
-; 2005, and 2010.
+; years other than 2007 and 2035, including 2010, 2015, 2020, 2025, 2030, and 2040.  The 2007 table is used for
+; years before 2007.
 ;
 ; Transit travel to the airports is not included in these vehicle trip tables.
 ;
@@ -90,7 +90,8 @@ loop year = 1,2
         ; do each as a separate process
         DistributeMultistep processid = 'MTC_AIRPAX', processNum = @processIdx@
              
-             *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\assign\taz_matrix_transfer.py . nonres\@token_year@_@token_toFrom@@token_airport@.csv nonres\@token_year@_@token_toFrom@@token_airport@_seq.csv
+             *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\resequence_columns.py nonres\@token_year@_@token_toFrom@@token_airport@.csv nonres\@token_year@_@token_toFrom@@token_airport@_seq.csv
+             IF (ReturnCode != 0) ABORT
 
              run pgm = matrix
              
@@ -195,7 +196,6 @@ loop year = 1,2
                 mw[88] = mi.1.88
                 mw[89] = mi.1.89
                 mw[90] = mi.1.90
-                
              
              endrun
 
@@ -432,9 +432,9 @@ endloop ; year
 Wait4Files Files=MTC_AIRPAX1.script.end,MTC_AIRPAX2.script.end
 
 ; step 3: build matrices by interpolating between the year 2007 and the year 2035 trip tables
-token_scale = '(%MODEL_YEAR% - 2007)/(2035 - %MODEL_YEAR%)'
-      
-   
+token_scale = (%MODEL_YEAR% - 2007)/(2035 - 2007)
+if (token_scale < 0) token_scale = 0
+
 run pgm = matrix
        
   DistributeINTRASTEP ProcessID='MTC_AIRPAX',ProcessList=1-12
@@ -503,7 +503,6 @@ run pgm = matrix
 
 endrun
 
-*DEL nonres\*_seq.csv
 *DEL nonres\2007*.mtx
 *DEL nonres\2035*.mtx
 
