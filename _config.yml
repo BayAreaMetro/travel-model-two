@@ -31,7 +31,7 @@ pages_list:
   Guide: 'guide/'
   Process: 'process/'
   Geographies: 'geographies/'
-  Other: 'other/'
+  Papers: 'papers/'
 
 # Allow URL Redirects: 
 #  * https://help.github.com/articles/redirects-on-github-pages
