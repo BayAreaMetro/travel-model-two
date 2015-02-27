@@ -541,11 +541,12 @@ MTC uses a simple three-step (generation, distribution, and assignment) commerci
 #### Friction Factors
 
 The trip distribution step uses a standard gravity model with a blended travel time impedance measure. This file sets the friction factors, which are vehicle type specific, using an ASCII fixed format text file with the following data:
-   * Travel time in minutes (integer, starting in column 1, left justified);
-   * Friction factors for very small trucks (integer, starting in column 9, left justified);
-   * Friction factors for small trucks (integer, starting in column 17, left justified);
-   * Friction factors for medium trucks (integer, starting in column 25, left justified); and,
-   * Friction factors for large trucks (integer, starting in column 33, left justified).
+ 
+ * Travel time in minutes (integer, starting in column 1, left justified);
+ * Friction factors for very small trucks (integer, starting in column 9, left justified);
+ * Friction factors for small trucks (integer, starting in column 17, left justified);
+ * Friction factors for medium trucks (integer, starting in column 25, left justified); and,
+ * Friction factors for large trucks (integer, starting in column 33, left justified).
 
 #### K-Factors
 
@@ -558,6 +559,7 @@ MTC uses representations of internal/external and air passenger demand that is y
 #### Internal/external
 
 So-called internal/external demand is travel that either begins or ends in the nine county Bay Area. This demand is based on Census journey-to-work data and captures all passenger (i.e. non-commercial) vehicle demand. This demand is introduced to the model via a matrix that contains the following four demand tables in production-attraction format:
+
  * Daily single-occupant vehicle flows;
  * Daily two-occupant vehicle flows;
  * Daily three-or-more occupant vehicle flows; and,
@@ -583,6 +585,7 @@ Air passenger demand is based on surveys of air passenger and captures demand fr
 Travel Model Two employs a tiered spatial system to allow level-of-service indicators to be computed at a fine or coarser geography, as appropriate.  Two spatial systems are defined: 1) a travel analysis zone (TAZ) system and 2) a micro-analysis zone (MAZ) system.  MAZs nest within TAZs.  For travel done at a "micro" scale (in the regional context, meaning less than five miles or so), the MAZ system is used; for travel done at a larger scale, the TAZ system is used.
 
 Further, transit travel is represented as a combination of the following three movements:
+
  1. Access.  An access movement from an MAZ to a so-called transit access point (or TAP), which is a single transit stop or an abstract location representing a collection of bus stops.
  2. Line haul.  A line-haul movement from a boarding TAP to an alighting TAP, which can include a transfer (moving from one TAP to another TAP) between services.
  3. Egress.  An egress movement from the alighting TAP to the destination MAZ. 
@@ -606,6 +609,7 @@ The table below presents the manner in which level-of-service indicators are ext
 | Bicycle | Far | TAZ to TAZ | TAZ-scale single best least-cost path |
 
 Three distinct methods of extracting times from the network are employed, as follows:
+
  1. Equilibrium assignment. For automobile travel, congestion effects impact path choice, so a traditional equilibrium assignment is performed at the TAZ-scale.
  2. N best least-cost paths. For transit movements, the model builds, &ldquo;on the fly&rdquo;, the N best least-cost paths between MAZ pairs. The N best least-cost paths are then evaluated in the mode/transit route choice model.
  3. Single best least-cost path. For close-proximity automobile, bicycle, and walk travel, a single best mode-specific least-cost path is computed from the MAZ level all streets network. Because the full MAZ level network is not assigned due to computational cost, the impact of congestion on MAZ level path decisions is not taken into account. As a compromise (for gaining the spatial fidelity offered by the MAZ level network), the model implicitly assumes that automobile, pedestrian, and bicycle congestion have a negligible impact on path choice decisions and assigns each MAZ-to-MAZ movement to a single best least-cost path.
