@@ -10,6 +10,7 @@ title: Modeling Process
   1. [Preprocessing](#preprocessing)
   2. [Shortest Path Skims](#shortest-path-skims)
   3. [Build Airport Trip Matrices](#build-airport-trip-matrices)
+  4. [Highway and Transit Skims](#highway-and-transit-skims)
 
 # Modeling Process
 
@@ -153,4 +154,17 @@ title: Modeling Process
     * Summary: Creates air passenger vehicle trip tables based on 2006 survey data and 2035 predictions of air travel for the three bay area airports.
     * Input: `nonres\[2007,2035]_[to,from][OAK,SFO,SJC].csv`, trip tables for TAZ origins & destinations for the airports by time-of-day and mode (escort, park, rental car, taxi, limo, shared rid van, hotel shuttle, charter bus).
     * Output: `nonres\tripsAirPaxAM[EA,AM,MD,PM,EV].mtx`, trip tables for resequenced (consecutive) origin/destination TAZs for modes [DA,SR2,SR3][TOLL]?
+
+## Highway and Transit Skims
+
+1. [`skims\HwySkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/HwySkims.job)
+    * Summary: Creates roadway skims.
+    * Input:
+      1. [`CTRAMP\scripts\block\hwyparam.block`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyparam.block) for value of time
+      2. `hwy\autoopcost.properties`, auto and truck operating costs
+      3. `hwy\avgload[EA,AM,MD,PM,EV]_taz.net`, the per-timeperiod roadway networks with renumbered nodes
+    * Output:
+      1. `skims\HWYSKM[EA,AM,MD,PM,EV]_taz.tpp`, level of service matrices for autos
+      2. `skims\COM_HWYSKIM[EA,AM,MD,PM,EV]_taz.tpp`, level of service matrices for commercial vehicles
+      3. `logs\HwySkims.debug`, a debug log file for a trace origin/destination
 
