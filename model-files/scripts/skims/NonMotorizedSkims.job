@@ -283,12 +283,12 @@ Wait4Files Files=MTC_NONMOT1.script.end, MTC_NONMOT2.script.end, MTC_NONMOT3.scr
 *Cluster.exe MTC_NONMOT 1-9 close exit
 
 ;header
-*echo ORIG_MAZ_N,DEST_MAZ_N,DEST2_MAZ_N,SP_DISTANCE,FEET > skims\ped_distance_maz_maz_header.csv
-*echo ORIG_MAZ_N,DEST_TAP_N,DEST2_TAP_N,SP_DISTANCE,FEET > skims\ped_distance_maz_tap_header.csv
-*echo ORIG_MAZ_N,DEST_MAZ_N,DEST2_MAZ_N,SP_DISTANCE,FEET > skims\bike_distance_maz_maz_header.csv
-*echo ORIG_MAZ_N,DEST_TAP_N,DEST2_TAP_N,SP_DISTANCE,FEET > skims\bike_distance_maz_tap_header.csv
-*echo ORIG_TAZ_N,DEST_TAZ_N,DEST2_TAZ_N,SP_DISTANCE,FEET > skims\bike_distance_taz_taz_header.csv
-*echo ORIG_TAP_N,DEST_TAP_N,DEST2_TAP_N,SP_DISTANCE,FEET > skims\ped_distance_tap_tap_header.csv
+*echo ORIG_MAZ_N,DEST_MAZ_N,DEST2_MAZ_N,SP_DISTANCE,FEET> skims\ped_distance_maz_maz_header.csv
+*echo ORIG_MAZ_N,DEST_TAP_N,DEST2_TAP_N,SP_DISTANCE,FEET> skims\ped_distance_maz_tap_header.csv
+*echo ORIG_MAZ_N,DEST_MAZ_N,DEST2_MAZ_N,SP_DISTANCE,FEET> skims\bike_distance_maz_maz_header.csv
+*echo ORIG_MAZ_N,DEST_TAP_N,DEST2_TAP_N,SP_DISTANCE,FEET> skims\bike_distance_maz_tap_header.csv
+*echo ORIG_TAZ_N,DEST_TAZ_N,DEST2_TAZ_N,SP_DISTANCE,FEET> skims\bike_distance_taz_taz_header.csv
+*echo ORIG_TAP_N,DEST_TAP_N,DEST2_TAP_N,SP_DISTANCE,FEET> skims\ped_distance_tap_tap_header.csv
 
 ;merge files.  Suffix=-origN indicates that the nodes need renumbering to MAZ/TAZ/TAP
 *copy skims\ped_distance_maz_maz_header.csv+skims\ped_distance_maz_maz_1.csv+skims\ped_distance_maz_maz_2.csv+skims\ped_distance_maz_maz_3.csv+skims\ped_distance_maz_maz_4.csv+skims\ped_distance_maz_maz_5.csv+skims\ped_distance_maz_maz_6.csv+skims\ped_distance_maz_maz_7.csv+skims\ped_distance_maz_maz_8.csv+skims\ped_distance_maz_maz_9.csv skims\ped_distance_maz_maz-origN.csv
