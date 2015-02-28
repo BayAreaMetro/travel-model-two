@@ -168,3 +168,13 @@ title: Modeling Process
       2. `skims\COM_HWYSKIM[EA,AM,MD,PM,EV]_taz.tpp`, level of service matrices for commercial vehicles
       3. `logs\HwySkims.debug`, a debug log file for a trace origin/destination
 
+1. [`skims\BuildTransitNetworks.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/BuildTransitNetworks.job)
+    * Summary: Creates ... something
+    * Input:
+      1. `hwy\mtc_final_network.net`, the roadway network
+      2. `skims\ped_distance_tap_tap.csv`, the pedestrian TAP to TAP skims
+    * Output:
+      1. `hwy\mtc_transit_network_tap_to_node.txt`, ???
+      2. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, ???
+
+1. [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job)
