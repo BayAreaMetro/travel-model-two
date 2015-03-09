@@ -129,8 +129,7 @@
 ;
 ; ----------------------------------------------------------------------------------------------------------------
 
-;read max cost parameters
-read file = %BASE_SCRIPTS%\block\maxCosts.block
+;read hwy parameters (value of time, etc)
 read file = %BASE_SCRIPTS%\block\hwyparam.block
 hwy_block_param = '%BASE_SCRIPTS%\block\hwyparam.block'
 
