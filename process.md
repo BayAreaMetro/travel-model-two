@@ -169,12 +169,14 @@ title: Modeling Process
       3. `logs\HwySkims.debug`, a debug log file for a trace origin/destination
 
 1. [`skims\BuildTransitNetworks.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/BuildTransitNetworks.job)
-    * Summary: Creates ... something
+    * Summary: First, this script runs [`build_walk_transfer_bypass_links.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/build_walk_transfer_bypass_links.py), which creates "pseudo TAP" nodes, which are the TAP nodes offset a small distance, and creates links for pseudo TAPs to stops and vice versa, as well as pseudo TAP to pseudo TAP links.  It then incorporates these new nodes and links (with CNTYPE=`TRWALK`), and adds new link attributes **WALKDIST**, **WALKTIME**, **NTL_MODE**, and **TRANTIME**.  The networks are renumbered so that all TAPS are sequential and first, and **CNTYPE** `MAZ`, `TAZ`, `PED`, `BIKE`, and `EXT` are dropped, and **TRANTIME** is imported from per-time period loaded roadway networks.
+    * **TODO**: **TRANTIME** is based on assumed speeds by **CNTYPE** and those speeds are hardcoded into this script.
     * Input:
       1. `hwy\mtc_final_network.net`, the roadway network
-      2. `skims\ped_distance_tap_tap.csv`, the pedestrian TAP to TAP skims
+      2. `skims\ped_distance_tap_tap-origN.csv`, the pedestrian TAP to TAP skims
+      3. `hwy\avgload[EA,AM,MD,PM,EV].net`, the congested network (**TODO**: Is this generated with real congested times?  Currently, it's not, I don't think.)
     * Output:
-      1. `hwy\mtc_transit_network_tap_to_node.txt`, ???
-      2. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, ???
+      1. `hwy\mtc_transit_network_tap_to_node.txt`, mapping of renumbered nodes.
+      2. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, transit network with renumbered nodes, TAP first pseudo TAP nodes and links.
 
 1. [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job)
