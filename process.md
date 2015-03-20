@@ -179,4 +179,14 @@ title: Modeling Process
       1. `hwy\mtc_transit_network_tap_to_node.txt`, mapping of renumbered nodes.
       2. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, transit network with renumbered nodes, TAP first pseudo TAP nodes and links.
 
+1. [`skims\build_drive_access_skims.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/build_drive_access_skims.py)
+    * Summary: Called by `TransitSkims.job`, below
+    * Input:
+      1. `hwy\mtc_final_network_zone_seq.csv`, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs
+      2. `landuse\maz_data.csv`, [Micro Zonal Data](/travel-model-two/guide/#micro-zonal-data) 
+
 1. [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job)
+    * Summary: 
+    * Input:
+      1. `skims\HWYSKM[EA,AM,MD,PM,EV]_taz.tpp`, level of service matrices for autos
+      2. `hwy\mtc_final_network_with_tolls.net`, the roadway network
