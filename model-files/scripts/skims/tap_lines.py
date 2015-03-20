@@ -48,9 +48,13 @@ with open(network_tap_links_file, 'rb') as csvfile:
 
 print 'reading zone sequence file'
 tapToSeqTap = dict()
+first = True
 with open(zone_seq_file, 'rb') as csvfile:
   tapreader = csv.reader(csvfile, skipinitialspace=True)
   for row in tapreader:
+    if first:
+      first = False
+      continue
     node_id = int(row[0])
     seq_tap_id = int(row[3])
     if seq_tap_id > 0:

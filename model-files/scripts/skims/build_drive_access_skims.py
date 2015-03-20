@@ -56,7 +56,7 @@ id_mode_map = {1:'LOCAL_BUS',
 #maz_to_taz_mapping_file = os.path.join(base_dir,r'hwy\node_maz_taz_lookup.csv')
 maz_to_taz_mapping_file = os.path.join(base_dir,r'landuse\maz_data.csv')
 hwy_parameter_block_file = os.path.join(block_dir,r'hwyParam.block')
-ped_maz_tap_distance_file = os.path.join(base_dir,r'skims\ped_distance_maz_tap.txt')
+ped_maz_tap_distance_file = os.path.join(base_dir,r'skims\ped_distance_maz_tap.csv')
 transit_line_file = os.path.join(base_dir,r'trn\transitLines.lin')
 network_tap_nodes_file = os.path.join(base_dir,r'hwy\mtc_final_network_tap_nodes.csv')
 network_tap_links_file = os.path.join(base_dir,r'hwy\mtc_final_network_tap_links.csv')
@@ -76,7 +76,11 @@ tazseq_mapping = {}
 mazseq_mapping = {}
 tapseq_mapping = {}
 extseq_mapping = {}
+first = True
 for line in open(n_seq_file):
+    if first:
+        first = False
+        continue
     data = map(int,line.strip().split(','))
     if data[1] > 0:
         seq_mapping[data[0]] = data[1]
@@ -110,13 +114,23 @@ print 'reading hwy parameter block data'
 block_data = {}
 for line in open(hwy_parameter_block_file):
     line = line.strip()
-    if len(line) == 0:
+    if len(line) == 0 or line[0]==';':
         continue
     line = line.split('=')
     key = line[0].strip()
     value = float(line[1].split(';')[0].strip())
-    block_data[key] = value
-    
+    block_data[key.upper()] = value
+
+for line in open(r'INPUT/hwy/autoopcost.properties'):
+    line = line.strip()
+    if len(line) == 0 or line[0]=='#':
+        continue
+    line = line.split('=')
+    key = line[0].strip()
+    value = float(line[1].split(';')[0].strip())
+    block_data[key.upper()] = value
+print block_data
+
 global auto_op_cost
 global vot
 global walk_rate
@@ -129,7 +143,11 @@ print 'reading maz->tap skims and building tap->maz/taz lookup'
 #build tap-> (closest) (maz,taz,maz->tap walk_time)
 tapn_tazn_lookup = {}
 tapns = {}
+first = True
 for line in open(ped_maz_tap_distance_file):
+    if first:
+        first = False
+        continue
     line = line.strip().split(',')
     mazn = mazseq_mapping[int(line[0])]
     tapn = tapseq_mapping[int(line[1])]
