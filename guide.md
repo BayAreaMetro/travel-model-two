@@ -396,7 +396,7 @@ Code  | County | TAZs | MAZs |  TAPs | Network Node | HOV Lane Node
 
 The following node attributes are included in the master network.
 
-Field | Description | Data Type
+*Field* | *Description* | *Data Type*
 |:---:|-------------|----------
 **N** | Node Number | Integer (see [Node Numbering](#county-node-numbering-system))
 **X** | X coordinate (feet) | Float
