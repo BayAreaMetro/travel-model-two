@@ -52,7 +52,7 @@ title: Modeling Process
      3. `hwy\mtc_bike_network.net`, the bike network.  This is extracted in a similar fashion as the pedestrian network, but **CNTYPE** = 'BIKE' links are included instead of **CNTYPE** = 'PED'.
 
 1. [`preprocess\tap_to_taz_for_parking.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/tap_to_taz_for_parking.job)
-   * Summary: Finds shortest paths from TAP nodes to TAZ nodes.  Max cost = `@nomax_bike_distance@ + @max_ped_distance@ + @max_ped_distance@`.
+   * Summary: Finds shortest pedestrian distance from TAP nodes to TAZ nodes.  Max cost = `@nomax_bike_distance@ + @max_ped_distance@ + @max_ped_distance@`.
    * Input: `hwy\mtc_ped_network.net`, the pedestrian network
    * Output: `hwy\tap_to_taz_for_parking.txt`, a CSV with columns
       1. origin TAP
@@ -65,12 +65,12 @@ title: Modeling Process
    * Summary: Maps TAPs to the closest TAZ for that TAP (via **FEET**).
    * Input:
       1. `hwy\mtc_final_network_zone_seq.csv`, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs
-      2. `hwy\tap_to_taz_for_parking.txt`, listing the shortest paths from all TAPs to all TAZs
+      2. `hwy\tap_to_taz_for_parking.txt`, listing the shortest pedestrian distance from all TAPs to all TAZs
    * Output: `hwy\tap_data.csv` (**TODO**: name this better?), a CSV with columns
       1. TAP - the tap number (in CTRAMP sequential numbering)
       2. TAP_original - the original tap number (in the CUBE network)
       3. lotid - the lot id; this is the same as TAP right now
-      4. TAP - the taz the tap is associated with (see tap_to_taz_for_parking.job)
+      4. TAZ - the taz the tap is associated with (see tap_to_taz_for_parking.job)
       5. capacity - the capacity of the lot; this is set to 9999 by default, but could be changed after this process has run
 
 1. [`preprocess\SetTolls.JOB`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/SetTolls.JOB)
