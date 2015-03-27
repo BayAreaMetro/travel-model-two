@@ -463,6 +463,7 @@ The transit network is made up of three core components: transit lines, transit 
 Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the [Level of Service Information](#level-of-service-information). 
 
 #### Line Attributes
+
 | *Field* | *Description* | *Data Type* |
 |:-------:|---------------|-------------|
 | **NAME** | RTD CPT_AGENCYID and SCH_ROUTEDESIGNATOR | String |
@@ -477,6 +478,102 @@ Transit trips are assigned between transit access points (TAPs), which represent
 | **HEADWAY[4]** | PM peak headway (3PM to 7PM) | Float |
 | **HEADWAY[5]** | Evening headway (7PM to 3AM) | Float |
 | **N** | List of stops served.  Lines are coded through stops, not TAPs (which are like transit TAZs).  A negative stop is not served. | List of Integers |
+
+#### Transit Modes
+
+The following transit modes are defined based on the RTD database attributes `CPT_AGENCYID`, `CPT_MODE`, and `SCH_ROUTEDESIGNATOR`.  These modes represent combinations of operators and technology. 
+
+| *CPT_AGENCYID* | *AGENCYNAME* | *CPT_MODE* | *SCH_ROUTEDESIGNATOR* | *MODECODE* | *MODEGROUP* |
+|----------------|--------------|------------|-----------------------|------------|-------------|
+| 3D | TriDelta Transit | B | NA | 44 | Local bus |
+| AB | AirBART | B | NA | 40 | Local bus |
+| AC | AC Transit | B | NA | 30 | Local bus |
+| AD | AC Transbay | B | NA | 84 | Express Bus |
+| AM | Amtrak Capitol Cor. & Reg. Svc | T | NA | 131 | Commuter rail |
+| AO | Alameda/Oakland Ferry | F | NA | 100 | Ferry service |
+| AT | Angel Island - Tiburon Ferry | F | NA | 103 | Ferry service |
+| AY | American Canyon Transit | B | NA | 55 | Local bus |
+| BA | BART | T | NA | 120 | Heavy rail |
+| BG | Blue and Gold | F | NA | 103 | Ferry service |
+| BT | Benicia Transit | B | NA | 58 | Local bus |
+| CC | The County Connection | B | 91X | 86 | Express Bus |
+| CC | The County Connection | B | 92X | 86 | Express Bus |
+| CC | The County Connection | B | 93X | 86 | Express Bus |
+| CC | The County Connection | B | 95X | 86 | Express Bus |
+| CC | The County Connection | B | 96X | 86 | Express Bus |
+| CC | The County Connection | B | 97X | 86 | Express Bus |
+| CC | The County Connection | B | 98X | 86 | Express Bus |
+| CC | The County Connection | B | NA | 42 | Local bus |
+| CE | ACE | T | NA | 133 | Commuter rail |
+| CT | Caltrain | T | NA | 130 | Commuter rail |
+| DE | Dumbarton Express | B | NA | 82 | Express Bus |
+| EM | Emery Go-Round | B | NA | 12 | Local bus |
+| FS | Fairfield-Suisun Transit | B | 40 | 92 | Express Bus |
+| FS | Fairfield-Suisun Transit | B | NA | 52 | Local bus |
+| GF | Golden Gate Ferry | F | NA | 101 | Ferry service |
+| GG | Golden Gate Transit | B | 22 | 87 | Express Bus |
+| GG | Golden Gate Transit | B | 23 | 87 | Express Bus |
+| GG | Golden Gate Transit | B | 29 | 87 | Express Bus |
+| GG | Golden Gate Transit | B | 35 | 87 | Express Bus |
+| GG | Golden Gate Transit | B | 36 | 87 | Express Bus |
+| GG | Golden Gate Transit | B | 71 | 88 | Express Bus |
+| GG | Golden Gate Transit | B | NA | 70 | Local bus |
+| HB | Alameda Harbor Bay Ferry | F | NA | 100 | Ferry service |
+| MS | Stanford Marguerite Shuttle | B | NA | 13 | Local bus |
+| PE | Petaluma Transit | B | NA | 68 | Local bus |
+| RV | Rio Vista Delta Breeze | B | NA | 52 | Local bus |
+| SC | Santa Clara VTA | B | 101 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 102 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 103 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 104 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 120 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 121 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 122 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 140 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 168 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 180 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 181 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | 182 | 81 | Express Bus |
+| SC | Santa Clara VTA | B | NA | 28 | Local bus |
+| SC | Santa Clara VTA | LR | NA | 111 | Light rail |
+| SF | San Francisco MUNI | B | NA | 21 | Local bus |
+| SF | San Francisco MUNI | LR | NA | 110 | Light rail |
+| SF | San Francisco MUNI | CC | NA | 20 | Local bus |
+| SM | samTrans | B | KX | 80 | Express Bus |
+| SM | samTrans | B | NA | 24 | Local bus |
+| SO | Sonoma County Transit | B | NA | 63 | Local bus |
+| SR | Santa Rosa CityBus | B | NA | 66 | Local bus |
+| SV | St. Helena VINE | B | NA | 60 | Local bus |
+| UC | Union City Transit | B | NA | 38 | Local bus |
+| VB | Vallejo Baylink Ferry | B | NA | 104 | Ferry service |
+| VB | Vallejo Baylink Ferry | F | NA | 104 | Ferry service |
+| VC | Vacaville City Coach | B | NA | 56 | Local bus |
+| VN | Napa VINE | B | NA | 60 | Local bus |
+| VT | Vallejo Transit | B | 80 | 91 | Express Bus |
+| VT | Vallejo Transit | B | 85 | 91 | Express Bus |
+| VT | Vallejo Transit | B | NA | 49 | Local bus |
+| WC | WestCAT | B | JL | 90 | Express Bus |
+| WC | WestCAT | B | JPX | 90 | Express Bus |
+| WC | WestCAT | B | JR | 90 | Express Bus |
+| WC | WestCAT | B | JX | 90 | Express Bus |
+| WC | WestCAT | B | LYNX | 90 | Express Bus |
+| WC | WestCAT | B | NA | 46 | Local bus |
+| WH | WHEELS | B | NA | 17 | Local bus |
+| YV | Yountville Shuttle | B | NA | 60 | Local bus |
+
+#### Transit Fares
+
+Transit fares are modeled in Cube's Public Transport (PT) program as follows:
+  1. Each transit mode is assigned a fare system in the Cube factor files
+  1. Each fare system is defined in the fares.far fare file
+  1. Each fare system is either FROMTO (fare zone based) or FLAT (initial + transfer in fare)
+  1. For FROMTO fare systems:
+    1. Each stop node is assigned a FAREZONE ID in the master network
+    1. The fare is looked up from the fare matrix (fareMatrix.txt), which is a text file with the following columns: MATRIX ZONE_I ZONE_J VALUE
+    1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file
+  1. For FLAT fare systems:
+    1. The initial fare is defined via the IBOARDFARE in the fares.far file
+    1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file
 
 ### Micro Zonal Data
 
