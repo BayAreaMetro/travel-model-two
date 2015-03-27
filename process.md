@@ -180,10 +180,28 @@ title: Modeling Process
       2. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, transit network with renumbered nodes, TAP first pseudo TAP nodes and links.
 
 1. [`skims\build_drive_access_skims.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/build_drive_access_skims.py)
-    * Summary: Called by `TransitSkims.job`, below
-    * Input:
-      1. `hwy\mtc_final_network_zone_seq.csv`, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs
-      2. `landuse\maz_data.csv`, [Micro Zonal Data](/travel-model-two/guide/#micro-zonal-data) 
+    * Summary: Called by `TransitSkims.job`, below, this script creates drive access links from TAZs to TAPs.  This process involves:
+      1. `trn\transitLines.lin` is read to determine the set of stops that are accessible for each (timeperiod, transit mode (see [network node attributes](http://metropolitantransportationcommission.github.io/travel-model-two/guide/#node-attributes) for transit modes).
+      2. `hwy\mtc_final_network_tap_links.csv` is read to link those stops with their TAPs and find the set of TAPs we want to access for each (timeperiod, mode)
+      3. `skims\ped_distance_maz_tap.csv` is read to find the associate the nearest MAZ to each of those TAPs (along with the walk distance)
+      4. `landuse\maz_data.csv` correspondingly assocates each MAZ with its containing TAZ
+      5. These are all regarded as destination TAP/MAZ/TAZs.  For each timeperiod, each origin TAZ needs a path to a TAP for each mode.  This is found by combining a generalized driving cost from the driving skim, `skims\DA_[EA,AM,MD,PM,EV]_taz_time.csv` along with the MAZ to TAP walk time to find the optimal TAZ to MAZ to TAP walk.
+    * Input: Those files listed above, plus
+      1. `CTRAMP\scripts\block\hwyParam.block` for value of time
+      2. `hwy\autoopcost.properties` for auto operating cost, to create generalized cost for drive
+      3. `hwy\mtc_final_network_zone_seq`, for translating between TAPs, MAZs, TAZs and their renumbered versions
+      4. `hwy\mtc_final_network_tap_nodes.csv` for corresponding TAPs with their transit nodes
+    * Output: `skims\drive_maz_taz_tap.csv` with the following columns:
+      1. ORIG_TAZ   - Origin TAZ (sequential numbering)
+      2. MODE       - The (transit) mode
+      3. TIMEPERIOD - The time period
+      4. DEST_TAP   - Destination TAP (sequential numbering)
+      5. DEST_MAZ   - Destination MAZ (sequential numbering)
+      6. DEST_TAZ   - Destination TAZ (sequential numbering)
+      7. DRIVE_TIME - Drive time from ORIG_TAZ to DEST_TAZ (minutes)
+      8. DRIVE_DIST - Drive distance from ORIG_TAZ to DEST_TAZ (miles)
+      9. DRIVE_BTOLL- Drive bridge toll from ORIG_TAZ to DEST_TAZ (in year 2010 cents)
+      10. WALK_DIST  - Walk access distance from the MAZ centroid to the TAP (feet)
 
 1. [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job)
     * Summary: 
