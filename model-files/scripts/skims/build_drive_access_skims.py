@@ -45,8 +45,7 @@ block_dir = sys.argv[2]
 PERIOD_TOKEN = '@PERIOD@'
 id_mode_map = {1:'LOCAL_BUS',
                2:'EXPRESS_BUS',
-               #3:'FERRY_SERVICE',
-               3:'LIGHT_RAIL',
+               3:'FERRY_SERVICE',
                4:'LIGHT_RAIL',
                5:'HEAVY_RAIL',
                6:'COMMUTER_RAIL'}
@@ -61,7 +60,7 @@ transit_line_file = os.path.join(base_dir,r'trn\transitLines.lin')
 network_tap_nodes_file = os.path.join(base_dir,r'hwy\mtc_final_network_tap_nodes.csv')
 network_tap_links_file = os.path.join(base_dir,r'hwy\mtc_final_network_tap_links.csv')
 skim_taz_taz_time_file = os.path.join(base_dir,r'skims\DA_' + PERIOD_TOKEN + '_taz_time.csv')
-drive_tansit_skim_out_file = os.path.join(base_dir,r'skims\drive_maz_taz_tap.csv')
+drive_tansit_skim_out_file = os.path.join(base_dir,r'skims\original\drive_maz_taz_tap.csv')
 n_seq_file = os.path.join(base_dir,r'hwy\mtc_final_network_zone_seq.csv')
 
 
@@ -134,7 +133,7 @@ print block_data
 global auto_op_cost
 global vot
 global walk_rate
-auto_op_cost = block_data['AUTOOPCOST'] / 5280 #correct for feet
+auto_op_cost = block_data['AUTOOPCOST'] # driving distance is already cents per mile
 vot = 0.6 / block_data['VOT'] #turn into minutes / cents
 walk_rate = 60.0 / 3.0 / 5280.0
 
@@ -188,14 +187,7 @@ for line in open(transit_line_file):
             for n in stop_nodes:
                 stops_by_tod_and_mode[periods[i]][mode][n] = None
 
-                
-id_mode_map = {1:'LOCAL_BUS',
-               2:'EXPRESS_BUS',
-               #3:'FERRY_SERVICE',
-               3:'LIGHT_RAIL',
-               4:'LIGHT_RAIL',
-               5:'HEAVY_RAIL',
-               6:'COMMUTER_RAIL'}
+
 print 'building tap->mode'
 tapn_to_mode = {}
 for line in open(network_tap_nodes_file):
@@ -226,7 +218,7 @@ for line in open(network_tap_links_file):
     for period in periods:
         if not tapn in tod_mode_tapn[period][mode]:
             #check to see if tap is available in this period
-            if stopn in stops_by_tod_and_mode[periods[i]][mode]:
+            if stopn in stops_by_tod_and_mode[period][mode]:
                 if not tapn in tapn_tazn_lookup:
                     isolated_tapns[tapn] = None
                 else:
@@ -246,6 +238,8 @@ def formCost(time,dist,toll):
     return time + vot*(dist * auto_op_cost + toll)
 
 
+f = open(drive_tansit_skim_out_file,'wb')
+f.write(','.join(['FTAZ','MODE','PERIOD','TTAP','TMAZ','TTAZ','DTIME','DDIST','DTOLL','WDIST','TOTAL_MIN']) + os.linesep)
 
 # tod_mode_tapn[period][mode][tapn] = (mazn,tazn,distance)
 drive_access_costs = {}
@@ -288,21 +282,20 @@ for period in periods:
                 if (drive_access_costs[period][mode][tazn] is None) or (drive_access_costs[period][mode][tazn][0] > cost):
                     drive_access_costs[period][mode][tazn] = (cost,tapn)
     
-print 'writing drive access skim results'
-f = open(drive_tansit_skim_out_file,'wb')
-f.write(','.join(['FTAZ','MODE','PERIOD','TTAP','TMAZ','TTAZ','DTIME','DDIST','DTOLL','WDIST']) + os.linesep)
-for period in drive_access_costs:
-    for mode in drive_access_costs[period]:
-        for tazn in drive_access_costs[period][mode]:
+    print 'writing drive access skim results for period ' + period
+    for mode_id in sorted(id_mode_map.keys()):
+        mode = id_mode_map[mode_id]
+        for tazn in sorted(drive_access_costs[period][mode]):
             if not drive_access_costs[period][mode][tazn] is None:
                 tapn = drive_access_costs[period][mode][tazn][1]
                 (tmazn,ttazn,wtime,wdist) = tod_mode_tapn[period][mode][tapn]
                 (fcost,time,dist,toll) = tazn_tazn_skim[tazn][ttazn]
-                f.write(','.join(map(str,[seq_mapping[tazn],mode,period,seq_mapping[tapn],seq_mapping[tmazn],seq_mapping[ttazn],time,dist,toll,wdist])) + os.linesep)
+                gen_cost = drive_access_costs[period][mode][tazn][0]
+                f.write(','.join(map(str,[seq_mapping[tazn],mode,period,seq_mapping[tapn],seq_mapping[tmazn],seq_mapping[ttazn],"%.2f" % time,"%.2f" % dist,"%.2f" % toll,"%.2f" % wdist,"%.2f" % gen_cost])) + os.linesep)
 f.close()
     
 end_time = pytime.time()
-print 'elapsed time in seconds: ' + str((end_time - start_time) / 1000.0)
+print 'elapsed time in minutes: ' + str((end_time - start_time) / 60.0)
 
 
         
