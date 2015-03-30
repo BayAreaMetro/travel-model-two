@@ -1,6 +1,7 @@
-"""
-    build_new_transit_line.py in_line_file out_line_file node_mapping_file
-    
+USAGE=r"""
+
+    Usage: python renumber_transit_line_nodes.py in_line_file out_line_file node_mapping_file
+
     This is a simple script which uses an existing node mapping file to transfer a transit
     line file with a set node sequence to an updated numbering scheme. All line data (including
     stop/pass-through nodes) is retained in the process.
@@ -16,9 +17,9 @@
 """
 import os,sys,math
 
-line_file = sys.argv[1]
-out_line_file = sys.argv[2]
-node_mapping = sys.argv[3]
+line_file       = sys.argv[1]
+out_line_file   = sys.argv[2]
+node_mapping    = sys.argv[3]
 
 #first, read in the node mapping
 node_map = {}
