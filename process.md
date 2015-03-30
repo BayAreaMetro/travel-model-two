@@ -180,7 +180,7 @@ title: Modeling Process
       2. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, transit network with renumbered nodes, TAP first pseudo TAP nodes and links.
 
 1. [`skims\build_drive_access_skims.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/build_drive_access_skims.py)
-    * Summary: Called by `TransitSkims.job`, below, this script creates drive access links from TAZs to TAPs.  This process involves:
+    * Summary: Called by [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job), below, this script creates drive access links from TAZs to TAPs.  This process involves:
       1. `trn\transitLines.lin` is read to determine the set of stops that are accessible for each (timeperiod, transit mode (see [network node attributes](http://metropolitantransportationcommission.github.io/travel-model-two/guide/#node-attributes) for transit modes).
       2. `hwy\mtc_final_network_tap_links.csv` is read to link those stops with their TAPs and find the set of TAPs we want to access for each (timeperiod, mode)
       3. `skims\ped_distance_maz_tap.csv` is read to find the associate the nearest MAZ to each of those TAPs (along with the walk distance)
@@ -202,6 +202,16 @@ title: Modeling Process
       8. DRIVE_DIST - Drive distance from ORIG_TAZ to DEST_TAZ (miles)
       9. DRIVE_BTOLL- Drive bridge toll from ORIG_TAZ to DEST_TAZ (in year 2010 cents)
       10. WALK_DIST  - Walk access distance from the MAZ centroid to the TAP (feet)
+
+1. [`skims\tap_lines.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/tap_lines.py)
+    * Summary: Called by [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job), below, this script outputs a list of TAPs and the lines that serve that TAP
+    * Input:
+      1. `trn\transitLines.lin`, the transit lines
+      2. `hwy\mtc_final_network_tap_links.csv`, the TAP to node connectors
+      3. `hwy\mtc_final_network_zone_seq.csv`, for translating between TAPs, MAZs, TAZs and their renumbered versions
+    * Output: `trn\tapLines.csv` with the following columns:
+      1. TAP: TAP (sequential numbering)
+      2. LINES: space-delimited list of names of lines serving the TAP
 
 1. [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job)
     * Summary: 
