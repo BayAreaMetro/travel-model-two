@@ -214,7 +214,18 @@ title: Modeling Process
       2. LINES: space-delimited list of names of lines serving the TAP
 
 1. [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job)
-    * Summary: 
+    * Summary: In addition to running [`skims\build_drive_access_skims.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/build_drive_access_skims.py), [`skims\tap_lines.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/tap_lines.py), and [`skims\renumber_transit_line_nodes.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/renumber_transit_line_nodes.py), creates 3 sets of transit skims per time period via Citilabs Public Transport Module
     * Input:
-      1. `skims\HWYSKM[EA,AM,MD,PM,EV]_taz.tpp`, level of service matrices for autos
-      2. `hwy\mtc_final_network_with_tolls.net`, the roadway network
+      1. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, transit network
+      2. `trn\transitLines_new_nodes.lin`, the transit lines with nodes renumbered
+      3. `trn\transitSystem.PTS`, the Public Transport System data file defines wait curve definitions
+      4. `trn\transitFactors_SET[1,2,3]_NAME@.fac`, factors for each skim set
+      5. `trn\fareMatrix.txt`, the fare matrix
+      6. `trn\fares.far`, definitions of fare systems
+    * Output:
+      1. `trn\mtc_transit_network_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.net`, transit network (??)
+      2. `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims
+      3. `trn\mtc_transit_lines_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.lin`
+      4. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.ntl`, nontransit legs file
+      5. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rte`, enumerated routes
+      6. `trn\mtc_transit_report_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rpt`, reports from the route-enumeration and route-evaluation processes
