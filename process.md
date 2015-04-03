@@ -225,9 +225,9 @@ title: Modeling Process
     * Output:
       1. `trn\mtc_transit_network_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.net`, transit network (??)
       2. `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims, with matrices
-        a. COMPCOST
-        b. IWAIT
-        c. XWAIT
+        1. COMPCOST
+        1. IWAIT
+        1. XWAIT
       3. `trn\mtc_transit_lines_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.lin`
       4. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.ntl`, nontransit legs file
       5. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rte`, enumerated routes
