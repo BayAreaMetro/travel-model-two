@@ -5,7 +5,7 @@
 ; TP+ script to NA out OD pairs that have the same skim values across skim sets.  One OD pair is retained though.
 ;
 ; Input: (1) Skims for each skim set, currently set to 3
-; Output: (1) Same set of skims but with NA value for skim sets that have the same values by OD pair
+; Output: (1) Same set of skims but with NA value for skim sets that have the same time values by OD pair
 ;
 ; version:  Travel Model Zed
 ; authors:  bts 09/11/14
