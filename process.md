@@ -218,16 +218,28 @@ title: Modeling Process
     * Input:
       1. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, transit network
       2. `trn\transitLines_new_nodes.lin`, the transit lines with nodes renumbered
-      3. `trn\transitSystem.PTS`, the Public Transport System data file defines wait curve definitions
-      4. `trn\transitFactors_SET[1,2,3].fac`, factors for each skim set
-      5. `trn\fareMatrix.txt`, the fare matrix
-      6. `trn\fares.far`, definitions of fare systems
+      3. [`trn\transitSystem.PTS`](https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/trn/transit_support/transitSystem.PTS), the Public Transport System data file defines wait curve definitions
+      4. [`trn\transitFactors_SET[1,2,3].fac`](https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/trn/transit_support/transitFactors_SET1.fac), factors for each skim set
+      5. [`trn\fareMatrix.txt`](https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/trn/transit_fares/fareMatrix.txt), the fare matrix
+      6. [`trn\fares.far`](https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/trn/transit_fares/fares.far), definitions of fare systems
     * Output:
       1. `trn\mtc_transit_network_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.net`, transit network (??)
       2. `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims, with matrices
-         1. COMPCOST
-         1. IWAIT
-         1. XWAIT
+         1. COMPCOST: composite cost, including walk, wait, boarding transfer and in-vehicle time, and fares
+         2. IWAIT: average wait time incurred at the start of the trip for all attractive routes between zones
+         3. XWAIT: average actual wait incurred at the transfer points of all attractive routes between zones
+         4. XPEN: average actual transfer penalty for all attractive routes between zones
+         5. BRDPEN: the boarding penalties associated with transit legs of the trip
+         6. XFERS: the average number of transfers used by the attractive routes between zone pairs 
+         7. FARE: the average fare, in monetary units, for all attractive routes between zones
+         8. XWTIME: transfer walk time
+         9. AEWTIME: acess/egress walk time
+         10. LB_TIME: local bus time
+         11. EB_TIME: express bus time
+         12. LR_TIME: light rail time
+         13. HR_TIME: heavy rail time
+         14. CR_TIME: commuter rail time
+         15. BEST_MODE: the "highest" mode with positive time, where commuter rail=5, heavy rail=4, light rail=3, express bus=2, local bus=1
       3. `trn\mtc_transit_lines_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.lin`
       4. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.ntl`, nontransit legs file
       5. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rte`, enumerated routes
