@@ -219,12 +219,14 @@ title: Modeling Process
       1. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, transit network
       2. `trn\transitLines_new_nodes.lin`, the transit lines with nodes renumbered
       3. `trn\transitSystem.PTS`, the Public Transport System data file defines wait curve definitions
-      4. `trn\transitFactors_SET[1,2,3]_NAME@.fac`, factors for each skim set
+      4. `trn\transitFactors_SET[1,2,3].fac`, factors for each skim set
       5. `trn\fareMatrix.txt`, the fare matrix
       6. `trn\fares.far`, definitions of fare systems
     * Output:
       1. `trn\mtc_transit_network_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.net`, transit network (??)
-      2. `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims
+      2. `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims, with matrices
+         a. COMPCOST
+         b. IWAIT
       3. `trn\mtc_transit_lines_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.lin`
       4. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.ntl`, nontransit legs file
       5. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rte`, enumerated routes
