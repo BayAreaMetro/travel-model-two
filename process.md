@@ -244,3 +244,8 @@ title: Modeling Process
       4. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.ntl`, nontransit legs file
       5. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rte`, enumerated routes
       6. `trn\mtc_transit_report_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rpt`, reports from the route-enumeration and route-evaluation processes
+
+1. [`skims\SkimSetsAdjustment.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/SkimSetsAdjustment.job)
+    * Summary: Reads the 3 transit skim sets and if any set times are the same as the times for another set for an origin/destination pair, the second set's values are updated to NA value (0).
+    * Input: `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims
+    * Output: `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims with some O/Ds removed if they're duplicates of an earlier set
