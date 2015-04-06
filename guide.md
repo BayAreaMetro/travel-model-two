@@ -652,11 +652,11 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 
 | *Field* | *Description* |
 |:-------:|---------------|
-| TAZ_ORIGINAL | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  |
-| AVGTTS | Average travel time savings for transponder ownership model |
-| DIST | Distance for transponder ownership model |
-| PCTDETOUR | Percent detour for transponder ownership model |
-| TERMINALTIME | Terminal time |
+| **TAZ_ORIGINAL** | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  |
+| **AVGTTS** | Average travel time savings for transponder ownership model |
+| **DIST** | Distance for transponder ownership model |
+| **PCTDETOUR** | Percent detour for transponder ownership model |
+| **TERMINALTIME** | Terminal time |
 
 ### Truck Distribution
 
