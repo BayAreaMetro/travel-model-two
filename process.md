@@ -11,6 +11,7 @@ title: Modeling Process
   2. [Shortest Path Skims](#shortest-path-skims)
   3. [Build Airport Trip Matrices](#build-airport-trip-matrices)
   4. [Highway and Transit Skims](#highway-and-transit-skims)
+  5. [Core](#core)
 
 # Modeling Process
 
@@ -249,3 +250,33 @@ title: Modeling Process
     * Summary: Reads the 3 transit skim sets and if any set times are the same as the times for another set for an origin/destination pair, the second set's values are updated to NA value (0).
     * Input: `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims
     * Output: `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims with some O/Ds removed if they're duplicates of an earlier set
+
+## Core
+
+* Summary:
+* Input:
+    1. [`mtctm2.properties`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties), the configuration for the core
+* Output:
+    1. `ctramp_output\wsLocResults.csv`, work and school location choice results
+    2. ...
+
+1. [`assign\merge_demand_matrices.s`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/merge_demand_matrices.s)
+    * Summary: Consolidates the output matrix files from the core into TAZ- and TAP-level demand matrices.
+    * Input:
+      1. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SOV_GP_[EA,AM,MD,PM,EV].mat`, auto single occupancy vehicle general purpose lane TAZ-to-TAZ demand matrix
+      2. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SOV_PAY_[EA,AM,MD,PM,EV].mat`, auto single occupancy vehicle pay lane TAZ-to-TAZ demand matrix
+      3. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR2_GP_[EA,AM,MD,PM,EV].mat`, auto shared ride 2 general purpose lane TAZ-to-TAZ demand matrix
+      4. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR2_HOV_[EA,AM,MD,PM,EV].mat`, auto shared ride 2 HOV lane TAZ-to-TAZ demand matrix
+      5. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR2_PAY_[EA,AM,MD,PM,EV].mat`, auto shared ride 2 pay lane TAZ-to-TAZ demand matrix
+      6. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR3_GP_[EA,AM,MD,PM,EV].mat`, auto shared ride 3+ general purpose lane TAZ-to-TAZ demand matrix
+      7. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR3_HOV_[EA,AM,MD,PM,EV].mat`, auto shared ride 3+ HOV lane TAZ-to-TAZ demand matrix
+      8. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR3_PAY_[EA,AM,MD,PM,EV].mat`, auto shared ride 3+ pay lane TAZ-to-TAZ demand matrix
+      9. `ctramp_output\nonmotor_[EA,AM,MD,PM,EV]_BIKE_[EA,AM,MD,PM,EV].mat`, bike TAZ-to-TAZ demand matrix
+      10. `ctramp_output\nonmotor_[EA,AM,MD,PM,EV]_WALK_[EA,AM,MD,PM,EV].mat`, walk TAZ-to-TAZ demand matrix
+      11. `ctramp_output\other_[EA,AM,MD,PM,EV]_SCHLBUS_[EA,AM,MD,PM,EV].mat`, school bus TAZ-to-TAZ demand matrix
+      12. `ctramp_output\transit_[EA,AM,MD,PM,EV]_KNR_SET_set[1,2,3]_[EA,AM,MD,PM,EV].mat`, kiss-and-ride TAP-to-TAP transit demand matrix sets
+      13. `ctramp_output\transit_[EA,AM,MD,PM,EV]_PNR_SET_set[1,2,3]_[EA,AM,MD,PM,EV].mat`, park-and-ride TAP-to-TAP transit demand matrix sets
+      14. `ctramp_output\transit_[EA,AM,MD,PM,EV]_WLK_SET_set[1,2,3]_[EA,AM,MD,PM,EV].mat`, walk to transit TAP-to-TAP transit demand matrix sets
+    * Output:
+      1. `ctramp_output\TAZ_Demand_[EA,AM,MD,PM,EV].mat`, TAZ-to-TAZ demand matrices for the time period with matrices 1-11 direct from input files.
+      2. `ctramp_output\TAP_Demand_set[1,2,3]_[EA,AM,MD,PM,EV].mat`, TAP-to-TAP demand matrices for the time period and transit set
