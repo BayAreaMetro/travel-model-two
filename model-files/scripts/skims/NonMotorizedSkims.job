@@ -262,7 +262,7 @@ LOOP PROC_COUNT=1,9
             *"%TPP_PATH%\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
             
             ;clean-up
-            *del @SFILE@_@SKIM_COUNTY@.s
+            ; *del @SFILE@_@SKIM_COUNTY@.s
         ENDLOOP  ; SKIM_TYPE loop
         
         *del hwy\mtc_ped_network_@PROC_COUNT@.net
