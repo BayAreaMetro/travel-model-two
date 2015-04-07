@@ -1,4 +1,4 @@
-"""
+USAGE=r"""
   Usage: python tap_data_builder.py base_dir 
 
   This script builds the tap csv data file which maps all TAPs to the closest TAZ for that TAP.
@@ -19,7 +19,7 @@
         TAP - the tap number (in CTRAMP sequential numbering)
         TAP_original - the original tap number (in the CUBE network)
         lotid - the lot id; this is the same as tap
-        TAP - the taz the tap is associated with (see tap_to_taz_for_parking.job)
+        TAZ - the taz the tap is associated with (see tap_to_taz_for_parking.job)
         capacity - the capacity of the lot; this is set to 9999 by default, but could be changed after 
                    this process has run
   
