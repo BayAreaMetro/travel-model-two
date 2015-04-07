@@ -120,7 +120,10 @@ loop period = 1,5
       
          ; read in the highway assignment parameter block
          read file = ctramp\scripts\block\hwyparam.block
-       
+
+         ; read in the auto operating cost
+         read file = hwy\autoopcost.properties, '#'=';'   ; convert properties comment to CUBE comment
+
          ; set universal variables
          _kIvtt = @token_model_coefficient_in_vehicle@
          _kCost = @token_model_coefficient_cost@
