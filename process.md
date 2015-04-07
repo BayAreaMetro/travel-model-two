@@ -12,6 +12,7 @@ title: Modeling Process
   3. [Build Airport Trip Matrices](#build-airport-trip-matrices)
   4. [Highway and Transit Skims](#highway-and-transit-skims)
   5. [Core](#core)
+  6. [Non Residential](#non-residential)
 
 # Modeling Process
 
@@ -280,3 +281,13 @@ title: Modeling Process
     * Output:
       1. `ctramp_output\TAZ_Demand_[EA,AM,MD,PM,EV].mat`, TAZ-to-TAZ demand matrices for the time period with matrices 1-11 direct from input files.
       2. `ctramp_output\TAP_Demand_set[1,2,3]_[EA,AM,MD,PM,EV].mat`, TAP-to-TAP demand matrices for the time period and transit set
+
+## Non Residential
+
+1. [`nonres\IxForecasts.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/nonres/IxForecasts.job)
+    * Summary: Creates Internal/External demand matrices for the model year.  Growth rates are embedded in the script.
+    * Input:
+      1. [`nonres\ixDaily2006x4.may2208.new.mat`](https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/nonres/IXDaily2006x4.may2208.new.mat), base matrix from Census journey-to-work data for 2006
+      2. %MODEL_YEAR% in the environment
+    * Output
+      1. `nonres\ixDaily[%MODEL_YEAR%].tpp`, the internal/external demand matrices.  Tables are: *ix_daily_da*, *ix_daily_sr2*, *ix_daily_sr3*, *ix_daily_total*
