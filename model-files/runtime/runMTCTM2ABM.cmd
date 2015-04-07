@@ -5,12 +5,12 @@ set OLDJAVAPATH=%JAVA_PATH%
 rem ### Set the directory of the jdk version desired for this model run
 rem ### Note that a jdk is required; a jre is not sufficient, as the UEC class generates
 rem ### and compiles code during the model run, and uses javac in the jdk to do this.
-set JAVA_PATH=%3
+set JAVA_PATH=%~3
 
 rem ### set sample rate from command line argument
 SET sampleRate=%1
 SET iteration=%2
-set PROJECT_DIRECTORY=%CD:\=/%
+set PROJECT_DIRECTORY=%CD%
 
 rem ### Name the project directory.  This directory will hava data and runtime subdirectories
 set RUNTIME=%PROJECT_DIRECTORY%
@@ -31,6 +31,7 @@ set OLDPATH=%PATH%
 rem ### Change the PATH environment variable so that JAVA_HOME is listed first in the PATH.
 rem ### Doing this ensures that the JAVA_HOME path we defined above is the on that gets used in case other java paths are in PATH.
 set PATH=%JAVA_PATH%\bin;%OLDPATH%
+set PROJECT_DIRECTORY=%CD:\=/%
 
 rem ### Run ABM LOCAL 
 java -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration %iteration% -sampleRate %sampleRate% -sampleSeed 0
