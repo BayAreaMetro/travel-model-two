@@ -293,7 +293,7 @@ title: Modeling Process
       1. `nonres\ixDaily[%MODEL_YEAR%].tpp`, the internal/external daily P/A matrices.  Tables are: *ix_daily_da*, *ix_daily_sr2*, *ix_daily_sr3*, *ix_daily_total*
 
 1. [`nonres\IxTimeOfDay.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/nonres/IxTimeOfDay.job)
-    * Summary: Converts Internal/External daily production/attraction matrices to origin/destination trip matrices by time period.
+    * Summary: Converts Internal/External daily production/attraction matrices to origin/destination trip matrices by time period.  Time period factors are embedded in the script.
     * Input: `nonres\ixDaily[%MODEL_YEAR%].tpp`, the internal/external daily P/A matrices
     * Output: `nonres\tripsIx[EA,AM,MD,PM,EV]x.tpp`, the internal/external trips for the given time period.  Tables are *DA*, *S2*, *S3*
 
