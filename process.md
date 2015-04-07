@@ -285,9 +285,15 @@ title: Modeling Process
 ## Non Residential
 
 1. [`nonres\IxForecasts.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/nonres/IxForecasts.job)
-    * Summary: Creates Internal/External demand matrices for the model year.  Growth rates are embedded in the script.
+    * Summary: Creates Internal/External production/attraction matrices for the model year.  Growth rates are embedded in the script.
     * Input:
-      1. [`nonres\ixDaily2006x4.may2208.new.mat`](https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/nonres/IXDaily2006x4.may2208.new.mat), base matrix from Census journey-to-work data for 2006
+      1. [`nonres\ixDaily2006x4.may2208.new.mat`](https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/nonres/IXDaily2006x4.may2208.new.mat), base production/attraction matrix from Census journey-to-work data for 2006
       2. %MODEL_YEAR% in the environment
     * Output
-      1. `nonres\ixDaily[%MODEL_YEAR%].tpp`, the internal/external demand matrices.  Tables are: *ix_daily_da*, *ix_daily_sr2*, *ix_daily_sr3*, *ix_daily_total*
+      1. `nonres\ixDaily[%MODEL_YEAR%].tpp`, the internal/external daily P/A matrices.  Tables are: *ix_daily_da*, *ix_daily_sr2*, *ix_daily_sr3*, *ix_daily_total*
+
+1. [`nonres\IxTimeOfDay.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/nonres/IxTimeOfDay.job)
+    * Summary: Converts Internal/External daily production/attraction matrices to origin/destination trip matrices by time period.
+    * Input: `nonres\ixDaily[%MODEL_YEAR%].tpp`, the internal/external daily P/A matrices
+    * Output: `nonres\tripsIx[EA,AM,MD,PM,EV]x.tpp`, the internal/external trips for the given time period.  Tables are *DA*, *S2*, *S3*
+
