@@ -298,7 +298,7 @@ title: Modeling Process
     * Output: `nonres\tripsIx[EA,AM,MD,PM,EV]x.tpp`, the internal/external trips for the given time period.  Tables are *DA*, *S2*, *S3*
 
 1. [`nonres\IxTollChoice.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/nonres/IxTollChoice.job)
-    * Summary: Applies a binomial choice model to drive alone, shared ride 2 and shared ride 3+ internal/external travel.
+    * Summary: Applies a binomial choice model to drive alone, shared ride 2 and shared ride 3+ internal/external travel to determine of the traveler chooses the tolled path (if available) or non-tolled path.
     * Input: 
       1. `nonres\tripsIx[EA,AM,MD,PM,EV]x.tpp`, the internal/external trips for the given time period, with no distinction between toll/notoll trips
       2. `skims\HWYSKM[EA,AM,MD,PM,EV]_taz.tpp`, level of service matrices for autos
