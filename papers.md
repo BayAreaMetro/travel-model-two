@@ -27,3 +27,4 @@ title: Papers
 * [Initial Transit Path Parameter Assessment](https://mtcdrive.box.com/travel-model-two-first-paths)
 * [Round One Calibration Mode Choice Targets](https://mtcdrive.box.com/travel-model-two-first-mc)  
 * [Second Request for proposals](https://mtcdrive.box.com/travel-model-two-second-rfp)
+* [Second Contract Award](https://mtc.legistar.com/View.ashx?M=F&ID=4284954&GUID=2784E74D-11BE-4D80-B0AE-917036D74F84)
