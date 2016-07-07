@@ -1,4 +1,4 @@
-@ECHO ON
+@ECHO OFF
 
 rem ### First save the JAVA_PATH environment variable so it s value can be restored at the end.
 set OLDJAVAPATH=%JAVA_PATH%
@@ -6,8 +6,7 @@ set OLDJAVAPATH=%JAVA_PATH%
 rem ### Set the directory of the jdk version desired for this model run
 rem ### Note that a jdk is required; a jre is not sufficient, as the UEC class generates
 rem ### and compiles code during the model run, and uses javac in the jdk to do this.
-rem ### The ~ strips the quotes.
-set JAVA_PATH=%~1
+set JAVA_PATH=%1
 set HOST_IP_ADDRESS=%2
 set HOST_PORT=1117
 CD %~dp0\..\..
@@ -41,7 +40,7 @@ set PATH=%JAVA_PATH%\bin;%OLDPATH%
 
 rem ### Change current directory to RUNTIME, and issue the java command to run the model.
 ECHO ***calling: java -server -Xmx35000m -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_hh.xml com.pb.mtctm2.abm.application.SandagHouseholdDataManager2 -hostname %HOST_IP_ADDRESS% -port %HOST_PORT%
-START "HouseholdDataManager" "%JAVA_PATH%\bin\java" -server -Xmx35000m -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_hh.xml com.pb.mtctm2.abm.application.SandagHouseholdDataManager2 -hostname %HOST_IP_ADDRESS% -port %HOST_PORT%
+START "" %JAVA_PATH%\bin\java -server -Xmx35000m -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_hh.xml com.pb.mtctm2.abm.application.SandagHouseholdDataManager2 -hostname %HOST_IP_ADDRESS% -port %HOST_PORT%
 rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1044,server=y,suspend=y -server -Xms40000m -Xmx40000m -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_hh.xml com.pb.mtctm2.abm.application.SandagHouseholdDataManager2 -hostname %HOST_IP_ADDRESS% -port %HOST_PORT%
  
 rem ### restore saved environment variable values, and change back to original current directory

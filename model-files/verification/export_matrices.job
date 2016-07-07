@@ -1,0 +1,82 @@
+
+
+*Cluster.exe MTC_HWYSKIM 1-5 start exit
+
+loop period = 1,5
+   
+   if (period = 1)   
+      token_period = 'EA'
+   elseif (period = 2)   
+      token_period = 'AM'
+   elseif (period = 3)   
+      token_period = 'MD'
+   elseif (period = 4)   
+      token_period = 'PM'
+   elseif (period = 5)   
+      token_period = 'EV'
+   endif
+
+   ; do each time of day as a separate process
+   DistributeMultistep processid = 'MTC_HWYSKIM', processNum = @period@
+       
+        RUN PGM=MATRIX 
+            FILEI MATI = skims\HWYSKM@token_period@_taz.tpp
+            FILEO MATO = documentation\skim_da_@token_period@_taz.csv FORMAT=TXT DELIMITER=',' MO=1-2 PATTERN=IJM:V NAME=TIMEDA,DISTDA
+            MW[1] = MI.1.TIMEDA
+            MW[2] = MI.1.DISTDA
+        ENDRUN
+       
+        RUN PGM=MATRIX 
+            FILEI MATI = skims\COM_HWYSKIM@token_period@_taz.tpp
+            FILEO MATO = documentation\skim_com_@token_period@_taz.csv FORMAT=TXT DELIMITER=',' MO=1-4 PATTERN=IJM:V NAME=TIMEMED,DISTMED,TIMELRG,DISTLRG
+            MW[1] = MI.1.TIMEMED
+            MW[2] = MI.1.DISTMED
+            MW[3] = MI.1.TIMELRG
+            MW[4] = MI.1.DISTLRG
+        ENDRUN
+       
+        RUN PGM=MATRIX 
+            FILEI MATI = nonres\tripsAirPax@token_period@.mtx
+            FILEO MATO = documentation\air_@token_period@_taz.csv FORMAT=TXT DELIMITER=',' MO=1-6 PATTERN=IJM:V NAME=DA,SR2,SR3,DATOLL,SR2TOLL,SR3TOLL
+            MW[1] = MI.1.DA
+            MW[2] = MI.1.SR2
+            MW[3] = MI.1.SR3
+            MW[4] = MI.1.DATOLL
+            MW[5] = MI.1.SR2TOLL
+            MW[6] = MI.1.SR3TOLL
+        ENDRUN
+
+       
+        RUN PGM=MATRIX 
+            FILEI MATI = nonres\tripsIX@token_period@.tpp
+            FILEO MATO = documentation\ix_@token_period@_taz.csv FORMAT=TXT DELIMITER=',' MO=1-6 PATTERN=IJM:V NAME=DA,SR2,SR3,DATOLL,SR2TOLL,SR3TOLL
+            MW[1] = MI.1.DA
+            MW[2] = MI.1.SR2
+            MW[3] = MI.1.SR3
+            MW[4] = MI.1.DATOLL
+            MW[5] = MI.1.SR2TOLL
+            MW[6] = MI.1.SR3TOLL
+        ENDRUN
+
+       
+        RUN PGM=MATRIX 
+            FILEI MATI = nonres\tripstrk@token_period@.tpp
+            FILEO MATO = documentation\trucks_@token_period@_taz.csv FORMAT=TXT DELIMITER=',' MO=1-4 PATTERN=IJM:V NAME=VSML,SML,MED,LRG
+            MW[1] = MI.1.VSTRUCK + MI.1.VSTRUCKTOLL
+            MW[2] = MI.1.STRUCK + MI.1.STRUCKTOLL
+            MW[3] = MI.1.MTRUCK + MI.1.MTRUCKTOLL
+            MW[4] = MI.1.CTRUCK + MI.1.CTRUCKTOLL
+        ENDRUN
+        
+    EndDistributeMultistep
+ENDLOOP
+
+Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM3.script.end, MTC_HWYSKIM4.script.end, MTC_HWYSKIM5.script.end, 
+           printfiles = merge, deldistribfiles = t, CheckReturnCode = t
+
+*Cluster.exe MTC_HWYSKIM 1-5 close exit
+;RUN PGM=MATRIX 
+;    FILEI MATI = nonres\ixDaily2005.tpp
+;    FILEO MATO = documentation\air_2005_taz.csv FORMAT=TXT DELIMITER=',' MO=1 PATTERN=IJM:V NAME=ix_daily_total
+;    MW[1] = MI.1.ix_daily_total
+;ENDRUN

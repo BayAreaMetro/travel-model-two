@@ -1,0 +1,5 @@
+RUN PGM=NETWORK
+    PAR  NODES=10000000
+    NETI = hwy\mtc_final_network.net
+    LINKO = documentation\mtc_final_network_.csv FORMAT=SDF
+ENDRUN

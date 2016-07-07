@@ -162,23 +162,13 @@ ROBOCOPY CTRAMP %MATRIX_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
 
 :: Build sequential numberings
 runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
-IF ERRORLEVEL 2 goto done
-
-:: Create all necessary input files based on updated sequential zone numbering
-python %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
-IF ERRORLEVEL 1 goto done
 
 :: Translate the roadway network into a non-motorized network
 runtpp %BASE_SCRIPTS%\preprocess\CreateNonMotorizedNetwork.job
 if ERRORLEVEL 2 goto done
 
-:: Find all the TAP-to-TAZ shortest paths
+:: Create the tap data
 runtpp %BASE_SCRIPTS%\preprocess\tap_to_taz_for_parking.job
-if ERRORLEVEL 2 goto done
-
-:: Map the TAP to the closest TAZ
-python %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
-IF ERRORLEVEL 1 goto done
 
 :: Set the prices in the roadway network
 runtpp %BASE_SCRIPTS%\preprocess\SetTolls.job
@@ -202,11 +192,11 @@ if ERRORLEVEL 2 goto done
 
 :: ------------------------------------------------------------------------------------------------------
 ::
-:: Step 4:  Build shortest-path level-of-service matrices
+:: Step 4:  Build non-motorized level-of-service matrices
 ::
 :: ------------------------------------------------------------------------------------------------------
 
-:: Shortest Path Skims
+:: Non-Motorized Skims
 
 :: Build the skim tables
 runtpp %BASE_SCRIPTS%\skims\NonMotorizedSkims.job

@@ -143,9 +143,9 @@ run pgm = matrix
      ;   - CA 1, Sonoma/Mendocino
      if (i == 4689 || j == 4689)
      
-        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4689@,@token_year@ - 2005)
-        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4689@,@token_year@ - 2005)
-        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4689@,@token_year@ - 2005)
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4698@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4698@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4698@,@token_year@ - 2005)
      
      endif
      
