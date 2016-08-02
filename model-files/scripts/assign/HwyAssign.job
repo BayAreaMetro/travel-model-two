@@ -84,7 +84,7 @@ free_flow_block_param = '%BASE_SCRIPTS%\block\FreeFlowSpeed.block'
 vdf_block_param = '%BASE_SCRIPTS%\block\SpeedFlowCurve.block'
 
 ;start cluster nodes
-*Cluster.exe MTC_HWYASN 1-25 start exit
+*Cluster.exe MTC_HWYASN 1-24 start exit
 
 
 ; do, more or less, the same skim procedure for each of the five time periods
@@ -93,51 +93,52 @@ loop period = 1,5
     ; a two letter token is used for each time period
     if (period = 1)   
       token_period = 'EA'   
-      intrastep_range = '6-9'
-      ;switch to use time penalties for transfering to hov lane
+      intrastep_range = '1-3'
+      ;switch to use time penalties for transferring to hov lane
       ;token_hov_xfer_pen = '0'
       ;hours for the assignment period
       token_capfac = 'parameters capfac = 3'
       ;convergence/stopping criteria
-      token_relativegap = 'parameters relativegap = 0.003'
-      token_maxiters = 'parameters maxiters = 300'
+      token_relativegap = 'parameters relativegap = 0.0005'
+      token_maxiters = 'parameters maxiters = 100'
     elseif (period = 2)   
       token_period = 'AM'    
-      intrastep_range = '10-13'
+      intrastep_range = '4-9'
       ;token_hov_xfer_pen = 'li.HOVXPEN'
       token_capfac = 'parameters capfac = 4'
       token_relativegap = 'parameters relativegap = 0.0005'
-      token_maxiters = 'parameters maxiters = 300'
+      token_maxiters = 'parameters maxiters = 100'
     elseif (period = 3)   
       token_period = 'MD'    
-      intrastep_range = '14-17'
+      intrastep_range = '10-15'
       ;token_hov_xfer_pen = '0'
       token_capfac = 'parameters capfac = 5'
       token_relativegap = 'parameters relativegap = 0.0005'
-      token_maxiters = 'parameters maxiters = 300'
+      token_maxiters = 'parameters maxiters = 100'
     elseif (period = 4)   
       token_period = 'PM'
-      intrastep_range = '18-21'
+      intrastep_range = '16-21'
       ;token_hov_xfer_pen = 'li.HOVXPEN'
       token_capfac = 'parameters capfac = 4'
       token_relativegap = 'parameters relativegap = 0.0005'
-      token_maxiters = 'parameters maxiters = 300'
+      token_maxiters = 'parameters maxiters = 100'
     elseif (period = 5)   
       token_period = 'EV'
-      intrastep_range = '22-25'
+      intrastep_range = '22-24'
       ;token_hov_xfer_pen = '0'
       token_capfac = 'parameters capfac = 8'
       token_relativegap = 'parameters relativegap = 0.0005'
-      token_maxiters = 'parameters maxiters = 300'
+      token_maxiters = 'parameters maxiters = 100'
     endif
-    ;TODO: this hard codes the max highway iterations
-    ;token_maxiters = 'parameters maxiters = 10'
-    token_maxiters = 'parameters maxiters = 3'
     
 
     ; do each time of day as a separate process
     DistributeMultistep processid = 'MTC_HWYASN', processNum = @period@
     
+	; comment out these steps when trimming the network manually prior to assignment
+	; this is just a temporary step, network should be whole from beginning of process
+    
+	/*
     ;in case mazmazvol already exist
     run pgm = network
         PAR NODES=10000000
@@ -148,7 +149,7 @@ loop period = 1,5
             MAZMAZVOL = 0.0
         ENDPHASE
     endrun
-    
+    	
     ;transfer maz->maz volumes to new zone system
     *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\assign\transfer_maz_maz_vols.py . @token_period@
     
@@ -167,8 +168,9 @@ loop period = 1,5
     *DEL hwy\avgload@token_period@_taz.net
     *DEL hwy\avgload@token_period@_taz_temp1.net
     *REN hwy\avgload@token_period@_taz_temp2.net hwy\avgload@token_period@_taz.net
-
-    run pgm = highway
+    */   
+    
+     run pgm = highway
         DistributeIntrastep processid = 'MTC_HWYASN', processlist = @intrastep_range@ saveprn = f
     
         ; time-specific input highway network
@@ -189,7 +191,7 @@ loop period = 1,5
         ; loaded time-specific highway network
         neto = hwy\load@token_period@.net
 
-        ; set the assignment paramters -- equilibrium assignment, bi-conjugate
+        ; set the assignment parameters -- equilibrium assignment, bi-conjugate
         parameters combine = equi, enhance = 2            
 
         ; set the assignment parameters -- internal zones + ?? external zones
@@ -353,15 +355,16 @@ loop period = 1,5
       endphase
       
    endrun      
-  
+   
    EndDistributeMultistep
-  
+
+ 
 endloop ; time period loop
 
 Wait4Files files = MTC_HWYASN1.script.end, MTC_HWYASN2.script.end, MTC_HWYASN3.script.end, MTC_HWYASN4.script.end, MTC_HWYASN5.script.end, 
           PrintFiles = merge, DelDistribFiles = t, CheckReturnCode = t
 
-*Cluster.exe MTC_HWYASN 1-25 close exit
+*Cluster.exe MTC_HWYASN 1-24 close exit
 
 
 

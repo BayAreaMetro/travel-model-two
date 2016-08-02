@@ -5,7 +5,7 @@
 ; TP+ script to compute the weighted average of roadway volumes for successive iterations of the entire model
 ; stream.  The iteration weights are set in the primary model stream file, RunModel.  Here, we average the volumes
 ; from the current iteration with the averaged volumes for ALL previous iterations.  This method of successive
-; avarages "forces" model convergence.
+; averages "forces" model convergence.
 ;
 ; The script performs the volume averaging for five time-period-specific assignments. Assignments are performed 
 ; for each of the following time periods: (a) early AM, 3 am to 6 am; (b) AM peak period, 6 am to 10 am; (c) midday,
@@ -24,25 +24,29 @@
 ;      (9) very small, small, and medium trucks, value toll eligible (smT)
 ;     (10) large trucks, value toll eligible (hvT)
 ;
+; The network was preloaded with MAZ-to-MAZ traffic volumes, which need to be averaged and included in all volume and speed
+; computations in the same way as the class-specific volumes
+
 ; Input:  (1) A highway network for each time period with the following fields: (a) VOL, which is the total a-to-b link
 ;         volume, in units of equivalent passenger vehicles; (b) VC, which is the volume to capacity ratio; (c) CTIM, which 
 ;         is the congested travel time in minutes; (d) CSPD, which is the congested travel speed in miles per hour;
-;         (e) VDT, which is the vehicle-distance traveled, in miles; (f) VHT, which is the vehicle hours traveled,
+;         (e) VDT, which is the vehicle-distance travelled, in miles; (f) VHT, which is the vehicle hours travelled,
 ;         in hours; (g) VOL_XXY, which is the a-to-b link volume for vehicles in class XX (see codes in above list), 
 ;         and Y is "T" for the value-toll-eligible classes and blank for the non-value-toll-eligible classes; (h) VOLT,
 ;         which is the total b-to-a link volume, in units of equivalent passenger vehicles; (i) VOLT_XXY, which is the 
-;         total b-to-a link volume for two-way links only and XX and Y have the same meaning as in (g).
+;         total b-to-a link volume for two-way links only and XX and Y have the same meaning as in (g); 
+;        (j) MAZMAZVOL, which is the preloaded volume
 ;
 ; Output: (1) Five highway networks with the averaged volume, one for each time period, stored in the same variables
 ;          as the input variables. 
 ;                                     
 ; Notes:  (1) Overhead gains are too small to distribute via Cluster. 
 ;
-; See also: (1) HwyAssign.job, which peforms the highway assignment;
-;	    (2) CalculateSpeeds.job, which computes speeds from this average volumes. 
+; See also: (1) HwyAssign.job, which performs the highway assignment;
+;	        (2) CalculateSpeeds.job, which computes speeds from this average volumes. 
 ;
 ; version:  Travel Model Zed
-; authors:  dto (2010 08 10); gde (2009); crf(2014 03)
+; authors:  dto (2010 08 10); gde (2009); crf(2014 03); rpm(2016 03)
 ;
 ;
 ; ----------------------------------------------------------------------------------------------------------------
@@ -98,6 +102,7 @@ loop period = 1, 5
           cspd_iter%ITERATION%     = li.2.cspd_1
           vdt_iter%ITERATION%      = li.2.vdt_1
           vht_iter%ITERATION%      = li.2.vht_1
+          vol_maz_iter%ITERATION%  = li.2.mazmazvol
           vol_da_iter%ITERATION%   = li.2.v1_1 
           vol_s2_iter%ITERATION%   = li.2.v2_1 
           vol_s3_iter%ITERATION%   = li.2.v3_1 
@@ -122,7 +127,10 @@ loop period = 1, 5
 
           ; average the volumes
           v_1   = @token_previous_weight@ * li.1.vol  + @token_current_weight@ * li.2.v_1
-          vc_1  = @token_previous_weight@ * li.1.vc   + @token_current_weight@ * li.2.vc_1 
+          vc_1  = @token_previous_weight@ * li.1.vc   + @token_current_weight@ * li.2.vc_1
+
+          v_maz = @token_previous_weight@ * li.1.mazmazvol   + @token_current_weight@ * li.2.mazmazvol
+          ;v_maz = @token_current_weight@ * li.2.mazmazvol
                                 
           v1_1  = @token_previous_weight@ * li.1.vol_da   + @token_current_weight@ * li.2.v1_1 
           v2_1  = @token_previous_weight@ * li.1.vol_s2   + @token_current_weight@ * li.2.v2_1 
@@ -149,7 +157,9 @@ loop period = 1, 5
           
           ; update the renamed volume variables, which are just along for the ride
           vol      = V_1   
-          vc       = VC_1  
+          vc       = VC_1
+
+          vol_maz  = V_MAZ		  
           
           vol_da   = V1_1  
           vol_s2   = V2_1  

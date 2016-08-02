@@ -1,124 +1,129 @@
 """
-  Usage: python codeLinkAreaType.py base_dir
-
-  Calculates MAZ Area Type using buffered population & employment density measure.
-  That is, for every MAZ node within 1/2 mile of the the current MAZ node,
-  population, employment and acres are summed.  The MAZ is then assigned an area type
-  based on a stratifcation of the average weighted population + employment density:
-  popemp_density = (population + 2.5xemployment)/acres.
-
-  Area type is based on the following bands of popemp_density:
-    popemp_density >= 300: 0 # regional core 
-    popemp_density <  300: 1 # CBD
-    popemp_density <  100: 2 # urban business
-    popemp_density <   55: 3 # urban
-    popemp_density <   30: 4 # suburban
-    popemp_density <    6: 5 # rural
-
-  Assigns link area type as min(area type of MAZ closest to A node, area type of MAZ closest to B node)
-
-  Input:
-
-     base_dir argument: the directory in which the model runs
-
-     base_dir\hwy\mtc_final_network_with_tolls_nodes.csv: the network nodes
-
-     base_dir\hwy\mtc_final_network_with_tolls_links.csv: the network links
-
-     base_dir\landuse\maz_data.csv: the Micro-Zonal Data
-
-  Output:
-     base_dir\hwy\link_area_type.csv: mapping of link to area type.  Columns are A, B, Area Type
-
+Calculate MAZ Area Type Using Buffered Pop + Emp Density Measure
+And Then Set Each Link Area Type to Nearest MAZ for Link A and B Node
+python codeLinkAreaType.py model_directory
 """
 
 
-import datetime, math, os, csv, sys
-import pandas
-import rtree
+import math, os, csv, sys
+from rtree import index
 
-if __name__ == '__main__':
-  base_dir        = sys.argv[1]
-  MAZ_DATA_FILE   = os.path.join(base_dir,'landuse','maz_data.csv')
-  NODE_CSV_FILE   = os.path.join(base_dir,'hwy',    'mtc_final_network_with_tolls_nodes.csv')
-  LINK_CSV_FILE   = os.path.join(base_dir,'hwy',    'mtc_final_network_with_tolls_links.csv')
-  AREA_TYPE_FILE  = os.path.join(base_dir,'hwy',    'link_area_type.csv')
-  BUFF_DIST       = 5280 * 0.5
+model_run_dir = sys.argv[1]
+MAZ_DATA_FILE = os.path.join(model_run_dir,r'landuse\maz_data.csv')
+NODE_CSV_FILE = os.path.join(model_run_dir,r'hwy\mtc_final_network_with_tolls_nodes.csv')
+LINK_CSV_FILE = os.path.join(model_run_dir,r'hwy\mtc_final_network_with_tolls_links.csv')
+AREA_TYPE_FILE = os.path.join(model_run_dir,r'hwy\link_area_type.csv')
+BUFF_DIST       = 5280 * 0.5
 
-  print "%s Reading MAZ data" % datetime.datetime.now().strftime("%c")
-  maz_df = pandas.DataFrame.from_csv(MAZ_DATA_FILE)
-  maz_df.reset_index(inplace=True)
+print "Reading MAZ data"
+mazData = []
+with open(MAZ_DATA_FILE, 'rb') as csvfile:
+  mazreader = csv.reader(csvfile, skipinitialspace=True)
+  for row in mazreader:
+    mazData.append(row)
+mazDataColNames = mazData.pop(0)
 
-  print "%s Reading nodes" % datetime.datetime.now().strftime("%c")
-  node_df = pandas.read_table(NODE_CSV_FILE, sep=',', names=['N','X','Y'])
+mazLandUse = dict()
+origMazToSeqMaz = dict()
+for row in mazData:
+  maz = row[mazDataColNames.index("MAZ")]
+  pop = row[mazDataColNames.index("POP")]
+  emp = row[mazDataColNames.index("emp_total")]
+  acres = row[mazDataColNames.index("ACRES")]
+  mazLandUse[maz] = [maz, pop, emp, acres,-1,-1,-1] #-1,-1,-1 = x,y,area type
+  
+  #create sequential lookup to join to network
+  orig_maz_id = row[mazDataColNames.index("MAZ_ORIGINAL")]
+  origMazToSeqMaz[orig_maz_id] = maz
 
-  # join to maz_df for maz_df coords
-  maz_df = pandas.merge(left=maz_df, right=node_df, how='left',
-                         left_on='MAZ_ORIGINAL', right_on='N')
-  maz_spatial_index = rtree.index.Index()
-  for index, row in maz_df.iterrows():
-    maz_spatial_index.insert( int(row['MAZ']), (row['X'], row['Y'], row['X'], row['Y']) )
+print "Reading nodes"
+mazs = dict()
+nodes = dict()
+spIndexMaz = index.Index()
+with open(NODE_CSV_FILE,'rb') as node_file:
+  node_reader = csv.reader(node_file,skipinitialspace=True)
+  for row in node_reader:
+    n = row[0]
+    xCoord = float(row[1])
+    yCoord = float(row[2])
+    if n in origMazToSeqMaz:
+      mazLandUse[origMazToSeqMaz[n]][4] = xCoord
+      mazLandUse[origMazToSeqMaz[n]][5] = yCoord
+      spIndexMaz.insert(int(origMazToSeqMaz[n]), (xCoord, yCoord, xCoord, yCoord))
+    nodes[n] = [n, xCoord, yCoord]
 
-  print "%s Calculate buffered MAZ measures" % datetime.datetime.now().strftime("%c")
-  # Note: pandas.DataFrame.apply is too slow here, go back to dictionary form
-  maz_df.set_index('MAZ', inplace=True)
-  maz_dict      = maz_df.to_dict()
-  popemp_den    = {}
-  for maz in maz_dict['X'].keys():
-    total_pop   = 0
-    total_emp   = 0
-    total_acres = 0
-    for near_maz in maz_spatial_index.intersection((maz_dict['X'][maz]-BUFF_DIST, 
-                                                    maz_dict['Y'][maz]-BUFF_DIST,
-                                                    maz_dict['X'][maz]+BUFF_DIST, 
-                                                    maz_dict['Y'][maz]+BUFF_DIST)):
-      total_pop   += maz_dict['POP'][near_maz] 
-      total_emp   += maz_dict['emp_total'][near_maz] 
-      total_acres += maz_dict['ACRES'][near_maz]
-    if total_acres>0:
-      popemp_den[maz] = (1.0 * total_pop + 2.5 * total_emp) / total_acres
+print "Calculate buffered MAZ measures"
+for k in mazLandUse.keys():
+  
+  #get maz data
+  x = float(mazLandUse[k][4])
+  y = float(mazLandUse[k][5])
+  
+  total_pop = 0
+  total_emp = 0
+  total_acres = 0
+
+  #get all mazs within square box around maz
+  idsList = spIndexMaz.intersection((x-BUFF_DIST, y-BUFF_DIST, x+BUFF_DIST, y+BUFF_DIST))
+  for id in idsList:
+    pop = int(mazLandUse[str(id)][1])
+    emp = int(mazLandUse[str(id)][2])
+    acres = float(mazLandUse[str(id)][3])
+    
+    #accumulate measures
+    total_pop = total_pop + pop
+    total_emp = total_emp + emp
+    total_acres = total_acres + acres
+  
+  #calculate buffer area type
+  if total_acres>0:
+    mazLandUse[k][6] = (1 * total_pop + 2.5 * total_emp) / total_acres
+  else:
+    mazLandUse[k][6] = 0
+  
+  #code area type class
+  if mazLandUse[k][6] < 6:
+    mazLandUse[k][6] = 5 #rural
+  elif mazLandUse[k][6] < 30:
+    mazLandUse[k][6] = 4 #suburban
+  elif mazLandUse[k][6] < 55:
+    mazLandUse[k][6] = 3 #urban
+  elif mazLandUse[k][6] < 100:
+    mazLandUse[k][6] = 2 #urban business
+  elif mazLandUse[k][6] < 300:
+    mazLandUse[k][6] = 1 #cbd
+  else:
+    mazLandUse[k][6] = 0 #regional core
+
+print "Find nearest MAZ for each link, take min area type of A or B node"
+lines = ["A,B,AREATYPE" + os.linesep]
+
+with open(LINK_CSV_FILE,'rb') as link_file:
+  link_reader = csv.reader(link_file,skipinitialspace=True)
+  for row in link_reader:
+    a = int(row[0])
+    b = int(row[1])
+    cntype = row[2]
+    ax = nodes[str(a)][1]
+    ay = nodes[str(a)][2]
+    bx = nodes[str(b)][1]
+    by = nodes[str(b)][2]
+    
+    #find nearest, take min area type of A or B node
+    if cntype in ["TANA","USE","TAZ","EXT"]:
+      aMaz = list(spIndexMaz.nearest((ax, ay, ax, ay), 1))[0]
+      bMaz = list(spIndexMaz.nearest((bx, by, bx, by), 1))[0]
+      aAT = mazLandUse[str(aMaz)][6]
+      bAT = mazLandUse[str(bMaz)][6]
+      linkAT = min(aAT, bAT)
     else:
-      popemp_den[maz] = 0
-  maz_dict['popemp_density'] = popemp_den
-  maz_df = pandas.DataFrame.from_dict(maz_dict)
+      linkAT = -1 #NA
+      
+    #add to output file
+    lines.append("%i,%i,%i%s" % (a, b, linkAT, os.linesep))
 
-  maz_df.loc[:,                           'area_type'] = 0 # regional core
-  maz_df.loc[maz_df.popemp_density < 300, 'area_type'] = 1 # CBD
-  maz_df.loc[maz_df.popemp_density < 100, 'area_type'] = 2 # urban business
-  maz_df.loc[maz_df.popemp_density <  55, 'area_type'] = 3 # urban
-  maz_df.loc[maz_df.popemp_density <  30, 'area_type'] = 4 # suburban
-  maz_df.loc[maz_df.popemp_density <   6, 'area_type'] = 5 # rural
-  maz_df.loc[:,                           'area_type'] = maz_df.area_type.astype(int)
-  # refresh
-  maz_dict = maz_df.to_dict()
-
-  # debug
-  # maz_df.loc[:,['MAZ','popemp_density','area_type']].to_csv('maz_new.csv',index=False)
-
-  print "%s Find nearest MAZ for each link, take min area type of A or B node" % datetime.datetime.now().strftime("%c")
-
-  link_df = pandas.read_table(LINK_CSV_FILE, sep=',', names=['A','B','CNTYPE'])
-  link_df = pandas.merge(left=link_df, right=node_df, how='left', left_on='A', right_on='N')
-  link_df.rename(columns={'X':'AX', 'Y':'AY'}, inplace=True)
-  link_df = pandas.merge(left=link_df, right=node_df, how='left', left_on='B', right_on='N')
-  link_df.rename(columns={'X':'BX', 'Y':'BY'}, inplace=True)
-  link_df.drop(['N_x','N_y'], axis=1, inplace=True)  
-
-  # Note: pandas.DataFrame.apply is too slow here, go back to dictionary form
-  link_dict = link_df.to_dict(orient='list')  # preserve index ordering
-  area_type = []
-  for link_idx in range(len(link_dict['AX'])):
-    if link_dict['CNTYPE'][link_idx] in ["TANA","USE","TAZ","EXT"]:
-      aMaz = list(maz_spatial_index.nearest((link_dict['AX'][link_idx], link_dict['AY'][link_idx], 
-                                             link_dict['AX'][link_idx], link_dict['AY'][link_idx]), 1))[0]
-      bMaz = list(maz_spatial_index.nearest((link_dict['BX'][link_idx], link_dict['BY'][link_idx], 
-                                             link_dict['BX'][link_idx], link_dict['BY'][link_idx]), 1))[0]
-      area_type.append( min( maz_dict['area_type'][aMaz], maz_dict['area_type'][bMaz] ) )
-    else:
-      area_type.append(-1)
-
-  link_dict['AREATYPE'] = area_type
-  link_df = pandas.DataFrame.from_dict(link_dict)
-
-  print "%s Write link area type CSV file" % datetime.datetime.now().strftime("%c")
-  link_df.loc[:,['A','B','AREATYPE']].to_csv(AREA_TYPE_FILE, index=False)
+#create output file
+print "Write link area type CSV file"
+outFile = open(AREA_TYPE_FILE, "wb")
+outFile.writelines(lines)
+outFile.close()

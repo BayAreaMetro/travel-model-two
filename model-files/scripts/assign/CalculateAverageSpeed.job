@@ -29,7 +29,7 @@
 ; See also: (1) AverageNetworkVolumes.job -- computes an average vehicle volume based on the current and previous
 ;               model iterations. 
 ;
-; version:  Travel Model One
+; version:  Travel Model Two
 ; authors:  dto (2010 08 10); gde (2009); crf (2014 03)
 ;
 ;
@@ -86,7 +86,7 @@ loop period = 1,5
         ; loaded time-specific highway network
         neto = hwy\msaspeed@token_period@.net
     
-        ; set the assignment paramters -- equilibrium assignment, bi-conjugate
+        ; set the assignment parameters -- equilibrium assignment, bi-conjugate
         parameters combine = equi, enhance = 2            
     
         ; set the assignment parameters -- internal zones + ?? external zones
@@ -154,8 +154,8 @@ loop period = 1,5
     
         ; compute the speeds with the volume delay curves
         phase = adjust
-            ; total volume includes each of the 10 classes
-            function v = li.vol_da + li.vol_s2 + li.vol_s3 + li.vol_sm + trkpce * li.vol_hv + li.vol_daT + li.vol_s2T + li.vol_s3T + li.vol_smT + trkpce * li.vol_hvT
+            ; total volume includes each of the 10 classes plus the preloaded volume
+            function v = li.vol_da + li.vol_s2 + li.vol_s3 + li.vol_sm + trkpce * li.vol_hv + li.vol_daT + li.vol_s2T + li.vol_s3T + li.vol_smT + trkpce * li.vol_hvT + li.vol_maz
                  
             ; the volume delay functions are housed in the SpeedFlowCurve.block file
             read file = @vdf_block_param@
@@ -175,7 +175,7 @@ loop period = 1,5
       ENDPHASE
     ENDRUN 
     
-    ;overwrite congestedtime in avgload (base assignment) network
+    ;overwrite congested time in avgload (base assignment) network
     RUN PGM=NETWORK
       PAR  NODES=10000000
       NETI = hwy\avgload@token_period@_taz.net
