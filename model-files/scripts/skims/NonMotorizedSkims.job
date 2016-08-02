@@ -2,43 +2,44 @@
 ;
 ; NonMotorizedSkims.job
 ;
-; TP+ script to compute zone-to-zone walk distance and bicycle distance. The bicycle and walk networks are created
-; by the script CreateNonMotorizedNetwork.job; to modify roadways that can and cannot be used for non-motorized
-; travel, please see that script.
+; TP+ script to compute zone-to-zone walk distance and bicycle distance. The bicycle and walk networks are created 
+; by the script CreateNonMotorizedNetwork.job; to modify roadways can and cannot be used for non-motorized travel, 
+; please see that script. 
 ;
 ; This script creates a number of shortest path skims:
 ;
 ;     pedestrian maz -> maz
 ;     pedestrian maz -> tap
-;     bicycle    maz -> maz
-;     bicycle    maz -> tap
-;     bicycle    taz -> taz
+;     bicycle maz -> maz
+;     bicycle maz -> tap
+;     bicycle taz -> taz
 ;     pedestrian tap -> tap
 ;
 ; All skims are capped at a max distance set in the maxCosts.block file.
 ;
 ; Because these skims are slow, they are distributed by county: each thread runs all of the skims from a single
-; county (to all other counties). This speeds up the process, but limits the parallelism at 9. In the future,
-; more threads could be used.
+; county (to all other counties). This speeds up the process, but limits the parallelism at 9. In the future, 
+; more threads could be used by splitting the processes by output county as well.
 ;
 ; The skims run much faster when unused links aren't included in the network, so different networks are created
 ; for the different skims. For example, the pedestrian maz-to-maz skim uses a network built from the pedestrian
 ; network, but with all TAZ and TAP connectors removed.
 ;
-; To correctly build the skims, tap/taz/maz connectors should not be used as intermediate links so the networks
+; To correctly build the skims, tap/taz/maz connectors should not be used as intermediate links. So, the networks
 ; (built in the CreateNonMotorizedNetwork.job script) set all connector costs equal to the max allowed cost. The
 ; skim then runs with the max cost = 3 times the max allowed cost, which means the actual cost will be the cost minus
-; 2 times the max allowed cost (the minus term from the two connector costs).
-;
+; 2 times the max allowed cost (the minus term from the two connector costs). 
+; 
 ;
 ; Input:  (1) A pedestrian network
 ;         (2) A bicycle network
 ;         (3) A pedestrian tap-tap network
 ;
-; Output: (1) Shortest path skims in csv format: orig_zone,dest_zone,dest_zone,shortest_path_cost,feet
-;             (note that the dest_zone is printed twice)
+; Output: (1) Shortest path skims in csv format: from_zone,to_zone,to_zone,shortest_path_cost,skim_value
+;             (note that the to_zone is printed twice)
 ;
-; Notes:  (1)  Intrazonal skims ARE NOT created by this script
+; Notes:  (1)  Output matrices are in feet
+;         (2)  Intrazonal skims ARE NOT created by this script
 ;
 ;
 ; version:  Travel Model Zed
@@ -79,38 +80,38 @@ county_selector_np = '(N < 700000) & (N > 600000)'
 county_selector_sn = '(N < 800000) & (N > 700000)'
 county_selector_mn = '(N < 900000) & (N > 800000)'
 
-taz_all = '(' + zone_selector      + ' & ' + taz_selector + ')'
-taz_sf  = '(' + county_selector_sf + ' & ' + taz_selector + ')'
-taz_sm  = '(' + county_selector_sm + ' & ' + taz_selector + ')'
-taz_sc  = '(' + county_selector_sc + ' & ' + taz_selector + ')'
-taz_al  = '(' + county_selector_al + ' & ' + taz_selector + ')'
-taz_cc  = '(' + county_selector_cc + ' & ' + taz_selector + ')'
-taz_sl  = '(' + county_selector_sl + ' & ' + taz_selector + ')'
-taz_np  = '(' + county_selector_np + ' & ' + taz_selector + ')'
-taz_sn  = '(' + county_selector_sn + ' & ' + taz_selector + ')'
-taz_mn  = '(' + county_selector_mn + ' & ' + taz_selector + ')'
+taz_all = '(' + zone_selector + '  & ' + taz_selector + ')'
+taz_sf = '(' + county_selector_sf + ' & ' + taz_selector + ')'
+taz_sm = '(' + county_selector_sm + ' & ' + taz_selector + ')'
+taz_sc = '(' + county_selector_sc + ' & ' + taz_selector + ')'
+taz_al = '(' + county_selector_al + ' & ' + taz_selector + ')'
+taz_cc = '(' + county_selector_cc + ' & ' + taz_selector + ')'
+taz_sl = '(' + county_selector_sl + ' & ' + taz_selector + ')'
+taz_np = '(' + county_selector_np + ' & ' + taz_selector + ')'
+taz_sn = '(' + county_selector_sn + ' & ' + taz_selector + ')'
+taz_mn = '(' + county_selector_mn + ' & ' + taz_selector + ')'
 
-maz_all = '(' + zone_selector      + ' & ' + maz_selector + ')'
-maz_sf  = '(' + county_selector_sf + ' & ' + maz_selector + ')'
-maz_sm  = '(' + county_selector_sm + ' & ' + maz_selector + ')'
-maz_sc  = '(' + county_selector_sc + ' & ' + maz_selector + ')'
-maz_al  = '(' + county_selector_al + ' & ' + maz_selector + ')'
-maz_cc  = '(' + county_selector_cc + ' & ' + maz_selector + ')'
-maz_sl  = '(' + county_selector_sl + ' & ' + maz_selector + ')'
-maz_np  = '(' + county_selector_np + ' & ' + maz_selector + ')'
-maz_sn  = '(' + county_selector_sn + ' & ' + maz_selector + ')'
-maz_mn  = '(' + county_selector_mn + ' & ' + maz_selector + ')'
- 
-tap_all = '(' + zone_selector      + ' & ' + tap_selector + ')'
-tap_sf  = '(' + county_selector_sf + ' & ' + tap_selector + ')'
-tap_sm  = '(' + county_selector_sm + ' & ' + tap_selector + ')'
-tap_sc  = '(' + county_selector_sc + ' & ' + tap_selector + ')'
-tap_al  = '(' + county_selector_al + ' & ' + tap_selector + ')'
-tap_cc  = '(' + county_selector_cc + ' & ' + tap_selector + ')'
-tap_sl  = '(' + county_selector_sl + ' & ' + tap_selector + ')'
-tap_np  = '(' + county_selector_np + ' & ' + tap_selector + ')'
-tap_sn  = '(' + county_selector_sn + ' & ' + tap_selector + ')'
-tap_mn  = '(' + county_selector_mn + ' & ' + tap_selector + ')'
+maz_all = '(' + zone_selector + '  & ' + maz_selector + ')'
+maz_sf = '(' + county_selector_sf + ' & ' + maz_selector + ')'
+maz_sm = '(' + county_selector_sm + ' & ' + maz_selector + ')'
+maz_sc = '(' + county_selector_sc + ' & ' + maz_selector + ')'
+maz_al = '(' + county_selector_al + ' & ' + maz_selector + ')'
+maz_cc = '(' + county_selector_cc + ' & ' + maz_selector + ')'
+maz_sl = '(' + county_selector_sl + ' & ' + maz_selector + ')'
+maz_np = '(' + county_selector_np + ' & ' + maz_selector + ')'
+maz_sn = '(' + county_selector_sn + ' & ' + maz_selector + ')'
+maz_mn = '(' + county_selector_mn + ' & ' + maz_selector + ')'
+
+tap_all = '(' + zone_selector + '  & ' + tap_selector + ')'
+tap_sf = '(' + county_selector_sf + ' & ' + tap_selector + ')'
+tap_sm = '(' + county_selector_sm + ' & ' + tap_selector + ')'
+tap_sc = '(' + county_selector_sc + ' & ' + tap_selector + ')'
+tap_al = '(' + county_selector_al + ' & ' + tap_selector + ')'
+tap_cc = '(' + county_selector_cc + ' & ' + tap_selector + ')'
+tap_sl = '(' + county_selector_sl + ' & ' + tap_selector + ')'
+tap_np = '(' + county_selector_np + ' & ' + tap_selector + ')'
+tap_sn = '(' + county_selector_sn + ' & ' + tap_selector + ')'
+tap_mn = '(' + county_selector_mn + ' & ' + tap_selector + ')'
 
         
 ;start cluster nodes
@@ -119,24 +120,14 @@ tap_mn  = '(' + county_selector_mn + ' & ' + tap_selector + ')'
 ;loop by county and create shortest paths
 LOOP PROC_COUNT=1,9
 
-    ; distribute county loads non_uniformly across processors, because they are very asymmetric
-    PED_MAZ_MAZ_COUNTY  = PROC_COUNT
+    ; distribute county loads non_uniformly across processors, because they are very asymetric
+    PED_MAZ_MAZ_COUNTY = PROC_COUNT
     BIKE_MAZ_MAZ_COUNTY = 1 + ((PROC_COUNT + 2) % 9)
-    PED_MAZ_TAP_COUNTY  = 1 + ((PROC_COUNT + 5) % 9)
+    PED_MAZ_TAP_COUNTY = 1 + ((PROC_COUNT + 5) % 9)
     BIKE_MAZ_TAP_COUNTY = 1 + ((PROC_COUNT + 7) % 9)
     BIKE_TAZ_TAZ_COUNTY = 1 + ((PROC_COUNT + 8) % 9)
-    PED_TAP_TAP_COUNTY  = 1 + ((PROC_COUNT + 4) % 9)
-    ; proc_count = 1: 1, 1+1+2=4, 1+1+5=7, 1+1+7=0, 1+1+8=1, 1+1+4=6
-    ;                 2, 1+2+2=5, 1+2+5=8, 1+2+7=1,       2        7
-    ;                 3, 1+2+2=6, 1+2+5=9, 1+2+7=2,       3        8
-    ;                 4, 1+2+2=7, 1+2+5=1, 1+2+7=3,       4        9
-    ;                 5, 1+2+2=8, 1+2+5=2, 1+2+7=4,       5        0
-    ;                 6, 1+2+2=9, 1+2+5=3, 1+2+7=4,       5        0
-    ;                 7, 1+2+2=1, 1+2+5=4, 1+2+7=4,       5        0
-    ;                 8, 1+2+2=2, 1+2+5=5, 1+2+7=4,       5        0
-    ;                 9, 1+2+2=3, 1+2+5=6, 1+2+7=4,       5        0
-
-
+    PED_TAP_TAP_COUNTY = 1 + ((PROC_COUNT + 4) % 9)
+    
     ; distribute via cluster
     DistributeMultistep ProcessID="MTC_NONMOT",ProcessNum=PROC_COUNT
         ;copy file since RUN PGM = CUBE can't open the file multiple times at once
@@ -154,55 +145,55 @@ LOOP PROC_COUNT=1,9
             ; 5 - bike taz->taz
             ; 6 - ped tap->tap
             
-            ;use proc count network so that it is only used within proc
+            ;;use proc count network so that it is only used within proc
             IF (SKIM_TYPE = 1)
-                NETFILE         = 'hwy\mtc_ped_network'
-                SFILE           = 'SP_PED_MAZ_MAZ'
-                OUTFILE         = '..\skims\ped_distance_maz_maz'
-                MAX_DISTANCE    = max_ped_distance*3
-                SKIM_COUNTY     = PED_MAZ_MAZ_COUNTY
+                NETFILE = 'hwy\mtc_ped_network'
+                SFILE = 'SP_PED_MAZ_MAZ'
+                OUTFILE = '..\skims\ped_distance_maz_maz'
+                MAX_DISTANCE = max_ped_distance*3
+                SKIM_COUNTY = PED_MAZ_MAZ_COUNTY
                 ORIGIN_SELECTOR = maz_selector
-                DEST_SELECTOR   = maz_all
+                DEST_SELECTOR = maz_all
             ELSEIF (SKIM_TYPE = 2)
-                NETFILE         = 'hwy\mtc_ped_network'
-                SFILE           = 'SP_PED_MAZ_TAP'
-                OUTFILE         = '..\skims\ped_distance_maz_tap'
-                MAX_DISTANCE    = max_ped_distance*3
-                SKIM_COUNTY     = PED_MAZ_TAP_COUNTY
+                NETFILE = 'hwy\mtc_ped_network'
+                SFILE = 'SP_PED_MAZ_TAP'
+                OUTFILE = '..\skims\ped_distance_maz_tap'
+                MAX_DISTANCE = max_ped_distance*3
+                SKIM_COUNTY = PED_MAZ_TAP_COUNTY
                 ORIGIN_SELECTOR = maz_selector
-                DEST_SELECTOR   = tap_all
+                DEST_SELECTOR = tap_all
             ELSEIF (SKIM_TYPE = 3)
-                NETFILE         = 'hwy\mtc_bike_network'
-                SFILE           = 'SP_BIKE_MAZ_MAZ'
-                OUTFILE         = '..\skims\bike_distance_maz_maz'
-                MAX_DISTANCE    = max_bike_short_distance*3
-                SKIM_COUNTY     = BIKE_MAZ_MAZ_COUNTY
+                NETFILE = 'hwy\mtc_bike_network'
+                SFILE = 'SP_BIKE_MAZ_MAZ'
+                OUTFILE = '..\skims\bike_distance_maz_maz'
+                MAX_DISTANCE = max_bike_short_distance*3
+                SKIM_COUNTY = BIKE_MAZ_MAZ_COUNTY
                 ORIGIN_SELECTOR = maz_selector
-                DEST_SELECTOR   = maz_all
+                DEST_SELECTOR = maz_all
             ELSEIF (SKIM_TYPE = 4)
-                NETFILE         = 'hwy\mtc_bike_network'
-                SFILE           = 'SP_BIKE_MAZ_TAP'
-                OUTFILE         = '..\skims\bike_distance_maz_tap'
-                MAX_DISTANCE    = max_bike_short_distance*3
-                SKIM_COUNTY     = BIKE_MAZ_TAP_COUNTY
+                NETFILE = 'hwy\mtc_bike_network'
+                SFILE = 'SP_BIKE_MAZ_TAP'
+                OUTFILE = '..\skims\bike_distance_maz_tap'
+                MAX_DISTANCE = max_bike_short_distance*3
+                SKIM_COUNTY = BIKE_MAZ_TAP_COUNTY
                 ORIGIN_SELECTOR = maz_selector
-                DEST_SELECTOR   = tap_all
+                DEST_SELECTOR = tap_all
             ELSEIF (SKIM_TYPE = 5)
-                NETFILE         = 'hwy\mtc_bike_network'
-                SFILE           = 'SP_BIKE_TAZ_TAZ'
-                OUTFILE         = '..\skims\bike_distance_taz_taz'
-                MAX_DISTANCE    = nomax_bike_distance*3
-                SKIM_COUNTY     = BIKE_TAZ_TAZ_COUNTY
+                NETFILE = 'hwy\mtc_bike_network'
+                SFILE = 'SP_BIKE_TAZ_TAZ'
+                OUTFILE = '..\skims\bike_distance_taz_taz'
+                MAX_DISTANCE = nomax_bike_distance*3
+                SKIM_COUNTY = BIKE_TAZ_TAZ_COUNTY
                 ORIGIN_SELECTOR = taz_selector
-                DEST_SELECTOR   = taz_all
+                DEST_SELECTOR = taz_all
             ELSEIF (SKIM_TYPE = 6)
-                NETFILE         = 'hwy\mtc_tap_ped_network'
-                SFILE           = 'SP_PED_TAP_TAP'
-                OUTFILE         = '..\skims\ped_distance_tap_tap'
-                MAX_DISTANCE    = max_tap_ped_distance*3
-                SKIM_COUNTY     = PED_TAP_TAP_COUNTY
+                NETFILE = 'hwy\mtc_tap_ped_network'
+                SFILE = 'SP_PED_TAP_TAP'
+                OUTFILE = '..\skims\ped_distance_tap_tap'
+                MAX_DISTANCE = max_tap_ped_distance*3
+                SKIM_COUNTY = PED_TAP_TAP_COUNTY
                 ORIGIN_SELECTOR = tap_selector
-                DEST_SELECTOR   = tap_all
+                DEST_SELECTOR = tap_all
             ENDIF
       
             ;write Cube script since can't pass tokens to RUN PGM = CUBE
@@ -213,7 +204,7 @@ LOOP PROC_COUNT=1,9
                 PRINT LIST="PAR  NODES=10000000" PRINTO=1
                 PRINT LIST=" FUNCTION = BUILDPATH" PRINTO=1
                 PRINT LIST=" neti = @NETFILE@_@PROC_COUNT@.net" PRINTO=1
-                PRINT LIST=" pathprinto = @OUTFILE@_@SKIM_COUNTY@.csv" PRINTO=1
+                PRINT LIST=" pathprinto = @OUTFILE@_@SKIM_COUNTY@.txt" PRINTO=1
                 PRINT LIST=" CostSpec='SP_DISTANCE' " PRINTO=1
                 ;have to put this down here because single quotes apparently can't be put in a variable string...
                 IF (@SKIM_TYPE@ = 1)
@@ -262,8 +253,8 @@ LOOP PROC_COUNT=1,9
             *"%TPP_PATH%\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
             
             ;clean-up
-            ; *del @SFILE@_@SKIM_COUNTY@.s
-        ENDLOOP  ; SKIM_TYPE loop
+            *del @SFILE@_@SKIM_COUNTY@.s
+        ENDLOOP
         
         *del hwy\mtc_ped_network_@PROC_COUNT@.net
         *del hwy\mtc_bike_network_@PROC_COUNT@.net
@@ -271,7 +262,7 @@ LOOP PROC_COUNT=1,9
         
     EndDistributeMultistep
   
-ENDLOOP   ; PROC_COUNT loop
+ENDLOOP
 
 ;wait for programs to complete
 Wait4Files Files=MTC_NONMOT1.script.end, MTC_NONMOT2.script.end, MTC_NONMOT3.script.end, 
@@ -282,50 +273,23 @@ Wait4Files Files=MTC_NONMOT1.script.end, MTC_NONMOT2.script.end, MTC_NONMOT3.scr
 ;stop cluster nodes
 *Cluster.exe MTC_NONMOT 1-9 close exit
 
-;header
-*echo ORIG_MAZ_N,DEST_MAZ_N,DEST2_MAZ_N,SP_DISTANCE,FEET> skims\ped_distance_maz_maz_header.csv
-*echo ORIG_MAZ_N,DEST_TAP_N,DEST2_TAP_N,SP_DISTANCE,FEET> skims\ped_distance_maz_tap_header.csv
-*echo ORIG_MAZ_N,DEST_MAZ_N,DEST2_MAZ_N,SP_DISTANCE,FEET> skims\bike_distance_maz_maz_header.csv
-*echo ORIG_MAZ_N,DEST_TAP_N,DEST2_TAP_N,SP_DISTANCE,FEET> skims\bike_distance_maz_tap_header.csv
-*echo ORIG_TAZ_N,DEST_TAZ_N,DEST2_TAZ_N,SP_DISTANCE,FEET> skims\bike_distance_taz_taz_header.csv
-*echo ORIG_TAP_N,DEST_TAP_N,DEST2_TAP_N,SP_DISTANCE,FEET> skims\ped_distance_tap_tap_header.csv
+;merge files
+*copy skims\ped_distance_maz_maz_1.txt+skims\ped_distance_maz_maz_2.txt+skims\ped_distance_maz_maz_3.txt+skims\ped_distance_maz_maz_4.txt+skims\ped_distance_maz_maz_5.txt+skims\ped_distance_maz_maz_6.txt+skims\ped_distance_maz_maz_7.txt+skims\ped_distance_maz_maz_8.txt+skims\ped_distance_maz_maz_9.txt skims\ped_distance_maz_maz.txt
+*del skims\ped_distance_maz_maz_*.txt
+*copy skims\ped_distance_maz_tap_1.txt+skims\ped_distance_maz_tap_2.txt+skims\ped_distance_maz_tap_3.txt+skims\ped_distance_maz_tap_4.txt+skims\ped_distance_maz_tap_5.txt+skims\ped_distance_maz_tap_6.txt+skims\ped_distance_maz_tap_7.txt+skims\ped_distance_maz_tap_8.txt+skims\ped_distance_maz_tap_9.txt skims\ped_distance_maz_tap.txt
+*del skims\ped_distance_maz_tap_*.txt
+*copy skims\bike_distance_maz_maz_1.txt+skims\bike_distance_maz_maz_2.txt+skims\bike_distance_maz_maz_3.txt+skims\bike_distance_maz_maz_4.txt+skims\bike_distance_maz_maz_5.txt+skims\bike_distance_maz_maz_6.txt+skims\bike_distance_maz_maz_7.txt+skims\bike_distance_maz_maz_8.txt+skims\bike_distance_maz_maz_9.txt skims\bike_distance_maz_maz.txt
+*del skims\bike_distance_maz_maz_*.txt
+*copy skims\bike_distance_maz_tap_1.txt+skims\bike_distance_maz_tap_2.txt+skims\bike_distance_maz_tap_3.txt+skims\bike_distance_maz_tap_4.txt+skims\bike_distance_maz_tap_5.txt+skims\bike_distance_maz_tap_6.txt+skims\bike_distance_maz_tap_7.txt+skims\bike_distance_maz_tap_8.txt+skims\bike_distance_maz_tap_9.txt skims\bike_distance_maz_tap.txt
+*del skims\bike_distance_maz_tap_*.txt
+*copy skims\bike_distance_taz_taz_1.txt+skims\bike_distance_taz_taz_2.txt+skims\bike_distance_taz_taz_3.txt+skims\bike_distance_taz_taz_4.txt+skims\bike_distance_taz_taz_5.txt+skims\bike_distance_taz_taz_6.txt+skims\bike_distance_taz_taz_7.txt+skims\bike_distance_taz_taz_8.txt+skims\bike_distance_taz_taz_9.txt skims\bike_distance_taz_taz.txt
+*del skims\bike_distance_taz_taz_*.txt
+*copy skims\ped_distance_tap_tap_1.txt+skims\ped_distance_tap_tap_2.txt+skims\ped_distance_tap_tap_3.txt+skims\ped_distance_tap_tap_4.txt+skims\ped_distance_tap_tap_5.txt+skims\ped_distance_tap_tap_6.txt+skims\ped_distance_tap_tap_7.txt+skims\ped_distance_tap_tap_8.txt+skims\ped_distance_tap_tap_9.txt skims\ped_distance_tap_tap.txt
+*del skims\ped_distance_tap_tap_*.txt
 
-;merge files.  Suffix=-origN indicates that the nodes need renumbering to MAZ/TAZ/TAP
-*copy skims\ped_distance_maz_maz_header.csv+skims\ped_distance_maz_maz_1.csv+skims\ped_distance_maz_maz_2.csv+skims\ped_distance_maz_maz_3.csv+skims\ped_distance_maz_maz_4.csv+skims\ped_distance_maz_maz_5.csv+skims\ped_distance_maz_maz_6.csv+skims\ped_distance_maz_maz_7.csv+skims\ped_distance_maz_maz_8.csv+skims\ped_distance_maz_maz_9.csv skims\ped_distance_maz_maz-origN.csv
-*del skims\ped_distance_maz_maz_*.csv
-*copy skims\ped_distance_maz_tap_header.csv+skims\ped_distance_maz_tap_1.csv+skims\ped_distance_maz_tap_2.csv+skims\ped_distance_maz_tap_3.csv+skims\ped_distance_maz_tap_4.csv+skims\ped_distance_maz_tap_5.csv+skims\ped_distance_maz_tap_6.csv+skims\ped_distance_maz_tap_7.csv+skims\ped_distance_maz_tap_8.csv+skims\ped_distance_maz_tap_9.csv skims\ped_distance_maz_tap-origN.csv
-*del skims\ped_distance_maz_tap_*.csv
-*copy skims\bike_distance_maz_maz_header.csv+skims\bike_distance_maz_maz_1.csv+skims\bike_distance_maz_maz_2.csv+skims\bike_distance_maz_maz_3.csv+skims\bike_distance_maz_maz_4.csv+skims\bike_distance_maz_maz_5.csv+skims\bike_distance_maz_maz_6.csv+skims\bike_distance_maz_maz_7.csv+skims\bike_distance_maz_maz_8.csv+skims\bike_distance_maz_maz_9.csv skims\bike_distance_maz_maz-origN.csv
-*del skims\bike_distance_maz_maz_*.csv
-*copy skims\bike_distance_maz_tap_header.csv+skims\bike_distance_maz_tap_1.csv+skims\bike_distance_maz_tap_2.csv+skims\bike_distance_maz_tap_3.csv+skims\bike_distance_maz_tap_4.csv+skims\bike_distance_maz_tap_5.csv+skims\bike_distance_maz_tap_6.csv+skims\bike_distance_maz_tap_7.csv+skims\bike_distance_maz_tap_8.csv+skims\bike_distance_maz_tap_9.csv skims\bike_distance_maz_tap-origN.csv
-*del skims\bike_distance_maz_tap_*.csv
-*copy skims\bike_distance_taz_taz_header.csv+skims\bike_distance_taz_taz_1.csv+skims\bike_distance_taz_taz_2.csv+skims\bike_distance_taz_taz_3.csv+skims\bike_distance_taz_taz_4.csv+skims\bike_distance_taz_taz_5.csv+skims\bike_distance_taz_taz_6.csv+skims\bike_distance_taz_taz_7.csv+skims\bike_distance_taz_taz_8.csv+skims\bike_distance_taz_taz_9.csv skims\bike_distance_taz_taz-origN.csv
-*del skims\bike_distance_taz_taz_*.csv
-*copy skims\ped_distance_tap_tap_header.csv+skims\ped_distance_tap_tap_1.csv+skims\ped_distance_tap_tap_2.csv+skims\ped_distance_tap_tap_3.csv+skims\ped_distance_tap_tap_4.csv+skims\ped_distance_tap_tap_5.csv+skims\ped_distance_tap_tap_6.csv+skims\ped_distance_tap_tap_7.csv+skims\ped_distance_tap_tap_8.csv+skims\ped_distance_tap_tap_9.csv skims\ped_distance_tap_tap-origN.csv
-*del skims\ped_distance_tap_tap_*.csv
-
-; Make sure these end with a newline
-*echo.>>skims\ped_distance_maz_maz-origN.csv
-*echo.>>skims\ped_distance_maz_tap-origN.csv
-*echo.>>skims\bike_distance_maz_maz-origN.csv
-*echo.>>skims\bike_distance_maz_tap-origN.csv
-*echo.>>skims\bike_distance_taz_taz-origN.csv
-*echo.>>skims\ped_distance_tap_tap-origN.csv
-
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\resequence_columns.py skims\ped_distance_maz_maz-origN.csv skims\ped_distance_maz_maz.csv
-IF (ReturnCode != 0) ABORT
-
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\resequence_columns.py skims\ped_distance_maz_tap-origN.csv skims\ped_distance_maz_tap.csv
-IF (ReturnCode != 0) ABORT
-
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\resequence_columns.py skims\bike_distance_maz_maz-origN.csv skims\bike_distance_maz_maz.csv
-IF (ReturnCode != 0) ABORT
-
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\resequence_columns.py skims\bike_distance_maz_tap-origN.csv skims\bike_distance_maz_tap.csv
-IF (ReturnCode != 0) ABORT
-
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\resequence_columns.py skims\bike_distance_taz_taz-origN.csv skims\bike_distance_taz_taz.csv
-IF (ReturnCode != 0) ABORT
-
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\resequence_columns.py skims\ped_distance_tap_tap-origN.csv skims\ped_distance_tap_tap.csv
-IF (ReturnCode != 0) ABORT
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_maz.txt 3
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_tap.txt 3
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_maz.txt 3
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_tap.txt 3
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_taz_taz.txt 3
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_tap_tap.txt 3

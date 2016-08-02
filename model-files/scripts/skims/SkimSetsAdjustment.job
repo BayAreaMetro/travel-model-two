@@ -5,10 +5,13 @@
 ; TP+ script to NA out OD pairs that have the same skim values across skim sets.  One OD pair is retained though.
 ;
 ; Input: (1) Skims for each skim set, currently set to 3
-; Output: (1) Same set of skims but with NA value for skim sets that have the same time values by OD pair
+; Output: (1) Same set of skims but with NA value for skim sets that have the same values by OD pair
 ;
 ; version:  Travel Model Zed
 ; authors:  bts 09/11/14
+;
+; Updated to account for ferry matrices in transit skim set.
+; author: sn(5/5/2015)
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;start cluster nodes - one for each time period
@@ -54,10 +57,11 @@ LOOP PERIOD = 1,5
         FILLMW MW[9]= MI.1.AEWTIME 
         FILLMW MW[10]=MI.1.LB_TIME 
         FILLMW MW[11]=MI.1.EB_TIME
-        FILLMW MW[12]=MI.1.LR_TIME
-        FILLMW MW[13]=MI.1.HR_TIME
-        FILLMW MW[14]=MI.1.CR_TIME
-        FILLMW MW[15]=MI.1.BEST_MODE
+        FILLMW MW[12]=MI.1.FR_TIME     
+        FILLMW MW[13]=MI.1.LR_TIME
+        FILLMW MW[14]=MI.1.HR_TIME
+        FILLMW MW[15]=MI.1.CR_TIME
+        FILLMW MW[16]=MI.1.BEST_MODE
         
         FILLMW MW[21]=MI.2.COMPCOST 
         FILLMW MW[22]=MI.2.IWAIT    
@@ -70,10 +74,11 @@ LOOP PERIOD = 1,5
         FILLMW MW[29]=MI.2.AEWTIME  
         FILLMW MW[30]=MI.2.LB_TIME  
         FILLMW MW[31]=MI.2.EB_TIME  
-        FILLMW MW[32]=MI.2.LR_TIME  
-        FILLMW MW[33]=MI.2.HR_TIME  
-        FILLMW MW[34]=MI.2.CR_TIME   
-        FILLMW MW[35]=MI.2.BEST_MODE
+        FILLMW MW[32]=MI.2.FR_TIME  
+        FILLMW MW[33]=MI.2.LR_TIME  
+        FILLMW MW[34]=MI.2.HR_TIME  
+        FILLMW MW[35]=MI.2.CR_TIME   
+        FILLMW MW[36]=MI.2.BEST_MODE
         
         FILLMW MW[41]=MI.3.COMPCOST 
         FILLMW MW[42]=MI.3.IWAIT    
@@ -86,23 +91,24 @@ LOOP PERIOD = 1,5
         FILLMW MW[49]=MI.3.AEWTIME  
         FILLMW MW[50]=MI.3.LB_TIME  
         FILLMW MW[51]=MI.3.EB_TIME  
-        FILLMW MW[52]=MI.3.LR_TIME  
-        FILLMW MW[53]=MI.3.HR_TIME  
-        FILLMW MW[54]=MI.3.CR_TIME   
-        FILLMW MW[55]=MI.3.BEST_MODE
+        FILLMW MW[52]=MI.3.FR_TIME  
+        FILLMW MW[53]=MI.3.LR_TIME  
+        FILLMW MW[54]=MI.3.HR_TIME  
+        FILLMW MW[55]=MI.3.CR_TIME   
+        FILLMW MW[56]=MI.3.BEST_MODE
         
         ;if skim time components are the same, then set skims to 0 which is used for availability in CT-RAMP
-        MW[16] = MW[2] + MW[3] + MW[8] + MW[9] + MW[10] + MW[11] + MW[12] + MW[13] + MW[14]
-        MW[36] = MW[22]+ MW[23]+ MW[28]+ MW[29]+ MW[30] + MW[31] + MW[32] + MW[33] + MW[34]
-        MW[56] = MW[42]+ MW[43]+ MW[48]+ MW[49]+ MW[50] + MW[51] + MW[52] + MW[53] + MW[54]
+        MW[17] = MW[2] + MW[3] + MW[8] + MW[9] + MW[10] + MW[11] + MW[12] + MW[13] + MW[14] + MW[15]
+        MW[37] = MW[22]+ MW[23]+ MW[28]+ MW[29]+ MW[30] + MW[31] + MW[32] + MW[33] + MW[34] + MW[35]
+        MW[57] = MW[42]+ MW[43]+ MW[48]+ MW[49]+ MW[50] + MW[51] + MW[52] + MW[53] + MW[54] + MW[55]
         
         ;output matrices
-        MATO[1] = "skims\transit_skims_@TOKEN_PERIOD@_SET1_Adj.TPP",MO=1-15,
-          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
-        MATO[2] = "skims\transit_skims_@TOKEN_PERIOD@_SET2_Adj.TPP",MO=21-35,
-          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
-        MATO[3] = "skims\transit_skims_@TOKEN_PERIOD@_SET3_Adj.TPP",MO=41-55,
-          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
+        MATO[1] = "skims\transit_skims_@TOKEN_PERIOD@_SET1_Adj.TPP",MO=1-16,
+          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
+        MATO[2] = "skims\transit_skims_@TOKEN_PERIOD@_SET2_Adj.TPP",MO=21-36,
+          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
+        MATO[3] = "skims\transit_skims_@TOKEN_PERIOD@_SET3_Adj.TPP",MO=41-56,
+          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
         
         ;NA-out OD pairs with the same values
         
@@ -113,10 +119,10 @@ LOOP PERIOD = 1,5
           NA = 0
           
           ;log results if desired
-          ;PRINT LIST=I, J, MW[16][J], MW[36][J], MW[56][J], CSV=T, FILE=SkimSetsAdjustmentsLog.csv
+          ;PRINT LIST=I, J, MW[17][J], MW[37][J], MW[57][J], CSV=T, FILE=SkimSetsAdjustmentsLog.csv
           
           ;compare set 1 and 2
-          IF (MW[16][J] == MW[36][J])
+          IF (MW[17][J] == MW[37][J])
             MW[21][J] = NA
             MW[22][J] = NA
             MW[23][J] = NA
@@ -132,10 +138,11 @@ LOOP PERIOD = 1,5
             MW[33][J] = NA
             MW[34][J] = NA
             MW[35][J] = NA
+            MW[36][J] = NA
           ENDIF
           
           ;compare set 1 and 3
-          IF (MW[16][J] == MW[56][J])
+          IF (MW[17][J] == MW[57][J])
             MW[41][J] = NA
             MW[42][J] = NA
             MW[43][J] = NA
@@ -151,10 +158,11 @@ LOOP PERIOD = 1,5
             MW[53][J] = NA
             MW[54][J] = NA
             MW[55][J] = NA
+            MW[56][J] = NA
           ENDIF
           
           ;compare set 2 and 3
-          IF (MW[36][J] == MW[56][J])
+          IF (MW[37][J] == MW[57][J])
             MW[41][J] = NA
             MW[42][J] = NA
             MW[43][J] = NA
@@ -170,6 +178,7 @@ LOOP PERIOD = 1,5
             MW[53][J] = NA
             MW[54][J] = NA
             MW[55][J] = NA
+            MW[56][J] = NA
           ENDIF
 
         ENDJLOOP

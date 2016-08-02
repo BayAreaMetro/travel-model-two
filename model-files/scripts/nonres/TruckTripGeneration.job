@@ -48,8 +48,7 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;build truck taz data
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\nonres\truck_taz_data.py
-IF (ReturnCode != 0) ABORT
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\nonres\truck_taz_data.py . landuse\maz_data.csv nonres\truck_taz_data.csv %TAZ_COUNT%
 
 ; apply the generation models
 run pgm = tripgen
@@ -58,13 +57,8 @@ run pgm = tripgen
    filei zdati[1] = nonres\truck_taz_data.csv Z=#1,AGREMPN=2,RETEMPN=3,FPSEMPN=4,HEREMPN=5,MWTEMPN=6,OTHEMPN=7,TOTEMP=8,TOTHH=9 SKIPRECS=1
    
    ; write the generation results to a DBF
-   fileo pao[1] = nonres\TruckTGx.dbf, 
-                  form = 12.0, 
-                  dbf = T,
-                  names = TAZ, link_vsm_p, link_sml_p, link_med_p, link_lrg_p, gar_sml_p, gar_med_p, gar_lrg_p,
-                               link_vsm_a, link_sml_a, link_med_a, link_lrg_a, gar_sml_a, gar_med_a, gar_lrg_a,
-                  list = z, p[1], p[2], p[3], p[4], p[5], p[6], p[7],
-                            a[1], a[2], a[3], a[4], a[5], a[6], a[7]
+   fileo pao[1] = nonres\TruckTGx.dbf, form = 12.0, dbf = T, list = z, p[1], p[2], p[3], p[4], p[5], p[6], p[7],
+                                                                       a[1], a[2], a[3], a[4], a[5], a[6], a[7] 
    
    ; only apply the model for internal zones
    zones = %TAZ_COUNT%
@@ -146,27 +140,26 @@ run pgm = matrix
    DistributeINTRASTEP ProcessID='MTC_TRUCK',ProcessList=2-13
     
    filei zdati[1] = nonres\TruckTGx.dbf
-   fileo reco[1]  = nonres\TruckTG.dbf, FIELDS=TAZ, TRK_VSM_P, TRK_VSM_A, TRK_SML_P, TRK_SML_A,
-                                                    TRK_MED_P, TRK_MED_A, TRK_LRG_P, TRK_LRG_A
+   
    zones = %TAZ_COUNT%
    
-   RO.TAZ = z
-
    ; very small only has linked trips
-   RO.TRK_VSM_P = zi.1.link_vsm_p
-   RO.TRK_VSM_A = zi.1.link_vsm_a
+   verySmallTruckP = zi.1.P1
+   verySmallTruckA = zi.1.A1
    
    ; small, medium, and large has linked and unlinked
-   RO.TRK_SML_P = zi.1.link_sml_p + zi.1.gar_sml_p
-   RO.TRK_SML_A = zi.1.link_sml_a + zi.1.gar_sml_a
+   smallTruckP  = zi.1.P2 + zi.1.P5
+   smallTruckA  = zi.1.A2 + zi.1.A5
    
-   RO.TRK_MED_P = zi.1.link_med_p + zi.1.gar_med_p
-   RO.TRK_MED_A = zi.1.link_med_a + zi.1.gar_med_a
+   mediumTruckP = zi.1.P3 + zi.1.P6
+   mediumTruckA = zi.1.A3 + zi.1.A6
    
-   RO.TRK_LRG_P = zi.1.link_lrg_p + zi.1.gar_lrg_p
-   RO.TRK_LRG_A = zi.1.link_lrg_a + zi.1.gar_lrg_a
-
-   write RECO=1
+   largeTruckP  = zi.1.P4 + zi.1.P7
+   largeTruckA  = zi.1.A4 + zi.1.A7
+   
+   list = z(12), verySmallTruckP(12.0), verySmallTruckA(12.0), smallTruckP(12.0), smallTruckA(12.0),
+                 mediumTruckP(12.0),    mediumTruckA(12.0),    largeTruckP(12.0), largeTruckA(12.0),
+          file = nonres\TruckTG.dat
 
 endrun
 EndDistributeMultistep
