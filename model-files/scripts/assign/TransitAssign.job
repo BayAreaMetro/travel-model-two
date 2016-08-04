@@ -80,7 +80,7 @@
 ;
 ; Updated to include transit system file for defining wait curves. Removed ferry (mode 104) from skim set 1 and included it 
 ; in SET2 and 3. Updated parameters in transit factor files. Also, build_walk_transfer_bypass_links.py file now sets distances 
-; on walk transfer legs to eucledian distance 
+; on walk transfer legs to euclidean distance 
 ; author: sn(11/7/2014)
 ; ----------------------------------------------------------------------------------------------------------------
 

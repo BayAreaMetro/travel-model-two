@@ -150,7 +150,7 @@ RUN PGM=NETWORK
 ENDRUN
 
 ;call python program to build transit drive access skims
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
+*"%c%\python.exe" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
 ;*del skims\DA_*_taz_time.csv
 
 ; run script used to help consolidate taps

@@ -101,6 +101,12 @@ Wait4Files Files=MTC_IX1.script.end
 token_year = %MODEL_YEAR%
 growth_exponent = '@token_year@ - 2005'
 
+; If forecast year is 2005, do nothing; the base matrix is a 2005 forecast
+
+if(token_year == 2005)  
+  goto done
+endif
+
 ; Set gateway-specific annual growth rates
 base_4689 = '1.005'
 base_4690 = '1.005'
@@ -336,9 +342,12 @@ run pgm = matrix
   
   
 endrun
+
 EndDistributeMultistep
 
 Wait4Files Files=MTC_IX1.script.end
+
+:done
 
 ;stop cluster nodes
 *Cluster.exe MTC_IX 1-13 close exit

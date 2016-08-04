@@ -10,8 +10,8 @@
 ; The five time periods are as follows:(a) early AM, 3 am to 6 am; (b) AM peak period, 6 am to 10 am; (c) midday, 
 ; 10 am to 3 pm; (d) PM peak period, 3 pm to 7 pm; and, (e) evening, 7 pm to 3 am the next morning.
 ;
-; Each highway assignment tracks ten classes of vehicles; the vehicle classes are  value-toll-paying and not-value
-; -toll-paying classes of the following types: (a) single-occupant passenger vehicles; (b)two-occupant passenger 
+; Each highway assignment tracks ten classes of vehicles plus preloaded volumes; the vehicle classes are  value-toll-paying 
+; and not-value-toll-paying classes of the following types: (a) single-occupant passenger vehicles; (b)two-occupant passenger 
 ; vehicles; (c) three or more occupant passenger vehicles; (d) very small, small, and medium commercial vehicles; and, 
 ; (e) large commercial vehicles (combination trucks).
 ;
@@ -54,7 +54,7 @@
 ;           (4) AverageNetworkVolumes.job, which uses the volumes in the output avgloadXX networks in the next
 ;               model execution iteration. 
 ;
-; version:  Travel Model One
+; version:  Travel Model Two
 ; authors:  dto (2010 08 10); gde (2009); crf (2014 02)
 ;
 ;
@@ -66,7 +66,7 @@ token_current_iteration = '%ITERATION%'
 ;start cluster nodes
 *Cluster.exe MTC_HWYMERGE 1-5 start exit
 
-; step one: create time-period-specific networks with readable variable names for use in next iteratin
+; step one: create time-period-specific networks with readable variable names for use in next iteration
 loop period = 1, 5
    
    ; a two letter token is used for each time period
@@ -116,10 +116,14 @@ loop period = 1, 5
       vol@token_period@_s3T = VOL_S3T                                               
       vol@token_period@_smT = VOL_SMT                                               
       vol@token_period@_hvT = VOL_HVT 
+	  
+	  ;set the assignment-class-specific volumes: preloaded volume
+	  vol@token_period@_maz = VOL_MAZ
             
       ; set the assignment-class-specific volumes: total volume
       vol@token_period@_tot = vol@token_period@_da  + vol@token_period@_s2 +  vol@token_period@_s3  + vol@token_period@_sm  +  vol@token_period@_hv + 
-                              vol@token_period@_daT + vol@token_period@_s2T + vol@token_period@_s3T + vol@token_period@_smT + vol@token_period@_hvT
+                              vol@token_period@_daT + vol@token_period@_s2T + vol@token_period@_s3T + vol@token_period@_smT + vol@token_period@_hvT +
+							  vol@token_period@_maz
                               
       ; compute delay, vehicle-miles traveled, and vehicle-hours traveled (ignore centroid connectors and other dummy links)
       if (FT != 6) & (FT != 0)
@@ -176,12 +180,12 @@ run pgm = hwynet
                      TOLLMD_DA,TOLLMD_S2,TOLLMD_S3,TOLLMD_VSM,TOLLMD_SML,TOLLMD_MED,TOLLMD_LRG,
                      TOLLPM_DA,TOLLPM_S2,TOLLPM_S3,TOLLPM_VSM,TOLLPM_SML,TOLLPM_MED,TOLLPM_LRG,
                      TOLLEV_DA,TOLLEV_S2,TOLLEV_S3,TOLLEV_VSM,TOLLEV_SML,TOLLEV_MED,TOLLEV_LRG,
-                     AT,CAPCLASS,FFT,A_NEW_NODE,OLD_A,B_NEW_NODE,OLD_B,
-                     vcEA,volEA_da,volEA_s2,volEA_s3,volEA_sm,volEA_hv,volEA_daT,volEA_s2T,volEA_s3T,volEA_smT,volEA_hvT,volEA_tot,delayEA,vmtEA,vhtEA,ctimEA,cspdEA,
-                     vcAM,volAM_da,volAM_s2,volAM_s3,volAM_sm,volAM_hv,volAM_daT,volAM_s2T,volAM_s3T,volAM_smT,volAM_hvT,volAM_tot,delayAM,vmtAM,vhtAM,ctimAM,cspdAM,
-                     vcMD,volMD_da,volMD_s2,volMD_s3,volMD_sm,volMD_hv,volMD_daT,volMD_s2T,volMD_s3T,volMD_smT,volMD_hvT,volMD_tot,delayMD,vmtMD,vhtMD,ctimMD,cspdMD,
-                     vcPM,volPM_da,volPM_s2,volPM_s3,volPM_sm,volPM_hv,volPM_daT,volPM_s2T,volPM_s3T,volPM_smT,volPM_hvT,volPM_tot,delayPM,vmtPM,vhtPM,ctimPM,cspdPM,
-                     vcEV,volEV_da,volEV_s2,volEV_s3,volEV_sm,volEV_hv,volEV_daT,volEV_s2T,volEV_s3T,volEV_smT,volEV_hvT,volEV_tot,delayEV,vmtEV,vhtEV,ctimEV,cspdEV
+                     PEMSID,AT,CAPCLASS,FFT,A_NEW_NODE,OLD_A,B_NEW_NODE,OLD_B,
+                     vcEA,volEA_da,volEA_s2,volEA_s3,volEA_sm,volEA_hv,volEA_daT,volEA_s2T,volEA_s3T,volEA_smT,volEA_hvT,volEA_maz,volEA_tot,delayEA,vmtEA,vhtEA,ctimEA,cspdEA,
+                     vcAM,volAM_da,volAM_s2,volAM_s3,volAM_sm,volAM_hv,volAM_daT,volAM_s2T,volAM_s3T,volAM_smT,volAM_hvT,volAM_maz,volAM_tot,delayAM,vmtAM,vhtAM,ctimAM,cspdAM,
+                     vcMD,volMD_da,volMD_s2,volMD_s3,volMD_sm,volMD_hv,volMD_daT,volMD_s2T,volMD_s3T,volMD_smT,volMD_hvT,volMD_maz,volMD_tot,delayMD,vmtMD,vhtMD,ctimMD,cspdMD,
+                     vcPM,volPM_da,volPM_s2,volPM_s3,volPM_sm,volPM_hv,volPM_daT,volPM_s2T,volPM_s3T,volPM_smT,volPM_hvT,volPM_maz,volPM_tot,delayPM,vmtPM,vhtPM,ctimPM,cspdPM,
+                     vcEV,volEV_da,volEV_s2,volEV_s3,volEV_sm,volEV_hv,volEV_daT,volEV_s2T,volEV_s3T,volEV_smT,volEV_hvT,volEV_maz,volEV_tot,delayEV,vmtEV,vhtEV,ctimEV,cspdEV
                      
 
      
@@ -203,6 +207,8 @@ run pgm = hwynet
       vol24hr_s3T = volEA_s3T + volAM_s3T + volMD_s3t + volPM_s3T + volEV_s3T        
       vol24hr_smT = volEA_smT + volAM_smT + volMD_smt + volPM_smT + volEV_smT        
       vol24hr_hvT = volEA_hvT + volAM_hvT + volMD_hvt + volPM_hvt + volEV_hvT
+	  
+	  vol24hr_maz = volEA_maz + volAM_maz + volMD_maz + volPM_maz + volEV_maz
       
       vol24hr_tot = volEA_tot + volAM_tot + volMD_tot + volPM_tot + volEV_tot
       
@@ -241,12 +247,12 @@ RUN PGM=NETWORK
     ZONES = 1
 ENDRUN
 
-*DEL hwy\msamerge%ITERATION%_temp.net
-*DEL hwy\msamerge%ITERATION%_EA.net
-*DEL hwy\msamerge%ITERATION%_AM.net
-*DEL hwy\msamerge%ITERATION%_MD.net
-*DEL hwy\msamerge%ITERATION%_PM.net
-*DEL hwy\msamerge%ITERATION%_EV.net
+;*DEL hwy\msamerge%ITERATION%_temp.net
+;*DEL hwy\msamerge%ITERATION%_EA.net
+;*DEL hwy\msamerge%ITERATION%_AM.net
+;*DEL hwy\msamerge%ITERATION%_MD.net
+;*DEL hwy\msamerge%ITERATION%_PM.net
+;*DEL hwy\msamerge%ITERATION%_EV.net
 
 
 ; step three: dump the network to a csv file
@@ -270,6 +276,7 @@ run pgm = network
                 "capclass,",
                 "ffs,",
                 "fft,",
+				"pemsid,",
                 "cspdEA,",
                 "cspdAM,",
                 "cspdMD,",
@@ -304,6 +311,7 @@ run pgm = network
              CAPCLASS(8.0),",",
              FFS(8.2),",",
              FFT(8.2),",",
+			 PEMSID(8.0),",",
              cspdEA(8.2),",",
              cspdAM(8.2),",",
              cspdMD(8.2),",",
