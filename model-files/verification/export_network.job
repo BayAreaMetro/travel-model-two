@@ -1,0 +1,55 @@
+;RUN PGM=NETWORK
+;    PAR  NODES=10000000
+;    NETI = hwy\mtc_final_network_with_tolls.net
+;    NODEO = documentation\mtc_final_network_with_tolls_nodes.csv FORMAT=SDF, FORM=15.0 INCLUDE=N,X,Y
+;ENDRUN
+;RUN PGM=NETWORK
+;    PAR  NODES=10000000
+;    NETI = hwy\mtc_ped_network.net
+;    LINKO = documentation\mtc_ped_network_links.csv FORMAT=SDF, FORM=15.0 INCLUDE=A,B,CNTYPE,FT,FEET,HIGHWAYT,PED_FLAG
+;ENDRUN
+;RUN PGM=NETWORK
+;    PAR  NODES=10000000
+;    NETI = hwy\mtc_bike_network.net
+;    LINKO = documentation\mtc_bike_network_links.csv FORMAT=SDF, FORM=15.0 INCLUDE=A,B,CNTYPE,FT,FEET,HIGHWAYT,PED_FLAG
+;ENDRUN
+;RUN PGM=NETWORK
+;    PAR  NODES=10000000
+;    NETI = hwy\avgloadMD.net
+;    LINKO = documentation\mtc_md_auto_network_links.csv FORMAT=SDF, FORM=15.0 INCLUDE=A,B,CNTYPE,FT,FFS,AT,FEET,HIGHWAYT,PED_FLAG
+;ENDRUN
+;
+;RUN PGM=NETWORK
+;    PAR  NODES=10000000
+;    NETI = hwy\mtc_bike_network.net
+;    LINKO = documentation\mtc_bike_network_links_tana_noft.csv FORMAT=SDF, FORM=15.0
+;    
+;    PHASE = LINKMERGE
+;        IF (CNTYPE == 'TANA' & FT == 0 & StrLen(HIGHWAYT) < 4)
+;        
+;        ELSE
+;            DELETE
+;        ENDIF
+;    ENDPHASE
+;ENDRUN
+
+LOOP PERIOD = 1,5
+
+    ; a two letter token is used for each time period
+    IF (PERIOD = 1)   
+        TOKEN_PERIOD = 'EA' 
+    ELSEIF (PERIOD = 2)   
+        TOKEN_PERIOD = 'AM' 
+    ELSEIF (PERIOD = 3)   
+        TOKEN_PERIOD = 'MD' 
+    ELSEIF (PERIOD = 4)   
+        TOKEN_PERIOD = 'PM'
+    ELSEIF (PERIOD = 5)   
+        TOKEN_PERIOD = 'EV'
+    ENDIF
+    RUN PGM=NETWORK
+        PAR  NODES=10000000
+        NETI = hwy\msaload@TOKEN_PERIOD@_taz.net
+        LINKO = documentation\assignet@TOKEN_PERIOD@.csv FORMAT=SDF, FORM=15.0 INCLUDE=OLD_A,OLD_B,CNTYPE,FT,FEET,V_1
+    ENDRUN
+ENDLOOP

@@ -1,6 +1,5 @@
-USAGE = r"""
-    
-    Usage: python truck_taz_data.py
+"""
+    truck_taz_data.py model_dir input_maz_file output_taz_file taz_count
 
     This script aggregates the maz data to taz level, aggregating and retaining variables needed
     for the commercial truck model. The (column) aggregation is as follows:
@@ -62,99 +61,155 @@ USAGE = r"""
     Additionally, the ***not used*** classes are ignored, as these represent dollar counts,
     not employment
 
-    Inputs:  landuse\maz_data.csv - the maz data file
+    Inputs: maz_data.csv - the input maz data file
 
-    Outputs: nonres\truck_taz_data.csv - the truck taz data file with columns
-             'TAZ','AGREMPN','RETEMPN','FPSEMPN','HEREMPN','MWTEMPN','OTHEMPN','TOTEMP','TOTHH'
+    Outputs: truck_taz_data.csv - the output truck taz data file
 
     version:  Travel Model Zed
     authors:  crf (2014 2 7)
 """
 
-import collections,sys,os,csv
-import numpy, pandas
+import sys,os,csv
 
-# employment category mappings
-CATEGORY_MAP = collections.OrderedDict([
-  ('AGREMPN',   ['emp_ag'                      ]),
-  ('RETEMPN',   ['emp_retail'                  ]),
-  ('FPSEMPN',   ['emp_prof_bus_svcs'           ,
-                 'emp_prof_bus_svcs_bldg_maint',
-                 'emp_personal_svcs_office'    ]),
-  ('HEREMPN',   ['emp_pvt_ed_k12'              ,
-                 'emp_pvt_ed_post_k12_oth'     ,
-                 'emp_health'                  ,
-                 'emp_public_ed'               ,
-                 'emp_amusement'               ,
-                 'emp_personal_svcs_retail'    ,
-                 'emp_hotel'                   ,
-                 'emp_restaurant_bar'          ,
-                 'emp_pvt_hh'                  ]),
-  ('MWTEMPN',   ['emp_mfg_prod'                ,
-                 'emp_mfg_office'              ,
-                 'emp_whsle_whs'               ,
-                 'emp_trans'                   ,
-                 'emp_utilities_prod'          ,
-                 'emp_utilities_office'        ]),
-  ('OTHEMPN',   ['emp_const_non_bldg_prod'     ,
-                 'emp_const_non_bldg_office'   ,
-                 'emp_const_bldg_prod'         ,
-                 'emp_const_bldg_office'       ,
-                 'emp_religious'               ,
-                 'emp_state_local_gov_ent'     ,
-                 'emp_fed_non_mil'             ,
-                 'emp_fed_mil'                 ,
-                 'emp_state_local_gov_blue'    ,
-                 'emp_state_local_gov_white'   ]),
-  ('TOTEMP',    ['emp_total'                   ]),
-  ('TOTHH',     ['HH'                          ]),
-  ('*not used*',['emp_scrap_other'             ,
-                 'emp_cap_accts'               ,
-                 'emp_fed_gov_accts'           ,
-                 'emp_st_lcl_gov_accts'        ]),
-  ('PE',        ['emp_self'                    ,
-                 'emp_own_occ_dwell_mgmt'      ])
-  ])
+base_dir = sys.argv[1]
+maz_data_file = os.path.join(base_dir,sys.argv[2])
+taz_data_file = os.path.join(base_dir,sys.argv[3])
+taz_count = int(sys.argv[4])
 
-ALLOCATION_COLUMNS = ['AGREMPN','RETEMPN','FPSEMPN','HEREMPN','MWTEMPN','OTHEMPN']
+#need these here for correct ordering
+taz_columns = ['TAZ','AGREMPN','RETEMPN','FPSEMPN','HEREMPN','MWTEMPN','OTHEMPN','TOTEMP','TOTHH']
+allocation_columns = ['AGREMPN','RETEMPN','FPSEMPN','HEREMPN','MWTEMPN','OTHEMPN']
+#set employment category mappings -- old maz data field names
+#data_map = {}
+#data_map['AGREMPN'] = ['emp_ag']
+#data_map['RETEMPN'] =        ['emp_retail']
+#data_map['FPSEMPN'] =        ['emp_prof_bus_svcs',
+#                              'emp_prof_bus_svcs_bldg_maint',
+#                              'emp_personal_svcs_office']
+#data_map['HEREMPN'] =        ['emp_pvt_ed_k12',
+#                              'emp_pvt_ed_post_k12_oth',
+#                              'emp_health',
+#                              'emp_public_ed',
+#                              'emp_amusement',
+#                              'emp_personal_svcs_retail',
+#                              'emp_hotel',
+#                              'emp_restaurant_bar',
+#                              'emp_pvt_hh']
+#data_map['MWTEMPN'] =        ['emp_mfg_prod',
+#                              'emp_mfg_office',
+#                              'emp_whsle_whs',
+#                              'emp_trans',
+#                              'emp_utilities_prod',
+#                              'emp_utilities_office']
+#data_map['OTHEMPN'] =        ['emp_const_non_bldg_prod',
+#                              'emp_const_non_bldg_office',
+#                              'emp_const_bldg_prod',
+#                              'emp_const_bldg_office',
+#                              'emp_religious',
+#                              'emp_state_local_gov_ent',
+#                              'emp_fed_non_mil',
+#                              'emp_fed_mil',
+#                              'emp_state_local_gov_blue',
+#                              'emp_state_local_gov_white']
+#data_map['TOTEMP'] =         ['emp_total']
+#data_map['TOTHH'] =          ['HH']
+#data_map['***not used***'] = ['emp_scrap_other',
+#                              'emp_cap_accts',
+#                              'emp_fed_gov_accts',
+#                              'emp_st_lcl_gov_accts']
+#data_map['PE'] =             ['emp_self',
+#                              'emp_own_occ_dwell_mgmt']
 
-if __name__ == '__main__':
-  maz_data_file = os.path.join("landuse",  "maz_data.csv")
-  taz_data_file = os.path.join("nonres",   "truck_taz_data.csv")
+#set employment category mappings
+data_map = {}
+data_map['AGREMPN'] = ['ag']
+data_map['RETEMPN'] =        ['ret_loc',
+                              'ret_reg']
+data_map['FPSEMPN'] =        ['prof',
+                              'prof_comp',
+							  'prof_rd',
+                              'serv_bus',
+                              'serv_pers',
+							  'serv_soc',
+							  'fire',
+							  'info',
+							  'lease']
+data_map['HEREMPN'] =        ['ed_k12',
+                              'ed_oth',
+							  'ed_high',
+                              'health',
+                              'art_rec',
+                              'hotel',
+                              'eat']
+data_map['MWTEMPN'] =        ['man_bio',
+                              'man_hvy',
+							  'man_lgt',
+							  'man_tech',
+                              'logis',
+                              'transp',
+                              'util']
+data_map['OTHEMPN'] =        ['constr',
+                              'gov']
+data_map['TOTEMP'] =         ['emp_total']
+data_map['TOTHH'] =          ['HH']
+data_map['PE'] =             ['unclass',
+                              'natres']
 
-  maz_data = pandas.DataFrame.from_csv(maz_data_file)
-  taz_data = maz_data.groupby(['TAZ']).sum()
+#read in maz-level employment data, and aggregate it to taz-level
+taz_data = {}
+taz_data[0] = {} #for default
+for column in data_map:
+    taz_data[0][column] = 0.0
+with open(maz_data_file) as f:
+    for row in csv.DictReader(f,skipinitialspace=True):
+        taz = int(row['TAZ'])
+        if not taz in taz_data:
+            taz_data[taz] = {}
+            for column in data_map:
+                taz_data[taz][column] = 0.0
+        for column in data_map:
+            for maz_column in data_map[column]:
+                taz_data[taz][column] += float(row[maz_column])
 
-  # combine categories
-  for newcol in CATEGORY_MAP.keys():
-    taz_data[newcol] = 0
-    for origcat in CATEGORY_MAP[newcol]:
-      taz_data[newcol] += taz_data[origcat]
+#reallocate PE
+default_fraction = 1 / float(len(allocation_columns))
+for taz in taz_data:
+    emps = taz_data[taz]
+    emp_sum = 0.0
+    max_column = None #max column gets remainder
+    for column in allocation_columns:
+        emp_sum += emps[column]
+        if max_column is None:
+            max_column = column
+        elif emps[column] > emps[max_column]:
+            max_column = column
 
-  # Reallocate PE
-  if taz_data.PE.sum() > 0:
-    pe_alloc = taz_data.loc[:,ALLOCATION_COLUMNS]
-    pe_alloc['totemp'] =  pe_alloc.sum(axis=1)
-  
-    # We'll proportion the PE amounts proportionally to existing
-    pe_alloc.loc[pe_alloc.totemp >0,ALLOCATION_COLUMNS] = pe_alloc.loc[pe_alloc.totemp>0,ALLOCATION_COLUMNS].div(pe_alloc['totemp'], axis=0)
-    # If no existing, just evenly
-    pe_alloc.loc[pe_alloc.totemp==0,ALLOCATION_COLUMNS] = 1.0/len(ALLOCATION_COLUMNS)
-  
-    # Multiply by the PE we want and round it
-    pe_new = numpy.round(pe_alloc.loc[:,ALLOCATION_COLUMNS].mul(taz_data.PE, axis=0))
-  
-    # Rounding will make us slightly off -- fix the largest column
-    pe_new['pe_sum' ] = pe_new.sum(axis=1)  # this is what we got
-    pe_new['pe_goal'] = taz_data.PE         # but this is what we want
-    pe_new['max_col'] = pe_alloc.loc[:,ALLOCATION_COLUMNS].idxmax(axis=1)  # adjust this column to get what we want
-    for taz in pe_new.index:
-      pe_new.loc[taz, pe_new.loc[taz,'max_col']] += pe_new.loc[taz,'pe_goal'] - pe_new.loc[taz,'pe_sum']
-  
-    # add to our taz_data
-    for newcol in ALLOCATION_COLUMNS:
-      taz_data[newcol] = taz_data[newcol] + pe_new[newcol].astype(numpy.int64)
+    allocations_fractions = {}
+    for column in allocation_columns:
+        if emp_sum == 0:
+            allocations_fractions[column] = default_fraction
+        else:
+            allocations_fractions[column] = emps[column] / emp_sum
 
-  taz_data = taz_data.loc[:,ALLOCATION_COLUMNS+['TOTEMP','TOTHH']]
-  taz_data.reset_index(inplace=True)
-  taz_data.to_csv(taz_data_file, index=False)
+    allocated_total = 0
+    for column in allocation_columns:
+        if column == max_column:
+            continue
+        allocation_emp = round(allocations_fractions[column] * emps['PE'])
+        emps[column] += allocation_emp
+        allocated_total += allocation_emp
+    emps[max_column] += max(0,emps['PE'] - allocated_total)
+
+#write out data, with employment-type aggregation
+with open(taz_data_file,'wb') as f:
+    f.write(','.join(taz_columns) + os.linesep)
+    for taz in range(1,taz_count+1):
+        if taz in taz_data:
+            data = taz_data[taz]
+        else:
+            data = taz_data[0]
+        line = [taz]
+        for column in taz_columns:
+            if column != 'TAZ':
+                line.append(data[column])
+        f.write(','.join(map(str,line)) + os.linesep)
