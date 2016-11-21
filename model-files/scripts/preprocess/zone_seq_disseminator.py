@@ -101,7 +101,7 @@ if __name__ == '__main__':
     
     ######### parkarea ?
     parkarea = maz_data[['MAZ','parkarea']]
-    parkarea.sort(['MAZ'], inplace=True)
+    parkarea.sort_values(['MAZ'], inplace=True)
     parkarea.reset_index(drop=True, inplace=True)
     parkarea.loc[:,'a'] = range(1, parkarea.shape[0] + 1) # isn't this pointless?  MAZ is a consecutive sequence already
     parkarea.rename(columns={'MAZ':'mgra'}, inplace=True)
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
     ######### dc alternatives ?
     dcalts = maz_data[['MAZ','TAZ']]
-    dcalts.sort(['MAZ','TAZ'], inplace=True)
+    dcalts.sort_values(['MAZ','TAZ'], inplace=True)
     dcalts.reset_index(drop=True, inplace=True)
     dcalts.loc[:,'a'] = range(1, dcalts.shape[0] + 1) # isn't this pointless?  MAZ is a consecutive sequence already
     dcalts.rename(columns={'MAZ':'mgra', 'TAZ':'dest'}, inplace=True)
