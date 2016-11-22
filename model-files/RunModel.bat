@@ -135,8 +135,13 @@ IF ERRORLEVEL 1 goto done
 runtpp %BASE_SCRIPTS%\preprocess\CreateNonMotorizedNetwork.job
 if ERRORLEVEL 2 goto done
 
-:: Create the tap data
+:: Find all the TAP-to-TAZ shortest paths
 runtpp %BASE_SCRIPTS%\preprocess\tap_to_taz_for_parking.job
+if ERRORLEVEL 2 goto done
+
+:: Map the TAP to the closest TAZ
+python %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
+IF ERRORLEVEL 1 goto done
 
 :: Set the prices in the roadway network
 runtpp %BASE_SCRIPTS%\preprocess\SetTolls.job

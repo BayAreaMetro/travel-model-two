@@ -20,7 +20,6 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 RUN PGM = CUBE Parameters ='/Command /CloseWhenDone /Minimize /NoSplash'
- PAR  NODES=10000000
  FUNCTION = BUILDPATH
      neti = hwy\mtc_ped_network.net
      pathprinto = ..\hwy\tap_to_taz_for_parking.txt
@@ -36,4 +35,3 @@ RUN PGM = CUBE Parameters ='/Command /CloseWhenDone /Minimize /NoSplash'
  ENDFUNCTION
 ENDRUN
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
