@@ -48,7 +48,7 @@ if __name__ == '__main__':
     taps                    = sequence_mapping[sequence_mapping.TAPSEQ > 0]
     for ind,row in taps.iterrows():
         try:
-            sorted_group = tap_data_grouped.get_group(row['N']).sort(['FEET','TAZ_original'])
+            sorted_group = tap_data_grouped.get_group(row['N']).sort_values(['FEET','TAZ_original'])
             if tap_data_out_init:
                 tap_data_out = tap_data_out.append(sorted_group.head(1))
             else:
