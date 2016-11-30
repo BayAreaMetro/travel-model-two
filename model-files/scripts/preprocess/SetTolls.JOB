@@ -50,8 +50,6 @@
 
 run pgm = hwynet
 
-   PAR NODES=10000000
-
    ; begin with the standard input network
    neti = hwy\mtc_final_network.net
 
@@ -71,6 +69,7 @@ run pgm = hwynet
      lookup[7] = 4, result = 11, ; toll for large (combination) commercial trucks
      fail = -1,-1,-1,
      interpolate = N,
+     list = Y,
      file = hwy\bridge_tolls.csv
 
    lookup name=valtoll,
@@ -84,6 +83,7 @@ run pgm = hwynet
      lookup[8] = 4, result = 12, ; feet multiplier? 1 if multiply by FEET, 0 if flat toll
      fail = -1,-1,-1,
      interpolate = N,
+     list = Y,
      file = hwy\value_tolls.csv
    ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~BRIDGE~TOLLS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
