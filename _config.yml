@@ -3,7 +3,8 @@
 #redcarpet:
 #  extensions: ["tables", "no_intra_emphasis", "fenced_code_blocks", "autolink", "strikethrough", "superscript", "with_toc_data"]
 
-pygments:         true
+pygments:         false
+highlighter:      rouge
 
 # Permalinks
 permalink:        pretty
