@@ -17,7 +17,7 @@
 ; toll" facilities, which are currently used to model high-occupancy toll (HOT) lanes.  These variables can be used
 ; to toll specific links (each link with a different toll needs a different TOLLBOOTH code). 
 ;
-; All tolls should be expressed in year 2010 cents.
+; All tolls should be expressed in year 2000 cents.
 ;
 ; Separate tolls can be charged to each of seven vehicle classes, as follows: (1) single-occupancy passenger 
 ; vehicles, or drive alone, "DA"; (2) two-occupant passenger vehicles, or shared ride two, "S2"; (3) three-or-more-
@@ -27,20 +27,14 @@
 ; are charged the average of the five- and six-axle fee, "LRG". 
 ;
 ;
-; Input:  hwy\mtc_final_network.net: A highway network containing the field TOLLBOOTH, which holds an integer
-;         representing the toll booth at each bridge or the links containing value tolls.
-;
-;         hwy\bridge_tolls.csv: A mapping from the TOLLBOOTH to the bridge tolls
-;         for each vehicle class for each time period.
-;
-;         hwy\value_tolls.csv: A mapping from the TOLLBOOTH to the value tolls
-;         for each vehicle class for each time period.  The tolls can be flat or distance-multipliers.
+; Input:  A highway network containing the field TOLLBOOTH, which holds an integer representing the toll booth at 
+;         each bridge.  
 ;
 ; Output: A highway network containing the following fields:TOLLXX_YY, where XX is a two-letter code
 ;         representing one of the five time periods and YY is the path in question, be it drive alone, shared
 ;         ride 2 or 3+, or very small, small, medium, or large (combination) trucks. 
 ;
-; See also: (1) hwyParam.block, which stores the "firstValue" variable denoting 11 as the first value toll. 
+;; See also: (1) hwyParam.block, which stores the "firstValue" variable denoting 11 as the first value toll. 
 ;
 ; version:  Travel Model Zed
 ; authors:  dto (2010 08 10); gde (2009 03 12); crf (2013 07)
@@ -48,276 +42,475 @@
 ;
 ; ----------------------------------------------------------------------------------------------------------------
 
+;;todo: this is a temp add in to test the toll stuff in the model
+RUN PGM=HWYNET
+    PAR NODES=10000000
+    NETI = hwy\mtc_final_network.net
+    NETO = hwy\mtc_final_network_tb25.net
+    IF ((A = 7079063) & (B = 7050993))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7050993) & (B = 7057151))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7057151) & (B = 7088202))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7088202) & (B = 7077888))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7077888) & (B = 7051005))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7051005) & (B = 7077417))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7077417) & (B = 7050029))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7050029) & (B = 7006291))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7006291) & (B = 7050713))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7050713) & (B = 7059489))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7059489) & (B = 7078415))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7078415) & (B = 7056619))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7056619) & (B = 7090598))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7090598) & (B = 7059061))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7059061) & (B = 7011967))
+        TOLLBOOTH = 25
+    ELSEIF ((A = 7011967) & (B = 7085853))
+        TOLLBOOTH = 25
+    ENDIF
+ENDRUN
+
 run pgm = hwynet
 
+    PAR NODES=10000000
+
    ; begin with the standard input network
-   neti = hwy\mtc_final_network.net
+   ;neti = hwy\mtc_final_network.net
+   neti = hwy\mtc_final_network_tb25.net
 
    ; write out to the same name with the added variables   
    neto = hwy\mtc_final_network_with_tolls.net
-
-   ; lookup FIRSTVALUE
-   read file = ctramp\scripts\block\hwyparam.block
    
-   lookup name=toll,
-     lookup[1] = 4, result = 5,  ; toll for drive alone
-     lookup[2] = 4, result = 6,  ; toll for shared ride 2
-     lookup[3] = 4, result = 7,  ; toll for shared ride 3+
-     lookup[4] = 4, result = 8,  ; toll for very small commercial trucks
-     lookup[5] = 4, result = 9,  ; toll for small commercial trucks
-     lookup[6] = 4, result = 10, ; toll for medium commercial trucks
-     lookup[7] = 4, result = 11, ; toll for large (combination) commercial trucks
-     fail = -1,-1,-1,
-     interpolate = N,
-     list = Y,
-     file = hwy\bridge_tolls.csv
-
-   lookup name=valtoll,
-     lookup[1] = 4, result = 5,  ; toll for drive alone
-     lookup[2] = 4, result = 6,  ; toll for shared ride 2
-     lookup[3] = 4, result = 7,  ; toll for shared ride 3+
-     lookup[4] = 4, result = 8,  ; toll for very small commercial trucks
-     lookup[5] = 4, result = 9,  ; toll for small commercial trucks
-     lookup[6] = 4, result = 10, ; toll for medium commercial trucks
-     lookup[7] = 4, result = 11, ; toll for large (combination) commercial trucks
-     lookup[8] = 4, result = 12, ; feet multiplier? 1 if multiply by FEET, 0 if flat toll
-     fail = -1,-1,-1,
-     interpolate = N,
-     list = Y,
-     file = hwy\value_tolls.csv
-   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~BRIDGE~TOLLS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-   if (TOLLBOOTH > 0 && TOLLBOOTH < FIRSTVALUE)
-
+   ; set a generic bridge toll value and only change the bridge-specific values below as needed
+   if (TOLLBOOTH > 0 && TOLLBOOTH < 11)
+   
       ; early AM
-      TOLLEA_DA  = toll(1, TOLLBOOTH + 1000)
-      TOLLEA_S2  = toll(2, TOLLBOOTH + 1000)
-      TOLLEA_S3  = toll(3, TOLLBOOTH + 1000)
-      TOLLEA_VSM = toll(4, TOLLBOOTH + 1000)
-      TOLLEA_SML = toll(5, TOLLBOOTH + 1000)
-      TOLLEA_MED = toll(6, TOLLBOOTH + 1000)
-      TOLLEA_LRG = toll(7, TOLLBOOTH + 1000)
-
-      ; if the lookup failed, then use the default
-      IF (TOLLEA_DA  < 0) TOLLEA_DA  = toll(1, 1000)
-      IF (TOLLEA_S2  < 0) TOLLEA_S2  = toll(2, 1000)
-      IF (TOLLEA_S3  < 0) TOLLEA_S3  = toll(3, 1000)
-      IF (TOLLEA_VSM < 0) TOLLEA_VSM = toll(4, 1000)
-      IF (TOLLEA_SML < 0) TOLLEA_SML = toll(5, 1000)
-      IF (TOLLEA_MED < 0) TOLLEA_MED = toll(6, 1000)
-      IF (TOLLEA_LRG < 0) TOLLEA_LRG = toll(7, 1000)
-
+      ;   - drive alone
+      TOLLEA_DA  = 402  
+      
+      ;   - shared ride 2
+      TOLLEA_S2  = 402  
+      
+      ;   - shared ride 3+
+      TOLLEA_S3  = 402  
+      
+      ;   - very small commercial trucks
+      TOLLEA_VSM = 402  
+      
+      ;   - small commercial trucks
+      TOLLEA_SML = 402  
+      
+      ;   - medium commercial trucks
+      TOLLEA_MED = 482  
+      
+      ;   - large (combination) commercial trucks
+      TOLLEA_LRG = 934  
+      
       ; AM peak 
-      TOLLAM_DA  = toll(1, TOLLBOOTH + 2000)
-      TOLLAM_S2  = toll(2, TOLLBOOTH + 2000)
-      TOLLAM_S3  = toll(3, TOLLBOOTH + 2000)
-      TOLLAM_VSM = toll(4, TOLLBOOTH + 2000)
-      TOLLAM_SML = toll(5, TOLLBOOTH + 2000)
-      TOLLAM_MED = toll(6, TOLLBOOTH + 2000)
-      TOLLAM_LRG = toll(7, TOLLBOOTH + 2000)
-
-      ; if the lookup failed, then use the default
-      IF (TOLLAM_DA  < 0) TOLLAM_DA  = toll(1, 2000)
-      IF (TOLLAM_S2  < 0) TOLLAM_S2  = toll(2, 2000)
-      IF (TOLLAM_S3  < 0) TOLLAM_S3  = toll(3, 2000)
-      IF (TOLLAM_VSM < 0) TOLLAM_VSM = toll(4, 2000)
-      IF (TOLLAM_SML < 0) TOLLAM_SML = toll(5, 2000)
-      IF (TOLLAM_MED < 0) TOLLAM_MED = toll(6, 2000)
-      IF (TOLLAM_LRG < 0) TOLLAM_LRG = toll(7, 2000)
-
+      TOLLAM_DA  = 402
+      TOLLAM_S2  = 402
+      TOLLAM_S3  = 201
+      TOLLAM_VSM = 402
+      TOLLAM_SML = 402
+      TOLLAM_MED = 482
+      TOLLAM_LRG = 934
+      
       ; midday 
-      TOLLMD_DA  = toll(1, TOLLBOOTH + 3000)
-      TOLLMD_S2  = toll(2, TOLLBOOTH + 3000)
-      TOLLMD_S3  = toll(3, TOLLBOOTH + 3000)
-      TOLLMD_VSM = toll(4, TOLLBOOTH + 3000)
-      TOLLMD_SML = toll(5, TOLLBOOTH + 3000)
-      TOLLMD_MED = toll(6, TOLLBOOTH + 3000)
-      TOLLMD_LRG = toll(7, TOLLBOOTH + 3000)
-
-      ; if the lookup failed, then use the default
-      IF (TOLLMD_DA  < 0) TOLLMD_DA  = toll(1, 3000)
-      IF (TOLLMD_S2  < 0) TOLLMD_S2  = toll(2, 3000)
-      IF (TOLLMD_S3  < 0) TOLLMD_S3  = toll(3, 3000)
-      IF (TOLLMD_VSM < 0) TOLLMD_VSM = toll(4, 3000)
-      IF (TOLLMD_SML < 0) TOLLMD_SML = toll(5, 3000)
-      IF (TOLLMD_MED < 0) TOLLMD_MED = toll(6, 3000)
-      IF (TOLLMD_LRG < 0) TOLLMD_LRG = toll(7, 3000)
-
+      TOLLMD_DA  = 402
+      TOLLMD_S2  = 402
+      TOLLMD_S3  = 402
+      TOLLMD_VSM = 402
+      TOLLMD_SML = 402
+      TOLLMD_MED = 482
+      TOLLMD_LRG = 934
+      
       ; PM peak
-      TOLLPM_DA  = toll(1, TOLLBOOTH + 4000)
-      TOLLPM_S2  = toll(2, TOLLBOOTH + 4000)
-      TOLLPM_S3  = toll(3, TOLLBOOTH + 4000)
-      TOLLPM_VSM = toll(4, TOLLBOOTH + 4000)
-      TOLLPM_SML = toll(5, TOLLBOOTH + 4000)
-      TOLLPM_MED = toll(6, TOLLBOOTH + 4000)
-      TOLLPM_LRG = toll(7, TOLLBOOTH + 4000)
-
-      ; if the lookup failed, then use the default
-      IF (TOLLPM_DA  < 0) TOLLPM_DA  = toll(1, 4000)
-      IF (TOLLPM_S2  < 0) TOLLPM_S2  = toll(2, 4000)
-      IF (TOLLPM_S3  < 0) TOLLPM_S3  = toll(3, 4000)
-      IF (TOLLPM_VSM < 0) TOLLPM_VSM = toll(4, 4000)
-      IF (TOLLPM_SML < 0) TOLLPM_SML = toll(5, 4000)
-      IF (TOLLPM_MED < 0) TOLLPM_MED = toll(6, 4000)
-      IF (TOLLPM_LRG < 0) TOLLPM_LRG = toll(7, 4000)
-
+      TOLLPM_DA  = 402
+      TOLLPM_S2  = 402
+      TOLLPM_S3  = 201
+      TOLLPM_VSM = 402
+      TOLLPM_SML = 402
+      TOLLPM_MED = 482
+      TOLLPM_LRG = 934
+      
       ; evening
-      TOLLEV_DA  = toll(1, TOLLBOOTH + 5000)
-      TOLLEV_S2  = toll(2, TOLLBOOTH + 5000)
-      TOLLEV_S3  = toll(3, TOLLBOOTH + 5000)
-      TOLLEV_VSM = toll(4, TOLLBOOTH + 5000)
-      TOLLEV_SML = toll(5, TOLLBOOTH + 5000)
-      TOLLEV_MED = toll(6, TOLLBOOTH + 5000)
-      TOLLEV_LRG = toll(7, TOLLBOOTH + 5000)
-
-      ; if the lookup failed, then use the default
-      IF (TOLLEV_DA  < 0) TOLLEV_DA  = toll(1, 5000)
-      IF (TOLLEV_S2  < 0) TOLLEV_S2  = toll(2, 5000)
-      IF (TOLLEV_S3  < 0) TOLLEV_S3  = toll(3, 5000)
-      IF (TOLLEV_VSM < 0) TOLLEV_VSM = toll(4, 5000)
-      IF (TOLLEV_SML < 0) TOLLEV_SML = toll(5, 5000)
-      IF (TOLLEV_MED < 0) TOLLEV_MED = toll(6, 5000)
-      IF (TOLLEV_LRG < 0) TOLLEV_LRG = toll(7, 5000)
-
-   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~VALUE~TOLLS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   elseif (TOLLBOOTH > 0)
-
-      ; early AM
-      _FEETMULT_EA= valtoll(8, TOLLBOOTH + 1000)
-      IF     (_FEETMULT_EA = 1)  ; per-distance toll
-        _FEET_EA = FEET
-      ELSEIF (_FEETMULT_EA = 0)  ; flat toll
-        _FEET_EA = 1.0
-      ELSE
-        ABORT MSG="Invalid or no feet multiplier configured for EA value toll"
-      ENDIF
-
-      TOLLEA_DA  = valtoll(1, TOLLBOOTH + 1000)*_FEET_EA
-      TOLLEA_S2  = valtoll(2, TOLLBOOTH + 1000)*_FEET_EA
-      TOLLEA_S3  = valtoll(3, TOLLBOOTH + 1000)*_FEET_EA
-      TOLLEA_VSM = valtoll(4, TOLLBOOTH + 1000)*_FEET_EA
-      TOLLEA_SML = valtoll(5, TOLLBOOTH + 1000)*_FEET_EA
-      TOLLEA_MED = valtoll(6, TOLLBOOTH + 1000)*_FEET_EA
-      TOLLEA_LRG = valtoll(7, TOLLBOOTH + 1000)*_FEET_EA
-      _FEETMULTEA= valtoll(8, TOLLBOOTH + 1000)*_FEET_EA
-
-      ; if the lookup failed, then abort
-      IF (TOLLEA_DA  < 0) ABORT MSG="No EA_DA  value toll configured for TOLLBOOTH>0"
-      IF (TOLLEA_S2  < 0) ABORT MSG="No EA_S2  value toll configured for TOLLBOOTH>0"
-      IF (TOLLEA_S3  < 0) ABORT MSG="No EA_S3  value toll configured for TOLLBOOTH>0"
-      IF (TOLLEA_VSM < 0) ABORT MSG="No EA_VSM value toll configured for TOLLBOOTH>0"
-      IF (TOLLEA_SML < 0) ABORT MSG="No EA_SML value toll configured for TOLLBOOTH>0"
-      IF (TOLLEA_MED < 0) ABORT MSG="No EA_MED value toll configured for TOLLBOOTH>0"
-      IF (TOLLEA_LRG < 0) ABORT MSG="No EA_LRG value toll configured for TOLLBOOTH>0"
-
-      ; AM peak
-      _FEETMULT_AM= valtoll(8, TOLLBOOTH + 2000)
-      IF     (_FEETMULT_AM = 1)  ; per-distance toll
-        _FEET_AM = FEET
-      ELSEIF (_FEETMULT_AM = 0)  ; flat toll
-        _FEET_AM = 1.0
-      ELSE
-        ABORT MSG="Invalid or no feet multiplier configured for AM value toll"
-      ENDIF
-
-      TOLLAM_DA  = valtoll(1, TOLLBOOTH + 2000)*_FEET_AM
-      TOLLAM_S2  = valtoll(2, TOLLBOOTH + 2000)*_FEET_AM
-      TOLLAM_S3  = valtoll(3, TOLLBOOTH + 2000)*_FEET_AM
-      TOLLAM_VSM = valtoll(4, TOLLBOOTH + 2000)*_FEET_AM
-      TOLLAM_SML = valtoll(5, TOLLBOOTH + 2000)*_FEET_AM
-      TOLLAM_MED = valtoll(6, TOLLBOOTH + 2000)*_FEET_AM
-      TOLLAM_LRG = valtoll(7, TOLLBOOTH + 2000)*_FEET_AM
-
-      ; if the lookup failed, then abort
-      IF (TOLLAM_DA  < 0) ABORT MSG="No AM_DA  value toll configured for TOLLBOOTH>0"
-      IF (TOLLAM_S2  < 0) ABORT MSG="No AM_S2  value toll configured for TOLLBOOTH>0"
-      IF (TOLLAM_S3  < 0) ABORT MSG="No AM_S3  value toll configured for TOLLBOOTH>0"
-      IF (TOLLAM_VSM < 0) ABORT MSG="No AM_VSM value toll configured for TOLLBOOTH>0"
-      IF (TOLLAM_SML < 0) ABORT MSG="No AM_SML value toll configured for TOLLBOOTH>0"
-      IF (TOLLAM_MED < 0) ABORT MSG="No AM_MED value toll configured for TOLLBOOTH>0"
-      IF (TOLLAM_LRG < 0) ABORT MSG="No AM_LRG value toll configured for TOLLBOOTH>0"
-
-      ; midday
-      _FEETMULT_MD= valtoll(8, TOLLBOOTH + 3000)
-      IF     (_FEETMULT_MD = 1)  ; per-distance toll
-        _FEET_MD = FEET
-      ELSEIF (_FEETMULT_MD = 0)  ; flat toll
-        _FEET_MD = 1.0
-      ELSE
-        ABORT MSG="Invalid or no feet multiplier configured for MD value toll"
-      ENDIF
-
-      TOLLMD_DA  = valtoll(1, TOLLBOOTH + 3000)*_FEET_MD
-      TOLLMD_S2  = valtoll(2, TOLLBOOTH + 3000)*_FEET_MD
-      TOLLMD_S3  = valtoll(3, TOLLBOOTH + 3000)*_FEET_MD
-      TOLLMD_VSM = valtoll(4, TOLLBOOTH + 3000)*_FEET_MD
-      TOLLMD_SML = valtoll(5, TOLLBOOTH + 3000)*_FEET_MD
-      TOLLMD_MED = valtoll(6, TOLLBOOTH + 3000)*_FEET_MD
-      TOLLMD_LRG = valtoll(7, TOLLBOOTH + 3000)*_FEET_MD
-
-      ; if the lookup failed, then abort
-      IF (TOLLMD_DA  < 0) ABORT MSG="No MD_DA  value toll configured for TOLLBOOTH>0"
-      IF (TOLLMD_S2  < 0) ABORT MSG="No MD_S2  value toll configured for TOLLBOOTH>0"
-      IF (TOLLMD_S3  < 0) ABORT MSG="No MD_S3  value toll configured for TOLLBOOTH>0"
-      IF (TOLLMD_VSM < 0) ABORT MSG="No MD_VSM value toll configured for TOLLBOOTH>0"
-      IF (TOLLMD_SML < 0) ABORT MSG="No MD_SML value toll configured for TOLLBOOTH>0"
-      IF (TOLLMD_MED < 0) ABORT MSG="No MD_MED value toll configured for TOLLBOOTH>0"
-      IF (TOLLMD_LRG < 0) ABORT MSG="No MD_LRG value toll configured for TOLLBOOTH>0"
-
-      ; PM peak
-      _FEETMULT_PM= valtoll(8, TOLLBOOTH + 4000)
-      IF     (_FEETMULT_PM = 1)  ; per-distance toll
-        _FEET_PM = FEET
-      ELSEIF (_FEETMULT_PM = 0)  ; flat toll
-        _FEET_PM = 1.0
-      ELSE
-        ABORT MSG="Invalid or no feet multiplier configured for PM value toll"
-      ENDIF
-
-      TOLLPM_DA  = valtoll(1, TOLLBOOTH + 4000)*_FEET_PM
-      TOLLPM_S2  = valtoll(2, TOLLBOOTH + 4000)*_FEET_PM
-      TOLLPM_S3  = valtoll(3, TOLLBOOTH + 4000)*_FEET_PM
-      TOLLPM_VSM = valtoll(4, TOLLBOOTH + 4000)*_FEET_PM
-      TOLLPM_SML = valtoll(5, TOLLBOOTH + 4000)*_FEET_PM
-      TOLLPM_MED = valtoll(6, TOLLBOOTH + 4000)*_FEET_PM
-      TOLLPM_LRG = valtoll(7, TOLLBOOTH + 4000)*_FEET_PM
-
-      ; if the lookup failed, then abort
-      IF (TOLLPM_DA  < 0) ABORT MSG="No PM_DA  value toll configured for TOLLBOOTH>0"
-      IF (TOLLPM_S2  < 0) ABORT MSG="No PM_S2  value toll configured for TOLLBOOTH>0"
-      IF (TOLLPM_S3  < 0) ABORT MSG="No PM_S3  value toll configured for TOLLBOOTH>0"
-      IF (TOLLPM_VSM < 0) ABORT MSG="No PM_VSM value toll configured for TOLLBOOTH>0"
-      IF (TOLLPM_SML < 0) ABORT MSG="No PM_SML value toll configured for TOLLBOOTH>0"
-      IF (TOLLPM_MED < 0) ABORT MSG="No PM_MED value toll configured for TOLLBOOTH>0"
-      IF (TOLLPM_LRG < 0) ABORT MSG="No PM_LRG value toll configured for TOLLBOOTH>0"
-
-      ; evening
-      _FEETMULT_EV= valtoll(8, TOLLBOOTH + 5000)
-      IF     (_FEETMULT_EV = 1)  ; per-distance toll
-        _FEET_EV = FEET
-      ELSEIF (_FEETMULT_EV = 0)  ; flat toll
-        _FEET_EV = 1.0
-      ELSE
-        ABORT MSG="Invalid or no feet multiplier configured for EV value toll"
-      ENDIF
-
-      TOLLEV_DA  = valtoll(1, TOLLBOOTH + 5000)*_FEET_EV
-      TOLLEV_S2  = valtoll(2, TOLLBOOTH + 5000)*_FEET_EV
-      TOLLEV_S3  = valtoll(3, TOLLBOOTH + 5000)*_FEET_EV
-      TOLLEV_VSM = valtoll(4, TOLLBOOTH + 5000)*_FEET_EV
-      TOLLEV_SML = valtoll(5, TOLLBOOTH + 5000)*_FEET_EV
-      TOLLEV_MED = valtoll(6, TOLLBOOTH + 5000)*_FEET_EV
-      TOLLEV_LRG = valtoll(7, TOLLBOOTH + 5000)*_FEET_EV
-
-      ; if the lookup failed, then abort
-      IF (TOLLEV_DA  < 0) ABORT MSG="No EV_DA  value toll configured for TOLLBOOTH>0"
-      IF (TOLLEV_S2  < 0) ABORT MSG="No EV_S2  value toll configured for TOLLBOOTH>0"
-      IF (TOLLEV_S3  < 0) ABORT MSG="No EV_S3  value toll configured for TOLLBOOTH>0"
-      IF (TOLLEV_VSM < 0) ABORT MSG="No EV_VSM value toll configured for TOLLBOOTH>0"
-      IF (TOLLEV_SML < 0) ABORT MSG="No EV_SML value toll configured for TOLLBOOTH>0"
-      IF (TOLLEV_MED < 0) ABORT MSG="No EV_MED value toll configured for TOLLBOOTH>0"
-      IF (TOLLEV_LRG < 0) ABORT MSG="No EV_LRG value toll configured for TOLLBOOTH>0"
+      TOLLEV_DA  = 402
+      TOLLEV_S2  = 402
+      TOLLEV_S3  = 402
+      TOLLEV_VSM = 402
+      TOLLEV_SML = 402
+      TOLLEV_MED = 482
+      TOLLEV_LRG = 934
+      
    endif
+   
+   
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; bencia-martinez bridge (changes from base tolls above)
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 1)
+    
+      ; AM peak, shared ride 3+
+      TOLLAM_S3 = 201
+      
+      ; PM peak, shared ride 3+
+      TOLLPM_S3 = 201
+      
+   endif ; end: benicia-martinez
+ 
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; carquinez bridge (changes from base tolls above)
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 2)
+    
+      ; AM peak, shared ride 3+
+      TOLLAM_S3 = 201
+      
+      ; PM peak, shared ride 3+
+      TOLLPM_S3 = 201
+      
+   endif ; end: carquinez bridge
+   
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; richmond-san rafael bridge (changes from base tolls above)
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 3)
+    
+      ; AM peak, shared ride 3+
+      TOLLAM_S3 = 201
+      
+      ; PM peak, shared ride 3+
+      TOLLPM_S3 = 201
+            
+   endif ; end: richmond-san rafael bridge
+   
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; golden gate bridge (changes from base tolls above)
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 4)
+    
+      ; early AM period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLEA_DA  = 402
+      TOLLEA_S2  = 402
+      TOLLEA_S3  = 402
+      TOLLEA_VSM = 402
+      TOLLEA_SML = 402
+      TOLLEA_MED = 602
+      TOLLEA_LRG = 1104
+      
+      ; AM peak period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLAM_DA  = 402
+      TOLLAM_S2  = 402
+      TOLLAM_S3  = 241
+      TOLLAM_VSM = 402
+      TOLLAM_SML = 402
+      TOLLAM_MED = 602
+      TOLLAM_LRG = 1104
+
+      ; midday period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLMD_DA  = 402
+      TOLLMD_S2  = 402
+      TOLLMD_S3  = 402
+      TOLLMD_VSM = 402
+      TOLLMD_SML = 402
+      TOLLMD_MED = 602
+      TOLLMD_LRG = 1104
+      
+      ; PM peak period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLPM_DA  = 402
+      TOLLPM_S2  = 402
+      TOLLPM_S3  = 241
+      TOLLPM_VSM = 402
+      TOLLPM_SML = 402
+      TOLLPM_MED = 602
+      TOLLPM_LRG = 1104
+      
+      ; evening period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLEV_DA  = 402
+      TOLLEV_S2  = 402
+      TOLLEV_S3  = 402
+      TOLLEV_VSM = 402
+      TOLLEV_SML = 402
+      TOLLEV_MED = 602
+      TOLLEV_LRG = 1104
+      
+   endif ; end: golden gate bridge
+   
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; san francisco-oakland bridge (changes from base tolls above)
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 5)
+    
+    ; early AM period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLEA_DA  = 321
+      TOLLEA_S2  = 321
+      TOLLEA_S3  = 321
+      TOLLEA_VSM = 321
+      TOLLEA_SML = 321
+      TOLLEA_MED = 482
+      TOLLEA_LRG = 934
+      
+      ; AM peak period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLAM_DA  = 482
+      TOLLAM_S2  = 482
+      TOLLAM_S3  = 201
+      TOLLAM_VSM = 482
+      TOLLAM_SML = 482
+      TOLLAM_MED = 482
+      TOLLAM_LRG = 934
+
+      ; midday period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLMD_DA  = 321
+      TOLLMD_S2  = 321
+      TOLLMD_S3  = 321
+      TOLLMD_VSM = 321
+      TOLLMD_SML = 321
+      TOLLMD_MED = 482
+      TOLLMD_LRG = 934
+      
+      ; PM peak period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLPM_DA  = 482
+      TOLLPM_S2  = 482
+      TOLLPM_S3  = 201
+      TOLLPM_VSM = 482
+      TOLLPM_SML = 482
+      TOLLPM_MED = 482
+      TOLLPM_LRG = 934
+      
+      ; evening period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLEV_DA  = 321
+      TOLLEV_S2  = 321
+      TOLLEV_S3  = 321
+      TOLLEV_VSM = 321
+      TOLLEV_SML = 321
+      TOLLEV_MED = 482
+      TOLLEV_LRG = 934 
+      
+            
+   endif ; end: san francisco oakland bridge
+   
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; san mateo - hayward bridge
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 6)
+      
+      ; AM peak, shared ride 2
+      TOLLAM_S2 = 201
+      
+      ; AM peak, shared ride 3+
+      TOLLAM_S3 = 201
+      
+      ; PM peak, shared ride 2
+      TOLLPM_S2 = 201
+      
+      ; PM peak, shared ride 3+
+      TOLLPM_S3 = 201
+      
+   endif ; end: san mateo - hayward bridge
+   
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; dumbarton bridge
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 7)
+      
+      ; AM peak, shared ride 2
+      TOLLAM_S2 = 201
+      
+      ; AM peak, shared ride 3+
+      TOLLAM_S3 = 201
+      
+      ; PM peak, shared ride 2
+      TOLLPM_S2 = 201
+      
+      ; PM peak, shared ride 3+
+      TOLLPM_S3 = 201
+      
+   endif ; end: dumbarton bridge
+                    
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; antioch bridge (changes from base tolls above)
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 8)
+    
+      ; AM peak, shared ride 3+
+      TOLLAM_S3 = 201
+      
+      ; PM peak, shared ride 3+
+      TOLLPM_S3 = 201
+      
+   endif ; end: antioch bridge
+   
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; placeholder bridge number one (set all tolls to zero)
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 9)
+    
+      ; early AM period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLEA_DA  = 0
+      TOLLEA_S2  = 0
+      TOLLEA_S3  = 0
+      TOLLEA_VSM = 0
+      TOLLEA_SML = 0
+      TOLLEA_MED = 0
+      TOLLEA_LRG = 0
+      
+      ; AM peak period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLAM_DA  = 0
+      TOLLAM_S2  = 0
+      TOLLAM_S3  = 0
+      TOLLAM_VSM = 0
+      TOLLAM_SML = 0
+      TOLLAM_MED = 0
+      TOLLAM_LRG = 0
+
+      ; midday period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLMD_DA  = 0
+      TOLLMD_S2  = 0
+      TOLLMD_S3  = 0
+      TOLLMD_VSM = 0
+      TOLLMD_SML = 0
+      TOLLMD_MED = 0
+      TOLLMD_LRG = 0
+      
+      ; PM peak period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLPM_DA  = 0
+      TOLLPM_S2  = 0
+      TOLLPM_S3  = 0
+      TOLLPM_VSM = 0
+      TOLLPM_SML = 0
+      TOLLPM_MED = 0
+      TOLLPM_LRG = 0
+      
+      ; evening period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLEV_DA  = 0
+      TOLLEV_S2  = 0
+      TOLLEV_S3  = 0
+      TOLLEV_VSM = 0
+      TOLLEV_SML = 0
+      TOLLEV_MED = 0
+      TOLLEV_LRG = 0
+      
+   endif ; end: place holder bridge one
+   
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; placeholder bridge number two (set all tolls to zero)
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 10)
+    
+      ; early AM period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLEA_DA  = 0
+      TOLLEA_S2  = 0
+      TOLLEA_S3  = 0
+      TOLLEA_VSM = 0
+      TOLLEA_SML = 0
+      TOLLEA_MED = 0
+      TOLLEA_LRG = 0
+      
+      ; AM peak period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLAM_DA  = 0
+      TOLLAM_S2  = 0
+      TOLLAM_S3  = 0
+      TOLLAM_VSM = 0
+      TOLLAM_SML = 0
+      TOLLAM_MED = 0
+      TOLLAM_LRG = 0
+
+      ; midday period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLMD_DA  = 0
+      TOLLMD_S2  = 0
+      TOLLMD_S3  = 0
+      TOLLMD_VSM = 0
+      TOLLMD_SML = 0
+      TOLLMD_MED = 0
+      TOLLMD_LRG = 0
+      
+      ; PM peak period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLPM_DA  = 0
+      TOLLPM_S2  = 0
+      TOLLPM_S3  = 0
+      TOLLPM_VSM = 0
+      TOLLPM_SML = 0
+      TOLLPM_MED = 0
+      TOLLPM_LRG = 0
+      
+      ; evening period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      TOLLEV_DA  = 0
+      TOLLEV_S2  = 0
+      TOLLEV_S3  = 0
+      TOLLEV_VSM = 0
+      TOLLEV_SML = 0
+      TOLLEV_MED = 0
+      TOLLEV_LRG = 0
+      
+   endif ; end: place holder bridge two
+   
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ; Facility:  I-680 southbound from I-580 to CA 237
+   ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   if (TOLLBOOTH = 25)
+       
+         ; early AM period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         TOLLEA_DA  = 0
+         TOLLEA_S2  = 0
+         TOLLEA_S3  = 0
+         TOLLEA_VSM = 0
+         TOLLEA_SML = 0
+         TOLLEA_MED = 0
+         TOLLEA_LRG = 0
+         
+         ; AM peak period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         TOLLAM_DA  = 5.0 * FEET
+         TOLLAM_S2  = 0.0
+         TOLLAM_S3  = 0.0
+         TOLLAM_VSM = 5.0 * FEET
+         TOLLAM_SML = 5.0 * FEET
+         TOLLAM_MED = 5.0 * FEET
+         TOLLAM_LRG = 0.0
+   
+         ; midday period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         TOLLMD_DA  = 0.0 * FEET
+         TOLLMD_S2  = 0.0 * FEET
+         TOLLMD_S3  = 0.0
+         TOLLMD_VSM = 0.0 * FEET
+         TOLLMD_SML = 0.0 * FEET
+         TOLLMD_MED = 0.0 * FEET
+         TOLLMD_LRG = 0.0
+         
+         ; PM peak period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         TOLLPM_DA  = 0.0
+         TOLLPM_S2  = 0.0
+         TOLLPM_S3  = 0.0
+         TOLLPM_VSM = 0.0
+         TOLLPM_SML = 0.0 
+         TOLLPM_MED = 0.0 
+         TOLLPM_LRG = 0.0
+         
+         ; evening period ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         TOLLEV_DA  = 0
+         TOLLEV_S2  = 0
+         TOLLEV_S3  = 0
+         TOLLEV_VSM = 0
+         TOLLEV_SML = 0
+         TOLLEV_MED = 0
+         TOLLEV_LRG = 0
+         
+   endif ; end: TOLLBOOTH 25
+   
+ 
+
+        
 endrun
 
 
