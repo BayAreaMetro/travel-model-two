@@ -16,7 +16,7 @@ rem ### Name the project directory.  This directory will hava data and runtime s
 set RUNTIME=%PROJECT_DIRECTORY%
 set CONFIG=%RUNTIME%\CTRAMP\runtime\config
 set JAR_LOCATION=%RUNTIME%\CTRAMP\runtime
-set JPPF_LIB=%JAR_LOCATION%\lib\JPPF-2.5-admin-ui\lib\*
+set JPPF_LIB=%JAR_LOCATION%\lib\JPPF-2.5.5-admin-ui\lib\*
 set LIB_JAR_PATH=%JPPF_LIB%;%JAR_LOCATION%\lib\sandagLib\*;%JAR_LOCATION%\lib\jxlLib\*;%JAR_LOCATION%\lib\ssjLib\*;%JAR_LOCATION%\lib\cmfLib\*;%JAR_LOCATION%\lib\log4jLib\*
 
 rem ### Define the CLASSPATH environment variable for the classpath needed in this model run.
@@ -34,18 +34,16 @@ set PATH=%JAVA_PATH%\bin;%OLDPATH%
 
 rem ### Run ABM LOCAL 
 java -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration %iteration% -sampleRate %sampleRate% -sampleSeed 0
-::java -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration %iteration% -sampleRate %sampleRate% -sampleSeed 0
-
 rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
 rem java -agentlib:jdwp=transport=dt_socket,address=1045,server=y,suspend=y -server Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
 
 rem ### Run ABM DISTRIBUTED
 rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientDistributed.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
-rem java -server Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientDistributed.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
+rem java -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientDistributed.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
 
 rem ### create demand matrices in Cube matrix format - must restart mtx manager before running?
 java -Xmx80g -cp "%CLASSPATH%" -Dproject.folder=%PROJECT_DIRECTORY% com.pb.mtctm2.abm.application.MTCTM2TripTables mtctm2 -iteration %iteration% -sampleRate %sampleRate%
-::java -Xmx80g -cp "%CLASSPATH%" -Dproject.folder=%PROJECT_DIRECTORY% com.pb.mtctm2.abm.application.MTCTM2TripTables mtctm2 -iteration %iteration% -sampleRate %sampleRate%
+rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server -Xmx80g -cp "%CLASSPATH%" -Dproject.folder=%PROJECT_DIRECTORY% com.pb.mtctm2.abm.application.MTCTM2TripTables mtctm2 -iteration %iteration% -sampleRate %sampleRate%
 
 rem ### restore saved environment variable values, and change back to original current directory
 set JAVA_PATH=%OLDJAVAPATH%

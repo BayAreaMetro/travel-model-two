@@ -80,7 +80,7 @@
 ;
 ; Updated to include transit system file for defining wait curves. Removed ferry (mode 104) from skim set 1 and included it 
 ; in SET2 and 3. Updated parameters in transit factor files. Also, build_walk_transfer_bypass_links.py file now sets distances 
-; on walk transfer legs to euclidean distance 
+; on walk transfer legs to eucledian distance 
 ; author: sn(11/7/2014)
 ; ----------------------------------------------------------------------------------------------------------------
 
@@ -130,6 +130,7 @@ LOOP PERIOD = 1,5
                 FILEO NETO = "trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit_assign.net"
                 FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit_assign.rte"
                 FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit_assign.rpt"
+				FILEO LINKO = "trn\@SKIMSET_NAME@_mtctrnasgn_@TOKEN_PERIOD@.dbf", ONOFFS=Y, NTLEGS=N
                 
                 PARAMETERS HDWAYPERIOD=@PERIOD@
                 PARAMETERS NOROUTEERRS=17000000
