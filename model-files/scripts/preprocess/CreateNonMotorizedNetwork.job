@@ -22,7 +22,7 @@
 ;
 ; version:  Travel Model Zed
 ; authors:  dto (2010 03 25); gde (2008 04 03); crf (2013 07)
-;
+; revised jef (2016 08 09) to work with cube 6.4
 ;
 ; ----------------------------------------------------------------------------------------------------------------
 
@@ -33,7 +33,6 @@ read file=%BASE_SCRIPTS%\block\maxCosts.block
 ;create temporary network with one-way links allowing walking in both directions
 ;write network link dbf
 RUN PGM = NETWORK
-    PAR  NODES=10000000
     NETI = hwy\mtc_final_network.net
     LINKO = hwy\temp_mtc_final_network_links.dbf, EXCLUDE=REPRIORITIZE
 ENDRUN
@@ -55,7 +54,6 @@ ENDRUN
 
 ;merge networks, retaining only pedestrian links
 RUN PGM=NETWORK
-    PAR  NODES=10000000
     NETI = hwy\mtc_final_network.net
     LINKI[2] = hwy\temp_ped_reverse_links.dbf
     NETO = hwy\mtc_ped_network.net
@@ -80,7 +78,6 @@ ENDRUN
 
 ;create tap-tap network
 RUN PGM=NETWORK
-    PAR  NODES=10000000
     NETI = hwy\mtc_ped_network.net
     NETO = hwy\mtc_tap_ped_network.net
     
@@ -100,7 +97,7 @@ ENDRUN
 
 ;now create bike network
 RUN PGM=NETWORK
-    PAR  NODES=10000000
+;    PAR  NODES=10000000
     NETI = hwy\mtc_final_network.net
     NETO = hwy\mtc_bike_network.net
     

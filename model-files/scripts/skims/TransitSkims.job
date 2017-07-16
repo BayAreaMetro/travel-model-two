@@ -127,7 +127,6 @@ Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM
 
 ;export taps connectors from network
 RUN PGM=NETWORK
-    PAR  NODES=10000000
     NETI = hwy\mtc_final_network_with_tolls.net
     LINKO = hwy\mtc_final_network_tap_links.csv FORMAT=SDF DELIMITER=',' INCLUDE=A,B
     NODEO = hwy\mtc_final_network_tap_nodes.csv FORMAT=SDF DELIMITER=',' INCLUDE=N,MODE
@@ -150,7 +149,7 @@ RUN PGM=NETWORK
 ENDRUN
 
 ;call python program to build transit drive access skims
-*"%c%\python.exe" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
 ;*del skims\DA_*_taz_time.csv
 
 ; run script used to help consolidate taps

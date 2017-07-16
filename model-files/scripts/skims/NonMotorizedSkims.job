@@ -49,7 +49,7 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;read max cost parameters
-read file=%BASE_SCRIPTS%\block\maxCosts.block
+read file=CTRAMP\scripts\block\maxCosts.block
 
 ;zone is < 900,000 (skip externals)
 zone_selector = '(N < 900000)'
@@ -115,7 +115,9 @@ tap_mn = '(' + county_selector_mn + ' & ' + tap_selector + ')'
 
         
 ;start cluster nodes
-*Cluster.exe MTC_NONMOT 1-9 start exit
+*"C:\Program Files (x86)\Citilabs\Cube\Cluster.exe" MTC_NONMOT 1-9 start exit
+
+SLEEP TIME = 10
 
 ;loop by county and create shortest paths
 LOOP PROC_COUNT=1,9
@@ -134,9 +136,8 @@ LOOP PROC_COUNT=1,9
         *copy hwy\mtc_ped_network.net hwy\mtc_ped_network_@PROC_COUNT@.net
         *copy hwy\mtc_bike_network.net hwy\mtc_bike_network_@PROC_COUNT@.net
         *copy hwy\mtc_tap_ped_network.net hwy\mtc_tap_ped_network_@PROC_COUNT@.net
-        
-  
-        LOOP SKIM_TYPE=1,6
+		
+      LOOP SKIM_TYPE=1,6
             ;skim types are:
             ; 1 - ped maz->maz
             ; 2 - ped maz->tap
@@ -195,13 +196,13 @@ LOOP PROC_COUNT=1,9
                 ORIGIN_SELECTOR = tap_selector
                 DEST_SELECTOR = tap_all
             ENDIF
-      
+           		
+
             ;write Cube script since can't pass tokens to RUN PGM = CUBE
             RUN PGM=MATRIX
                 ZONES=1
                 FILEO PRINTO[1] = @SFILE@_@SKIM_COUNTY@.s
                 PRINT LIST="RUN PGM = CUBE Parameters ='/Command /CloseWhenDone /Minimize /NoSplash'" PRINTO=1
-                PRINT LIST="PAR  NODES=10000000" PRINTO=1
                 PRINT LIST=" FUNCTION = BUILDPATH" PRINTO=1
                 PRINT LIST=" neti = @NETFILE@_@PROC_COUNT@.net" PRINTO=1
                 PRINT LIST=" pathprinto = @OUTFILE@_@SKIM_COUNTY@.txt" PRINTO=1
@@ -225,38 +226,48 @@ LOOP PROC_COUNT=1,9
                 ;same single quote problem here
                 IF (@SKIM_COUNTY@ = 1)
                     PRINT LIST=" Origin = '(@county_selector_sf@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-                ELSEIF (@SKIM_COUNTY@ = 2)
+;                    PRINT LIST=" Origin = '1'" PRINTO=1
+                 ELSEIF (@SKIM_COUNTY@ = 2)
                     PRINT LIST=" Origin = '(@county_selector_sm@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-                ELSEIF (@SKIM_COUNTY@ = 3)
+;                    PRINT LIST=" Origin = '1'" PRINTO=1
+                 ELSEIF (@SKIM_COUNTY@ = 3)
                     PRINT LIST=" Origin = '(@county_selector_sc@ & @ORIGIN_SELECTOR@)'" PRINTO=1
+;                    PRINT LIST=" Origin = '1'" PRINTO=1
                 ELSEIF (@SKIM_COUNTY@ = 4)
                     PRINT LIST=" Origin = '(@county_selector_al@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-                ELSEIF (@SKIM_COUNTY@ = 5)
+;                    PRINT LIST=" Origin = '1'" PRINTO=1
+                 ELSEIF (@SKIM_COUNTY@ = 5)
                     PRINT LIST=" Origin = '(@county_selector_cc@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-                ELSEIF (@SKIM_COUNTY@ = 6)
+;                    PRINT LIST=" Origin = '1'" PRINTO=1
+                 ELSEIF (@SKIM_COUNTY@ = 6)
                     PRINT LIST=" Origin = '(@county_selector_sl@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-                ELSEIF (@SKIM_COUNTY@ = 7)
+;                    PRINT LIST=" Origin = '1'" PRINTO=1
+                 ELSEIF (@SKIM_COUNTY@ = 7)
                     PRINT LIST=" Origin = '(@county_selector_np@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-                ELSEIF (@SKIM_COUNTY@ = 8)
+;                    PRINT LIST=" Origin = '1'" PRINTO=1
+                 ELSEIF (@SKIM_COUNTY@ = 8)
                     PRINT LIST=" Origin = '(@county_selector_sn@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-                ELSEIF (@SKIM_COUNTY@ = 9)
+;                    PRINT LIST=" Origin = '1'" PRINTO=1
+                 ELSEIF (@SKIM_COUNTY@ = 9)
                     PRINT LIST=" Origin = '(@county_selector_mn@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-                ENDIF
+;                    PRINT LIST=" Origin = '1'" PRINTO=1
+                 ENDIF
                 PRINT LIST=" AddTrace='FEET'" PRINTO=1
                 PRINT LIST=" Destination = '@DEST_SELECTOR@'" PRINTO=1
-                PRINT LIST=" CLOSE" PRINTO=1
+;                PRINT LIST=" Destination = '2'" PRINTO=1
+                 PRINT LIST=" CLOSE" PRINTO=1
                 PRINT LIST=" ENDFUNCTION" PRINTO=1
                 PRINT LIST="ENDRUN" PRINTO=1
              ENDRUN
-          
+            
             ;run script
-            *"%TPP_PATH%\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
+            *"C:\Program Files\Citilabs\CubeVoyager\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
             
             ;clean-up
             *del @SFILE@_@SKIM_COUNTY@.s
         ENDLOOP
         
-        *del hwy\mtc_ped_network_@PROC_COUNT@.net
+		 *del hwy\mtc_ped_network_@PROC_COUNT@.net
         *del hwy\mtc_bike_network_@PROC_COUNT@.net
         *del hwy\mtc_tap_ped_network_@PROC_COUNT@.net
         

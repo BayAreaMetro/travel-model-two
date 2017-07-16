@@ -12,14 +12,11 @@
 ;
 ; version:  Travel Model Zed
 ; authors:  dto (2010 08 10); gde (2009 03 12); crf (2013 07)
-;
-;
+; revised jef (2016 08 09) to work with cube 6.4
 ; ----------------------------------------------------------------------------------------------------------------
 
 
 run pgm = hwynet
-
-    PAR NODES=10000000
 
    ; begin with the standard input network
    neti = hwy\mtc_final_network_with_tolls.net

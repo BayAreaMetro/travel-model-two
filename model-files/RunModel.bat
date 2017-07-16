@@ -1,4 +1,4 @@
-@ECHO OFF
+rem @ECHO OFF
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 :: RunModel.bat
 ::
@@ -17,16 +17,20 @@
 :: 
 :: ------------------------------------------------------------------------------------------------------
 
-:: The number of internal TAZs
+
+
+:: The number of internal TAZs (shouldn't this be calculated on the fly?)
 SET TAZ_COUNT=4688
 ECHO TAZ_COUNT: %TAZ_COUNT%
 
-:: The number of internal + external TAZs
+:: The number of internal + external TAZs (shouldn't this be calculated on the fly?)
 SET TAZ_EXTS_COUNT=4709
 ECHO TAZ_EXTS_COUNT: %TAZ_EXTS_COUNT%
 
-:: The number of transit access point (TAP) zones
-SET TAP_COUNT=6214
+:: The number of transit access point (TAP) zones (shouldn't this be calculated on the fly?)
+:: There are 6214 TAPS in 2000,2005, and 2010 networks, and 6216 TAPS in 2015 network
+
+SET TAP_COUNT=6216
 ECHO TAP_COUNT: %TAP_COUNT%
 
 :: ------------------------------------------------------------------------------------------------------
@@ -36,6 +40,7 @@ ECHO TAP_COUNT: %TAP_COUNT%
 :: ------------------------------------------------------------------------------------------------------
 
 :: Scenario name - the directory that this file is in
+rem :here
 SET D=%~p0
 IF %D:~-1% EQU \ SET D=%D:~0,-1%
 FOR %%a IN ("%D%") DO SET SCEN=%%~nxa
@@ -45,19 +50,17 @@ ECHO ***SCENARIO: %SCEN%***
 CALL CTRAMP\runtime\CTRampEnv.bat
 
 :: Set the model feedback iterations
-SET /A MAX_ITERATION=1
+SET /A MAX_ITERATION=3
 
 ::  Set choice model household sample rate
-::set SAMPLERATE_ITERATION1=0.001
 SET SAMPLERATE_ITERATION1=0.10
-rem SET SAMPLERATE_ITERATION2=0.25
-rem SET SAMPLERATE_ITERATION3=0.25
-rem SET SAMPLERATE_ITERATION4=0.25
-rem SET SAMPLERATE_ITERATION5=0.25
-ECHO SAMPLE RATE: %SAMPLERATE_ITERATION1%
+SET SAMPLERATE_ITERATION2=0.50
+SET SAMPLERATE_ITERATION3=1.0
+SET SAMPLERATE_ITERATION4=1.0
+SET SAMPLERATE_ITERATION5=1.0
 
 :: Set the model run year
-SET MODEL_YEAR=2005
+SET MODEL_YEAR=2015
 
 :: Scripts base directory
 SET BASE_SCRIPTS=CTRAMP\scripts
@@ -125,23 +128,15 @@ ROBOCOPY CTRAMP %MATRIX_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
 
 :: Build sequential numberings
 runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
-IF ERRORLEVEL 2 goto done
-
-:: Create all necessary input files based on updated sequential zone numbering
-python %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
-IF ERRORLEVEL 1 goto done
+if ERRORLEVEL 2 goto done
 
 :: Translate the roadway network into a non-motorized network
 runtpp %BASE_SCRIPTS%\preprocess\CreateNonMotorizedNetwork.job
 if ERRORLEVEL 2 goto done
 
-:: Find all the TAP-to-TAZ shortest paths
+:: Create the tap data
 runtpp %BASE_SCRIPTS%\preprocess\tap_to_taz_for_parking.job
 if ERRORLEVEL 2 goto done
-
-:: Map the TAP to the closest TAZ
-python %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
-IF ERRORLEVEL 1 goto done
 
 :: Set the prices in the roadway network
 runtpp %BASE_SCRIPTS%\preprocess\SetTolls.job
@@ -174,7 +169,7 @@ if ERRORLEVEL 2 goto done
 :: Build the skim tables
 runtpp %BASE_SCRIPTS%\skims\NonMotorizedSkims.job
 if ERRORLEVEL 2 goto done
-::
+
 :::: Build the maz-maz skims
 runtpp %BASE_SCRIPTS%\skims\MazMazSkims.job
 if ERRORLEVEL 2 goto done
@@ -198,6 +193,8 @@ ROBOCOPY skims %HH_SERVER_BASE_DIR%\skims *.csv *.txt /NDL /NFL
 ROBOCOPY trn %HH_SERVER_BASE_DIR%\trn tapLines.csv /NDL /NFL
 
 :itercnt
+
+
 
 ::Step X: Main model iteration setup
 SET /A ITERATION=0
@@ -260,17 +257,16 @@ ROBOCOPY trn %HH_SERVER_BASE_DIR%\trn tapLines.csv /NDL /NFL
 ::CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d %MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%MATRIX_SERVER_JAVA_PATH%" 
 
 ::remote servers using current user (wait 10 seconds between each call because otherwise psXXX sometimes bashes on its own authentication/permissions)
-::CTRAMP\runtime\config\pskill %HH_SERVER% java\
-::ping -n 10 localhost
-::CTRAMP\runtime\config\pskill %MATRIX_SERVER% java
-::ping -n 10 localhost
-::CTRAMP\runtime\config\psexec %HH_SERVER% -d %HH_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runHhMgr.cmd "%HH_SERVER_JAVA_PATH%" %HOST_IP_ADDRESS%
-::ping -n 10 localhost
-::CTRAMP\runtime\config\psexec %MATRIX_SERVER% -d %MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%MATRIX_SERVER_JAVA_PATH%" 
-::ping -n 10 localhost
+CTRAMP\runtime\config\pskill %HH_SERVER% java\
+ping -n 10 localhost
+CTRAMP\runtime\config\pskill %MATRIX_SERVER% java
+ping -n 10 localhost
+CTRAMP\runtime\config\psexec %HH_SERVER% -d %HH_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runHhMgr.cmd "%HH_SERVER_JAVA_PATH%" %HOST_IP_ADDRESS%
+ping -n 10 localhost
+CTRAMP\runtime\config\psexec %MATRIX_SERVER% -d %MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%MATRIX_SERVER_JAVA_PATH%" 
+ping -n 10 localhost
 
 
-taskkill /im "java.exe" /F
 ::start CTRAMP\runtime\runDriver.cmd
 copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
@@ -338,20 +334,19 @@ if ERRORLEVEL 2 goto done
 runtpp CTRAMP\scripts\assign\build_and_assign_maz_to_maz_auto.job
 if ERRORLEVEL 2 goto done
 
-
-
 runtpp CTRAMP\scripts\assign\HwyAssign.job
 if ERRORLEVEL 2 goto done
 
-:resume
-
 runtpp CTRAMP\scripts\assign\AverageNetworkVolumes.job
 if ERRORLEVEL 2 goto done
+
 runtpp CTRAMP\scripts\assign\CalculateAverageSpeed.job
 if ERRORLEVEL 2 goto done
+
 runtpp CTRAMP\scripts\assign\MergeNetworks.job
 if ERRORLEVEL 2 goto done
 
+:here
 IF %ITERATION% LSS %MAX_ITERATION% GOTO iteration_start
 
 runtpp CTRAMP\scripts\assign\TransitAssign.job

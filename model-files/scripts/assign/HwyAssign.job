@@ -100,35 +100,35 @@ loop period = 1,5
       token_capfac = 'parameters capfac = 3'
       ;convergence/stopping criteria
       token_relativegap = 'parameters relativegap = 0.0005'
-      token_maxiters = 'parameters maxiters = 100'
+      token_maxiters = 'parameters maxiters = 30'
     elseif (period = 2)   
       token_period = 'AM'    
       intrastep_range = '4-9'
       ;token_hov_xfer_pen = 'li.HOVXPEN'
       token_capfac = 'parameters capfac = 4'
       token_relativegap = 'parameters relativegap = 0.0005'
-      token_maxiters = 'parameters maxiters = 100'
+      token_maxiters = 'parameters maxiters = 30'
     elseif (period = 3)   
       token_period = 'MD'    
       intrastep_range = '10-15'
       ;token_hov_xfer_pen = '0'
       token_capfac = 'parameters capfac = 5'
       token_relativegap = 'parameters relativegap = 0.0005'
-      token_maxiters = 'parameters maxiters = 100'
+      token_maxiters = 'parameters maxiters = 30'
     elseif (period = 4)   
       token_period = 'PM'
       intrastep_range = '16-21'
       ;token_hov_xfer_pen = 'li.HOVXPEN'
       token_capfac = 'parameters capfac = 4'
       token_relativegap = 'parameters relativegap = 0.0005'
-      token_maxiters = 'parameters maxiters = 100'
+      token_maxiters = 'parameters maxiters = 30'
     elseif (period = 5)   
       token_period = 'EV'
       intrastep_range = '22-24'
       ;token_hov_xfer_pen = '0'
       token_capfac = 'parameters capfac = 8'
       token_relativegap = 'parameters relativegap = 0.0005'
-      token_maxiters = 'parameters maxiters = 100'
+      token_maxiters = 'parameters maxiters = 30'
     endif
     
 
@@ -138,10 +138,8 @@ loop period = 1,5
 	; comment out these steps when trimming the network manually prior to assignment
 	; this is just a temporary step, network should be whole from beginning of process
     
-	/*
     ;in case mazmazvol already exist
     run pgm = network
-        PAR NODES=10000000
         NETI = hwy\avgload@token_period@_taz.net
         NETO = hwy\avgload@token_period@_taz_temp1.net
         
@@ -155,21 +153,21 @@ loop period = 1,5
     
     ;merge in maz->maz vols
     run pgm = network
-        PAR NODES=10000000
         NETI = hwy\avgload@token_period@_taz_temp1.net
         LINKI[2] = hwy\maz_preload_@token_period@_seq_vols.csv VAR=A,B,MAZMAZVOL
         NETO = hwy\avgload@token_period@_taz_temp2.net
 		
         PHASE=LINKMERGE
 			MAZMAZVOL=LI.2.MAZMAZVOL
+			
+			IF(DELETE=1) DELETE
         ENDPHASE
     endrun
     
-    *DEL hwy\avgload@token_period@_taz.net
-    *DEL hwy\avgload@token_period@_taz_temp1.net
-    *REN hwy\avgload@token_period@_taz_temp2.net hwy\avgload@token_period@_taz.net
-    */   
-    
+     *DEL hwy\avgload@token_period@_taz.net
+     *copy hwy\avgload@token_period@_taz_temp2.net hwy\avgload@token_period@_taz.net
+     *DEL hwy\avgload@token_period@_taz_temp2.net
+		 
      run pgm = highway
         DistributeIntrastep processid = 'MTC_HWYASN', processlist = @intrastep_range@ saveprn = f
     
@@ -290,6 +288,8 @@ loop period = 1,5
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_MED > 0) addtogroup = 14
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_LRG > 0) addtogroup = 15
             
+            if(li.DELETE=1) addtogroup = 19
+            
          endphase
 
 
@@ -299,36 +299,36 @@ loop period = 1,5
             ; no value toll paying classes first
 
             ; drive alone, no value toll, exclude drive alone value toll and HOV facilities, internal demand plus intra-regional demand plus air passenger demand
-            pathload path = lw.gencost_da, excludegrp = 11, 23, vol[1] = mi.1.SOV_GP_@token_period@ + mi.2.da + mi.4.da
+            pathload path = lw.gencost_da, excludegrp = 11, 23, 19, vol[1] = mi.1.SOV_GP_@token_period@ + mi.2.da + mi.4.da
 
             ; shared ride 2, no value toll, exclude sr2 value toll and HOV 3+ facilities, internal demand plus intra-regional demand plus air passenger demand
-            pathload path = lw.gencost_s2, excludegrp = 12, 3, vol[2] =  (mi.1.SR2_GP_@token_period@ + mi.1.SR2_HOV_@token_period@) / sr2costShare + mi.2.sr2 + mi.4.sr2
+            pathload path = lw.gencost_s2, excludegrp = 12, 3, 19, vol[2] =  (mi.1.SR2_GP_@token_period@ + mi.1.SR2_HOV_@token_period@) / sr2costShare + mi.2.sr2 + mi.4.sr2
 
             ; shared ride 3+, no value toll, exclude sr3 value toll facilities, internal demand plus intra-regional demand plus air passenger demand
-            pathload path = lw.gencost_s3, excludegrp = 13, vol[3] = (mi.1.SR3_GP_@token_period@ + mi.1.SR3_HOV_@token_period@) / sr3costShare + mi.2.sr3 + mi.4.sr3
+            pathload path = lw.gencost_s3, excludegrp = 13, 19, vol[3] = (mi.1.SR3_GP_@token_period@ + mi.1.SR3_HOV_@token_period@) / sr3costShare + mi.2.sr3 + mi.4.sr3
 
             ; very small, small, and medium trucks, no value toll, exclude small truck value toll facilities and HOV facilities
-            pathload path = lw.gencost_sml, excludegrp = 14, 23, vol[4] = mi.3.vstruck + mi.3.struck + mi.3.mtruck
+            pathload path = lw.gencost_sml, excludegrp = 14, 23, 19, vol[4] = mi.3.vstruck + mi.3.struck + mi.3.mtruck
 
             ; large trucks, no value toll, exclude large truck toll facilities, HOV facilities, and no commercial truck facilities 
-            pathload path = lw.gencost_lrg, excludegrp = 15, 4, vol[5] = mi.3.ctruck
+            pathload path = lw.gencost_lrg, excludegrp = 15, 4, 19, vol[5] = mi.3.ctruck
 
             ; value toll paying classes second
 
             ; drive alone, value toll paying, exclude HOV facilities, internal demand plus intra-regional demand plus air passenger demand
-            pathload path = lw.gencost_da, excludegrp = 23, vol[6] = mi.1.SOV_PAY_@token_period@ + mi.2.datoll + mi.4.datoll
+            pathload path = lw.gencost_da, excludegrp = 23, 19, vol[6] = mi.1.SOV_PAY_@token_period@ + mi.2.datoll + mi.4.datoll
 
             ; shared ride 2, value toll paying, exclude HOV 3+ facilities, internal demand plus intra-regional demand plus air passenger demand
-            pathload path = lw.gencost_s2, excludegrp = 3, vol[7] = mi.1.SR2_PAY_@token_period@ / sr2costShare + mi.2.sr2toll + mi.4.sr2toll
+            pathload path = lw.gencost_s2, excludegrp = 3, 19, vol[7] = mi.1.SR2_PAY_@token_period@ / sr2costShare + mi.2.sr2toll + mi.4.sr2toll
 
             ; shared ride 3+, value toll paying, no exclusions, internal demand plus intra-regional demand plus air passenger demand
-            pathload path = lw.gencost_s3, vol[8] = mi.1.SR3_PAY_@token_period@ / sr3costShare + mi.2.sr3toll + mi.4.sr3toll
+            pathload path = lw.gencost_s3, excludegrp = 19, vol[8] = mi.1.SR3_PAY_@token_period@ / sr3costShare + mi.2.sr3toll + mi.4.sr3toll
 
             ; very small, small, and medium trucks, value toll paying, excluded from HOV facilities, use the small truck generalized cost
-            pathload path = lw.gencost_sml, excludegrp = 23, vol[9]= mi.3.vstrucktoll + mi.3.strucktoll + mi.3.mtrucktoll
+            pathload path = lw.gencost_sml, excludegrp = 23,19, vol[9]= mi.3.vstrucktoll + mi.3.strucktoll + mi.3.mtrucktoll
 
             ; large trucks, value toll paying, excluded from HOV facilities and no commercial truck facilities
-            pathload path = lw.gencost_lrg, excludegrp = 4, vol[10] = mi.3.ctrucktoll
+            pathload path = lw.gencost_lrg, excludegrp = 4,19, vol[10] = mi.3.ctrucktoll
 
         endphase 
     
@@ -354,10 +354,58 @@ loop period = 1,5
          
       endphase
       
-   endrun      
+   endrun     
+
+   ; merge the links from the original network back in, and set the time and congested speed to free-flow conditions for deleted links
+   run pgm = network
+       NETI[1] = hwy\load@token_period@.net
+       NETI[2] = hwy\avgload@token_period@_taz_temp1.net
+       NETO = hwy\avgload@token_period@_taz_temp2.net 
+	   
+		  MERGE RECORD = TRUE FIRST=V_%ITERATION%,TIME_%ITERATION%,VC_%ITERATION%,CSPD_%ITERATION%,VDT_%ITERATION%,VHT_%ITERATION%,V1_%ITERATION%,V2_%ITERATION%,V3_%ITERATION%,V4_%ITERATION%,V5_%ITERATION%,V6_%ITERATION%,
+		  V7_%ITERATION%,V8_%ITERATION%,V9_%ITERATION%,V10_%ITERATION%,VT_%ITERATION%,V1T_%ITERATION%,V2T_%ITERATION%,V3T_%ITERATION%,V4T_%ITERATION%,V5T_%ITERATION%,V6T_%ITERATION%,V7T_%ITERATION%,V8T_%ITERATION%,V9T_%ITERATION%,V10T_%ITERATION% LAST=DELETE
+		
+        PHASE=LINKMERGE
+			
+			
+			IF(LI.2.DELETE=1) TIME_%ITERATION%=lI.2.FFT
+			IF(LI.2.DELETE=1) CSPD_%ITERATION%=lI.2.FFS
+			IF(LI.2.DELETE=1) V_%ITERATION% = 0 
+			IF(LI.2.DELETE=1) VC_%ITERATION%= 0
+			IF(LI.2.DELETE=1) VDT_%ITERATION%= 0
+			IF(LI.2.DELETE=1) VHT_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V1_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V2_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V3_%ITERATION%= 0
+		    IF(LI.2.DELETE=1) V4_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V5_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V6_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V7_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V8_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V9_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V10_%ITERATION%= 0
+			IF(LI.2.DELETE=1) VT_%ITERATION% = 0
+			IF(LI.2.DELETE=1) V1T_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V2T_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V3T_%ITERATION%= 0
+		    IF(LI.2.DELETE=1) V4T_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V5T_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V6T_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V7T_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V8T_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V9T_%ITERATION%= 0
+			IF(LI.2.DELETE=1) V10T_%ITERATION%= 0
+			
+        ENDPHASE
+    endrun
+   
+    ; delete the output from assignment, rename the merged file to load, and delete the temp files.
+    *DEL hwy\load@token_period@.net
+    *copy hwy\avgload@token_period@_taz_temp2.net hwy\load@token_period@.net
+    *DEL hwy\avgload@token_period@_taz_temp1.net
+    *DEL hwy\avgload@token_period@_taz_temp2.net
    
    EndDistributeMultistep
-
  
 endloop ; time period loop
 

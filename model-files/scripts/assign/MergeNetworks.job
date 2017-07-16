@@ -56,7 +56,7 @@
 ;
 ; version:  Travel Model Two
 ; authors:  dto (2010 08 10); gde (2009); crf (2014 02)
-;
+; revised jef (2016 08 09) to work with cube 6.4
 ;
 ; ----------------------------------------------------------------------------------------------------------------
 
@@ -91,7 +91,6 @@ loop period = 1, 5
    DistributeMultistep processid = 'MTC_HWYMERGE', processNum = @period@
    
    run pgm = network
-      PAR NODES=10000000
    
       ; read in the time-period-specific assigned and averaged (over iterations) network (see CalculateSpeeds.job)
       neti[1] = hwy\msaload@token_period@_taz.net
@@ -126,7 +125,7 @@ loop period = 1, 5
 							  vol@token_period@_maz
                               
       ; compute delay, vehicle-miles traveled, and vehicle-hours traveled (ignore centroid connectors and other dummy links)
-      if (FT != 6) & (FT != 0)
+      if ((FT != 6) & (FT != 0))
       
          ; delay is the congested time minus the free-flow time, weighted by the link volume, and converted from minutes to hours
          delay@token_period@ = (CTIM - FFT) * vol@token_period@_tot / 60.0
@@ -213,7 +212,7 @@ run pgm = hwynet
       vol24hr_tot = volEA_tot + volAM_tot + volMD_tot + volPM_tot + volEV_tot
       
       ; compute delay, vehicle-miles traveled, and vehicle-hours traveled (ignore centroid connectors and other dummy links)
-      if (FT != 6) & (FT != 0)
+      if ((FT != 6) & (FT != 0))
       
          ; vehicle delay is the difference between congested time and free flow time, times number of vehicles
          delay24hr = delayEA + delayAM + delayMD + delayPM + delayEV
@@ -231,7 +230,6 @@ endrun
    
 ;copy these back to correct network values
 RUN PGM=NETWORK
-    PAR  NODES=10000000
     NETI = hwy\msamerge%ITERATION%_temp.net
     NETO = hwy\msamerge%ITERATION%.net
 
@@ -257,7 +255,6 @@ ENDRUN
 
 ; step three: dump the network to a csv file
 run pgm = network
-    PAR  NODES=10000000
 
    neti = hwy\msamerge%ITERATION%.net
    

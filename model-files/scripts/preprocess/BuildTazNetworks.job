@@ -13,6 +13,7 @@
 ;
 ; version:  Travel Model Zed
 ; authors:  crf (2014 03)
+; revised jef (2016 08 09) to work with cube 6.4
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;start cluster nodes
@@ -44,7 +45,6 @@ loop period = 1, 5
     
     ;create sequential taz numbers
     RUN PGM=NETWORK
-        PAR NODES=10000000
         NETI = hwy\avgload@token_period@.net
         NETO = hwy\temp@token_period@.net
         
@@ -77,7 +77,6 @@ loop period = 1, 5
     ENDRUN
     ;copy these back to correct network values
     RUN PGM=NETWORK
-        PAR  NODES=10000000
         NETI = hwy\temp@token_period@.net
         NETO = hwy\temp2@token_period@.net
 
@@ -93,7 +92,6 @@ loop period = 1, 5
     
     ;set zone count
     RUN PGM=NETWORK
-        PAR NODES=10000000
         NETI = hwy\temp2@token_period@.net
         NETO = hwy\avgload@token_period@_taz.net
         ZONES = %TAZ_COUNT%
@@ -101,18 +99,17 @@ loop period = 1, 5
     
     ;write out taz to node correspondence
     RUN PGM=NETWORK
-        PAR NODES=10000000
         NETI = hwy\avgload@token_period@_taz.net
         NODEO=hwy\avgload@token_period@_taz_to_node.txt FORMAT=TXT, FORM=25.5 INCLUDE=N,OLD_NODE,X,Y
     ENDRUN
     
     ;build network which will store MSA volume
     RUN PGM=NETWORK
-        PAR NODES=10000000
         NETI = hwy\avgload@token_period@_taz.net
         NETO = hwy\msaload@token_period@_taz.net
         
         PHASE = LINKMERGE
+		   mazmazvol = 0
             vol      = 0
             vc       = 0
             vol_da   = 0
@@ -144,7 +141,6 @@ loop period = 1, 5
     ;*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_external_stations.py %TAZ_COUNT% . hwy\external_stations.csv hwy\avgload@token_period@_taz_to_node.txt hwy\@token_period@_exts_node.csv hwy\@token_period@_exts_link.csv
     ;
     ;RUN PGM=NETWORK
-    ;    PAR NODES=10000000
     ;    NETI = hwy\avgload@token_period@_taz.net
     ;    NODEI[2] = hwy\@token_period@_exts_node.csv VAR=N,X,Y,OLD_NODE
     ;    LINKI[2] = hwy\@token_period@_exts_link.csv VAR=A,B,CNTYPE(C),FEET,OLD_A,OLD_B

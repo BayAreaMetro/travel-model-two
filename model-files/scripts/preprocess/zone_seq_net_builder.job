@@ -31,6 +31,7 @@
 ;
 ; version:  Travel Model Zed
 ; authors:  crf (2013 11)
+; edited jef 2016-08 to remove PAR NODES line
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;taz includes externals
@@ -41,7 +42,6 @@ ext_selector = '(N < 1000000) & (N > 900000)'
 
 ;build the zone sequences and export to a new network
 RUN PGM=NETWORK
-    PAR  NODES=10000000
     NETI = "hwy\mtc_final_network_base.net"
     NETO = "hwy\mtc_final_network.net"
     
@@ -81,7 +81,6 @@ ENDRUN
 
 ;write out taz to node correspondence
 RUN PGM=NETWORK
-    PAR  NODES=10000000
     NETI = hwy\mtc_final_network.net
     NODEO = hwy\mtc_final_network_zone_seq.csv FORMAT=SDF, FORM=15.0 INCLUDE=N,TAZSEQ,MAZSEQ,TAPSEQ,EXTSEQ
     PHASE = NODEMERGE
