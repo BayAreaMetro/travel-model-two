@@ -182,32 +182,41 @@ Most of the JPPF-related configuration parameters have been optimized for the MT
 |                                           |                                 | `processing.threads = 12`                                     | Number of computing cores on node {X} |
 |                                           |                                 | `other.jvm.options = -Xms48000m -Xmx48000m -Dnode.name=node0` | Maximum amount of memory, in MB, to allocate to node {X} and node name for logging | 
 
-The final configuration file that needs to be edited prior to executing a model run is the `mtctm2.properties` file located in `CTRAMP\runtime\`. This file serves as the general control module for the entire CT-RAMP application. At this stage, the following variables need to be modified for the software to execute the model properly.
+A file that needs to be edited prior to executing a model run is the `mtctm2.properties` file located in `CTRAMP\runtime\`. This file serves as the general control module for the entire CT-RAMP application. At this stage, the following variables need to be modified for the software to execute the model properly.
 
 | **Statement**                                     | **Purpose**                                                                                           |
 |---------------------------------------------------|-------------------------------------------------------------------------------------------------------|
 | `RunModel.MatrixServerAddress = 192.168.1.200`    | The IP address of the machine upon which the Matrix Manager is being executed (`satmodel1` at MTC)    |
 | `RunModel.HouseholdServerAddress = 192.168.1.200` | The IP address of the machine upon which the Household Manager is being executed (`satmodel1` at MTC) |
 
-### Step 4: Configure `RunModel.bat`
-The final file in need of adjustment for the computing environment is the `RunModel.bat` MS-DOS batch file that executes the model stream. The following statements need to be configured within this file:
+### Step 4: Configure `RunModel.bat` and `CTRampEnv.bat`
+The file `RunModel.bat` MS-DOS batch file that executes the model stream needs to be consistent with the network and if a specialized model run is being executed, the model flow logic and/or sample rates may need to be adjusted. The following statements may need to be configured within this file:
 
 | **Statement**                                                                | **Purpose** |
 |:------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
-| ` set JAVA_PATH=c:\program files\java\jdk1.7.0_13`                           | Specify the 64-bit Java path; version 1.7.0+ |
-| `set TPP_PATH=c:\progam files(x86)\citilabs\cubevoyager`                     | Specify the Cube Voyager path |
-| `set CUBE_PATH=c:\progam files(x86)\citilabs\cube`                           | Specify the Cube path |
-| `set PYTHON_PATH=C:\Python27`                                                | Specify the Python path |
-| `set RUNTIME=ctramp\runtime`                                                 | Specify the location of the CT-RAMP software (relative to the project directory) |
 | `set SAMPLERATE_ITERATION{iteration}=0.1`                                    | Set choice model household sample rate by iteration |
-| `set PATH=%RUNTIME%;%JAVA_PATH%/bin;%TPP_PATH%;%PYTHON_PATH%/bin;%OLD_PATH%` | Set the path DOS environment variable for the model run |
-| `set HOST_IP_ADDRESS=%IPADDRESS%`                                            | The IP address of the host machine, `mainmodel` at MTC, is automatically calculated |
+model run |
 | `set MODEL_YEAR=2010`                                                        | Set model year |
 | `set BASE_SCRIPTS=CTRAMP\scripts`                                            | Set scripts folder |
 | `set /A MAX_ITERATION=2`                                                     | Set the model feedback iterations |
 | `set TAZ_COUNT=4509`                                                         | The number of tazs |
 | `set TAZ_EXTS_COUNT=4530`                                                    | The number of tazs + externals |
 | `set TAP_COUNT=6172`                                                         | The number of transit access point zones |
+
+The file `CTRampEnv.bat` MS-DOS batch file points to locations of executables and contains some additional information on machine configuration. The following statements may need to be configured within this file:
+
+| **Statement**                                                                | **Purpose** |
+|:------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+
+| `set JAVA_PATH=C:\Program Files\Java\jdk1.8.0_111`                           | Specify the 64-bit Java path; version 1.8.0+ |
+| `set TPP_PATH=C:\Progam Files\Citilabs\CubeVoyager`                          | Specify the Cube Voyager path |
+| `set CUBE_PATH=C:\Progam Files (x86)\Citilabs\Cube`                          | Specify the Cube path |
+| `set PYTHON_PATH=C:\Program Files\anaconda2`                                 | Specify the Python path |
+| `set RUNTIME=CTRAMP\runtime`                                                 | Specify the location of the CT-RAMP software (relative to the project directory) |
+|`set JAVA_32_PORT=1190`                                                       | Specify the port for Java 32 bit matrix reader\writer (not currently used) |
+|`set MATRIX_MANAGER_PORT=1191`                                                | Specify the port for the matrix manager |
+|`set HH_MANAGER_PORT=1129`                                                    | Specify the port for the household manager |
+|`set HHMGR_IP=172.24.0.100`                                                   | Specify IP address of household manager |
 | `set MATRIX_SERVER=\\w-ampdx-d-sag02`                                        | Machine running matrix data manager |
 | `set MATRIX_SERVER_BASE_DIR=%MATRIX_SERVER%\c$\projects\mtc\%SCEN%`          | Machine running matrix data manager base directory |
 | `set MATRIX_SERVER_ABSOLUTE_BASE_DIR=c:\projects\mtc\%SCEN%`                 | Machine running matrix data manager absolute directory |
@@ -218,6 +227,7 @@ The final file in need of adjustment for the computing environment is the `RunMo
 | `set HH_SERVER_JAVA_PATH=C:\Program Files\Java\jdk1.7.0_25`                  | Machine running household data manager Java install |
 | `set UN=`                                                                    | Username for logging in to remote machines |
 | `set PWD=`                                                                   | Password for logging in to remote machines |
+
 
 Now that the model is configured, the user can run the model, as described in the [Model Execution](#model-execution) section.
 
@@ -372,10 +382,8 @@ The table below contains brief descriptions of the input files required to execu
 | `ixDailyYYYY.tpp` | Internal-external fixed trip table for year YYYY | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Fixed Demand](#fixed-demand) |
 | `IXDaily2006x4.may2208.new` | Internal-external input fixed trip table | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Fixed Demand](#fixed-demand) |
 |  `YYYY_fromtoAAA.csv` |  Airport passenger fixed trips for year YYYY and airport AAA  | nonres\ | CSV | [Fixed Demand](#fixed-demand) |
-| `hhFile_YYYY_MAZ.csv` | Synthetic population household file at the MAZ level for year YYYY | popsyn\ | CSV | PopSynHousehold |
-| `personFile.YYYY.csv` | Synthetic population person file for year YYYY | popsyn\ | CSV |   |
-| `activity_code_indcen.csv` | Census occupation to activity coding | popsyn\ | CSV |   |
-| `pecasvocc_occcen1.csv` | Census occupation to work occupation coding | popsyn\ | CSV |   |
+| `households.csv` | Synthetic population household file | popsyn\ | CSV | PopSynHousehold |
+| `persons.csv` | Synthetic population person file | popsyn\ | CSV |   |
 | `transitLines.lin` | Transit lines | trn\transit_lines | [Citilabs Cube](http://citilabs.com/products/cube)| TransitNetwork  |
 | `transitFactors_MMMM.fac` | Cube Public Transport (PT) factor files by transit line haul mode MMMM | trn\transit_support | [Citilabs Cube](http://citilabs.com/products/cube) | TransitNetwork |
 
