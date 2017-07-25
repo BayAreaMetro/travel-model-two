@@ -16,7 +16,7 @@ CONTENTS
 2. [System Design](#system-design) 
 3. [Setup and Configuration](#setup-and-configuration)
 4. [Model Execution](#model-execution) 
-5. [CT-RAMP Properties File](#ct-ramp-properties-File)
+5. [CT-RAMP Properties File](#ct-ramp-properties-file)
 6. [Input Files](#input-files)
   1. [Roadway Network](#roadway-network)
   2. [Transit Network](#transit-network)
@@ -46,7 +46,7 @@ As discussed in the [System Design](#system-design) section, these four computer
 The following software are required to execute the MTC travel model.
 
 #### Citilabs Cube Voyager
-The travel model currently uses version 6.1.X of [Citilabs Cube](http://www.citilabs.com/) or software. The Cube software is used to build skims, manipulate networks, manipulate matrices, and perform assignments. A Cube license that supports up to 9,999,999 nodes is required.
+The travel model currently uses version 6.4.2 of [Citilabs Cube](http://www.citilabs.com/) software. The Cube software is used to build skims, manipulate networks, manipulate matrices, and perform assignments. 
 
 #### Citilabs Cube Voyager 64bit Matrix I/O DLL
 The CT-RAMP software, as discussed below, needs to access data stored in a format dictated by Cube. This is accomplished through a 64-bit DLL library specifically for matrix I/O,which must be accessible through the `PATH` environment variable.  To install the DLL:
@@ -59,13 +59,13 @@ The CT-RAMP software, as discussed below, needs to access data stored in a forma
 The [Cube Cluster software](http://citilabs.com/software/products/cube/cube-cluster) allows Cube scripts to be multi-threaded. In the current approach, the travel model uses 64 computing nodes across four machines. The Cube scripts can be manipulated to use any number of computing nodes across any number of machines, provided each machine has, at a minimum, a Cube Voyager node license (for the time being, MTC has found 64 nodes on a single machine to be the most effective approach -- in terms of reliability and run time). Cube Cluster is not strictly necessary, as the Cube scripts can be modified to use only a single computing node. Such an approach would dramatically increase run times.
 
 #### Java and CT-RAMP
-MTC's travel model operates on the open-source Coordinated Travel - Regional Activity-based Modeling Platform (or CT-RAMP) developed by [Parsons Brinckerhoff](pbworld.com). The software is written in the [Java](http://java.com/en) programming language.  CT-RAMP requires the 64-bit Java Development Kit version 1.6 or later to be installed on each computer running the CT-RAMP software. The Java Development Kit includes the Java Runtime Environment. The 64-bit version of the software allows CT-RAMP to take advantage of larger memory addresses. The details of setting up and configuring the software are presented in the [Setup and Configuration section](#setup-and-configuration) of this guide.
+MTC's travel model operates on the open-source Coordinated Travel - Regional Activity-based Modeling Platform (or CT-RAMP) developed by [Parsons Brinckerhoff](pbworld.com). The software is written in the [Java](http://java.com/en) programming language.  CT-RAMP requires the 64-bit Java Development Kit version 1.8 or later to be installed on each computer running the CT-RAMP software. The Java Development Kit includes the Java Runtime Environment. The 64-bit version of the software allows CT-RAMP to take advantage of larger memory addresses. The details of setting up and configuring the software are presented in the [Setup and Configuration section](#setup-and-configuration) of this guide.
 
 #### Python
 Certain network processing programs are written in [Python](https://www.python.org/). Python must be installed on the computer executing the Cube scripts -- `mainmodel` in MTC's configuration.
 
 #### Python Rtree library
-The open source [Python `rtree` library](https://pypi.python.org/pypi/Rtree/) is required for a script that dynamically codes link area type based on land use data.  The `rtree` library provides an efficient spatial index for looking up all spatial units within a buffered distance from each spatial unit.
+The open source [Python `rtree` library](http://www.lfd.uci.edu/~gohlke/pythonlibs/#rtree) is required for a script that dynamically codes link area type based on land use data.  The `rtree` library provides an efficient spatial index for looking up all spatial units within a buffered distance from each spatial unit. To install, open a dos prompt, navigate to the directory and type: pip install Rtree-0.8.2-cp27-cp27m-win_amd64.whl
 
 #### Microsoft Excel
 The CT-RAMP software allows discrete choice models to be specified via so-called [Utility Expression Calculators](http://analytics.mtc.ca.gov/foswiki/Main/UtilityExpressionCalculator). These files are Excel-based.
@@ -122,7 +122,12 @@ These data managers provide TAZ, MAZ, and TAP level data to the various sub-mode
 This section provides details on setting up the travel model to run on a cluster of computers, including descriptions of the necessary configuration files.
 
 ### Step 1: Create the required folder structure
-The MTC travel model is delivered as a compressed folder containing two directories, `CTRAMP` and `INPUT` and one MS-DOS batch file, `RunModel.bat`. These files can be placed in any directory on a computer designated as the main controller of the program flow. On MTC's set up, these files are placed on the `mainmodel` computer (see [System Design](#system-design) section for more details).
+The MTC travel model folder structure is shown below. Typically the parent directory will be named for the scenario to be run (e.g. '2010_base'). The parent directory contains two subfolders `ctramp` and `input`, and one MS-DOS batch file, `RunModel.bat`. This folder can be placed in any directory on a computer designated as the main controller of the program flow. On MTC's set up, these files are placed on the `mainmodel` computer (see [System Design](#system-design) section for more details).
+
+\Scenario_Folder
+  \ct-ramp
+  \input
+  RunModel.bat
 
 The `CTRAMP` directory contains all of the model configuration files, Java instructions, and Cube scripts required to run the travel model, organized in the following three folders:
 
@@ -136,7 +141,8 @@ The `INPUT` directory contains all of the input files (see the [Input Files](#in
 * `trn` -- contains all of the input transit network files (see the [Networks](#networks) section);
 * `landuse` -- contains the MAZ and TAZ level socio-economic input land use files;
 * `nonres` -- contains the fixed, year-specific internal/external trip tables, the fixed, year-specific air passenger trip tables, and files used to support the commercial vehicle model;
-* `popsyn` -- contains the synthetic population files.
+* `popsyn` -- contains the synthetic population files;
+* `warmstart` -- contains trip tables for warm-starting the model.
 
 The `RunModel.bat` script contains a list of MS-DOS instructions that control model flow.
 
@@ -146,6 +152,8 @@ As noted in the previous section, the MTC model files can be placed within any d
 Satellite computers should also map the letter drive `M:\` to this network location.
 
 Please note that the model components running on the main machine should use the local version of the directory (i.e. `M:\Projects\`) rather than the network version (i.e. `\\MainModel\MainModelShare\Projects\`).
+
+MTC has created scenarios for 2000, 2005, 2010 and 2015. The model is calibrated and validated to 2010 observed data.
 
 ### Step 3: Configure the CT-RAMP and JPPF Services
 Much of the configuration of the CT-RAMP software is done automatically by the `RunModel.bat` batch file.  However, prior to executing a model run, the files controlling the CT-RAMP and JPPF services may need to be configured. Please see the [System Design](#system-design) section for a broad overview of these services. When executing the travel model, the following start-up scripts need to be run separately on each computer. Each script specifies the tasks assigned to each computer and need not be configured exactly as described on the [System Design](#system-design) section (we describe MTC's setup; numerous other configurations are possible). In the MTC setup, the following commands are executed:
