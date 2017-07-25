@@ -13,6 +13,7 @@ title: Modeling Process
   4. [Highway and Transit Skims](#highway-and-transit-skims)
   5. [Core](#core)
   6. [Non Residential](#non-residential)
+  7. [Assignment](#assignment)
 
 # Modeling Process
 
@@ -307,3 +308,72 @@ title: Modeling Process
     * Output:
       1. `nonres\tripIx[EA,AM,MD,PM,EV].tpp`, the internal/external trips for the given time period.  Tables are *DA*, *SR2*, *SR3*, *DATOLL*, *SR2TOLL*, *SR3TOLL*
   
+## Assignment
+
+1. [`assign\build_and_assign_maz_to_maz_auto.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/build_and_assign_maz_to_maz_auto.job)
+    * Summary: Assigns short auto trips to highway network using MAZ centroids based on shortest paths. 
+    * Input:  
+      1. `hwy\avgload@token_period@.net`, TAZ output network for skimming by time period
+      2. `hwy\hwyparam.block`, highway assignment generalized cost parameters
+      3. `MAZ_Demand_[MAZSET]_[EA,AM,MD,PM,EV].mat`, MAZ to MAZ auto demand for each local network
+    * Output: 
+      1. `maz_preload_[EA,AM,MD,PM,EV].net`, Network by time period with link attribute MAZMAZVOL for copying over to the TAZ to TAZ highway assignment    
+    
+2. [`scripts\assign\HwyAssign.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/hwyassign.job)
+    * Summary: Assigns trips to highway network using TAZ centroids and equilibrium capacity restraint assignment. Uses trimmed highway network which excludes lower-functional class links to improve runtime.
+    * Input: 
+      1. `block\hwyparam.block`, highway assignment generalized cost parameters
+      2. `block\SpeedCapacity_1hour.block`, speed-capacity table
+      3. `block\FreeFlowSpeed.block`, free-flow speed table
+      4. `block\SpeedFlowCurve.block`, volume-delay functions
+      5. `hwy\avgload[EA,AM,MD,PM,EV]_taz.net`, highway network for assignment
+      6. `ctramp_output\TAZ_Demand_[EA,AM,MD,PM,EV].mat`, household travel demand
+      7. `nonres\tripsIx[EA,AM,MD,PM,EV].tpp`, internal-external travel demand
+      8. `nonres\tripsTrk[EA,AM,MD,PM,EV].tpp`, commercial vehicle travel demand
+      9. `nonres\tripsAirPax[EA,AM,MD,PM,EV].mtx`, airport travel demand
+    * Output:
+      1. `hwy\load[EA,AM,MD,PM,EV].net`, loaded highway network
+      
+3. [`scripts\assign\AverageNetworkVolumes.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/averagenetworkvolumes.job)
+    * Summary: Compute the weighted average of roadway volumes for successive iterations of the entire model stream.  The iteration weights are set in the primary model stream file, RunModel.  This script averages the volumes from the current iteration with the averaged volumes for ALL previous iterations.  This method of successive averages "forces" model convergence.
+    * Input: 
+      1. `hwy\msaload[EA,AM,MD,PM,EV]_taz.net`, an MSA network used to store averaged volumes for all previous iterations
+      2. `hwy\load[EA,AM,MD,PM,EV].net`, the loaded highway network from the current iteration
+    * Output:
+      1. `hwy\msaload[EA,AM,MD,PM,EV]_taz.net`, the new MSA network with averaged volumes for all iterations including the current iteration
+      
+4. [`scripts\assign\CalculateAverageSpeed.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/calculateaveragespeed.job)
+    * Summary: Computes the speeds from a highway network with successively averaged roadway volumes.
+    * Input: 
+      1. `block\hwyparam.block`, highway assignment generalized cost parameters
+      2. `block\SpeedCapacity_1hour.block`, speed-capacity table
+      3. `block\FreeFlowSpeed.block`, free-flow speed table
+      4. `block\SpeedFlowCurve.block`, volume-delay functions
+      5. `hwy\msaload[EA,AM,MD,PM,EV]_taz.net`, the new MSA network with averaged volumes for all iterations including the current iteration
+    * Output:
+      1. `hwy\avgload[EA,AM,MD,PM,EV]_taz.net`, a highway network with congested speeds according to MSA volumes by period
+      
+5. [`scripts\assign\MergeNetworks.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/mergenetworks.job)
+    * Summary: Merges time-period-specific assignment results into a single TP+ and CSV network.  The combined network is not used by the model stream.  Variables are first given time-period-specific names in the first step of the script and then the five networks are merged. Daily volumes, delay, vehicle-miles traveled, and vehicle-hours traveled calculations are performed.  Note that delay is computed as the difference between congested time and free-flow time. 
+    * Input: 
+      1. `hwy\msaload[EA,AM,MD,PM,EV]_taz.net`, highway networks with congested speeds according to MSA volumes by period
+      2. `hwy\msa[EA,AM,MD,PM,EV]_speeds.csv`, a comma-separated value file of speeds 
+    * Output:
+      1. `hwy\msamerge[ITERATION].net`, a merged network with assignment data for all time periods
+      2. `hwy\msamerge[ITERATION].csv`, a comma-separated value dump of the above network
+
+6. [`scripts\assign\TransitAssign.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/transitassign.job)
+    * Summary: Assigns transit trips for all time periods
+    * Input: 
+      1. `trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net`, the auto network consistent with transit node numbers
+      2. `trn\transitLines_new_nodes.lin`, transit line file
+      3. `trn\transitSystem.PTS`, transit system file
+      4. `transitFactors_[SKIMSET=1,2,3].fac`, transit assignment factors
+      5. `trn\fareMatrix.txt`, transit fare matrix
+      6. `trn\fares.far`, transit fares by route
+      7. `ctramp_output\TAP_Demand_set[SKIMSET=1,2,3]_[EA,AM,MD,PM,EV].mat`, resident model transit demand matrix (TAP-TAP) 
+    * Output:
+      1. `trn\mtc_transit_network_[EA,AM,MD,PM,EV]_[SKIMSET=1,2,3]_with_transit_assign.net`, auto network with transit assignment results
+      2. `trn\mtc_transit_routes_[EA,AM,MD,PM,EV]_[SKIMSET=1,2,3]_with_transit_assign.rte`, transit routes with assignment results
+      3. `trn\mtc_transit_report_[EA,AM,MD,PM,EV]_[SKIMSET=1,2,3]_with_transit_assign.rpt`, transit assignment report file
+    
