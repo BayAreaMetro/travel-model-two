@@ -207,7 +207,6 @@ The file `CTRampEnv.bat` MS-DOS batch file points to locations of executables an
 
 | **Statement**                                                                | **Purpose** |
 |:------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
-
 | `set JAVA_PATH=C:\Program Files\Java\jdk1.8.0_111`                           | Specify the 64-bit Java path; version 1.8.0+ |
 | `set TPP_PATH=C:\Progam Files\Citilabs\CubeVoyager`                          | Specify the Cube Voyager path |
 | `set CUBE_PATH=C:\Progam Files (x86)\Citilabs\Cube`                          | Specify the Cube path |
