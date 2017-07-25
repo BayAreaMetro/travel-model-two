@@ -185,7 +185,7 @@ The final configuration file that needs to be edited prior to executing a model 
 The final file in need of adjustment for the computing environment is the `RunModel.bat` MS-DOS batch file that executes the model stream. The following statements need to be configured within this file:
 
 | **Statement**                                                                | **Purpose** |
-|------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+|:------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
 | ` set JAVA_PATH=c:\program files\java\jdk1.7.0_13`                           | Specify the 64-bit Java path; version 1.7.0+ |
 | `set TPP_PATH=c:\progam files(x86)\citilabs\cubevoyager`                     | Specify the Cube Voyager path |
 | `set CUBE_PATH=c:\progam files(x86)\citilabs\cube`                           | Specify the Cube path |
