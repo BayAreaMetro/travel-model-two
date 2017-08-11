@@ -1,0 +1,53 @@
+;taz includes externals
+taz_selector = '(N < 900000) & (N % 100000 < 10000)'
+maz_selector = '(N < 900000) & (N % 100000 < 90000) & (N % 100000 >= 10000)'
+tap_selector = '(N < 900000) & (N % 100000 >= 90000)'
+ext_selector = '(N < 1000000) & (N > 900000)'
+
+
+;build the zone sequences and export to a new network
+RUN PGM=NETWORK
+    NETI = "hwy\mtc_final_network_base.net"
+ 
+    PHASE = NODEMERGE
+        IF (@taz_selector@)
+            _i = _i + 1 
+        ELSEIF (@maz_selector@)
+            _j = _j + 1 
+        ELSEIF (@tap_selector@)
+            _k = _k + 1 
+        ENDIF
+    ENDPHASE
+	
+	ZONECOUNT=_i
+	
+	;there are 21 external stations
+	ZONES_PLUS_EXT=(_i+21)
+	MAZCOUNT=_j
+	TAPCOUNT=_k
+	
+	LOG VAR=ZONECOUNT
+	LOG VAR=ZONES_PLUS_EXT
+	LOG VAR=MAZCOUNT
+	LOG VAR=TAPCOUNT
+	
+ENDRUN
+
+	
+;
+; Write the following to a batch file
+;  SET TAZ_COUNT=4688
+;  SET TAZ_EXTS_COUNT=4709
+;  SET TAP_COUNT=6216
+;
+RUN PGM=MATRIX
+
+    ZONES=1
+    FILEO PRINTO[1] = "zoneSystem.bat"
+    
+	PRINT LIST="SET TAZ_COUNT=" @NETWORK.ZONECOUNT@(L) PRINTO=1
+    PRINT LIST="SET TAZ_EXTS_COUNT=" @NETWORK.ZONES_PLUS_EXT@(L) PRINTO=1
+    PRINT LIST="SET TAP_COUNT=" @NETWORK.TAPCOUNT@(L) PRINTO=1
+	PRINT LIST="SET MAZ_COUNT=" @NETWORK.MAZCOUNT@(L) PRINTO=1
+ 	
+ENDRUN
