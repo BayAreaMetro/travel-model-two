@@ -190,10 +190,17 @@ public class SandagHouseholdDataManager2
 
                 hh.setHhIncomeInDollars(incomeInDollars);
 
-                // 0=Housing unit, 1=Institutional group quarters, 2=Noninstitutional
+                // Now using 2010 ACS Definition: 1=Housing unit, 2=Institutional group quarters, 3=Noninstitutional
                 // group quarters
                 int unitType = (int) hhTable.getValueAt(r, hhTable
                         .getColumnPosition(HH_UNITTYPE_FIELD_NAME));
+                
+                if(unitType==0){
+                	logger.fatal("Error: unit type variable in household file ("+HH_UNITTYPE_FIELD_NAME+") is out of range ("+unitType+")");
+                	logger.fatal("Please check that the file is consistent with 2010 ACS definitions");
+                	throw new RuntimeException();
+                }
+                
                 hh.setUnitType(unitType);
 
                 // 1=Family household:married-couple, 2=Family household:male

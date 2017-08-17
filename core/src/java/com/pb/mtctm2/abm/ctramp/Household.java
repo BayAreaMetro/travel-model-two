@@ -344,8 +344,8 @@ public class Household
         hhType = type;
     }
 
-    // 0=Housing unit, 1=Institutional group quarters, 2=Noninstitutional group
-    // quarters
+    // Using Census 2010 definitions
+    // 1=Housing unit, 2=Institutional group quarters, 3=Noninstitutional group quarters
     public void setUnitType(int type)
     {
         unitType = type;
@@ -402,7 +402,7 @@ public class Household
      */
     public int getIsGroupQuarters()
     {
-        if (unitType == 0) return 0;
+        if (unitType == 1) return 0;
         else return 1;
     }
 
