@@ -108,13 +108,14 @@ loop period = 1, 5
       
       ZONES=%TAP_COUNT%
       
+
       ;MATI[1]="ctramp_output\transit_set@set@_@p@_KNR_SET_@p@.mat"
       ;MATI[2]="ctramp_output\transit_set@set@_@p@_PNR_SET_@p@.mat"
       ;MATI[3]="ctramp_output\transit_set@set@_@p@_WLK_SET_@p@.mat"
 
-      MATI[1]="ctramp_output\transit_@p@_KNR_SET_set@set@_@p@.mat"
+      MATI[1]="ctramp_output\transit_@p@_WLK_SET_set@set@_@p@.mat"
       MATI[2]="ctramp_output\transit_@p@_PNR_SET_set@set@_@p@.mat"
-      MATI[3]="ctramp_output\transit_@p@_WLK_SET_set@set@_@p@.mat"
+      MATI[3]="ctramp_output\transit_@p@_KNR_SET_set@set@_@p@.mat"
       
       MATO[1]="ctramp_output\TAP_Demand_set@set@_@p@.mat", MO=1-3, Name=WLK_SET_@p@, PNR_SET_@p@, KNR_SET_@p@
       
@@ -124,9 +125,9 @@ loop period = 1, 5
       
     ENDRUN
     
-  ;  *del "ctramp_output\transit_@p@_KNR_SET_set@set@_@p@.mat"
-  ;  *del "ctramp_output\transit_@p@_PNR_SET_set@set@_@p@.mat"
-  ;  *del "ctramp_output\transit_@p@_WLK_SET_set@set@_@p@.mat"
+  ;  *del "ctramp_output\transit_set@set@_@p@_KNR_SET_@p@.mat"
+  ;  *del "ctramp_output\transit_set@set@_@p@_PNR_SET_@p@.mat"
+  ;  *del "ctramp_output\transit_set@set@_@p@_WLK_SET_@p@.mat"
 
   endloop ; set
 
