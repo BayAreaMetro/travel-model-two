@@ -556,6 +556,31 @@ public class TazDataManager
                                 + aMode);
         }
     }
+    
+    /**
+     * Get the time from the TAZ to the TAP in minutes.
+     * 
+     * @param taz The origin TAZ
+     * @param tap The destination TAP
+     * @param aMode The access model (PNR or KNR)
+     * @return The time in minutes, or -1 if there isn't an access link from the TAZ to the TAP.
+     */
+    public float getTimeToTapFromTaz(int taz, int tap, AccessMode aMode){
+    	
+    	int btapPosition = getTapPosition(taz,tap,aMode);
+    	float time;
+    	
+    	if(btapPosition==-1){
+    		logger.info("Bad tap position for " + (aMode==Modes.AccessMode.PARK_N_RIDE ? "PNR" : "KNR") +" access board tap");
+    		return -1;
+    	}else{
+    		time = getTapTime(taz,btapPosition,Modes.AccessMode.PARK_N_RIDE);
+    	}
+    	
+    	return time;
+    	
+    }
+    
 
     /**
      * Get the taz to tap distance in miles.

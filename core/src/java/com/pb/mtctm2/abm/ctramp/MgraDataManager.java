@@ -530,6 +530,29 @@ public final class MgraDataManager
         return (float) (mgraWlkTapsDistArray[mgra][1][pos] * Constants.walkMinutesPerFoot);
     }
 
+    
+    /**
+     * Get the walk time from an MGRA to a TAP.
+     * 
+     * @param mgra The MGRA
+     * @param tap The TAP
+     * @return The walk time in minutes, else -1 if there is no walk link between the MGRA and the TAP.
+     */
+    public float getWalkTimeFromMgraToTap(int mgra, int tap){
+    	
+    	int tapPosition = getTapPosition(mgra, tap);
+    	float time = 0;
+    	
+    	if(tapPosition==-1){
+    		logger.info("Bad Tap Position for Walk Access From MAZ: "+mgra+" to TAP: "+tap);
+    		return -1;
+    	}
+    	else{
+    		time = (float) (mgraWlkTapsDistArray[mgra][1][tapPosition] * Constants.walkMinutesPerFoot);
+    	}
+    	return time;
+    }
+    
     /**
      * Get the walk distance from an MGRA to an MGRA. Return 0 if not within walking
      * distance.
