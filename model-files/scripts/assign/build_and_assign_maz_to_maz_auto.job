@@ -57,6 +57,7 @@ loop period = 1, 5
 
       ;create sequential taz numbers
       RUN PGM=NETWORK
+;          PAR NODES=10000000
           NETI = hwy\avgload@token_period@.net
           NETO = hwy\temp@token_period@.net
           
@@ -90,6 +91,7 @@ loop period = 1, 5
       
       ;copy these back to correct network values
       RUN PGM=NETWORK
+;          PAR  NODES=10000000
           NETI = hwy\temp@token_period@.net
           NETO = hwy\avgload@token_period@_maz_taz.net
       
@@ -124,6 +126,7 @@ loop period = 1, 5
           
           ;create sequential maz numbers
           RUN PGM=NETWORK
+;              PAR NODES=10000000
               NETI = hwy\avgload@token_period@_maz_taz.net
               NETO = hwy\temp_@mazset@_@token_period@.net
               
@@ -162,6 +165,7 @@ loop period = 1, 5
           
           ;copy these back to correct network values
           RUN PGM=NETWORK
+;              PAR  NODES=10000000
               NETI = hwy\temp_@mazset@_@token_period@.net
               NETO = hwy\avgload_@mazset@_@token_period@_maz.net
           

@@ -19,6 +19,7 @@
 
 ;write out the links and nodes as csv files
 RUN PGM=NETWORK
+;    PAR  NODES=10000000
     NETI = hwy\mtc_final_network_with_tolls.net
     NODEO = hwy\mtc_final_network_with_tolls_nodes.csv FORMAT=SDF, FORM=15.0 INCLUDE=N,X,Y
     LINKO = hwy\mtc_final_network_with_tolls_links.csv FORMAT=SDF, FORM=15.0 INCLUDE=A,B,CNTYPE
@@ -29,6 +30,7 @@ ENDRUN
 
 ;read in link data with area type and calculate capclass
 RUN PGM=NETWORK
+;    PAR  NODES=10000000
     NETI = hwy\mtc_final_network_with_tolls.net
     LINKI[2] = hwy\link_area_type.csv VAR=A,B,AT
     NETO = hwy\mtc_final_network_with_tolls_areatype.net

@@ -21,6 +21,7 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 RUN PGM = CUBE Parameters ='/Command /CloseWhenDone /Minimize /NoSplash'
+; PAR  NODES=10000000
  FUNCTION = BUILDPATH
      neti = hwy\mtc_ped_network.net
      pathprinto = ..\hwy\tap_to_taz_for_parking.txt

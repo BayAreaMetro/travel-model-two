@@ -1,3 +1,22 @@
+;*****************************************************************************
+;
+; writeZoneSystems.job
+;
+; This cube script reads the highway network, counts TAZs, MAZs, and TAPS,
+; and writes a MS-DOS batch file with the number of TAZs, MAZs, TAPs, and TAZs
+; plus externals. The batch file can then be run to set environment variables 
+; for each to be used in subsequent scripts
+;
+; input: hwy\mtc_final_network_base.net: The MTC highway network base input file.
+; output: zoneSystem.bat: A DOS batch file setting environment variables as follows:
+;		SET TAZ_COUNT=n
+;		SET TAZ_EXTS_COUNT=n
+;		SET TAP_COUNT=n
+;		SET MAZ_COUNT=n
+;
+;************************************************************************************
+
+
 ;taz includes externals
 taz_selector = '(N < 900000) & (N % 100000 < 10000)'
 maz_selector = '(N < 900000) & (N % 100000 < 90000) & (N % 100000 >= 10000)'
@@ -44,8 +63,9 @@ RUN PGM=MATRIX
 
     ZONES=1
     FILEO PRINTO[1] = "zoneSystem.bat"
-    
-	PRINT LIST="SET TAZ_COUNT=" @NETWORK.ZONECOUNT@(L) PRINTO=1
+    PRINT LIST="::This batch file is created by ctramp/scripts/preprocess/writeZoneSystems.job"
+    PRINT LIST=""
+	  PRINT LIST="SET TAZ_COUNT=" @NETWORK.ZONECOUNT@(L) PRINTO=1
     PRINT LIST="SET TAZ_EXTS_COUNT=" @NETWORK.ZONES_PLUS_EXT@(L) PRINTO=1
     PRINT LIST="SET TAP_COUNT=" @NETWORK.TAPCOUNT@(L) PRINTO=1
 	PRINT LIST="SET MAZ_COUNT=" @NETWORK.MAZCOUNT@(L) PRINTO=1

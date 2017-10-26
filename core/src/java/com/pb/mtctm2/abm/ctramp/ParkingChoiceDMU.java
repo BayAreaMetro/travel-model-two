@@ -28,6 +28,7 @@ public class ParkingChoiceDMU
     private double[] distancesOrigAlt;
     private double[] distancesAltDest;
 
+    /*
     private double[] altParkingCostsM;
     private int[] altMstallsoth;
     private int[] altMstallssam;
@@ -40,6 +41,7 @@ public class ParkingChoiceDMU
     private float[] altHparkcost;
     private int[] altNumfreehrs;
 
+*/
     private int[] parkAreaMgras;
     private int[] altMgraIndices;
     
@@ -111,7 +113,7 @@ public class ParkingChoiceDMU
     public void setDistancesAltDest( double[] distances ) {
         distancesAltDest = distances;
     }
-    
+ /*   
     public void setParkingCostsM( double[] values ) {
         altParkingCostsM = values;
     }
@@ -156,7 +158,7 @@ public class ParkingChoiceDMU
         altNumfreehrs = values;
     }
 
-    
+*/    
     public int getPersonType() {
         return personType;
     }
@@ -189,11 +191,12 @@ public class ParkingChoiceDMU
     public double getDistanceTripDestFromParkAlt( int alt ) {
         return distancesAltDest[alt];
     }
+  
     
     /**
      * @param alt is the index value in the alternatives array (0,...,num alts).
      * @return the cost for this person to park at the alternative park mgra.
-     */
+     
     public double getLsWgtAvgCostM( int alt ) {
         return altParkingCostsM[alt];
     }
@@ -237,7 +240,7 @@ public class ParkingChoiceDMU
     public int getNumfreehrs( int alt ) {
         return altNumfreehrs[alt];
     }
-
+*/
     /**
      * @return 1 if the altMgra attribute that was set equals the trip destination
      */    

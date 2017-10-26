@@ -84,6 +84,7 @@ loop period = 1, 5
     DistributeMultistep processid = 'MTC_HWYMSA', processNum = @period@
    
         run pgm = network
+; causes cube 6.4 to crash         PAR NODES=10000000
         
           ; read in the msa network
           neti[1] = hwy\msaload@token_period@_taz.net

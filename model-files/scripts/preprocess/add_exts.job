@@ -73,6 +73,7 @@ copy file=input\hwy\temp_link.csv
 endcopy
 
 RUN PGM=NETWORK
+;    PAR  NODES=10000000
     NETI = input\hwy\mtc_final_network_base_noexts.net
     NODEI[2] = input\hwy\temp_node.csv VAR=N,X,Y
     LINKI[2] = input\hwy\temp_link.csv VAR=A,B,CNTYPE(C),FEET,FRC,NAME(C),FREEWAY,KPH,MINUTES,LANES,RAMP,SPEEDCAT,ASSIGNABLE,TRANSIT,USECLASS,TOLLBOOTH,FT,FFS,NUMLANES,B_CLASS,REPRIORITIZE,GRADE_CAT,BIKEPEDOK,ONEWAY(C)

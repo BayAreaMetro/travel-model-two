@@ -42,6 +42,7 @@
 
 ;export tap->node (stop) links and node locations so that connector links can be built
 RUN PGM=NETWORK
+;    PAR  NODES=10000000
     NETI = "hwy\mtc_final_network.net"
     LINKO=hwy\mtc_tap_to_stop_connectors.txt FORMAT=TXT, FORM=15.0 INCLUDE=A,B
     NODEO=hwy\mtc_transit_network_node_xy.txt FORMAT=TXT, FORM=15.0 INCLUDE=N,X,Y
@@ -62,6 +63,7 @@ ENDRUN
 
 ;now build transit network
 RUN PGM=NETWORK
+;    PAR  NODES=10000000
     NETI = "hwy\mtc_final_network.net"
     NODEI[2] = hwy\tap_connector_nodes.csv VAR=N,X,Y
     LINKI[2] = hwy\tap_connectors.csv VAR=A,B,CNTYPE(C),FEET
@@ -109,6 +111,7 @@ tap_selector = '(N < 900000) & (N % 100000 > 90000)'
 
 ;create sequential tap numbers
 RUN PGM=NETWORK
+;    PAR  NODES=10000000
     NETI = "hwy\mtc_transit_network_temp1.net"
     NETO = "hwy\mtc_transit_network_temp2.net"
     
@@ -132,6 +135,7 @@ RUN PGM=NETWORK
 ENDRUN
 ;copy these back to correct network values
 RUN PGM=NETWORK
+;    PAR  NODES=10000000
     NETI = "hwy\mtc_transit_network_temp2.net"
     NETO = "hwy\mtc_transit_network_temp3.net"
 
@@ -146,12 +150,14 @@ RUN PGM=NETWORK
 ENDRUN
 ;set zone count
 RUN PGM=NETWORK
+;    PAR  NODES=10000000
     NETI = hwy\mtc_transit_network_temp3.net
     NETO = hwy\mtc_transit_network.net
     ZONES = %TAP_COUNT%
 ENDRUN
 ;write out taz to node correspondence
 RUN PGM=NETWORK
+;    PAR  NODES=10000000
     NETI = hwy\mtc_transit_network.net
     NODEO=hwy\mtc_transit_network_tap_to_node.txt FORMAT=TXT, FORM=15.0 INCLUDE=N,OLD_NODE
 ENDRUN
@@ -185,6 +191,7 @@ LOOP PERIOD = 1,5
 
         ;spit out congested times for time period
         RUN PGM=NETWORK
+;            PAR  NODES=10000000
             NETI = "hwy\avgload@token_period@.net"
             LINKO = "hwy\link_times_@TOKEN_PERIOD@_temp1.csv" FORMAT=TXT DELIMITER=',' INCLUDE=A,B,CTIM
 
@@ -202,6 +209,7 @@ LOOP PERIOD = 1,5
 
         ;read in congested times for transit network
         RUN PGM=NETWORK
+;            PAR  NODES=10000000
             NETI = "hwy\mtc_transit_network.net"
             LINKI[2] = "hwy\link_times_@TOKEN_PERIOD@_temp2.csv" VAR=A,B,TRANTIME
             NETO = "hwy\mtc_transit_network_@TOKEN_PERIOD@.net"

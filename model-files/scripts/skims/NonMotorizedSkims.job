@@ -226,36 +226,26 @@ LOOP PROC_COUNT=1,9
                 ;same single quote problem here
                 IF (@SKIM_COUNTY@ = 1)
                     PRINT LIST=" Origin = '(@county_selector_sf@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-;                    PRINT LIST=" Origin = '1'" PRINTO=1
                  ELSEIF (@SKIM_COUNTY@ = 2)
                     PRINT LIST=" Origin = '(@county_selector_sm@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-;                    PRINT LIST=" Origin = '1'" PRINTO=1
                  ELSEIF (@SKIM_COUNTY@ = 3)
                     PRINT LIST=" Origin = '(@county_selector_sc@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-;                    PRINT LIST=" Origin = '1'" PRINTO=1
-                ELSEIF (@SKIM_COUNTY@ = 4)
+               ELSEIF (@SKIM_COUNTY@ = 4)
                     PRINT LIST=" Origin = '(@county_selector_al@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-;                    PRINT LIST=" Origin = '1'" PRINTO=1
                  ELSEIF (@SKIM_COUNTY@ = 5)
                     PRINT LIST=" Origin = '(@county_selector_cc@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-;                    PRINT LIST=" Origin = '1'" PRINTO=1
                  ELSEIF (@SKIM_COUNTY@ = 6)
                     PRINT LIST=" Origin = '(@county_selector_sl@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-;                    PRINT LIST=" Origin = '1'" PRINTO=1
                  ELSEIF (@SKIM_COUNTY@ = 7)
                     PRINT LIST=" Origin = '(@county_selector_np@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-;                    PRINT LIST=" Origin = '1'" PRINTO=1
                  ELSEIF (@SKIM_COUNTY@ = 8)
                     PRINT LIST=" Origin = '(@county_selector_sn@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-;                    PRINT LIST=" Origin = '1'" PRINTO=1
                  ELSEIF (@SKIM_COUNTY@ = 9)
                     PRINT LIST=" Origin = '(@county_selector_mn@ & @ORIGIN_SELECTOR@)'" PRINTO=1
-;                    PRINT LIST=" Origin = '1'" PRINTO=1
                  ENDIF
                 PRINT LIST=" AddTrace='FEET'" PRINTO=1
                 PRINT LIST=" Destination = '@DEST_SELECTOR@'" PRINTO=1
-;                PRINT LIST=" Destination = '2'" PRINTO=1
-                 PRINT LIST=" CLOSE" PRINTO=1
+                PRINT LIST=" CLOSE" PRINTO=1
                 PRINT LIST=" ENDFUNCTION" PRINTO=1
                 PRINT LIST="ENDRUN" PRINTO=1
              ENDRUN
@@ -264,12 +254,12 @@ LOOP PROC_COUNT=1,9
             *"C:\Program Files\Citilabs\CubeVoyager\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
             
             ;clean-up
-            *del @SFILE@_@SKIM_COUNTY@.s
+;            *del @SFILE@_@SKIM_COUNTY@.s
         ENDLOOP
         
-		 *del hwy\mtc_ped_network_@PROC_COUNT@.net
-        *del hwy\mtc_bike_network_@PROC_COUNT@.net
-        *del hwy\mtc_tap_ped_network_@PROC_COUNT@.net
+;		*del hwy\mtc_ped_network_@PROC_COUNT@.net
+;		*del hwy\mtc_bike_network_@PROC_COUNT@.net
+;		*del hwy\mtc_tap_ped_network_@PROC_COUNT@.net
         
     EndDistributeMultistep
   

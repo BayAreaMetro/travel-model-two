@@ -18,6 +18,8 @@
 
 run pgm = hwynet
 
+;    PAR NODES=10000000
+
    ; begin with the standard input network
    neti = hwy\mtc_final_network_with_tolls.net
 

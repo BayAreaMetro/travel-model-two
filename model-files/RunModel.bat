@@ -6,32 +6,10 @@ rem @ECHO OFF
 :: called here.  
 ::
 :: Travel Model Two
-:: dto (2012 02 15) gde (2009 04 22) crf (2013 09) bts (2013 09 24) rpm (2016 06 22)
+:: dto (2012 02 15) gde (2009 04 22) crf (2013 09) bts (2013 09 24) rpm (2016 06 22) jef (2017 10 26)
 :: 
 :: RunModel.bat > model_run_out.txt 2>&1
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-:: ------------------------------------------------------------------------------------------------------
-:: 
-:: Step 0:  Set global model-specific variables that can be accessed in scripts
-:: 
-:: ------------------------------------------------------------------------------------------------------
-
-
-
-:: The number of internal TAZs (shouldn't this be calculated on the fly?)
-SET TAZ_COUNT=4688
-ECHO TAZ_COUNT: %TAZ_COUNT%
-
-:: The number of internal + external TAZs (shouldn't this be calculated on the fly?)
-SET TAZ_EXTS_COUNT=4709
-ECHO TAZ_EXTS_COUNT: %TAZ_EXTS_COUNT%
-
-:: The number of transit access point (TAP) zones (shouldn't this be calculated on the fly?)
-:: There are 6214 TAPS in 2000,2005, and 2010 networks, and 6216 TAPS in 2015 network
-
-SET TAP_COUNT=6216
-ECHO TAP_COUNT: %TAP_COUNT%
 
 :: ------------------------------------------------------------------------------------------------------
 ::
@@ -53,14 +31,14 @@ CALL CTRAMP\runtime\CTRampEnv.bat
 SET /A MAX_ITERATION=3
 
 ::  Set choice model household sample rate
-SET SAMPLERATE_ITERATION1=0.10
+SET SAMPLERATE_ITERATION1=0.1
 SET SAMPLERATE_ITERATION2=0.50
 SET SAMPLERATE_ITERATION3=1.0
 SET SAMPLERATE_ITERATION4=1.0
 SET SAMPLERATE_ITERATION5=1.0
 
 :: Set the model run year
-SET MODEL_YEAR=2015
+SET MODEL_YEAR=2010
 
 :: Scripts base directory
 SET BASE_SCRIPTS=CTRAMP\scripts
@@ -68,6 +46,8 @@ SET BASE_SCRIPTS=CTRAMP\scripts
 :: Add these variables to the PATH environment variable, moving the current path to the back of the list
 SET OLD_PATH=%PATH%
 SET PATH=%RUNTIME%;%JAVA_PATH%/bin;%TPP_PATH%;%PYTHON_PATH%;%OLD_PATH%
+
+SET /A ITERATION=3
 
 :: ------------------------------------------------------------------------------------------------------
 ::
@@ -126,9 +106,24 @@ ROBOCOPY CTRAMP %MATRIX_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
 
 : Pre-Process
 
+:: Write a batch file with number of zones, taps, mazs
+runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
+if ERRORLEVEL 2 goto done
+
+::Run the batch file
+call zoneSystem.bat
+
 :: Build sequential numberings
 runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
 if ERRORLEVEL 2 goto done
+
+:: Write out the intersection and maz XYs
+runtpp %BASE_SCRIPTS%\preprocess\maz_densities.job
+if ERRORLEVEL 2 goto done
+
+:: Calculate density fields and append to MAZ file
+"%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\createMazDensityFile.py 
+
 
 :: Translate the roadway network into a non-motorized network
 runtpp %BASE_SCRIPTS%\preprocess\CreateNonMotorizedNetwork.job
@@ -270,8 +265,11 @@ ping -n 10 localhost
 ::start CTRAMP\runtime\runDriver.cmd
 copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
+if ERRORLEVEL 2 goto done
 del mtctm2.properties
 rem taskkill /im "java.exe" /F
+
+
 
 ::Kill remote servers
 ::CTRAMP\runtime\config\pskill %HH_SERVER% -u %UN% -p %PWD% java

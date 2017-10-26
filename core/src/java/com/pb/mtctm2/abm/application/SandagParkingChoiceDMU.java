@@ -25,6 +25,7 @@ public class SandagParkingChoiceDMU
         methodIndexMap.put("getPersonType", 5);
         methodIndexMap.put("getActivityIntervals", 6);
         methodIndexMap.put("getTripDestPurpose", 7);
+     /*
         methodIndexMap.put("getLsWgtAvgCostM", 8);
         methodIndexMap.put("getMstallsoth", 9);
         methodIndexMap.put("getMstallssam", 10);
@@ -36,6 +37,7 @@ public class SandagParkingChoiceDMU
         methodIndexMap.put("getHstallssam", 16);
         methodIndexMap.put("getHparkcost", 17);
         methodIndexMap.put("getNumfreehrs", 18);
+     */
         methodIndexMap.put("getReimbPct", 19);
     }
 
@@ -60,6 +62,7 @@ public class SandagParkingChoiceDMU
                 return getActivityIntervals();
             case 7:
                 return getTripDestPurpose();
+ /*
             case 8:
                 return getLsWgtAvgCostM( arrayIndex );
             case 9:
@@ -82,6 +85,7 @@ public class SandagParkingChoiceDMU
                 return getHparkcost( arrayIndex );
             case 18:
                 return getNumfreehrs( arrayIndex );
+ */
             case 19:
                 return getReimbPct();
                 

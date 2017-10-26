@@ -44,6 +44,7 @@
 
 ;;todo: this is a temp add in to test the toll stuff in the model
 RUN PGM=HWYNET
+;    PAR NODES=10000000
     NETI = hwy\mtc_final_network.net
     NETO = hwy\mtc_final_network_tb25.net
     IF ((A = 7079063) & (B = 7050993))
@@ -82,6 +83,8 @@ RUN PGM=HWYNET
 ENDRUN
 
 run pgm = hwynet
+
+;   PAR NODES=10000000
 
    ; begin with the standard input network
    ;neti = hwy\mtc_final_network.net

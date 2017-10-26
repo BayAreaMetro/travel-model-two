@@ -666,7 +666,14 @@ public class NonMandatoryDestChoiceModel implements Serializable {
                 logger.error(String.format(
                         "Exception caught for HHID=%d, PersonNum=%d, tourId=%d, in %s destination choice.",
                         dcDmuObject.getHouseholdObject().getHhId(), dcDmuObject.getPersonObject().getPersonNum(), tour.getTourId(), tourPurposeName));
-                throw new RuntimeException();
+            
+            dcModel[m].logAlternativesInfo(choiceModelDescription, decisionMakerLabel);
+            dcModel[m].logSelectionInfo(choiceModelDescription, decisionMakerLabel, rn, chosen);
+
+            // write UEC calculation results to separate model specific log file
+            dcModel[m].logUECResults(modelLogger, loggingHeader);                
+            
+            throw new RuntimeException();
             }
         }
 

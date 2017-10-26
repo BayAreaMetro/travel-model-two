@@ -30,6 +30,8 @@
 ;set fft, and drop off non-hwy links
 run pgm = hwynet
 
+;    PAR NODES=10000000
+
    ; begin with the standard input network
    neti = hwy\mtc_final_network_with_tolls.net
 
@@ -254,6 +256,8 @@ loop period = 1, 5
    
    
    run pgm = hwynet
+
+;      PAR NODES=10000000
 
       ; begin with the input network with tolls added
       neti = hwy\mtc_final_network_with_tolls_fft.net

@@ -246,7 +246,12 @@ public class IntermediateStopChoiceModels implements Serializable {
     private int[] parkAreas;
 
     private int[]                               mgraParkArea;
-    private int[]                               numfreehrs;
+ 
+    private double[]                            lsWgtAvgCostM;
+    private double[]                            lsWgtAvgCostD;
+    private double[]                            lsWgtAvgCostH;
+
+    /*
     private int[]                               hstallsoth;
     private int[]                               hstallssam;
     private float[]                             hparkcost;
@@ -257,9 +262,6 @@ public class IntermediateStopChoiceModels implements Serializable {
     private int[]                               mstallssam;
     private float[]                             mparkcost;
     
-    private double[]                            lsWgtAvgCostM;
-    private double[]                            lsWgtAvgCostD;
-    private double[]                            lsWgtAvgCostH;
     
     private double[] altParkingCostsM;
     private double[] altParkingCostsD;
@@ -274,7 +276,7 @@ public class IntermediateStopChoiceModels implements Serializable {
     private int[] altHstallssam;
     private float[] altHparkcost;
     private int[] altNumfreehrs;
-
+*/
     private HashMap<String,Integer> sizeSegmentNameIndexMap;
     
     private StopDepartArrivePeriodModel stopTodModel;
@@ -319,10 +321,12 @@ public class IntermediateStopChoiceModels implements Serializable {
         mgraManager = MgraDataManager.getInstance(propertyMap);
 
         mgraParkArea = mgraManager.getMgraParkAreas();
-        numfreehrs = mgraManager.getNumFreeHours();
+        
         lsWgtAvgCostM = mgraManager.getLsWgtAvgCostM();
         lsWgtAvgCostD = mgraManager.getLsWgtAvgCostD();
         lsWgtAvgCostH = mgraManager.getLsWgtAvgCostH();
+        /*
+        numfreehrs = mgraManager.getNumFreeHours();
         mstallsoth = mgraManager.getMStallsOth();
         mstallssam = mgraManager.getMStallsSam();
         mparkcost = mgraManager.getMParkCost();
@@ -332,6 +336,7 @@ public class IntermediateStopChoiceModels implements Serializable {
         hstallsoth = mgraManager.getHStallsOth();
         hstallssam = mgraManager.getHStallsSam();
         hparkcost = mgraManager.getHParkCost();
+        */
         
         modelStructure = myModelStructure;
         logsumHelper = myLogsumHelper;
@@ -505,6 +510,8 @@ public class IntermediateStopChoiceModels implements Serializable {
         altMgraIndices = new int[MAX_PLC_SAMPLE_SIZE+1];
         altOsDistances = new double[MAX_PLC_SAMPLE_SIZE+1];
         altSdDistances = new double[MAX_PLC_SAMPLE_SIZE+1];
+        
+/*        
         altParkingCostsM = new double[MAX_PLC_SAMPLE_SIZE+1];
         altParkingCostsD = new double[MAX_PLC_SAMPLE_SIZE+1];
         altParkingCostsH = new double[MAX_PLC_SAMPLE_SIZE+1];
@@ -518,7 +525,7 @@ public class IntermediateStopChoiceModels implements Serializable {
         altHstallssam = new int[MAX_PLC_SAMPLE_SIZE+1];
         altHparkcost = new float[MAX_PLC_SAMPLE_SIZE+1];
         altNumfreehrs = new int[MAX_PLC_SAMPLE_SIZE+1];
-
+*/
         altParkAvail = new boolean[MAX_PLC_SAMPLE_SIZE+1];
         altParkSample = new int[MAX_PLC_SAMPLE_SIZE+1];
         
@@ -542,6 +549,7 @@ public class IntermediateStopChoiceModels implements Serializable {
         parkingChoiceDmuObj.setSampleIndicesArray( altMgraIndices );
         parkingChoiceDmuObj.setDistancesOrigAlt( altOsDistances );
         parkingChoiceDmuObj.setDistancesAltDest( altSdDistances );
+/*
         parkingChoiceDmuObj.setParkingCostsM( altParkingCostsM );
         parkingChoiceDmuObj.setMstallsoth( altMstallsoth );
         parkingChoiceDmuObj.setMstallssam( altMstallssam );
@@ -553,13 +561,15 @@ public class IntermediateStopChoiceModels implements Serializable {
         parkingChoiceDmuObj.setHstallssam( altHstallssam );
         parkingChoiceDmuObj.setHparkCost( altHparkcost );
         parkingChoiceDmuObj.setNumfreehrs( altNumfreehrs );
-        
+*/        
         mgraAltLocationIndex = new HashMap<Integer,Integer>();
         mgraAltParkArea = new HashMap<Integer,Integer>();
         
         for ( int i=0; i < parkMgras.length; i++ ) {
-            mgraAltLocationIndex.put(parkMgras[i], i);
-            mgraAltParkArea.put(parkMgras[i], parkAreas[i]);
+        	if(parkAreas[i]==1){
+        		mgraAltLocationIndex.put(parkMgras[i], i);
+        		mgraAltParkArea.put(parkMgras[i], parkAreas[i]);
+        	}
         }
 
     }
@@ -3720,7 +3730,7 @@ public class IntermediateStopChoiceModels implements Serializable {
                     
                     altSdDistances[altCount+1] = curWalkDist;
                     altMgraIndices[altCount+1] = altIndex;
-                    
+/*                    
                     altParkingCostsM[altCount+1] = lsWgtAvgCostM[m];
                     altParkingCostsD[altCount+1] = lsWgtAvgCostD[m];
                     altParkingCostsH[altCount+1] = lsWgtAvgCostH[m];
@@ -3734,7 +3744,7 @@ public class IntermediateStopChoiceModels implements Serializable {
                     altHstallssam[altCount+1] = hstallssam[m];
                     altHparkcost[altCount+1] = hparkcost[m];
                     altNumfreehrs[altCount+1] = numfreehrs[m];
-
+*/
                     altParkAvail[altCount+1] = true;
                     altParkSample[altCount+1] = 1;
 
@@ -3748,7 +3758,7 @@ public class IntermediateStopChoiceModels implements Serializable {
                     altOsDistances[i+1] = Double.NaN;
                     altSdDistances[i+1] = Double.NaN;
                     altMgraIndices[i+1] = Integer.MAX_VALUE;
-
+/*
                     altParkingCostsM[i+1] = Double.NaN;
                     altParkingCostsD[i+1] = Double.NaN;
                     altParkingCostsH[i+1] = Double.NaN;
@@ -3762,7 +3772,7 @@ public class IntermediateStopChoiceModels implements Serializable {
                     altHstallssam[i+1] = Integer.MAX_VALUE;
                     altHparkcost[i+1] = Float.MAX_VALUE;
                     altNumfreehrs[i+1] = Integer.MAX_VALUE;
-                    
+*/                    
                     altParkAvail[i+1] = false;
                     altParkSample[i+1] = 0;
                 }

@@ -91,6 +91,7 @@ loop period = 1, 5
    DistributeMultistep processid = 'MTC_HWYMERGE', processNum = @period@
    
    run pgm = network
+;      PAR NODES=10000000
    
       ; read in the time-period-specific assigned and averaged (over iterations) network (see CalculateSpeeds.job)
       neti[1] = hwy\msaload@token_period@_taz.net
@@ -230,6 +231,7 @@ endrun
    
 ;copy these back to correct network values
 RUN PGM=NETWORK
+;    PAR  NODES=10000000
     NETI = hwy\msamerge%ITERATION%_temp.net
     NETO = hwy\msamerge%ITERATION%.net
 
@@ -255,6 +257,7 @@ ENDRUN
 
 ; step three: dump the network to a csv file
 run pgm = network
+;    PAR  NODES=10000000
 
    neti = hwy\msamerge%ITERATION%.net
    

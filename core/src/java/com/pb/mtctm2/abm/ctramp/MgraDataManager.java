@@ -1092,7 +1092,7 @@ private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) 
             // get the mgra value for TableDataSet row k from the mgra field.
             int mgra = mgraField[k];
             
-          
+         
             mgraParkArea[mgra] = mgraParkAreaField[k];
             numfreehrs[mgra] = numfreehrsField[k];
             hstallsoth[mgra] = hstallsothField[k];
@@ -1104,25 +1104,25 @@ private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) 
             mstallsoth[mgra] = mstallsothField[k];
             mstallssam[mgra] = mstallssamField[k];
             mparkcost[mgra] = mparkcostField[k];
-            
-            // get the array of mgras within walking distance of m
+        
+          // get the array of mgras within walking distance of m
             int[] walkMgras = getMgrasWithinWalkDistanceFrom( mgra );
             
             // park area 1.
-            if ( mgraParkArea[mgra] == PARK_AREA_ONE ) {
+            if ( mgraParkAreaField[k] == PARK_AREA_ONE ) {
                       
                 // calculate weighted average cost from monthly costs 
                 double dist = getMgraToMgraWalkDistFrom( mgra, mgra )/5280.0;
                 
-                double numeratorM = mstallssam[mgra] * Math.exp( workDistCoeff * dist ) * mparkcost[mgra];
-                double denominatorM = mstallssam[mgra] * Math.exp( workDistCoeff * dist );
+                double numeratorM = mstallssamField[k] * Math.exp( workDistCoeff * dist ) * mparkcostField[k];
+                double denominatorM = mstallssamField[k] * Math.exp( workDistCoeff * dist );
                 
-                double numeratorD = dstallssam[mgra] * Math.exp( workDistCoeff * dist ) * dparkcost[mgra];
-                double denominatorD = dstallssam[mgra] * Math.exp( workDistCoeff * dist );
+                double numeratorD = dstallssamField[k] * Math.exp( workDistCoeff * dist ) * dparkcostField[k];
+                double denominatorD = dstallssamField[k] * Math.exp( workDistCoeff * dist );
                 
-                double discountFactor = Math.max( 1 - (numfreehrs[mgra]/4), 0 );
-                double numeratorH = hstallssam[mgra] * Math.exp( workDistCoeff * dist ) * discountFactor * hparkcost[mgra];
-                double denominatorH = hstallssam[mgra] * Math.exp( workDistCoeff * dist );
+                double discountFactor = Math.max( 1 - (numfreehrsField[k]/4), 0 );
+                double numeratorH = hstallssamField[k] * Math.exp( workDistCoeff * dist ) * discountFactor * hparkcostField[k];
+                double denominatorH = hstallssamField[k] * Math.exp( workDistCoeff * dist );
 
                 
                 if ( mgra == LOG_MGRA ) {
@@ -1131,22 +1131,23 @@ private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) 
                     outD.println( "wMgra" + "," + "mgraParkArea" + "," + "otherDistCoeff*dist" + "," + "exp(otherDistCoeff*dist)" + "," + "dstallsoth" + "," + "dparkcost" + "," + "numeratorD" + "," + "denominatorD" );
                     outH.println( "wMgra" + "," + "mgraParkArea" + "," + "otherDistCoeff*dist" + "," + "exp(otherDistCoeff*dist)" + "," + "discountFactor" + "," + "hstallsoth" + "," + "hparkcost" + "," + "numeratorH" + "," + "denominatorH" );
 
-                    outM.println( mgra + "," + mgraParkArea[mgra] + "," + workDistCoeff*dist + "," + Math.exp( workDistCoeff*dist ) + "," + mstallsoth[mgra] + "," + mparkcost[mgra] + "," + numeratorM + "," + denominatorM );
-                    outD.println( mgra + "," + mgraParkArea[mgra] + "," + workDistCoeff*dist + "," + Math.exp( workDistCoeff*dist ) + "," + dstallsoth[mgra] + "," + dparkcost[mgra] + "," + numeratorD + "," + denominatorD );
-                    outH.println( mgra + "," + mgraParkArea[mgra] + "," + workDistCoeff*dist + "," + Math.exp( workDistCoeff*dist ) + "," + discountFactor + "," + hstallsoth[mgra] + "," + hparkcost[mgra] + "," + numeratorH + "," + denominatorH );
+                    outM.println( mgra + "," + mgraParkAreaField[k] + "," + workDistCoeff*dist + "," + Math.exp( workDistCoeff*dist ) + "," + mstallsothField[k] + "," + mparkcostField[k] + "," + numeratorM + "," + denominatorM );
+                    outD.println( mgra + "," + mgraParkAreaField[k] + "," + workDistCoeff*dist + "," + Math.exp( workDistCoeff*dist ) + "," + dstallsothField[k] + "," + dparkcostField[k] + "," + numeratorD + "," + denominatorD );
+                    outH.println( mgra + "," + mgraParkAreaField[k] + "," + workDistCoeff*dist + "," + Math.exp( workDistCoeff*dist ) + "," + discountFactor + "," + hstallsothField[k] + "," + hparkcostField[k] + "," + numeratorH + "," + denominatorH );
                 }
                 
                 if ( walkMgras != null ) {
                     
                     for ( int wMgra : walkMgras ) {
 
-                        
+                        int row = mgraDataTableMgraRowMap.get(wMgra) - 1;
+
                         // skip mgra if not in park area 1 or 2.
-                        if ( mgraParkArea[wMgra] > 2 ) {
+                        if ( mgraParkAreaField[row] > 2 ) {
                             if ( mgra == LOG_MGRA ) {
-                                outM.println( wMgra + "," + mgraParkArea[wMgra] );
-                                outD.println( wMgra + "," + mgraParkArea[wMgra] );
-                                outH.println( wMgra + "," + mgraParkArea[wMgra] );
+                                outM.println( wMgra + "," + mgraParkAreaField[row] );
+                                outD.println( wMgra + "," + mgraParkAreaField[row] );
+                                outH.println( wMgra + "," + mgraParkAreaField[row] );
                             }
                             continue;
                         }
@@ -1157,27 +1158,27 @@ private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) 
                           
                           if ( dist > MAX_PARKING_WALK_DISTANCE ) {
                               if ( mgra == LOG_MGRA ) {
-                                  outM.println( wMgra + "," + mgraParkArea[wMgra] );
-                                  outD.println( wMgra + "," + mgraParkArea[wMgra] );
-                                  outH.println( wMgra + "," + mgraParkArea[wMgra] );
+                                  outM.println( wMgra + "," + mgraParkAreaField[row] );
+                                  outD.println( wMgra + "," + mgraParkAreaField[row] );
+                                  outH.println( wMgra + "," + mgraParkAreaField[row] );
                               }
                               continue;
                           }
                           
-                          numeratorM += mstallsoth[wMgra] * Math.exp( workDistCoeff * dist ) * mparkcost[wMgra];
-                          denominatorM += mstallsoth[wMgra] * Math.exp( workDistCoeff * dist );
+                          numeratorM += mstallsothField[row] * Math.exp( workDistCoeff * dist ) * mparkcostField[row];
+                          denominatorM += mstallsothField[row] * Math.exp( workDistCoeff * dist );
                           
-                          numeratorD += dstallsoth[wMgra] * Math.exp( otherDistCoeff * dist ) * dparkcost[wMgra];
-                          denominatorD += dstallsoth[wMgra] * Math.exp( otherDistCoeff * dist );
+                          numeratorD += dstallsothField[row] * Math.exp( otherDistCoeff * dist ) * dparkcostField[row];
+                          denominatorD += dstallsothField[row] * Math.exp( otherDistCoeff * dist );
                           
-                          discountFactor = Math.max( 1 - (numfreehrs[wMgra]/4), 0 );
-                          numeratorH += hstallsoth[wMgra] * Math.exp( otherDistCoeff * dist ) * discountFactor * hparkcost[wMgra];
-                          denominatorH += hstallsoth[wMgra] * Math.exp( otherDistCoeff * dist );
+                          discountFactor = Math.max( 1 - (numfreehrsField[row]/4), 0 );
+                          numeratorH += hstallsothField[row] * Math.exp( otherDistCoeff * dist ) * discountFactor * hparkcostField[row];
+                          denominatorH += hstallsothField[row] * Math.exp( otherDistCoeff * dist );
 
                           if ( mgra == LOG_MGRA ) {
-                              outM.println( wMgra + "," + mgraParkArea[wMgra] + "," + workDistCoeff*dist + "," + Math.exp( workDistCoeff*dist ) + "," + mstallsoth[wMgra] + "," + mparkcost[wMgra] + "," + numeratorM + "," + denominatorM );
-                              outD.println( wMgra + "," + mgraParkArea[wMgra] + "," + otherDistCoeff*dist + "," + Math.exp( otherDistCoeff*dist ) + "," + dstallsoth[wMgra] + "," + dparkcost[wMgra] + "," + numeratorD + "," + denominatorD );
-                              outH.println( wMgra + "," + mgraParkArea[wMgra] + "," + otherDistCoeff*dist + "," + Math.exp( otherDistCoeff*dist ) + "," + discountFactor + "," + hstallsoth[wMgra] + "," + hparkcost[wMgra] + "," + numeratorH + "," + denominatorH );
+                              outM.println( wMgra + "," + mgraParkAreaField[row] + "," + workDistCoeff*dist + "," + Math.exp( workDistCoeff*dist ) + "," + mstallsothField[row] + "," + mparkcostField[row] + "," + numeratorM + "," + denominatorM );
+                              outD.println( wMgra + "," + mgraParkAreaField[row] + "," + otherDistCoeff*dist + "," + Math.exp( otherDistCoeff*dist ) + "," + dstallsothField[row] + "," + dparkcostField[row] + "," + numeratorD + "," + denominatorD );
+                              outH.println( wMgra + "," + mgraParkAreaField[row] + "," + otherDistCoeff*dist + "," + Math.exp( otherDistCoeff*dist ) + "," + discountFactor + "," + hstallsothField[row] + "," + hparkcostField[row] + "," + numeratorH + "," + denominatorH );
                           }
                           
                        }
@@ -1189,41 +1190,50 @@ private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) 
                 if (denominatorM != 0) {
                 	lsWgtAvgCostM[mgra] = numeratorM / denominatorM;
                 } else {
-                	outM.close();
-                	outD.close();
-                	outH.close();
-                	throw new RuntimeException("Monthly weighted average parking cost for mgra " + mgra + " cannot be calculated since denominator is " + denominatorM);
+                    if ( LOG_MGRA == mgra ) {
+                        outM.close();
+                        outD.close();
+                        outH.close();
+                    }
+                    lsWgtAvgCostM[mgra] = 0;
+                	logger.warn("Monthly weighted average parking cost for mgra " + mgra + " cannot be calculated since denominator is " + denominatorM);
                 }
                 
                 if (denominatorD != 0) {
                 	lsWgtAvgCostD[mgra] = numeratorD / denominatorD;
                 } else {
-                	outM.close();
-                	outD.close();
-                	outH.close();
-                	throw new RuntimeException("Daily weighted average parking cost for mgra " + mgra + " cannot be calculated since denominator is " + denominatorD);
+                    if ( LOG_MGRA == mgra ) {
+                        outM.close();
+                        outD.close();
+                        outH.close();
+                    }
+                   	lsWgtAvgCostD[mgra] = 0;
+                   	logger.warn("Daily weighted average parking cost for mgra " + mgra + " cannot be calculated since denominator is " + denominatorD);
                 }
                 
                 if (denominatorH != 0) {
                 	lsWgtAvgCostH[mgra] = numeratorH / denominatorH;
                 } else {
-                	outM.close();
-                	outD.close();
-                	outH.close();
-                	throw new RuntimeException("Hourly weighted average parking cost for mgra " + mgra + " cannot be calculated since denominator is " + denominatorH);
+                    if ( LOG_MGRA > 0 ) {
+                        outM.close();
+                        outD.close();
+                        outH.close();
+                    }
+                    lsWgtAvgCostH[mgra] = 0;
+                    logger.warn("Hourly weighted average parking cost for mgra " + mgra + " cannot be calculated since denominator is " + denominatorH);
                 }
 
             }
             else {
                 
-                lsWgtAvgCostM[mgra] = mparkcost[mgra];
-                lsWgtAvgCostD[mgra] = dparkcost[mgra];
-                lsWgtAvgCostH[mgra] = hparkcost[mgra];
+                lsWgtAvgCostM[mgra] = mparkcostField[k];
+                lsWgtAvgCostD[mgra] = dparkcostField[k];
+                lsWgtAvgCostH[mgra] = hparkcostField[k];
                 
             }
 
             // write the data record
-            out.println( mgra + "," + mgraParkArea[mgra] + "," + lsWgtAvgCostM[mgra] + "," + lsWgtAvgCostD[mgra] + "," + lsWgtAvgCostH[mgra] );
+            out.println( mgra + "," + mgraParkAreaField[k] + "," + lsWgtAvgCostM[mgra] + "," + lsWgtAvgCostD[mgra] + "," + lsWgtAvgCostH[mgra] );
                     }
         
         if ( LOG_MGRA > 0 ) {

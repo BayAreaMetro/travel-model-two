@@ -35,6 +35,7 @@ inMazNodes = "hwy\maz_nodes.csv" # VAR=N,X,Y
 inIntersectionNodes="hwy\intersection_nodes.csv" # VAR=N, X, Y
 inMazData = "landuse\maz_data.csv" # "maz_data.csv"
 outDensityData = "landuse\maz_density.csv"
+outMazData = "landuse\maz_data_withDensity.csv"
 
 print inMazNodes
 print inIntersectionNodes
@@ -108,7 +109,7 @@ maz_nonseqn = mazData['MAZ_ORIGINAL'].tolist()
 # create writer
 writeMazDensityFile = open(outDensityData, "wb")
 writer = csv.writer(writeMazDensityFile, delimiter=',')
-outHeader = ["MAZ","MAZ_ORIGINAL","TotInt","EmpDen","RetDen","DUDen","PopDen","intDenBin","empDenBin","duDenBin"]
+outHeader = ["MAZ_ORIGINAL","TotInt","EmpDen","RetEmpDen","DUDen","PopDen","IntDenBin","EmpDenBin","DuDenBin"]
 writer.writerow(outHeader)
 
 # iterate through MAZs and calculate density terms
@@ -133,8 +134,7 @@ while i < len(maz_seqn):
     mazData['dest_x'] = maz_x_seq[i]
     mazData['dest_y'] = maz_y_seq[i]
 
-    i = i + 1
-    if((i ==1) or (i % 100) == 0):
+    if((i ==0) or (i % 100) == 0):
         print "Calculating Density Variables for MAZ ", origNonSeqMaz
  
      
@@ -170,13 +170,33 @@ while i < len(maz_seqn):
 		
     if (duDen < 5):
         duDenBin=1
-    elif (duDenBin < 10):
+    elif (duDen < 10):
         duDenBin=2
     else:
         duDenBin=3
     
-    #write out results to csv file
-    outList = [origSeqMaz,origNonSeqMaz,interCount,empDen,retDen,duDen,popDen,intDenBin,empDenBin,duDenBin]
-    writer.writerow(outList)
+    i = i + 1
+ 
     
+    #write out results to csv file
+    outList = [origNonSeqMaz,interCount,empDen,retDen,duDen,popDen,intDenBin,empDenBin,duDenBin]
+    writer.writerow(outList)
+
+writeMazDensityFile.close()
+
+# read the data back in as a pandas table
+densityData = pd.read_csv(outDensityData)   
+
+# merge with maz data
+mazData = pd.merge(mazData,densityData,how='inner',on='MAZ_ORIGINAL')
+
+# drop unnecessary fields
+mazData.drop('INTER_CNT', axis=1, inplace=True)
+mazData.drop('dest_x', axis=1, inplace=True)
+mazData.drop('dest_y', axis=1, inplace=True)
+mazData.drop('distance', axis=1, inplace=True)
+
+# write the data back out
+mazData.to_csv(outMazData, index=False)
+
 print "*** Finished ***"

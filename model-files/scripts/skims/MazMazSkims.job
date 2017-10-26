@@ -105,6 +105,8 @@ LOOP CLASS = 1,1
     ;create networks with gencost and without excluded links
     RUN PGM=NETWORK
 
+;        PAR NODES=10000000
+
         NETI = hwy\avgload@TOKEN_PERIOD@.net
         NETO = hwy\maz_maz_network_@TOKEN_CLASS@.net
         
@@ -232,6 +234,7 @@ LOOP PROC_COUNT=1,9
                     ZONES=1
                     FILEO PRINTO[1] = @SFILE@_@SKIM_COUNTY@.s
                     PRINT LIST="RUN PGM = CUBE Parameters ='/Command /CloseWhenDone /Minimize /NoSplash'" PRINTO=1
+;                    PRINT LIST=" PAR NODES=10000000" PRINTO=1
                     PRINT LIST=" FUNCTION = BUILDPATH" PRINTO=1
                     PRINT LIST=" neti = @SKIM_NETWORK@_@PROC_COUNT@.net" PRINTO=1
                     PRINT LIST=" pathprinto = @OUTFILE@_@SKIM_COUNTY@.txt" PRINTO=1
