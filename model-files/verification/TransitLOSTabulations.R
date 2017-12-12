@@ -6,8 +6,9 @@
 # CREATE_TRIP_TOUR_FILES, if set to 0, assume tour/trip files with XFERS and BEST_MODE already exist in model run folder,
 #                         else run appendLOSAttributes.R to create those files
 # DISTRICT_COLUMN, column name of the district column in the TAZ file
+# TRIP_IN_PA, if set to 1, trip district summary will be in PA format, else it will be in OD format 
 # OUTFILE, the name of the output excel spreadsheet
-# example: %R_LOC%\Rscript.exe --vanilla --verbose TransitLOSTabulations.R "C:\projects\mtc\tm2_2000" 1 DIST Transit_LOS_summaries.xlsx > LOSTabulation.log
+# example: %R_LOC%\Rscript.exe --vanilla --verbose TransitLOSTabulations.R "C:\projects\mtc\tm2_2000" 1 DIST 1 Transit_LOS_summaries.xlsx > LOSTabulation.log
 # 
 
 
@@ -16,7 +17,8 @@ args = commandArgs(TRUE)
 RUNDIR = args[1]
 CREATE_TOUR_TRIP_FILES = as.integer(args[2])
 DISTRICT_COLUMN = args[3]
-OUTFILE = args[4]
+TRIP_IN_PA = as.integer(args[4])
+OUTFILE = args[5]
 
 list.of.packages <- c("reshape", "devtools", "foreign", "xlsx", "dplyr", "data.table")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -236,6 +238,8 @@ itransTrip <- itransTrip %>%
     mutate(tod = AddTODNum(stop_period),
            ODIST = mazfile$DIST[match(orig_mgra, mazfile$MAZ)],
            DDIST = mazfile$DIST[match(dest_mgra, mazfile$MAZ)],
+	   PDIST = ifelse(inbound == 0, ODIST, DDIST),
+           ADIST = ifelse(inbound == 0, DDIST, ODIST),
            PMAZ = ifelse(inbound == 0, orig_mgra, dest_mgra),
            PTAZ = mazfile$TAZ[match(PMAZ, mazfile$MAZ)],
            PTAP = ifelse(inbound == 0, trip_board_tap, trip_alight_tap),
@@ -375,11 +379,17 @@ summ3 <- rbind(summ3, c("Total", sum(summ3$trips)))
 summ3$trips <- as.numeric(summ3$trips)
 
 # summary 4 - transit trips by district, primary mode and access mode
-summ4_to_cast <- melt(itransTrip, id.vars = c("ODIST", "DDIST", "BEST_MODE",
+if (TRIP_IN_PA) {
+    summ4_to_cast <- melt(itransTrip, id.vars = c("PDIST", "ADIST", "BEST_MODE",
                                               "accessMode"),
                       measure.vars = c("trips"))
-
-summ4 <- cast(summ4_to_cast, ODIST + DDIST + BEST_MODE ~ accessMode, sum, margins = TRUE)
+    summ4 <- cast(summ4_to_cast, PDIST + ADIST + BEST_MODE ~ accessMode, sum, margins = TRUE)
+} else {
+    summ4_to_cast <- melt(itransTrip, id.vars = c("ODIST", "DDIST", "BEST_MODE",
+                                                  "accessMode"),
+                          measure.vars = c("trips"))
+    summ4 <- cast(summ4_to_cast, ODIST + DDIST + BEST_MODE ~ accessMode, sum, margins = TRUE)
+    }
 
 # summary 5 - transit tours by primary mode, access mode and access distance
 summ5 <- aggregate(tours ~ BEST_MODE_IN + BEST_MODE_OUT + accDistC + accessMode, 
@@ -583,10 +593,15 @@ addDataFrame(summ3, sheet2, startRow=14, startColumn=1,
              rownamesStyle = TABLE_ROWNAMES_STYLE,
              row.names = FALSE)
 
-
-xlsx.addTitle(sheet2, rowIndex=20, 
-              title="Transit Trips by Origin/Destination District, Primary Transit Mode and Access Mode",
-              titleStyle = TITLE_STYLE)
+if (TRIP_IN_PA) {
+    xlsx.addTitle(sheet2, rowIndex=20, 
+                  title="Transit Trips by Production/Attraction District, Primary Transit Mode and Access Mode",
+                  titleStyle = TITLE_STYLE)
+} else {
+    xlsx.addTitle(sheet2, rowIndex=20, 
+                  title="Transit Trips by Origin/Destination District, Primary Transit Mode and Access Mode",
+                  titleStyle = TITLE_STYLE)
+}
 
 summ4.colVar = list(
     '1'=csOtherColumn,
