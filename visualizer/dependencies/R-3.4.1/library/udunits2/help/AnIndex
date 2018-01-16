@@ -1,0 +1,9 @@
+udunits2-package	udunits2-package
+ud.are.convertible	ud.are.convertible
+ud.convert	ud.convert
+ud.get.name	ud.get.name
+ud.get.symbol	ud.get.name
+ud.have.unit.system	ud.have.unit.system
+ud.is.parseable	ud.is.parseable
+ud.set.encoding	ud.set.encoding
+udunits2	udunits2-package

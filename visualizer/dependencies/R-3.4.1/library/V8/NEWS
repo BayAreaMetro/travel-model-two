@@ -1,0 +1,63 @@
+1.5
+ - Homebrew has moved V8 (again), now it's called v8@3.15
+
+1.4
+ - Fix autobrew for OSX Mavericks
+
+1.3
+ - Extract autobrew script to separate repo
+ - Add symbol registration
+
+1.2
+ - Improve configure script to check for the correct version of libv8
+ - Fedora 25+ requires v8-314-devel instead of v8-devel
+
+1.1
+ - Use C++ 'new' and 'delete' instead of nodelist to keep contexts in scope
+
+1.0.3
+ - Update homebrew URL in configure script
+
+1.0.2
+ - Update URL of browserify logo
+
+1.0.1
+ - Fix internal stop() function for new testthat
+ - ctx$eval(character(0)) does not raise error anymore
+ - Remove references to new_context() in favor of v8()
+ - Use the new 'COMPILED_BY' variable on windows
+ - Updated the URL to the V8 homepage in DESCRIPTION
+
+1.0
+ - Remove UTF-8 workarounds now that Rcpp has proper UTF-8 support
+
+0.10
+ - Add the console.r callback JavaScript api
+
+0.9
+ - Fix for OSX cran builder
+ - Add 'v8' as a more descriptive alias for 'new_context'
+ - Update libv8 on Windows to 3.15
+ - Add support for the new windows tool chain
+
+0.8
+ - Fix configure script for OSX
+ - Add 'v8' as a more descriptive alias for 'new_context'
+ - Update libv8 on Windows to 3.15
+ - Add support for the new windows tool chain
+
+0.7
+ - Deprecated support for I() removed. Use JS() instead
+ - Refactored configure script to use pkg-config if available.
+ - Updated libv8 brew script on OSX to v8-3.15
+ - Update libv8 static builds on windows to v3.14.5.10
+ - Ship separate libraries for win32 for more recent compilers
+
+0.6
+ - Breaking change: use JS() instead of I() to mark strings as literal JavaScript.
+ - ct$source() now always assumes UTF-8 data, even on Windows.
+ - Use the new V8_types.h feature from Rcpp 0.11.5
+ - Start with custom code completion within ct$console() for R 3.2.0
+
+0.5
+ - Add support for Typed Arrays

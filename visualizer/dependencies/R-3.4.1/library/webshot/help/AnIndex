@@ -1,0 +1,7 @@
+%>%	reexports
+appshot	appshot
+install_phantomjs	install_phantomjs
+reexports	reexports
+resize	resize
+shrink	shrink
+webshot	webshot

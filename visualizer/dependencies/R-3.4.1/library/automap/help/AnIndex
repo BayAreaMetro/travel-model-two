@@ -1,0 +1,8 @@
+autofitVariogram	autofitVariogram
+autoKrige	autoKrige
+autoKrige.cv	autoKrige_cv
+automapPlot	automapPlot
+compare.cv	compare.cv
+plot.autoKrige	plot.autoKrige
+plot.posPredictionInterval	plot.autoKrige
+posPredictionInterval	posPredictionInterval

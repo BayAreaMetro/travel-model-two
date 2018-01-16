@@ -1,0 +1,16 @@
+useDynLib(weights, .registration = TRUE)
+
+export("wtd.hist", "wtd.chi.sq", "wtd.t.test", "wtd.cor", "nalevs", "dummify", "wpct", "starmaker", "stdz", "rd")
+export(findwtdinteraction, plotwtdinteraction, plotinteractpreds, findwtdinteraction.mira, findwtdinteraction.default)
+export(wtd.cors)
+
+importFrom(gdata, drop.levels)
+importFrom(Hmisc, wtd.table, wtd.mean, wtd.var)
+importFrom(mice, pool.scalar)
+importFrom("grDevices", "nclass.FD", "nclass.Sturges", "nclass.scott", "gray")
+importFrom("stats", "coef", "lm", "model.matrix", "pchisq", "pt",
+     "weights", "xtabs", "cor", "predict", "var")
+importFrom("graphics", "axis", "lines", "par", "plot", "polygon")
+
+S3method(findwtdinteraction, default)
+S3method(findwtdinteraction, mira)

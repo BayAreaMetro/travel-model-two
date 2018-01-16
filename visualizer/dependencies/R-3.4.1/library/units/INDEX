@@ -1,0 +1,25 @@
+Math.units              Mathematical operations for units objects
+Ops.units               S3 Ops Group Generic Functions for units
+                        objects
+as.dt                   convert units object into difftime object
+as.units                convert object to a units object
+as_cf                   deparse unit to string in product power form
+                        (e.g. km m-2 s-1)
+hist.units              histogram for unit objects
+install_conversion_constant
+                        Install a function for conversion between
+                        user-defined units.
+install_conversion_function
+                        Install a function for conversion between
+                        user-defined units.
+make_unit               Create a new unit from a unit name.
+parse_unit              parse unit in product power form (e.g. km m-2
+                        s-1)
+plot.units              create axis label with appropriate labels
+type_sum.units          type_sum for tidy tibble printing
+ud_units                List containing pre-defined units from the
+                        udunits2 package.
+unitless                The "unit" type for vectors that are actually
+                        dimension-less.
+units                   Set measurement units on a numeric vector
+units_options           set one or more units global options

@@ -1,0 +1,3 @@
+JS                      Mark character strings as literal JavaScript
+                        code
+V8                      Run JavaScript in a V8 context

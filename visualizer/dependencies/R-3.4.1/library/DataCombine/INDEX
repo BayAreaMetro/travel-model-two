@@ -1,0 +1,47 @@
+CasesTable              Create reports cases after listwise deletion of
+                        missing values for time-series cross-sectional
+                        data.
+CountSpell              Count spells, including for grouped data
+DropNA                  Drop rows from a data frame with missing values
+                        on a given variable(s).
+FillDown                Fills in missing (NA) values with the previous
+                        non-missing value
+FillIn                  A function for filling in missing values of a
+                        variable from one data frame with the values
+                        from another variable.
+FindDups                Find duplicated values in a data frame and
+                        subset it to either include or not include
+                        them.
+FindReplace             Replace multiple patterns found in a character
+                        string column of a data frame
+InsertRow               Inserts a new row into a data frame
+MoveFront               Move variables to the front of a data frame.
+NaVar                   Create new variable(s) indicating if there are
+                        missing values in other variable(s)
+PercChange              Calculate the percentage change from a
+                        specified lag, including within groups
+SpreadDummy             Spread a dummy variable (1's and 0') over a
+                        specified time period and for specified groups
+StartEnd                Find the starting and ending time points of a
+                        spell
+TimeExpand              Expands a data set so that it includes an
+                        observation for each time point in a sequence.
+                        Works with grouped data.
+TimeFill                Creates a continuous Unit-Time-Dummy data frame
+                        from a data frame with Unit-Start-End times
+VarDrop                 Drop one or more variables from a data frame.
+change                  Calculate the changes (absolute, percent, and
+                        proportion) changes from a specified lag,
+                        including within groups
+dMerge                  Merges 2 data frames and report/drop/keeps only
+                        duplicates.
+grepl.sub               Subset a data frame if a specified pattern is
+                        found in a character string
+rmExcept                Remove all objects from a workspace except
+                        those specified by the user.
+shift                   A function for creating lag and lead variables.
+shiftMA                 Internal function for slideMA
+slide                   A function for creating lag and lead variables,
+                        including for time-series cross-sectional data.
+slideMA                 Create a moving average for a period before or
+                        after each time point for a given variable

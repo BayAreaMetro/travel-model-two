@@ -1,0 +1,55 @@
+EbroCatchmentsCHE       Subcatchments of the Ebro River basin (Spain)
+EbroDEM1000m            Digital Elevation Model (DEM) of the Ebro River
+                        basin (Spain)
+EbroPPgis               Spatial location of raingauges on the Ebro
+                        River basin
+EbroPPtsMonthly         Ebro Monthly Precipitation Time Series
+KarameaAtGorgeQts       Karamea at Gorge, time series of hourly
+                        streamflows
+MaquehueTemuco          San Martino, ts of daily precipitation.
+OcaEnOnaQts             Oca in "Ona" (Q0931), time series of daily
+                        streamflows.
+SanMartinoPPts          San Martino, ts of daily precipitation.
+annualfunction          Annual Function
+climograph              Climograph
+daily2annual            (sub)Daily/Monthly -> Annual
+daily2monthly           (sub)Daily -> Monthly
+dip                     Days in Period
+diy                     Days in Year
+dm2seasonal             (sub)Daily/Monthly -> Seasonal Values
+drawTimeAxis            Customized Time Axis
+dwdays                  Amount of dry/wet days in a time series
+dwi                     Days with Information
+extract                 Extract from Zoo
+fdc                     Flow Duration Curve
+fdcu                    Flow Duration Curve with uncertainty bounds.
+gists2spt               Time Series and GIS Info ->
+                        (pseudo)Spatio-Temporal Object
+hip                     Hours in Period
+hydroTSM-package        Management, analysis, interpolation and plot of
+                        hydrological time series, with focus on
+                        hydrological modelling
+hydrokrige              Krige for Hydrological Time Series
+hydropairs              Visual Correlation Matrix
+hydroplot               Hydrological time series plotting and
+                        extraction.
+hypsometric             Hypsometric Curve
+infillxy                Infills NA values
+istdx                   Inverse Standarization
+izoo2rzoo               Irregular Zoo -> Regular Zoo
+ma                      Moving Average
+matrixplot              Matrixplot
+mip                     Months in Period
+monthlyfunction         Monthly Function
+mspplot                 Multiple spplot
+rm1stchar               Remove First Character(s)
+seasonalfunction        Seasonal Function
+sfreq                   Sampling Frequency
+smry                    Summary
+sname2ts                Station Name -> Time Series
+stdx                    Standarization
+subdaily2daily          Sub-daily -> Daily
+time2season             Date/DateTime character -> Seasonal character
+vector2zoo              Vector -> Zoo
+yip                     Years in Period
+zoo2RHtest              Zoo -> RHTest

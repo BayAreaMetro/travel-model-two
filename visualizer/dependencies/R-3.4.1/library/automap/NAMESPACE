@@ -1,0 +1,20 @@
+import(lattice)
+import(sp)
+import(gstat)
+import(reshape)
+
+export(autoKrige,
+	autofitVariogram,
+	posPredictionInterval,
+	automapPlot, 
+	autoKrige.cv,
+	compare.cv
+	)
+
+S3method(plot, autofitVariogram)
+S3method(plot, autoKrige)
+S3method(plot, posPredictionInterval)
+S3method(summary, autofitVariogram)
+S3method(summary, autoKrige)
+S3method(summary, posPredictionInterval)
+S3method(summary, autoKrige.cv)
