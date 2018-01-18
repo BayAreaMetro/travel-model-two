@@ -1,0 +1,8 @@
+autoKrige               Performs an automatic interpolation
+autoKrige.cv            Automatic cross-validation
+autofitVariogram        Automatically fitting a variogram
+automapPlot             Special plot function for automap
+compare.cv              Comparing the results of cross-validations
+plot.autoKrige          Plot methods in automap
+posPredictionInterval   Determines the position of the p% prediction
+                        interval

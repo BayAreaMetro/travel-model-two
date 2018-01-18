@@ -1,0 +1,17 @@
+kableExtra-package	kableExtra-package
+%>%	reexports
+add_footnote	add_footnote
+add_header_above	add_header_above
+add_indent	add_indent
+collapse_rows	collapse_rows
+column_spec	column_spec
+group_rows	group_rows
+kableExtra	kableExtra-package
+kable_styling	kable_styling
+landscape	landscape
+magic_mirror	magic_mirror
+reexports	reexports
+rmd_format	rmd_format
+row_spec	row_spec
+scroll_box	scroll_box
+usepackage_latex	usepackage_latex
