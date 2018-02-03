@@ -52,8 +52,8 @@ public abstract class DestChoiceDMU
         dmuIndex = new IndexValues();
 
         // create default objects - some choice models use these as place holders for values
-        person = new Person(null, -1, modelStructure);
-        hh = new Household(modelStructure);
+         hh = new Household(modelStructure);
+         person = new Person(hh, -1, modelStructure);
 
         mgraManager = MgraDataManager.getInstance();
 

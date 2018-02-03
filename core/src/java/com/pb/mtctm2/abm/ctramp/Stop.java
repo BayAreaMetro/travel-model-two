@@ -19,6 +19,8 @@ public class Stop
     int     alightTap;
     boolean inbound;
     int     set;
+    
+    float   sampleRate;
 
     String  origPurpose;
     String  destPurpose;
@@ -165,6 +167,14 @@ public class Stop
         logger.info( "" );
 
     }
+
+	public float getSampleRate() {
+		return sampleRate;
+	}
+
+	public void setSampleRate(float sampleRate) {
+		this.sampleRate = sampleRate;
+	}
     
 
 }

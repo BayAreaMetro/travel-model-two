@@ -57,6 +57,8 @@ public class Tour
     
     private int       choosenTransitPathIn;
     private int       choosenTransitPathOut;
+    
+    private float     sampleRate;
 
     // this constructor used for mandatory tour creation
     public Tour(Person perObj, int tourId, int primaryIndex)
@@ -66,6 +68,7 @@ public class Tour
         this.tourId = tourId;
         tourCategory = ModelStructure.MANDATORY_CATEGORY;
         tourPrimaryPurposeIndex = primaryIndex;
+        sampleRate = perObj.getSampleRate();
     }
 
     // this constructor used for joint tour creation
@@ -75,6 +78,7 @@ public class Tour
         this.tourPurpose = tourPurpose;
         tourCategory = category;
         tourPrimaryPurposeIndex = primaryIndex;
+        sampleRate = hhObj.getSampleRate();
     }
 
     // this constructor used for individual non-mandatory or at-work subtour creation
@@ -87,6 +91,7 @@ public class Tour
         this.tourPurpose = tourPurpose;
         tourCategory = category;
         tourPrimaryPurposeIndex = primaryIndex;
+        sampleRate = hhObj.getSampleRate();
     }
 
     public Person getPersonObject()
@@ -350,6 +355,7 @@ public class Tour
             outboundStops[0] = new Stop( this, origPurp, destPurp, id, inbound, 0 );
             stop = outboundStops[0]; 
         }
+        
         return stop;
     }
     
@@ -711,5 +717,13 @@ public class Tour
     {
         return choosenTransitPathOut;
     }
+
+	public float getSampleRate() {
+		return sampleRate;
+	}
+
+	public void setSampleRate(float sampleRate) {
+		this.sampleRate = sampleRate;
+	}
 
 }

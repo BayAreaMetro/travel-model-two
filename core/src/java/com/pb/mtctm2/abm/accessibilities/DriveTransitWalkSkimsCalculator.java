@@ -37,7 +37,7 @@ public class DriveTransitWalkSkimsCalculator
         implements Serializable
 {
 
-    private transient Logger                        primaryLogger;
+    private transient Logger                        primaryLogger       = Logger.getLogger(DriveTransitWalkSkimsCalculator.class);;
 
     private static final int              EA                            = TransitWalkAccessUEC.EA;
     private static final int              AM                            = TransitWalkAccessUEC.AM;
@@ -79,7 +79,7 @@ public class DriveTransitWalkSkimsCalculator
 
     public DriveTransitWalkSkimsCalculator(HashMap<String, String> rbMap)
     {
-        mgraManager = MgraDataManager.getInstance();
+    	mgraManager = MgraDataManager.getInstance();
         maxTap = mgraManager.getMaxTap();
     }
 

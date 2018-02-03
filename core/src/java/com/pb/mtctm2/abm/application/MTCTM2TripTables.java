@@ -60,7 +60,6 @@ public class MTCTM2TripTables {
     private float[][] CBDVehicles; // an array of parked vehicles in MGRAS by period
     private float[][] PNRVehicles; // an array of parked vehicles at TAPs by period
     
-    private float sampleRate;
     private int iteration;
 	private String directory;
 	private String matrixFileExtension = "mat";
@@ -73,7 +72,7 @@ public class MTCTM2TripTables {
     
     public int numSkimSets;
     
-    public MTCTM2TripTables(String resourceBundleName, int iteration, float sampleRate){
+    public MTCTM2TripTables(String resourceBundleName, int iteration){
 
         HashMap<String,String> rbMap = ResourceUtil.getResourceBundleAsHashMap(resourceBundleName);
         properties = new Properties();
@@ -121,7 +120,6 @@ public class MTCTM2TripTables {
 		CBDVehicles = new float[mgraManager.getMaxMgra()+1][numberOfPeriods];
 		PNRVehicles = new float[tapManager.getMaxTap()+1][numberOfPeriods];
 		
-		setSampleRate(sampleRate);
 		this.iteration = iteration; 
 		
 		//create mazSets
@@ -314,6 +312,8 @@ public class MTCTM2TripTables {
 			
 			//get trip distance for taz/maz level matrix decision
 			float tripdist = (int) tripData.getValueAt(i,"TRIP_DISTANCE");
+			
+			float sampleRate = tripData.getValueAt(i,"sampleRate");
 
         	//transit trip - get boarding and alighting tap
         	int boardTap=0;
@@ -584,15 +584,7 @@ public class MTCTM2TripTables {
 
     }
     
-    /**
-     * Set the sample rate
-     * @param sampleRate  The sample rate, used for expanding trips
-     */
-    public void setSampleRate(float sampleRate) {
-		this.sampleRate = sampleRate;
-	}
-    
-    
+     
     private String formFileName( String originalFileName, int iteration ) {
         int lastDot = originalFileName.lastIndexOf('.');
         
@@ -617,11 +609,9 @@ public class MTCTM2TripTables {
 		String propertiesName = args[0];
 		//args[1] is "-iteration"
 		int iteration = new Integer(args[2]).intValue();
-		//args[3] is "-sampleRate"
-		float sampleRate = new Float(args[4]).floatValue();
 		
 		//run trip table generator
-		MTCTM2TripTables tripTables = new MTCTM2TripTables(propertiesName, iteration, sampleRate);		
+		MTCTM2TripTables tripTables = new MTCTM2TripTables(propertiesName, iteration);		
 		tripTables.createTripTables();
 
 	}

@@ -68,6 +68,8 @@ public class SandagHouseholdDataManager2
         // read the corrrespondence files for mapping persons to occupation and
         //int[] occCodes = readOccupCorrespondenceData();
         //int[] indCodes = readIndustryCorrespondenceData();
+        
+        boolean hasSampleRate=(hhTable.getColumnPosition(HH_SAMPLERATE_FIELD_NAME) > -1 ? true : false);
 
         // get the maximum HH id value to use to dimension the hhIndex correspondence
         // array.  The hhIndex array will store the hhArray index number for the given
@@ -225,7 +227,13 @@ public class SandagHouseholdDataManager2
                 int bldgsz = (int) hhTable.getValueAt(r, hhTable
                         .getColumnPosition(HH_BLDGSZ_FIELD_NAME));
                 hh.setHhBldgsz(bldgsz);
-
+                
+                // read sample rate from file if it exists, if not set it to the global sample rate
+                float hhSampleRate = sampleRate;
+                if(hasSampleRate)
+                	hhSampleRate = hhTable.getValueAt(r,  hhTable.getColumnPosition(HH_SAMPLERATE_FIELD_NAME));
+                hh.setSampleRate(hhSampleRate);
+                
                 hh.initializeWindows();
                 hhArray[newIndex] = hh;
 

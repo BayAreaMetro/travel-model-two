@@ -1,8 +1,12 @@
 package com.pb.mtctm2.abm.accessibilities;
 
+import org.apache.log4j.Logger;
+
 
 public class StoredTransitSkimData
 {
+
+    private transient Logger                        logger       = Logger.getLogger(StoredTransitSkimData.class);;
 
     private static StoredTransitSkimData objInstance = null;
     private int numSets;
@@ -30,7 +34,8 @@ public class StoredTransitSkimData
     }    
     
     private void setupStoredDataArrays(int numSets, int numPeriods, int maxTap ){        
-        storedWtwDepartPeriodTapTapSkims = new double[numSets][numPeriods + 1][maxTap + 1][][];
+        
+    	storedWtwDepartPeriodTapTapSkims = new double[numSets][numPeriods + 1][maxTap + 1][][];
         storedWtdDepartPeriodTapTapSkims = new double[numSets][numPeriods + 1][maxTap + 1][][];
         storedDtwDepartPeriodTapTapSkims = new double[numSets][numPeriods + 1][maxTap + 1][][];
     }

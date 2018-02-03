@@ -268,6 +268,7 @@ public class HouseholdDataWriter
         data.add("transponder");
         data.add("cdap_pattern");
         data.add("jtf_choice");
+        data.add("sampleRate");
         return data;
     }
 
@@ -281,6 +282,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
         return data;
     }
 
@@ -294,6 +296,7 @@ public class HouseholdDataWriter
         data.add(string(hh.getTpChoice()));
         data.add(string(hh.getCoordinatedDailyActivityPattern()));
         data.add(string(hh.getJointTourFreqChosenAlt()));
+        data.add(string(hh.getSampleRate()));
         return data;
     }
 
@@ -312,6 +315,7 @@ public class HouseholdDataWriter
         data.add("inmf_choice");
         data.add("fp_choice");
         data.add("reimb_pct");
+        data.add("sampleRate");
         return data;
     }
 
@@ -329,6 +333,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.REAL);
         return data;
     }
@@ -348,6 +353,8 @@ public class HouseholdDataWriter
         data.add(string(p.getInmtfChoice()));
         data.add(string(p.getFreeParkingAvailableResult()));
         data.add(string(p.getParkingReimbursement()));
+        float sampleRate = p.getHouseholdObject().getSampleRate();
+        data.add(string(sampleRate));
         return data;
     }
 
@@ -379,6 +386,7 @@ public class HouseholdDataWriter
         
         data.add("out_set");
         data.add("in_set");
+        data.add("sampleRate");
 
         if (saveUtilsProbsFlag)
         {
@@ -431,6 +439,8 @@ public class HouseholdDataWriter
         data.add("out_set");
         data.add("in_set");
 
+        data.add("sampleRate");
+        
         if (saveUtilsProbsFlag)
         {
             int numModeAlts = modelStructure.getMaxTourModeIndex();
@@ -483,7 +493,8 @@ public class HouseholdDataWriter
         
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
-
+        data.add(SqliteDataTypes.REAL);
+        
         if (saveUtilsProbsFlag)
         {
             int numModeAlts = modelStructure.getMaxTourModeIndex();
@@ -532,6 +543,7 @@ public class HouseholdDataWriter
         
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
 
         if (saveUtilsProbsFlag)
         {
@@ -598,6 +610,9 @@ public class HouseholdDataWriter
         data.add(string(inTaps[1]));
         data.add(string(outTaps[2]));
         data.add(string(inTaps[2]));
+        
+        float sampleRate = t.getSampleRate();
+        data.add(string(sampleRate));
         
         if (saveUtilsProbsFlag)
         {
@@ -669,6 +684,10 @@ public class HouseholdDataWriter
         data.add(string(inTaps[1]));
         data.add(string(outTaps[2]));
         data.add(string(inTaps[2]));
+        
+        float sampleRate = t.getSampleRate();
+        data.add(string(sampleRate));
+        
         
         if (saveUtilsProbsFlag)
         {
@@ -800,6 +819,7 @@ public class HouseholdDataWriter
         
         data.add("set");
         
+        data.add("sampleRate");
         return data;
     }
 
@@ -826,6 +846,7 @@ public class HouseholdDataWriter
         
         data.add("set");
         
+        data.add("sampleRate");
         return data;
     }
 
@@ -851,6 +872,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
         return data;
     }
 
@@ -875,6 +897,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
         return data;
     }
 
@@ -967,6 +990,8 @@ public class HouseholdDataWriter
         	set = s.getSet();
         }
         data.add(string(set));
+        float sampleRate = t.getSampleRate();
+        data.add(string(sampleRate));
 
         return data;
         
@@ -1065,6 +1090,8 @@ public class HouseholdDataWriter
         	set = s.getSet();
         }
         data.add(string(set));
+        float sampleRate = t.getSampleRate();
+        data.add(string(sampleRate));
         
         return data;
     }
@@ -1119,6 +1146,8 @@ public class HouseholdDataWriter
         data.add(string(t.getTourModeChoice()));
        
         data.add(string(0));							// set
+        float sampleRate = t.getSampleRate();
+        data.add(string(sampleRate));
 
         return data;
     }
@@ -1188,6 +1217,8 @@ public class HouseholdDataWriter
         data.add(string(t.getTourModeChoice()));
        
         data.add(string(0));							// set
+        float sampleRate = t.getSampleRate();
+        data.add(string(sampleRate));
 
         return data;
     }

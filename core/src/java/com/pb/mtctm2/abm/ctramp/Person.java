@@ -113,6 +113,8 @@ public class Person
     private int                  windowBeforeFirstMandJointTour;
     private int                  windowBetweenFirstLastMandJointTour;
     private int                  windowAfterLastMandJointTour;
+    
+    private float                sampleRate;
 
     private ModelStructure       modelStructure;
 
@@ -125,7 +127,9 @@ public class Person
         this.indNonManTourArrayList = new ArrayList<Tour>();
         this.atWorkSubtourArrayList = new ArrayList<Tour>();
         this.modelStructure = modelStructure;
-
+        
+        this.sampleRate = hhObj.getSampleRate();
+        
         initializeWindows();
 
         freeParkingAvailable = ParkingProvisionModel.FP_MODEL_REIMB_ALT;
@@ -1873,7 +1877,15 @@ public class Person
 
     }
 
-    public enum EmployStatus
+    public float getSampleRate() {
+		return sampleRate;
+	}
+
+	public void setSampleRate(float sampleRate) {
+		this.sampleRate = sampleRate;
+	}
+
+	public enum EmployStatus
     {
         nul, FULL_TIME, PART_TIME, NOT_EMPLOYED, UNDER16
     }

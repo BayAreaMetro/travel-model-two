@@ -24,6 +24,8 @@ IF %D:~-1% EQU \ SET D=%D:~0,-1%
 FOR %%a IN ("%D%") DO SET SCEN=%%~nxa
 ECHO ***SCENARIO: %SCEN%***
 
+SET /A SELECT_COUNTY=9
+
 :: Set up environment variables
 CALL CTRAMP\runtime\CTRampEnv.bat
 
@@ -106,6 +108,12 @@ ROBOCOPY CTRAMP %MATRIX_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
 
 : Pre-Process
 
+IF %SELECT_COUNTY% GTR 0 (
+  :: Collapse the mazs outside select county
+  runtpp %BASE_SCRIPTS%\preprocess\CreateCollapsedNetwork.job
+  if ERRORLEVEL 2 goto done
+)
+
 :: Write a batch file with number of zones, taps, mazs
 runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
 if ERRORLEVEL 2 goto done
@@ -113,9 +121,23 @@ if ERRORLEVEL 2 goto done
 ::Run the batch file
 call zoneSystem.bat
 
+IF %SELECT_COUNTY% GTR 0 (
+  ::Collapse the MAZ data (except county 9 which is Marin)
+  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\CollapseMAZ.PY landuse\maz_data.csv %SELECT_COUNTY%
+)
+
 :: Build sequential numberings
 runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
 if ERRORLEVEL 2 goto done
+
+IF %SELECT_COUNTY% GTR 0 (
+  :: Renumber the household file MAZs
+  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\RenumberHHFileMAZs.PY popsyn\households.csv landuse\maz_data.csv %SELECT_COUNTY%
+
+  :: Sample households according to sample rates by TAZ
+  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\popsampler.PY landuse\sampleRateByTAZ.csv popsyn\households.csv popsyn\persons.csv
+)
+
 
 :: Write out the intersection and maz XYs
 runtpp %BASE_SCRIPTS%\preprocess\maz_densities.job

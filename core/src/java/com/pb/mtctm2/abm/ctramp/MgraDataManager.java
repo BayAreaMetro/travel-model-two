@@ -153,13 +153,19 @@ public final class MgraDataManager
      */
     private MgraDataManager(HashMap<String, String> rbMap)
     {
-        System.out.println("MgraDataManager Started");
+        logger.info("MgraDataManager Started");
         readMgraTableData(rbMap);
         
         //read maz to tap and trim set 
         readMgraWlkTaps(rbMap);
-        readTapLines(rbMap);
-        trimTapSet();
+        
+        
+        //trim tap lines
+        boolean trimTapSet = Util.getBooleanValueFromPropertyMap(rbMap, "maz.tap.trimTapSet");
+        if(trimTapSet){
+        	readTapLines(rbMap);
+        	trimTapSet();
+        }
         
         readMazMazWalkDistance(rbMap);
         readMazMazBikeDistance(rbMap);
@@ -663,6 +669,7 @@ public final class MgraDataManager
     {
         logger.info("Number of MGRAs: " + mgras.size());
         logger.info("Max MGRA: " + maxMgra);
+        logger.info("Max TAP: "+maxTap);
 
         //logger.info("Number of MGRAs with WalkAccessTaps: " + nMgrasWithWlkTaps);
         //logger.info("Number of TAPs in MGRA 18 (should be 3): "
@@ -1010,6 +1017,10 @@ public final class MgraDataManager
     }
     
     
+public TableDataSet getMgraTableDataSet() {
+		return mgraTableDataSet;
+	}
+
 private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) {
         
         // open output file to write average parking costs for each mgra

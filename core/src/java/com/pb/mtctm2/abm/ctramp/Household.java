@@ -64,6 +64,8 @@ public class Household
     private ModelStructure            modelStructure;
     
     private int 					  countyId;
+    
+    private float                     sampleRate;
  
 
     public Household(ModelStructure modelStructure)
@@ -1608,6 +1610,7 @@ public class Household
             persons[i].logEntirePersonObject(logger);
 
         logger.info(separater);
+        logger.info("sampleRate: "+sampleRate);
         logger.info("");
         logger.info("");
 
@@ -1635,5 +1638,13 @@ public class Household
     {
         nul, FAMILY_MARRIED, FAMILY_MALE_NO_WIFE, FAMILY_FEMALE_NO_HUSBAND, NON_FAMILY_MALE_ALONE, NON_FAMILY_MALE_NOT_ALONE, NON_FAMILY_FEMALE_ALONE, NON_FAMILY_FEMALE_NOT_ALONE
     }
+
+	public float getSampleRate() {
+		return sampleRate;
+	}
+
+	public void setSampleRate(float sampleRate) {
+		this.sampleRate = sampleRate;
+	}
 
 }
