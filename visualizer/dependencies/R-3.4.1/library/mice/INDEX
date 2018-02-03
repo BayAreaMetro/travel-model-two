@@ -1,0 +1,144 @@
+.pmm.match              Finds an imputed value from matches in the
+                        predictive metric
+ampute                  Generate Missing Data for Simulation Purposes
+ampute.continuous       Multivariate Amputation Based On Continuous
+                        Probability Functions
+ampute.default.freq     Default 'freq' in 'ampute'
+ampute.default.odds     Default 'odds' in 'ampute()'
+ampute.default.patterns
+                        Default 'patterns' in 'ampute'
+ampute.default.type     Default 'type' in 'ampute()'
+ampute.default.weights
+                        Default 'weights' in 'ampute'
+ampute.discrete         Multivariate Amputation Based On Discrete
+                        Probability Functions
+ampute.mcar             Multivariate Amputation In A MCAR Manner
+appendbreak             Appends specified break to the data
+as.mids                 Converts an multiply imputed dataset (long
+                        format) into a 'mids' object
+as.mira                 Create a 'mira' object from repeated analyses
+boys                    Growth of Dutch boys
+bwplot.mads             Box-and-whisker plot of amputed and non-amputed
+                        data
+bwplot.mids             Box-and-whisker plot of observed and imputed
+                        data
+cbind.mids              Columnwise combination of a 'mids' object.
+cc                      Select complete cases
+cci                     Complete case indicator
+complete                Creates imputed data sets from a 'mids' object
+densityplot.mids        Density plot of observed and imputed data
+extractBS               Extract broken stick estimates from a 'lmer'
+                        object
+fdd                     SE Fireworks disaster data
+fdgs                    Fifth Dutch growth study 2009
+fico                    Fraction of incomplete cases among cases with
+                        observed
+flux                    Influx and outflux of multivariate missing data
+                        patterns
+fluxplot                Fluxplot of the missing data pattern
+getfit                  Extracts fit objects from 'mira' object
+glm.mids                Generalized linear model for 'mids' object
+ibind                   Combine imputations fitted to the same data
+ic                      Select incomplete cases
+ici                     Incomplete case indicator
+is.mads                 Check for 'mads' object
+is.mids                 Check for 'mids' object
+is.mipo                 Check for 'mipo' object
+is.mira                 Check for 'mira' object
+leiden85                Leiden 85+ study
+lm.mids                 Linear regression for 'mids' object
+mads-class              Multivariate Amputed Data Set ('mads')
+mammalsleep             Mammal sleep data
+md.pairs                Missing data pattern by variable pairs
+md.pattern              Missing data pattern
+mdc                     Graphical parameter for missing data plots.
+mice                    Multivariate Imputation by Chained Equations
+                        (MICE)
+mice.impute.2l.norm     Imputation by a two-level normal model
+mice.impute.2l.pan      Imputation by a two-level normal model using
+                        'pan'
+mice.impute.2lonly.mean
+                        Imputation of the mean within the class
+mice.impute.2lonly.norm
+                        Imputation at level 2 by Bayesian linear
+                        regression
+mice.impute.2lonly.pmm
+                        Imputation at level 2 by predictive mean
+                        matching
+mice.impute.cart        Imputation by classification and regression
+                        trees
+mice.impute.fastpmm     Imputation by fast predictive mean matching
+mice.impute.lda         Imputation by linear discriminant analysis
+mice.impute.logreg      Imputation by logistic regression
+mice.impute.logreg.boot
+                        Imputation by logistic regression using the
+                        bootstrap
+mice.impute.mean        Imputation by the mean
+mice.impute.midastouch
+                        Predictive Mean Matching with distance aided
+                        selection of donors
+mice.impute.norm        Imputation by Bayesian linear regression
+mice.impute.norm.boot   Imputation by linear regression, bootstrap
+                        method
+mice.impute.norm.nob    Imputation by linear regression (non Bayesian)
+mice.impute.norm.predict
+                        Imputation by linear regression, prediction
+                        method
+mice.impute.passive     Passive imputation
+mice.impute.pmm         Imputation by predictive mean matching
+mice.impute.polr        Imputation by polytomous regression - ordered
+mice.impute.polyreg     Imputation by polytomous regression - unordered
+mice.impute.quadratic   Imputation of quadratric terms
+mice.impute.rf          Imputation by random forests
+mice.impute.ri          Imputation by the random indicator method for
+                        nonignorable data
+mice.impute.sample      Imputation by simple random sampling
+mice.mids               Multivariate Imputation by Chained Equations
+                        (Iteration Step)
+mice.theme              Set the theme for the plotting Trellis
+                        functions
+mids-class              Multiply imputed data set ('mids')
+mids2mplus              Export 'mids' object to Mplus
+mids2spss               Export 'mids' object to SPSS
+mipo-class              Multiply imputed pooled analysis ('mipo')
+mira-class              Multiply imputed repeated analyses ('mira')
+ncc                     Number of complete cases
+nelsonaalen             Cumulative hazard rate or Nelson-Aalen
+                        estimator
+nhanes                  NHANES example - all variables numerical
+nhanes2                 NHANES example - mixed numerical and discrete
+                        variables
+nic                     Number of incomplete cases
+norm.draw               Draws values of beta and sigma by Bayesian
+                        linear regression
+pattern                 Datasets with various missing data patterns
+plot.mids               Plot the trace lines of the MICE algorithm
+pool                    Multiple imputation pooling
+pool.compare            Compare two nested models fitted to imputed
+                        data
+pool.r.squared          Pooling: R squared
+pool.scalar             Multiple imputation pooling: univariate version
+popmis                  Hox pupil popularity data with missing
+                        popularity scores
+pops                    Project on preterm and small for gestational
+                        age infants (POPS)
+potthoffroy             Potthoff-Roy data
+print.mads              Print a 'mads' object
+print.mids              Print a 'mids' object
+quickpred               Quick selection of predictors from the data
+rbind.mids              Rowwise combination of a 'mids' object.
+selfreport              Self-reported and measured BMI
+squeeze                 Squeeze the imputed values to be within
+                        specified boundaries.
+stripplot.mids          Stripplot of observed and imputed data
+summary.mira            Summary of a 'mira' object
+supports.transparent    Supports semi-transparent foreground colors?
+tbc                     Terneuzen birth cohort
+version                 Echoes the package version number
+walking                 Walking disability data
+windspeed               Subset of Irish wind speed data
+with.mids               Evaluate an expression in multiple imputed
+                        datasets
+xyplot.mads             Scatterplot of amputed and non-amputed data
+                        against weighted sum scores
+xyplot.mids             Scatterplot of observed and imputed data

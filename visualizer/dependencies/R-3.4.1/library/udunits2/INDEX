@@ -1,0 +1,11 @@
+ud.are.convertible      Determine whether two units may be converted
+                        between each other
+ud.convert              Convert numeric types from one unit to another
+ud.get.name             Retrieve the udunits name or symbol from the
+                        database for a given units string
+ud.have.unit.system     Determine whether udunits has loaded its units
+                        database
+ud.is.parseable         Determine whether a unit string is parseable by
+                        the udunits library
+ud.set.encoding         Set the udunits package level encoding type
+udunits2-package        udunits-2 bindings for R

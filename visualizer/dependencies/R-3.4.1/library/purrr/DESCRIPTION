@@ -1,0 +1,27 @@
+Package: purrr
+Title: Functional Programming Tools
+Version: 0.2.3
+Authors@R: c(
+    person("Lionel", "Henry", , "lionel@rstudio.com", c("aut", "cre")),
+    person("Hadley", "Wickham", , "hadley@rstudio.com", "aut"),
+    person("RStudio", role = c("cph", "fnd"))
+    )
+Description: A complete and consistent functional programming toolkit for R.
+URL: http://purrr.tidyverse.org, https://github.com/tidyverse/purrr
+BugReports: https://github.com/tidyverse/purrr/issues
+License: GPL-3 | file LICENSE
+LazyData: true
+Imports: magrittr (>= 1.5), tibble, rlang (>= 0.1)
+Suggests: covr, dplyr (>= 0.4.3), testthat, knitr, rmarkdown
+RoxygenNote: 6.0.1
+VignetteBuilder: knitr
+NeedsCompilation: yes
+Packaged: 2017-08-02 09:31:27 UTC; lionel
+Author: Lionel Henry [aut, cre],
+  Hadley Wickham [aut],
+  RStudio [cph, fnd]
+Maintainer: Lionel Henry <lionel@rstudio.com>
+Repository: CRAN
+Date/Publication: 2017-08-02 18:31:42 UTC
+Built: R 3.4.1; x86_64-w64-mingw32; 2017-08-06 17:43:46 UTC; windows
+Archs: i386, x64

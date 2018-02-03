@@ -1,0 +1,25 @@
+Package: satellite
+Type: Package
+Title: Various Functions for Handling and Manipulating Remote Sensing
+        Data
+Version: 1.0.0
+Date: 2017-08-02
+Author: Thomas Nauss, Hanna Meyer, Tim Appelhans, Florian Detsch
+Maintainer: Florian Detsch <fdetsch@web.de>
+Description: This smorgasbord provides a variety of functions which are useful
+    for handling, manipulating and visualizing remote sensing data.
+Depends: R (>= 2.10), raster, methods, utils, stats, grDevices,
+        graphics
+Imports: plyr, Rcpp (>= 0.10.3), tools, stats4
+License: GPL (>= 3) | file LICENSE
+Suggests: devtools, knitr, rgdal, testthat
+LazyData: true
+VignetteBuilder: knitr
+LinkingTo: Rcpp
+RoxygenNote: 6.0.1
+NeedsCompilation: yes
+Packaged: 2017-08-02 08:45:40 UTC; fdetsch
+Repository: CRAN
+Date/Publication: 2017-08-03 15:22:27 UTC
+Built: R 3.4.1; x86_64-w64-mingw32; 2017-08-06 17:51:35 UTC; windows
+Archs: i386, x64

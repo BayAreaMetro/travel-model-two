@@ -1,0 +1,146 @@
+R_version_in_a_folder   Get the version of the R installed in a folder
+add.installr.GUI        Adds a menu based GUI for updating R within
+                        Rgui
+add_load_installr_on_startup_menu
+                        Add menu item for having installr load on
+                        startup
+add_remove_installr_from_startup_menu
+                        Add menu item for having installr NOT load on
+                        startup
+add_to_.First_in_Rprofile.site
+                        Add a code line to Rprofile.site .First
+ask.user.for.a.row      Asks the user for a row number from a
+                        data.frame table
+ask.user.yn.question    Asks the user for one yes/no question.
+barplot_package_users_per_day
+                        barplot for the number of users installation of
+                        a package
+browse.latest.R.NEWS    See the NEWS file for the latest R release
+check.for.updates.R     Checks if there is a newer version of R
+check.integer           Check if a number is integer
+checkMD5sums2           Check and Create MD5 Checksum Files
+copy.packages.between.libraries
+                        Copies all packages from one library folder to
+                        another
+cranometer              Measures the speed of downloading from
+                        different CRAN mirrors
+create.global.library   Creates a global library folder
+download_RStudio_CRAN_data
+                        Download RStudio CRAN mirror data files into a
+                        folder
+fetch_tag_from_Rd       Access tag elements from R's Rd file
+file.name.from.url      Extract the file name from some URL
+format_RStudio_CRAN_data
+                        Format the RStudio CRAN mirror data into the
+                        data.table format
+freegeoip               Geolocate IP addresses in R
+get.installed.R.folders
+                        Returns folder names with R installations
+get_Rscript_PID         Get the running "Rscript" processes PID
+get_pid                 Find the pid of a process by name
+get_tasklist            Get the running processes in windows task
+                        manager
+install.7zip            Downloads and installs 7-Zip for windows
+install.CMake           Downloads and installs CMake for windows
+install.Cygwin          Downloads and installs Cygwin for windows
+install.FFmpeg          Downloads and installs FFmpeg for windows
+install.GitHub          Downloads and installs GitHub for windows
+install.GraphicsMagick
+                        Downloads and installs GraphicsMagick for
+                        windows
+install.ImageMagick     Downloads and installs ImageMagick for windows
+install.LaTeX2RTF       Downloads and installs LaTeX2RTF for windows
+install.LyX             Downloads and installs LyX for windows
+install.MikTeX          Downloads and installs MikTeX for windows
+install.R               Downloads and installs the latest R version
+install.RStudio         Downloads and installs RStudio for windows
+install.Rdevel          Downloads and installs the latest Rdevel
+                        version
+install.Rtools          Downloads and installs Rtools
+install.SWFTools        Downloads and installs SWFTools for windows
+install.Texmaker        Downloads and installs Texmaker for windows
+install.URL             Downloads and runs a .exe installer file for
+                        some software from a URL
+install.git             Downloads and installs git and git-gui for
+                        windows
+install.inno            Downloads and installs Inno Setup
+install.notepadpp       Downloads and installs Notepad++ for windows
+install.npptor          Downloads and installs NppToR for windows
+install.packages.zip    Downloads and installs a ZIP R package Binary
+                        (for Windows) from a URL
+install.pandoc          Downloads and installs pandoc
+install.python          Downloads and installs python 2 or 3
+installr                Installing software from R
+installr-package        Using R to Install Stuff (Such As: R, Rtools,
+                        RStudio, Git, and More!)
+is.RStudio              Checks if the R session is running within
+                        RStudio
+is.Rgui                 Checks if the R session is running within Rgui
+                        (Windows OS)
+is.empty                Checks if an object is empty (e.g: of zero
+                        length)
+is.exe.installed        Checks if some .exe is available in on the
+                        Windows machine search PATH
+is.windows              Checks if the running OS is windows
+is_in_.First_in_Rprofile.site
+                        Remove a code line from Rprofile.site .First
+kill_all_Rscript_s      kill (i.e.: stop) all running "Rscript"
+                        processes
+kill_pid                kill (i.e.: stop) running processes by there
+                        pid
+kill_process            kill (i.e.: stop) running processes by there
+                        process name
+lineplot_package_downloads
+                        barplot for the number of users installation of
+                        a package
+load_installr_on_startup
+                        Have the installr package load on startup
+most_downloaded_packages
+                        Most downloaded packages
+myip                    What is my IP
+os.hibernate            Hibernate the operating system (Windows)
+                        through a shell command
+os.lock                 Locks the operating system (Windows) through a
+                        shell command
+os.manage               Gives managing option to the current OS
+                        (shutdown, restart, sleep, hibernate, etc...)
+os.restart              Restarts the operating system (Windows) through
+                        a shell command
+os.shutdown             Shut down the operating system with the command
+                        'shutdown'
+os.sleep                Sleeps the operating system (Windows) through a
+                        shell command
+package_authors         Access (and clean) author elements from R's Rd
+                        file
+pkgDNLs_worldmapcolor   Worldmap colored by the number of downloads for
+                        a given package
+read_RStudio_CRAN_data
+                        Reads RStudio CRAN mirror data files from a
+                        folder
+remove.installr.GUI     Removes the menu based GUI for updating R
+                        within Rgui
+remove_from_.First_in_Rprofile.site
+                        Remove a code line from Rprofile.site .First
+rename_r_to_R           Rename files' extensions in a folder from .r to
+                        .R
+require2                Loading Packages (and Installing them if they
+                        are missing)
+restart_RGui            Restart RGui from RGui
+rm_installr_from_startup
+                        Remove installr from startup
+source.https            Read R Code from a File in an https URL
+system.PATH             Returns the search path for executable files
+turn.number.version     Turns a vector of version-numbers back to
+                        version-character
+turn.version.to.number
+                        Turns version to number (for a vector of
+                        values)
+turn.version.to.number1
+                        Turns version to number (for 1 value only)
+uninstall.R             Uninstall an R version
+uninstall.packages      uninstalls (removes) Installed Packages
+up_folder               Performs "up-level" on a folder string
+updateR                 Checks for the latest R version, and if there
+                        is a newer version of R - downloads and
+                        installs it.
+xlsx2csv                Converts xls(x) to csv using VB

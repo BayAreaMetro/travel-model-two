@@ -1,0 +1,13 @@
+citHeader("To cite package automap in publications use:")
+
+citEntry(entry="Article",
+        title = "Real-time automatic interpolation of ambient gamma dose rates from the Dutch Radioactivity Monitoring Network",
+        author = "P.H. Hiemstra and E.J. Pebesma and C.J.W. Twenh\"{o}fel and G.B.M. Heuvelink",
+        journal = "Computers & Geosciences",
+        year     = 2008,
+	note = "DOI: http://dx.doi.org/10.1016/j.cageo.2008.10.011",
+
+        textVersion =
+        paste("Hiemstra, P.H., Pebesma, E.J., Twenhofel, C.J.W. and G.B.M. Heuvelink, 2008. Real-time automatic interpolation of ambient gamma dose rates from the Dutch Radioactivity Monitoring Network.",
+        "Computers & Geosciences, accepted for publication.")
+)
