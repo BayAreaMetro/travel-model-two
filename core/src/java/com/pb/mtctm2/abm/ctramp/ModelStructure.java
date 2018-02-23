@@ -38,7 +38,7 @@ public abstract class ModelStructure
     public static final int      EV_SKIM_PERIOD_INDEX   = TransitWalkAccessUEC.EV;
         
     
-    public static final int[]    SKIM_PERIOD_INDICES    = {
+    public static final int[]    PERIODCODES    = {
                                         EA_SKIM_PERIOD_INDEX,
                                         AM_SKIM_PERIOD_INDEX,
                                         MD_SKIM_PERIOD_INDEX,
