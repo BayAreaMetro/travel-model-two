@@ -41,7 +41,7 @@ def sample_hhs(group):
     sample = group.sample(frac=group.SampleRate.min(), replace=True, random_state=seed)
         
     if len(sample)==0:
-        print('sample is empty')
+#        print 'taz ',group.taz.min(),' sample is empty '
         sample = group
     else:
         #set hh expansion factor based on actual sample size since sampling is lumpy
@@ -91,7 +91,14 @@ def runPopSampler(tazSampleRateFileName, hhFileName, perFileName):
     del new_households['hhsizebin']
     del new_persons['hhno_new']
     del new_persons['TAZ_SEQ']
-    
+	
+	#sort data
+    new_households.sort_values('HHID', ascending=True, inplace=True)
+    new_persons.sort_values(['HHID','sporder'], ascending=[True,True], inplace=True)
+	
+	#reset perid to sequential number
+    new_persons['PERID'] = range(1,len(new_persons)+1)
+
     # Write new households file to output data folder
     new_households.to_csv(hhFileName, sep=',', index=False)
         

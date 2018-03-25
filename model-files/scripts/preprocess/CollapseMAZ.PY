@@ -1,6 +1,6 @@
 # Author: Justin Culp
 # Date: 8/15/2017
-#
+# 
 # Description: This script takes an input csv containing records for MAZ to be collapsed based on a certain condition (see line 42, 43)
 # Requires: Basic python 2.7.x, pandas
 #
@@ -69,7 +69,8 @@ keyField = ["TAZ"]
 other = ["MAZ", "MAZ_ORIGINAL", "TAZ_ORIGINAL", "mall_flag"]
 avgAll = ["hparkcost", "numfreehrs", "dparkcost", "mparkcost"]
 commObs = ["ech_dist", "hch_dist", "parkarea"]
-nonObs = ["TotInt", "DUDen", "EmpDen", "PopDen", "RetEmpDen", "IntDenBin", "EmpDenBin", "DuDenBin"]
+#nonObs = ["TotInt", "DUDen", "EmpDen", "PopDen", "RetEmpDen", "IntDenBin", "EmpDenBin", "DuDenBin"]
+nonObs = []
 # Fill sumAll list with remaining fields
 sumAll = []
 for fieldName in header:
