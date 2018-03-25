@@ -38,15 +38,37 @@ public class TransitWalkAccessDMU
     
     //default values for generic application
     int                                 applicationType = 0;
-    int                                 tourCategoryIsJoint = 0;
-    int                                 personType = 1;
-    float                               valueOfTime = (float) 10.0;
+    int                                 personType = 1;     //defaults to full-time worker
+    float                               ivtCoeff;
+    float                               costCoeff;
+    int									accessEgressMode=0; //this is called a walk-access DMU but it is used in the TAP-to-TAP UEC, so it is
+                                                            //possible that it is being called for a drive-access path!
 
     public TransitWalkAccessDMU()
     {
         setupMethodIndexMap();
     }
 
+    /**
+     * Set the access/egress mode
+     * 
+     * @param accessEgressMode
+     */
+    public void setAccessEgressMode(int accessEgressMode){
+    	this.accessEgressMode = accessEgressMode;
+    }
+    
+    
+    /**
+     * Get the access/egress mode
+     * 
+     * @return accessEgressMode
+     */
+    public int getAccessEgressMode(){
+    	return accessEgressMode;
+    }
+    
+  
     /**
      * Get the time from the production/origin MGRA to the boarding TAP.
      * 
@@ -133,13 +155,6 @@ public class TransitWalkAccessDMU
     	return applicationType;
     }
     
-    public void setTourCategoryIsJoint(int tourCategoryIsJoint) {
-    	this.tourCategoryIsJoint = tourCategoryIsJoint;
-    }
-    
-    public int getTourCategoryIsJoint() {
-    	return tourCategoryIsJoint;
-    }
     
     public void setPersonType(int personType) {
     	this.personType = personType;
@@ -149,14 +164,22 @@ public class TransitWalkAccessDMU
     	return personType;
     }
     
-    public void setValueOfTime(float valueOfTime) {
-    	this.valueOfTime = valueOfTime;
+    public void setIvtCoeff(float ivtCoeff) {
+    	this.ivtCoeff = ivtCoeff;
     }
     
-    public float getValueOfTime() {
-    	return valueOfTime;
+    public void setCostCoeff(float costCoeff) {
+    	this.costCoeff = costCoeff;
+    }
+    
+    public float getIvtCoeff() {
+    	return ivtCoeff;
     }
 
+    public float getCostCoeff() {
+    	return costCoeff;
+    }
+    
     /**
      * Log the DMU values.
      * 
@@ -174,9 +197,11 @@ public class TransitWalkAccessDMU
         localLogger.info(String.format("Period:                   %9s", period));
         localLogger.info(String.format("Set:                      %9s", set));
         localLogger.info(String.format("applicationType:          %9s", applicationType));
-        localLogger.info(String.format("tourCategoryIsJoint:      %9s", tourCategoryIsJoint));
         localLogger.info(String.format("personType:               %9s", personType));
-        localLogger.info(String.format("valueOfTime:              %9.4f", valueOfTime));
+        localLogger.info(String.format("ivtCoeff  :               %9.4f", ivtCoeff));
+        localLogger.info(String.format("costCoeff  :              %9.4f", costCoeff));
+        localLogger.info(String.format("accessEgressMode  :       %9s", accessEgressMode));
+        
 
     }
 
@@ -191,10 +216,11 @@ public class TransitWalkAccessDMU
         methodIndexMap.put("getSet", 4);
         
         methodIndexMap.put("getApplicationType", 6);
-        methodIndexMap.put("getTourCategoryIsJoint", 7);
         methodIndexMap.put("getPersonType", 8);
-        methodIndexMap.put("getValueOfTime", 9);
-        
+        methodIndexMap.put("getIvtCoeff", 9);
+        methodIndexMap.put("getCostCoeff", 10);
+        methodIndexMap.put("getAccessEgressMode", 11);
+               
 
     }
 
@@ -213,15 +239,16 @@ public class TransitWalkAccessDMU
                 return getTOD();
             case 4:
                 return getSet();
-                
             case 6:
                 return getApplicationType();
-            case 7:
-                return getTourCategoryIsJoint();
             case 8:
                 return getPersonType();
             case 9:
-                return getValueOfTime();
+                return getIvtCoeff();
+            case 10:
+            	return getCostCoeff();
+            case 11:
+            	return getAccessEgressMode();
 
             default:
                 logger.error("method number = " + variableIndex + " not found");

@@ -170,6 +170,12 @@ public class SandagHouseholdDataManager2
                 hh.setHhAutos(numAutos);
 
                 // set the hhSize variable and create Person objects for each person
+                // read sample rate from file if it exists, if not set it to the global sample rate
+                float hhSampleRate = sampleRate;
+                if(hasSampleRate)
+                	hhSampleRate = hhTable.getValueAt(r,  hhTable.getColumnPosition(HH_SAMPLERATE_FIELD_NAME));
+                hh.setSampleRate(hhSampleRate);
+
                 int numPersons = (int) hhTable.getValueAt(r, hhTable
                         .getColumnPosition(HH_SIZE_FIELD_NAME));
                 hh.setHhSize(numPersons);
@@ -227,12 +233,6 @@ public class SandagHouseholdDataManager2
                 int bldgsz = (int) hhTable.getValueAt(r, hhTable
                         .getColumnPosition(HH_BLDGSZ_FIELD_NAME));
                 hh.setHhBldgsz(bldgsz);
-                
-                // read sample rate from file if it exists, if not set it to the global sample rate
-                float hhSampleRate = sampleRate;
-                if(hasSampleRate)
-                	hhSampleRate = hhTable.getValueAt(r,  hhTable.getColumnPosition(HH_SAMPLERATE_FIELD_NAME));
-                hh.setSampleRate(hhSampleRate);
                 
                 hh.initializeWindows();
                 hhArray[newIndex] = hh;

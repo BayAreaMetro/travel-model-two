@@ -1,0 +1,51 @@
+; do, more or less, the same skim procedure for each of the five time periods
+loop period = 1,5
+  
+    ; a two letter token is used for each time period
+    if (period = 1)   
+      token_period = 'EA'   
+    elseif (period = 2)   
+      token_period = 'AM'    
+   elseif (period = 3)   
+      token_period = 'MD'    
+     elseif (period = 4)   
+      token_period = 'PM'   
+	elseif (period = 5)   
+      token_period = 'EV'
+	endif
+	
+   ;build network which will store MSA volume
+    RUN PGM=NETWORK
+        NETI = hwy\avgload@token_period@_taz.net
+        NETO = hwy\msaload@token_period@_taz.net
+        
+        PHASE = LINKMERGE
+		   mazmazvol = 0
+            vol      = 0
+            vc       = 0
+            vol_da   = 0
+            vol_s2   = 0
+            vol_s3   = 0
+            vol_sm   = 0
+            vol_hv   = 0
+            vol_daT  = 0
+            vol_s2T  = 0
+            vol_s3T  = 0
+            vol_smT  = 0
+            vol_hvT  = 0
+            volT     = 0
+            volT_da  = 0
+            volT_s2  = 0
+            volT_s3  = 0
+            volT_sm  = 0
+            volT_hv  = 0
+            volT_daT = 0
+            volT_s2T = 0
+            volT_s3T = 0
+            volT_smT = 0
+            volT_hvT = 0
+        ENDPHASE
+    ENDRUN
+    
+   
+endloop ; time period loop

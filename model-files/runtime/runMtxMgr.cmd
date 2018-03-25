@@ -27,6 +27,7 @@ rem ### Name the project directory.  This directory will hava data and runtime s
 set RUNTIME=%PROJECT_DIRECTORY%
 set CONFIG=%RUNTIME%\CTRAMP\runtime\config
 set JAR_LOCATION=%RUNTIME%\CTRAMP\runtime
+set JPPF_LIB=%JAR_LOCATION%\lib\JPPF-2.5-admin-ui\lib\*
 set LIB_JAR_PATH=%JPPF_LIB%;%JAR_LOCATION%\lib\sandagLib\*;%JAR_LOCATION%\lib\cmfLib\*;%JAR_LOCATION%\lib\log4jLib\*
 
 rem ### Define the CLASSPATH environment variable for the classpath needed in this model run.

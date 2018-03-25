@@ -1367,16 +1367,17 @@ public class IntermediateStopChoiceModels implements Serializable {
                     // the selectedIndex determined for the previous stop location choice.
                     
                     stop.setDest(destMgra);
-
-                    if ( tour.getTourCategory().equalsIgnoreCase( ModelStructure.JOINT_NON_MANDATORY_CATEGORY ) ) {
-                        smcLogger.info( "Monte Carlo selection for determining Mode Choice from KJ Probabilities for " + (stop.isInboundStop() ? "INBOUND" : "OUTBOUND") + " joint tour stop." );
-                        smcLogger.info( "HHID=" + household.getHhId() + ", persNum=" + "N/A" + ", tourPurpose=" + tour.getTourPrimaryPurpose() + ", tourId=" + tour.getTourId() + ", tourMode=" + tour.getTourModeChoice() );
-                        smcLogger.info( "StopID=End of " + (stop.isInboundStop() ? "INBOUND" : "OUTBOUND") + " half-tour, stopPurpose=" + stop.getDestPurpose() + ", stopDepart=" + stop.getStopPeriod() + ", stopOrig=" + stop.getOrig() + ", stopDest=" + stop.getDest() );
-                    }
-                    else {
-                        smcLogger.info( "Monte Carlo selection for determining Mode Choice from KJ Probabilities for " + (stop.isInboundStop() ? "INBOUND" : "OUTBOUND") + " stop." );
-                        smcLogger.info( "HHID=" + household.getHhId() + ", persNum=" + person.getPersonNum() + ", tourPurpose=" + tour.getTourPrimaryPurpose() + ", tourId=" + tour.getTourId() + ", tourMode=" + tour.getTourModeChoice() );
-                        smcLogger.info( "StopID=End of " + (stop.isInboundStop() ? "INBOUND" : "OUTBOUND") + " half-tour, stopPurpose=" + stop.getDestPurpose() + ", stopDepart=" + stop.getStopPeriod() + ", stopOrig=" + stop.getOrig() + ", stopDest=" + stop.getDest() );
+                    if ( household.getDebugChoiceModels() ){
+                  	if ( tour.getTourCategory().equalsIgnoreCase( ModelStructure.JOINT_NON_MANDATORY_CATEGORY ) ) {
+                    		smcLogger.info( "Monte Carlo selection for determining Mode Choice from KJ Probabilities for " + (stop.isInboundStop() ? "INBOUND" : "OUTBOUND") + " joint tour stop." );
+                    		smcLogger.info( "HHID=" + household.getHhId() + ", persNum=" + "N/A" + ", tourPurpose=" + tour.getTourPrimaryPurpose() + ", tourId=" + tour.getTourId() + ", tourMode=" + tour.getTourModeChoice() );
+                    		smcLogger.info( "StopID=End of " + (stop.isInboundStop() ? "INBOUND" : "OUTBOUND") + " half-tour, stopPurpose=" + stop.getDestPurpose() + ", stopDepart=" + stop.getStopPeriod() + ", stopOrig=" + stop.getOrig() + ", stopDest=" + stop.getDest() );
+                    	}
+                    	else {
+                    		smcLogger.info( "Monte Carlo selection for determining Mode Choice from KJ Probabilities for " + (stop.isInboundStop() ? "INBOUND" : "OUTBOUND") + " stop." );
+                    		smcLogger.info( "HHID=" + household.getHhId() + ", persNum=" + person.getPersonNum() + ", tourPurpose=" + tour.getTourPrimaryPurpose() + ", tourId=" + tour.getTourId() + ", tourMode=" + tour.getTourModeChoice() );
+                    		smcLogger.info( "StopID=End of " + (stop.isInboundStop() ? "INBOUND" : "OUTBOUND") + " half-tour, stopPurpose=" + stop.getDestPurpose() + ", stopDepart=" + stop.getStopPeriod() + ", stopOrig=" + stop.getOrig() + ", stopDest=" + stop.getDest() );
+                    	}
                     }
 
                     check = System.nanoTime();        

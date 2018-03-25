@@ -63,7 +63,6 @@ ENDRUN
 
 ;now build transit network
 RUN PGM=NETWORK
-;    PAR  NODES=10000000
     NETI = "hwy\mtc_final_network.net"
     NODEI[2] = hwy\tap_connector_nodes.csv VAR=N,X,Y
     LINKI[2] = hwy\tap_connectors.csv VAR=A,B,CNTYPE(C),FEET
@@ -84,17 +83,23 @@ RUN PGM=NETWORK
             NTL_MODE = 0
         ENDIF
         
-        ;todo: fix this either from block lookup or internal coding on streets
+        ; changed 2018-03-24 JEF to use FFS for non-fixed guideway
+        ; the freeway and non-freeway speeds should get replaced by auto skimmed times for non-fixed guideway transit
+        ; in the transitSkims.job process. This is just a placeholder.
+        ; script will throw an error if freeway links aren't coded with FFS
+        ;
         IF (CNTYPE='CRAIL')
-            TRANTIME = FEET * (60.0 / 5280.0 / 30.0)    ; default to 30 mph for CRAIL
+            TRANTIME = FEET * (60.0 / 5280.0 / 45.0)    ; default to 45 mph for CRAIL
         ELSEIF (CNTYPE='HRAIL')
-            TRANTIME = FEET * (60.0 / 5280.0 / 30.0)    ; default to 30 mph for HRAIL
+            TRANTIME = FEET * (60.0 / 5280.0 / 40.0)    ; default to 40 mph for HRAIL
         ELSEIF (CNTYPE='LRAIL')
-            TRANTIME = FEET * (60.0 / 5280.0 / 20.0)    ; default to 20 mph for LRAIL
+            TRANTIME = FEET * (60.0 / 5280.0 / 30.0)    ; default to 30 mph for LRAIL
         ELSEIF (CNTYPE='FERRY')
             TRANTIME = FEET * (60.0 / 5280.0 / 15.0)    ; default to 15 mph for FERRY
-        ELSE
-            TRANTIME = FEET * (60.0 / 5280.0 / 15.0)    ; default to 15 mph for transit
+        ELSEIF (FT=1|FT=2)
+            TRANTIME = FEET * (60.0 / 5280.0 / FFS)     ; same as auto time for freeways
+        ELSEIF(FFS>0)
+            TRANTIME = FEET * (60.0 / 5280.0 / FFS) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))    ; TIME + 5 stops/mile * 20 secs/stop
         ENDIF
 
         IF (CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='PED' | CNTYPE='BIKE' | CNTYPE='EXT')

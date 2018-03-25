@@ -179,6 +179,73 @@ LOOP PERIOD = 1,5
         TOKEN_PERIOD = 'EV'
     ENDIF
     
+   ;convert transit network node numbers to originals
+    RUN PGM=NETWORK
+      NETI = hwy\mtc_transit_network_@TOKEN_PERIOD@.net
+      NETO = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE.net
+      
+      PHASE = INPUT FILEI=NI.1
+      
+           N = OLD_NODE
+           
+      ENDPHASE
+      
+      PHASE = INPUT FILEI=LI.1
+        A = OLD_A
+        B = OLD_B
+      ENDPHASE
+
+      
+    ENDRUN
+    
+    ;convert loaded auto network node numbers to originals
+    RUN PGM=NETWORK
+      NETI = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ.net
+      LINKO = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ_ORIGNODE.CSV, FORMAT=SDF DELIMITER=',' INCLUDE=OLD_A,OLD_B,CTIM
+      
+     ENDRUN
+      
+    ; merge congested times and calculate transit time  
+    RUN PGM=NETWORK
+      NETI = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE.net
+      LINKI[2] = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ_ORIGNODE.CSV,VAR=A,B,CTIM
+      NETO = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE_CONG.net
+      
+      MERGE RECORD = FALSE ; only keep transit network links
+     
+      PHASE = LINKMERGE
+         
+          CTIM = li.2.CTIM
+          IF (CTIM>0 & (li.1.FT=1|li.1.FT=2))
+            TRANTIME = CTIM    ; same as auto time for freeways
+          ELSEIF (CTIM>0)
+            TRANTIME = CTIM + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))    ; TIME + 5 stops/mile * 20 secs/stop
+        ENDIF
+
+      ENDPHASE
+    ENDRUN 
+
+    ; recode network with new node numbers  
+    RUN PGM=NETWORK
+      NETI = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE_CONG.net
+      NETO = hwy\mtc_transit_network_@TOKEN_PERIOD@_CONG.net
+      
+      PHASE = INPUT FILEI=NI.1
+      
+        N = NEW_NODE
+           
+      ENDPHASE
+      
+      PHASE = INPUT FILEI=LI.1
+        A = A_NEW_NODE
+        B = B_NEW_NODE
+      ENDPHASE
+
+      
+    ENDRUN
+    
+
+    
     LOOP SKIMSET = 1,3
 
         ; specify SKIMSET specific stuff
@@ -188,7 +255,7 @@ LOOP PERIOD = 1,5
         ; do each time of day and SKIMSET as a separate process
         DistributeMultistep processid = 'MTC_TRANSKIM', processNum = counter
             ;make a copy of the network so that we don't walk all over each other
-            *copy hwy\mtc_transit_network_@TOKEN_PERIOD@.net trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net
+            *copy hwy\mtc_transit_network_@TOKEN_PERIOD@_CONGESTED.net trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net
             
 
             ;next, build actual transit skims

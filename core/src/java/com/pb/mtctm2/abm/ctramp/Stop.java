@@ -36,6 +36,7 @@ public class Stop
         this.stopPurposeIndex = stopPurposeIndex;
         this.id = id;
         this.inbound = inbound;
+        sampleRate = parentTour.getSampleRate();
     }
 
     public void setOrig(int orig)

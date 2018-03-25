@@ -353,7 +353,7 @@ public class HouseholdDataWriter
         data.add(string(p.getInmtfChoice()));
         data.add(string(p.getFreeParkingAvailableResult()));
         data.add(string(p.getParkingReimbursement()));
-        float sampleRate = p.getHouseholdObject().getSampleRate();
+        float sampleRate = p.getSampleRate();
         data.add(string(sampleRate));
         return data;
     }
@@ -990,7 +990,7 @@ public class HouseholdDataWriter
         	set = s.getSet();
         }
         data.add(string(set));
-        float sampleRate = t.getSampleRate();
+        float sampleRate = s.getSampleRate();
         data.add(string(sampleRate));
 
         return data;
@@ -1090,7 +1090,7 @@ public class HouseholdDataWriter
         	set = s.getSet();
         }
         data.add(string(set));
-        float sampleRate = t.getSampleRate();
+        float sampleRate = s.getSampleRate();
         data.add(string(sampleRate));
         
         return data;

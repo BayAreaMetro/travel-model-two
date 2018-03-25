@@ -475,6 +475,8 @@ public class Person
 
             tempTour.setTourDepartPeriod(DEFAULT_NON_MANDATORY_START_PERIOD);
             tempTour.setTourArrivePeriod(DEFAULT_NON_MANDATORY_END_PERIOD);
+            
+            tempTour.setSampleRate(sampleRate);
 
             indNonManTourArrayList.add(tempTour);
         }
@@ -504,6 +506,8 @@ public class Person
             tempTour.setTourArrivePeriod(-1);
             //tempTour.setTourDepartPeriod(DEFAULT_MANDATORY_START_PERIOD);
             //tempTour.setTourArrivePeriod(DEFAULT_MANDATORY_END_PERIOD);
+            
+            tempTour.setSampleRate(sampleRate);
 
             workTourArrayList.add(tempTour);
         }
@@ -538,6 +542,8 @@ public class Person
 
         tempTour.setTourDepartPeriod(DEFAULT_AT_WORK_SUBTOUR_START_PERIOD);
         tempTour.setTourArrivePeriod(DEFAULT_AT_WORK_SUBTOUR_END_PERIOD);
+        
+        tempTour.setSampleRate(sampleRate);
 
         atWorkSubtourArrayList.add(tempTour);
 
@@ -567,6 +573,8 @@ public class Person
             tempTour.setTourArrivePeriod(-1);
             //tempTour.setTourDepartPeriod(DEFAULT_MANDATORY_START_PERIOD);
             //tempTour.setTourArrivePeriod(DEFAULT_MANDATORY_END_PERIOD);
+            
+            tempTour.setSampleRate(sampleRate);
 
             schoolTourArrayList.add(tempTour);
         }
