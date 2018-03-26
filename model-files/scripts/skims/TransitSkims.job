@@ -255,7 +255,7 @@ LOOP PERIOD = 1,5
         ; do each time of day and SKIMSET as a separate process
         DistributeMultistep processid = 'MTC_TRANSKIM', processNum = counter
             ;make a copy of the network so that we don't walk all over each other
-            *copy hwy\mtc_transit_network_@TOKEN_PERIOD@_CONGESTED.net trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net
+            *copy hwy\mtc_transit_network_@TOKEN_PERIOD@_CONG.net trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net
             
 
             ;next, build actual transit skims
