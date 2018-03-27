@@ -43,6 +43,8 @@ public class TransitWalkAccessDMU
     float                               costCoeff;
     int									accessEgressMode=0; //this is called a walk-access DMU but it is used in the TAP-to-TAP UEC, so it is
                                                             //possible that it is being called for a drive-access path!
+    int                                 tourCategoryIsJoint = 0;
+    float                               valueOfTime = (float) 10.0;
 
     public TransitWalkAccessDMU()
     {
@@ -155,6 +157,13 @@ public class TransitWalkAccessDMU
     	return applicationType;
     }
     
+    public void setTourCategoryIsJoint(int tourCategoryIsJoint) {
+    	this.tourCategoryIsJoint = tourCategoryIsJoint;
+    }
+    
+    public int getTourCategoryIsJoint() {
+    	return tourCategoryIsJoint;
+    }
     
     public void setPersonType(int personType) {
     	this.personType = personType;
@@ -179,7 +188,14 @@ public class TransitWalkAccessDMU
     public float getCostCoeff() {
     	return costCoeff;
     }
+    public void setValueOfTime(float valueOfTime) {
+    	this.valueOfTime = valueOfTime;
+    }
     
+    public float getValueOfTime() {
+    	return valueOfTime;
+    }
+   
     /**
      * Log the DMU values.
      * 
@@ -201,6 +217,8 @@ public class TransitWalkAccessDMU
         localLogger.info(String.format("ivtCoeff  :               %9.4f", ivtCoeff));
         localLogger.info(String.format("costCoeff  :              %9.4f", costCoeff));
         localLogger.info(String.format("accessEgressMode  :       %9s", accessEgressMode));
+        localLogger.info(String.format("tourCategoryIsJoint:      %9s", tourCategoryIsJoint));
+        localLogger.info(String.format("valueOfTime:              %9.4f", valueOfTime));
         
 
     }
@@ -220,7 +238,8 @@ public class TransitWalkAccessDMU
         methodIndexMap.put("getIvtCoeff", 9);
         methodIndexMap.put("getCostCoeff", 10);
         methodIndexMap.put("getAccessEgressMode", 11);
-               
+        methodIndexMap.put("getTourCategoryIsJoint", 12);
+        methodIndexMap.put("getValueOfTime", 13);
 
     }
 
@@ -249,6 +268,10 @@ public class TransitWalkAccessDMU
             	return getCostCoeff();
             case 11:
             	return getAccessEgressMode();
+            case 12:
+            	return getTourCategoryIsJoint();
+            case 13:
+            	return getValueOfTime();
 
             default:
                 logger.error("method number = " + variableIndex + " not found");
