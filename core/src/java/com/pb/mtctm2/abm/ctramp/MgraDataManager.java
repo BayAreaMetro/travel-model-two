@@ -395,9 +395,24 @@ public final class MgraDataManager
         readMazMazDistance(mazMazDistanceFile,oMgraBikeDistance,dMgraBikeDistance);
     }
     
+    /** 
+     * THis method reads the MAZ to MAZ distance file. The format of the file is:
+     * 
+     *   from_maz, to_maz, to_maz, generalized cost, distance in feet.
+     * 
+     * There is no header record. Note that there are no intrazonal MAZ distances in the file so this method calculates 
+     * the intraMAZ distance as half the distance to the nearest neighbor.
+     * 
+     * @param mazMazDistanceFile
+     * @param oDistance
+     * @param dDistance
+     */
     private void readMazMazDistance(File mazMazDistanceFile, HashMap[] oDistance, HashMap[] dDistance) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(mazMazDistanceFile))) {
+        
+    	HashMap<Integer, Integer> minDistanceMap = new HashMap<Integer, Integer>(); 
+    	try (BufferedReader reader = new BufferedReader(new FileReader(mazMazDistanceFile))) {
         	String line;
+        	
         	while ((line = reader.readLine()) != null) {
 				line = line.trim();
 				if (line.length() == 0)
@@ -414,10 +429,44 @@ public final class MgraDataManager
         		if (dDistance[tmaz] == null)
         			dDistance[tmaz] = new HashMap();
         		dDistance[tmaz].put(fmaz,distance);
+        		
+        		//store minimum distance from (strange but the walk file is asymmetrical)
+        		if(minDistanceMap.containsKey(fmaz)){
+        			int minDist = minDistanceMap.get(fmaz);
+        			if(distance < minDist )
+        				minDistanceMap.put(fmaz,distance);
+        		}else{
+        			minDistanceMap.put(fmaz,distance);
+        		}
+        		
+           		//store minimum distance to (strange but the walk file is asymmetrical)
+        		if(minDistanceMap.containsKey(tmaz)){
+        			int minDist = minDistanceMap.get(tmaz);
+        			if(distance < minDist )
+        				minDistanceMap.put(tmaz,distance);
+        		}else{
+        			minDistanceMap.put(tmaz,distance);
+        		}
+
         	}
         } catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+    	
+    	//now add intrazonal distance to arrays
+    	for(int maz : minDistanceMap.keySet()){
+    		
+    		float minDist = (float) minDistanceMap.get(maz);
+    		double intraDist = Math.max(minDist/2.0,100.0); // at least 100 feet
+    		
+    		if (oDistance[maz] == null)
+    			oDistance[maz] = new HashMap();
+    		oDistance[maz].put(maz, (int)(intraDist+0.5));
+    		if (dDistance[maz] == null)
+    			dDistance[maz] = new HashMap();
+    		dDistance[maz].put(maz, (int)(intraDist+0.5));
+   		
+    	}
     }
 
     /**

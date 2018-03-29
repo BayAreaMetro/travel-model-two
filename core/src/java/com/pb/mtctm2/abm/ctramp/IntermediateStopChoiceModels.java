@@ -1599,9 +1599,10 @@ public class IntermediateStopChoiceModels implements Serializable {
         	Arrays.fill( sampleMgraInBoardingTapShed, false );
             Arrays.fill( sampleMgraInAlightingTapShed, false );
         	
-        	int numAvailableAlternatives = setSoaAvailabilityForTransitTour(s, tour);
+        	int numAvailableAlternatives = setSoaAvailabilityForTransitTour(s, tour, household.getDebugChoiceModels());
             if ( numAvailableAlternatives == 0 ) {
-                logger.error( "no available locations - empty sample." );
+                logger.error( "No available stop locations in sample for household "+household.getHhId()+" personNum "+person.getPersonNum()+
+                		" transit tour "+tour.getTourId()+" stop "+s.getStopId()+" - empty sample." );
                 throw new RuntimeException();
             }
         }
@@ -1855,9 +1856,10 @@ public class IntermediateStopChoiceModels implements Serializable {
         	Arrays.fill( sampleMgraInBoardingTapShed, false );
             Arrays.fill( sampleMgraInAlightingTapShed, false );
         	
-        	int numAvailableAlternatives = setSoaAvailabilityForTransitTour(s, tour);
+        	int numAvailableAlternatives = setSoaAvailabilityForTransitTour(s, tour, household.getDebugChoiceModels());
             if ( numAvailableAlternatives == 0 ) {
-                logger.error( "no available locations - empty sample." );
+                logger.error( "No available stop locations in sample for household "+household.getHhId()+" personNum "+person.getPersonNum()+
+                		" transit tour "+tour.getTourId()+" stop "+s.getStopId()+" - empty sample." );
                 throw new RuntimeException();
             }
         }
@@ -2816,11 +2818,17 @@ public class IntermediateStopChoiceModels implements Serializable {
      * create an array with 1 if the mgra indexed has at least one TAP within walk egress distance of the mgra
      * or zero if no walk TAPS exist for the mgra. 
      */
-    private int setSoaAvailabilityForTransitTour( Stop s, Tour t ) {
+    private int setSoaAvailabilityForTransitTour( Stop s, Tour t, boolean debug ) {
 
         
         int availableCount = 0;
         double[][] bestTaps = null;
+        
+        if(debug){
+        	slcSoaLogger.info("Logging stop sampling for transit tour");
+        	t.logEntireTourObject(slcSoaLogger);
+        	s.logStopObject(slcSoaLogger,1000);
+        }
         
         if ( s.isInboundStop() ) {
  
@@ -2838,9 +2846,13 @@ public class IntermediateStopChoiceModels implements Serializable {
                 //    continue;                    
 
                 boolean accessible = false;
+                int i=-1;
                 for (double[] tapPair : bestTaps ) {
+                	
                     if ( tapPair == null )
                         continue;                    
+                    
+                    ++i;
                     
                     if ( modelStructure.getTourModeIsWalkTransit(t.getTourModeChoice() ) ) {
                         // if alternative location mgra is accessible by walk to any of the best inbound boarding taps, AND it's accessible by walk to the stop origin, it's available.                    
@@ -2871,8 +2883,20 @@ public class IntermediateStopChoiceModels implements Serializable {
                         }
                     }
 
-                    if ( accessible )
+                    if ( accessible ){
+                        if(debug){
+                        	slcSoaLogger.info("");
+                        	if(sampleMgraInBoardingTapShed[alt]==true){
+                        		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for TapPair "+i+" in boarding shed of TAP "+tapPair[0]);
+                        	}else if(sampleMgraInAlightingTapShed[alt]==true){
+                           		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for TapPair "+i+" in alighting shed of TAP "+tapPair[1]);
+                        	}
+                        	if((sampleMgraInBoardingTapShed[alt]==true) && (sampleMgraInAlightingTapShed[alt]==true)) //should not happen
+                           		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for TapPair "+i+" in both boarding shed of TAP "+tapPair[0]+" and alighting shed of TAP "+tapPair[1]);
+                        }
+                        
                         break;
+                    }
                 }
                 
                 if ( accessible ) {
@@ -2881,6 +2905,9 @@ public class IntermediateStopChoiceModels implements Serializable {
                 else {
                     soaSample[alt] = 0;
                     soaAvailability[alt] = false;
+                    
+                    if(debug)
+                    	slcSoaLogger.info("Stop alternative "+alt+" is not available");
                 }
 
             }
@@ -2897,17 +2924,18 @@ public class IntermediateStopChoiceModels implements Serializable {
             ArrayList<Integer> mgras = mgraManager.getMgras();
             for (int alt : mgras)
             {
-                // if alternative mgra is unavailable because it has no size, no need to check its accessibility
+            	// if alternative mgra is unavailable because it has no size, no need to check its accessibility
                 //if ( ! soaAvailability[alt] )
                 //    continue;                    
 
                 // check whether any of the outbound dtw boarding taps or best wtw alighting taps are in the set of walk accessible TAPs for the alternative mgra.
                 // if not, the alternative is not available.
                 boolean accessible = false;
+                int i=-1;
                 for (double[] tapPair : bestTaps ) {
                     if ( tapPair == null )
                         continue;
-                                        
+                    ++i;
                     if ( modelStructure.getTourModeIsWalkTransit(t.getTourModeChoice() ) ) {
                         // if alternative location mgra is accessible by walk to any of the best origin taps, AND it's accessible by walk to the stop origin, it's available.                    
                         if ( mgraManager.getTapIsWalkAccessibleFromMgra(alt, (int)tapPair[0])
@@ -2936,16 +2964,31 @@ public class IntermediateStopChoiceModels implements Serializable {
                         }
                     }
                     
-                    if ( accessible )
+                    if ( accessible ){
+                        if(debug){
+                        	slcSoaLogger.info("");
+                        	if(sampleMgraInBoardingTapShed[alt]==true)
+                        		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for TapPair "+i+" in boarding shed of TAP "+tapPair[0]);
+                        	else if(sampleMgraInAlightingTapShed[alt]==true)
+                           		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for TapPair "+i+" in alighting shed of TAP "+tapPair[1]);
+                       
+                        	if((sampleMgraInBoardingTapShed[alt]==true) && (sampleMgraInAlightingTapShed[alt]==true)) //should not happen
+                           		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for TapPair "+i+" in both boarding shed of TAP "+tapPair[0]+" and alighting shed of TAP "+tapPair[1]);
+                        }
+	
                         break;
-                    
+                    }
                 }
+                
                 if ( accessible ) {
                     availableCount++;
                 }
                 else {
                     soaSample[alt] = 0;
                     soaAvailability[alt] = false;
+                    
+                    if(debug)
+                    	slcSoaLogger.info ("Stop alternative "+alt+" is not available");
                 }
 
             }

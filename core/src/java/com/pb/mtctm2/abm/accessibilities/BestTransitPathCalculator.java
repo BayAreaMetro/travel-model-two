@@ -674,7 +674,7 @@ public class BestTransitPathCalculator implements Serializable
         {
         	myLogger.info("");
         	myLogger.info("");
-            header = ACC_EGR[accMode] + " best tap pairs debug info for origMgra=" + origMgra
+            header = "Access-Egress Mode "+ACC_EGR[accMode] + " best tap pairs debug info for origMgra=" + origMgra
                     + ", destMgra=" + destMgra + ", period index=" + departPeriod
                     + ", period label=" + ModelStructure.SKIM_PERIOD_STRINGS[departPeriod];
             for (int i = 0; i < header.length(); i++)
@@ -749,7 +749,7 @@ public class BestTransitPathCalculator implements Serializable
         {
         	myLogger.info("");
         	myLogger.info("");
-            header = accMode + " best tap pairs person specific utility info for origMgra=" + origMgra
+            header = "Access-egress mode " + accMode + " best tap pairs person specific utility info for origMgra=" + origMgra
                     + ", destMgra=" + destMgra + ", period index=" + departPeriod
                     + ", period label=" + ModelStructure.SKIM_PERIOD_STRINGS[departPeriod];
             for (int i = 0; i < header.length(); i++)

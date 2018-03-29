@@ -320,7 +320,7 @@ public class AutoAndNonMotorizedSkimsCalculator
                         logger.info(header);                                                                                     
                         logger.info(separator);                                                                                  
                                                                                                                                  
-                        logger.info("non-motorized skims array values");                                                         
+                        logger.info("non-motorized skims time array values");                                                         
                         logger                                                                                                   
                                 .info("determined from the mgraManager for an mgra pair within walking distance of each other.");
                         logger.info(String.format("%5s %40s %15s", "i", "skimName", "value"));                                   
@@ -345,6 +345,8 @@ public class AutoAndNonMotorizedSkimsCalculator
         // times from the TAZ-TAZ skim distance                                                                                  
         int oTaz = mgraManager.getTaz(origMgra);                                                                                 
         int dTaz = mgraManager.getTaz(destMgra);                                                                                 
+        nmSkims[WALK_INDEX] = (storedFromTazDistanceSkims[departPeriod][oTaz][dTaz] / WALK_SPEED) * 60.0;                                  
+        nmSkims[BIKE_INDEX] = (storedFromTazDistanceSkims[departPeriod][oTaz][dTaz] / BIKE_SPEED) * 60.0;                                  
                                                                                                                                  
                                                                                                                                  
         if (debug)                                                                                                               
@@ -354,7 +356,7 @@ public class AutoAndNonMotorizedSkimsCalculator
             logger.info(header);                                                                                                 
             logger.info(separator);                                                                                              
                                                                                                                                  
-            logger.info("non-motorized skims array values");                                                                     
+            logger.info("non-motorized skims time array values");                                                                     
             logger.info("calculated for an mgra pair not within walking distance of each other.");                               
             logger.info("origTaz = " + oTaz + ", destTaz = " + dTaz + ", od distance = "                                         
                     + (float) storedFromTazDistanceSkims[departPeriod][oTaz][dTaz]);                                                       
@@ -367,9 +369,6 @@ public class AutoAndNonMotorizedSkimsCalculator
             }                                                                                                                    
                                                                                                                                  
         }                                                                                                                        
-                                                                                                                                 
-        nmSkims[WALK_INDEX] = (storedFromTazDistanceSkims[departPeriod][oTaz][dTaz] / WALK_SPEED) * 60.0;                                  
-        nmSkims[BIKE_INDEX] = (storedFromTazDistanceSkims[departPeriod][oTaz][dTaz] / BIKE_SPEED) * 60.0;                                  
                                                                                                                                  
         return nmSkims;                                                                                                          
                                                                                                                                  
