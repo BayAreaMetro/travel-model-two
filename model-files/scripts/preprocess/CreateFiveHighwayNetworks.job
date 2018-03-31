@@ -23,14 +23,14 @@
 ;
 ; version:  Travel Model Zed
 ; authors:  dto (2010 08 10); crf (2013 07)
-; revised jef (2016 08 09) to work with cube 6.4
+;
 ;
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;set fft, and drop off non-hwy links
 run pgm = hwynet
 
-;    PAR NODES=10000000
+    PAR NODES=10000000
 
    ; begin with the standard input network
    neti = hwy\mtc_final_network_with_tolls.net
@@ -94,9 +94,11 @@ loop period = 1, 5
       token_sterling_onramp = 'USECLASS = 1'
       
       ; shared ride bridge delay by-pass links
-      token_carquinez_bridge_sr_bypass = 'if (a = 8022075 & b = 3524846) delete'
+      token_benicia_bridge_sr_bypass   = 'if (a = 7574224 & b = 3074224) delete'
+      token_carquinez_bridge_sr_bypass = 'if (a = 3526167 & b = 3524846) delete'
+      token_richmond_bridge_sr_bypass = 'if (a = 7579474 & b = 7579475) delete'
       token_bay_bridge_sr_bypass       = 'if (a = 7089312 & b = 7065303) delete'
-      token_sanmateo_bridge_sr_bypass  = 'if (a = 7081526 & b = 2539743) delete'
+      token_sanmateo_bridge_sr_bypass  = 'if (a = 7081526 & b = 2591698) delete'
       token_dumbarton_bridge_sr_bypass = 'if (a = 7081088 & b = 2523179) delete'
       token_new_bridge_sr_bypass       = 'if (a = 20302 & b = 20303) delete'
       
@@ -129,7 +131,9 @@ loop period = 1, 5
       
       
       ; shared ride bridge delay by-pass links
+      token_benicia_bridge_sr_bypass   = '; do not delete the link'
       token_carquinez_bridge_sr_bypass = '; do not delete the link'
+      token_richmond_bridge_sr_bypass  = '; do not delete the link'
       token_bay_bridge_sr_bypass       = '; do not delete the link'
       token_sanmateo_bridge_sr_bypass  = '; do not delete the link'
       token_dumbarton_bridge_sr_bypass = '; do not delete the link'
@@ -164,9 +168,11 @@ loop period = 1, 5
       token_sterling_onramp = 'USECLASS = 1'
       
       ; shared ride bridge delay by-pass links
-      token_carquinez_bridge_sr_bypass = 'if (a = 8022075 & b = 3524846) delete'
+      token_benicia_bridge_sr_bypass   = 'if (a = 7574224 & b = 3074224) delete'
+      token_carquinez_bridge_sr_bypass = 'if (a = 3526167 & b = 3524846) delete'
+      token_richmond_bridge_sr_bypass = 'if (a = 7579474 & b = 7579475) delete'
       token_bay_bridge_sr_bypass       = 'if (a = 7089312 & b = 7065303) delete'
-      token_sanmateo_bridge_sr_bypass  = 'if (a = 7081526 & b = 2539743) delete'
+      token_sanmateo_bridge_sr_bypass  = 'if (a = 7081526 & b = 2591698) delete'
       token_dumbarton_bridge_sr_bypass = 'if (a = 7081088 & b = 2523179) delete'
       token_new_bridge_sr_bypass       = 'if (a = 20302 & b = 20303) delete'
       
@@ -199,7 +205,9 @@ loop period = 1, 5
       
       
       ; shared ride bridge delay by-pass links
+      token_benicia_bridge_sr_bypass   = '; do not delete the link'
       token_carquinez_bridge_sr_bypass = '; do not delete the link'
+      token_richmond_bridge_sr_bypass  = '; do not delete the link'
       token_bay_bridge_sr_bypass       = '; do not delete the link'
       token_sanmateo_bridge_sr_bypass  = '; do not delete the link'
       token_dumbarton_bridge_sr_bypass = '; do not delete the link'
@@ -234,9 +242,11 @@ loop period = 1, 5
       token_sterling_onramp = 'USECLASS = 1'
       
       ; shared ride bridge delay by-pass links
-      token_carquinez_bridge_sr_bypass = 'if (a = 8022075 & b = 3524846) delete'
+      token_benicia_bridge_sr_bypass   = 'if (a = 7574224 & b = 3074224) delete'
+      token_carquinez_bridge_sr_bypass = 'if (a = 3526167 & b = 3524846) delete'
+      token_richmond_bridge_sr_bypass = 'if (a = 7579474 & b = 7579475) delete'
       token_bay_bridge_sr_bypass       = 'if (a = 7089312 & b = 7065303) delete'
-      token_sanmateo_bridge_sr_bypass  = 'if (a = 7081526 & b = 2539743) delete'
+      token_sanmateo_bridge_sr_bypass  = 'if (a = 7081526 & b = 2591698) delete'
       token_dumbarton_bridge_sr_bypass = 'if (a = 7081088 & b = 2523179) delete'
       token_new_bridge_sr_bypass       = 'if (a = 20302 & b = 20303) delete'
       
@@ -257,7 +267,7 @@ loop period = 1, 5
    
    run pgm = hwynet
 
-;      PAR NODES=10000000
+      PAR NODES=10000000
 
       ; begin with the input network with tolls added
       neti = hwy\mtc_final_network_with_tolls_fft.net
@@ -274,9 +284,9 @@ loop period = 1, 5
       ; golden gate bridge reversible lanes
       ; split funny here to avoid going over cube/voyager's lame line length limit
       if (@golden_gate_sb_linksa@ |
-          @golden_gate_sb_linksa@) NUMLANES = @token_golden_gate_sb_lanes@
+          @golden_gate_sb_linksb@) NUMLANES = @token_golden_gate_sb_lanes@
       if (@golden_gate_nb_linksa@ |
-          @golden_gate_nb_linksa@) NUMLANES = @token_golden_gate_nb_lanes@
+          @golden_gate_nb_linksb@) NUMLANES = @token_golden_gate_nb_lanes@
       
       ; caldecott tunnel reversible lanes 
       if @caldecott_tunnel_wb_links@ NUMLANES = @token_caldecott_wb_lanes@
@@ -287,8 +297,10 @@ loop period = 1, 5
       if @sterling_on_ramp_links@ @token_sterling_onramp@
       
       
-      ; benecia martinez bridge (no shared ride by-pass link)
-      if (TOLLBOOTH = 1)
+      ; benecia martinez bridge
+      @token_benicia_bridge_sr_bypass@
+
+      if (TOLLBOOTH = 1 & USECLASS = 1)
       
          FFT  = @token_benicia_bridge_delay@
          CTIM = @token_benicia_bridge_delay@
@@ -298,15 +310,17 @@ loop period = 1, 5
       ; carquinez bridge
       @token_carquinez_bridge_sr_bypass@
       
-      if (TOLLBOOTH = 2)
+      if (TOLLBOOTH = 2 & USECLASS = 1)
       
          FFT  = @token_carquinez_bridge_delay@
          CTIM = @token_carquinez_bridge_delay@
       
       endif
       
-      ; richmond san rafael bridge (no shared ride by-pass link)
-      if (TOLLBOOTH = 3)
+      ; richmond san rafael bridge
+      @token_richmond_bridge_sr_bypass@
+
+      if (TOLLBOOTH = 3 & USECLASS = 1)
       
          FFT  = @token_richmond_bridge_delay@
          CTIM = @token_richmond_bridge_delay@
@@ -314,7 +328,7 @@ loop period = 1, 5
       endif
       
       ; golden gate bridge (no shared ride by-pass link)
-      if (TOLLBOOTH = 4)
+      if (TOLLBOOTH = 4 & USECLASS = 1)
       
          FFT  = @token_golden_bridge_delay@
          CTIM = @token_golden_bridge_delay@
@@ -324,7 +338,7 @@ loop period = 1, 5
       ; bay bridge
       @token_bay_bridge_sr_bypass@ 
       
-      if (TOLLBOOTH = 5) 
+      if (TOLLBOOTH = 5 & USECLASS = 1) 
          
          FFT  = @token_bay_bridge_delay@
          CTIM = @token_bay_bridge_delay@ 
@@ -334,7 +348,7 @@ loop period = 1, 5
       ; san mateo bridge
       @token_sanmateo_bridge_sr_bypass@ 
       
-      if (TOLLBOOTH = 6) 
+      if (TOLLBOOTH = 6 & USECLASS = 1) 
       
          FFT  = @token_sanmateo_bridge_delay@
          CTIM = @token_sanmateo_bridge_delay@
@@ -344,7 +358,7 @@ loop period = 1, 5
       ; dumbarton bridge
       @token_dumbarton_bridge_sr_bypass@
       
-      if (TOLLBOOTH = 7)
+      if (TOLLBOOTH = 7 & USECLASS = 1)
       
          FFT  = @token_dumbarton_bridge_delay@
          CTIM = @token_dumbarton_bridge_delay@
@@ -353,7 +367,7 @@ loop period = 1, 5
       
       
       ; antioch bridge (no shared ride by-pass link)
-      if (TOLLBOOTH = 8)
+      if (TOLLBOOTH = 8 & USECLASS = 1)
       
          FFT  = @token_antioch_bridge_delay@
          CTIM = @token_antioch_bridge_delay@
@@ -363,7 +377,7 @@ loop period = 1, 5
       ; new bridge
       @token_new_bridge_sr_bypass@
       
-      if (TOLLBOOTH = 10)
+      if (TOLLBOOTH = 10 & USECLASS = 1)
       
          FFT  = @token_new_bridge_delay@
          CTIM = @token_new_bridge_delay@
