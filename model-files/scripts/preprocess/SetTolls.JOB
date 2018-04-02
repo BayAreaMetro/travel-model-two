@@ -43,11 +43,11 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 RUN PGM=HWYNET
-    ; begin with the standard input network
+     ; begin with the standard input network
    neti = hwy\mtc_final_network_base.net
    
    ; write out to the same name with the added variables   
-    neto = hwy\mtc_final_network_with_tolls.net
+   neto = hwy\mtc_final_network_with_tolls.net
    
    ; the input tolls file
    FILEI LOOKUPI[1]=hwy\tolls.csv
