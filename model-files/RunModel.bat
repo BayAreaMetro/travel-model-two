@@ -18,13 +18,12 @@ rem @ECHO OFF
 :: ------------------------------------------------------------------------------------------------------
 
 :: Scenario name - the directory that this file is in
-rem :here
 SET D=%~p0
 IF %D:~-1% EQU \ SET D=%D:~0,-1%
 FOR %%a IN ("%D%") DO SET SCEN=%%~nxa
 ECHO ***SCENARIO: %SCEN%***
 
-SET /A SELECT_COUNTY=9
+SET /A SELECT_COUNTY=-1
 
 :: Set up environment variables
 CALL CTRAMP\runtime\CTRampEnv.bat
@@ -33,14 +32,14 @@ CALL CTRAMP\runtime\CTRampEnv.bat
 SET /A MAX_ITERATION=3
 
 ::  Set choice model household sample rate
-SET SAMPLERATE_ITERATION1=0.1
+SET SAMPLERATE_ITERATION1=1.0
 SET SAMPLERATE_ITERATION2=0.50
 SET SAMPLERATE_ITERATION3=1.0
 SET SAMPLERATE_ITERATION4=1.0
 SET SAMPLERATE_ITERATION5=1.0
 
 :: Set the model run year
-SET MODEL_YEAR=2010
+SET MODEL_YEAR=2015
 
 :: Scripts base directory
 SET BASE_SCRIPTS=CTRAMP\scripts
@@ -49,7 +48,12 @@ SET BASE_SCRIPTS=CTRAMP\scripts
 SET OLD_PATH=%PATH%
 SET PATH=%RUNTIME%;%JAVA_PATH%/bin;%TPP_PATH%;%PYTHON_PATH%;%OLD_PATH%
 
-SET /A ITERATION=3
+:: Remove these properties if starting from scratch
+:: SET /A ITERATION=1
+:: IF %ITERATION% EQU 1 SET SAMPLERATE=%SAMPLERATE_ITERATION1%
+:: call zoneSystem.bat
+
+:: goto here
 
 :: ------------------------------------------------------------------------------------------------------
 ::
@@ -274,17 +278,19 @@ ROBOCOPY trn %HH_SERVER_BASE_DIR%\trn tapLines.csv /NDL /NFL
 ::CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d %MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%MATRIX_SERVER_JAVA_PATH%" 
 
 ::remote servers using current user (wait 10 seconds between each call because otherwise psXXX sometimes bashes on its own authentication/permissions)
-CTRAMP\runtime\config\pskill %HH_SERVER% java\
-ping -n 10 localhost
-CTRAMP\runtime\config\pskill %MATRIX_SERVER% java
-ping -n 10 localhost
+rem CTRAMP\runtime\config\pskill %HH_SERVER% java\
+rem ping -n 10 localhost
+rem CTRAMP\runtime\config\pskill %MATRIX_SERVER% java
+rem ping -n 10 localhost
 CTRAMP\runtime\config\psexec %HH_SERVER% -d %HH_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runHhMgr.cmd "%HH_SERVER_JAVA_PATH%" %HOST_IP_ADDRESS%
 ping -n 10 localhost
-CTRAMP\runtime\config\psexec %MATRIX_SERVER% -d %MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%MATRIX_SERVER_JAVA_PATH%" 
-ping -n 10 localhost
+rem CTRAMP\runtime\config\psexec %MATRIX_SERVER% -d %MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%MATRIX_SERVER_JAVA_PATH%" 
+rem ping -n 10 localhost
 
 
-::start CTRAMP\runtime\runDriver.cmd
+start CTRAMP\runtime\runDriver.cmd
+start CTRAMP\runtime\runNode0.cmd
+
 copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
 if ERRORLEVEL 2 goto done
@@ -366,7 +372,6 @@ if ERRORLEVEL 2 goto done
 runtpp CTRAMP\scripts\assign\MergeNetworks.job
 if ERRORLEVEL 2 goto done
 
-:here
 IF %ITERATION% LSS %MAX_ITERATION% GOTO iteration_start
 
 runtpp CTRAMP\scripts\assign\TransitAssign.job
