@@ -21,6 +21,7 @@ public class AutoOwnershipChoiceDMU
 
     private double                     workAutoDependency               = 0.0;
     private double                     schoolAutoDependency             = 0.0;
+    private double                     workAutoTime                     = 0.0;
 
     private double                     workersRailProportion            = 0.0;
     private double                     studentsRailProportion           = 0.0;
@@ -93,10 +94,19 @@ public class AutoOwnershipChoiceDMU
     {
         return hh.getNumPersons18to24();
     }
+    
+    public int getNumPersons18to35(){
+    	return hh.getNumPersons18to35();
+    }
 
     public int getNumPersons6to15()
     {
         return hh.getNumPersons6to15();
+    }
+    
+    public int getNumPersons65Plus()
+    {
+    	return (hh.getNumPersons65to79()+hh.getNumPersons80plus());
     }
 
     public int getNumPersons80plus()
@@ -154,7 +164,15 @@ public class AutoOwnershipChoiceDMU
         return schoolAutoDependency;
     }
 
-    public double getWorkersRailProportion()
+    public double getWorkAutoTime() {
+		return workAutoTime;
+	}
+
+	public void setWorkAutoTime(double workAutoTime) {
+		this.workAutoTime = workAutoTime;
+	}
+
+	public double getWorkersRailProportion()
     {
         return workersRailProportion;
     }

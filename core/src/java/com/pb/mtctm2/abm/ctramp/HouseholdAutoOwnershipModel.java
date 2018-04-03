@@ -21,6 +21,7 @@ public class HouseholdAutoOwnershipModel
     private static final String                AO_MODEL_SHEET_TARGET  = "ao.model.page";
     private static final String                AO_DATA_SHEET_TARGET   = "ao.data.page";
 
+    private static final int                   AUTO_SOV_TIME_INDEX    = 10;
     private static final int                   AUTO_LOGSUM_INDEX      = 6;
     private static final int                   TRANSIT_LOGSUM_INDEX   = 8;
     private static final int                   DT_RAIL_PROP_INDEX     = 10;
@@ -99,6 +100,8 @@ public class HouseholdAutoOwnershipModel
             double schoolAutoDependency = 0.0;
             double workRailProp = 0.0;
             double schoolRailProp = 0.0;
+            double workAutoTime = 0.0;
+           
             Person[] persons = hhObj.getPersons();
             for (int i = 1; i < persons.length; i++)
             {
@@ -120,6 +123,8 @@ public class HouseholdAutoOwnershipModel
                         // if auto logsum < transit logsum, do not accumulate auto
                         // dependency
                         double[] workerAccessibilities = mandAcc.calculateWorkerMandatoryAccessibilities(hhObj.getHhMgra(), workMgra);
+           
+                        workAutoTime += workerAccessibilities[AUTO_SOV_TIME_INDEX];
                         if (workerAccessibilities[AUTO_LOGSUM_INDEX] >= workerAccessibilities[TRANSIT_LOGSUM_INDEX])
                         {
                             double logsumDiff = workerAccessibilities[AUTO_LOGSUM_INDEX]
@@ -177,6 +182,8 @@ public class HouseholdAutoOwnershipModel
 
             aoDmuObject.setWorkersRailProportion(workRailProp);
             aoDmuObject.setStudentsRailProportion(schoolRailProp);
+            
+            aoDmuObject.setWorkAutoTime(workAutoTime);
 
         }
 

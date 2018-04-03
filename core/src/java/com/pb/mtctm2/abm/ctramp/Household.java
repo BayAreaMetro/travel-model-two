@@ -762,6 +762,16 @@ public class Household
         }
         return numPersons16to17;
     }
+    
+    public int getNumPersons18to35(){
+    	
+        int numPersons18to35 = 0;
+        for (int i = 1; i < persons.length; i++)
+        {
+            if (persons[i].getAge() >= 18 && persons[i].getAge() <= 35) numPersons18to35++;
+        }
+        return numPersons18to35;
+    }
 
     public int getNumPersons16plus()
     {
