@@ -16,7 +16,7 @@ TRN_LABELFILE= os.path.join(TM2_INPUTS,"TM2 Transit Nodes.csv")
 GTFS_DIR     = r"M:\\Data\\Transit\\511\\Dec 2014\\GTFS"
 
 GTFS_NETWORKS = {
-    "Caltrain": "GTFSTransitData_CT_2014.11.27.zip"
+    "San Francisco MUNI": "GTFSTransitData_SF_2014.11.29.zip"
 }
 
 if __name__ == '__main__':
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     trn_stop_labels["TM2 Node"] = trn_stop_labels["TM2 Node"].astype(int)
     trn_stop_labels.set_index("TM2 Node", inplace=True)
 
-    for operator in ["Caltrain"]:
+    for operator in ["San Francisco MUNI"]:
         Wrangler.WranglerLogger.info("Processing operator %s" % operator)
 
         # get the stop labels for this operator
