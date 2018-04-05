@@ -16,7 +16,9 @@ TRN_LABELFILE= os.path.join(TM2_INPUTS,"TM2 Transit Nodes.csv")
 GTFS_DIR     = r"M:\\Data\\Transit\\511\\Dec 2014\\GTFS"
 
 GTFS_NETWORKS = {
-    "San Francisco MUNI": "GTFSTransitData_SF_2014.11.29.zip"
+    "Caltrain"                     : "GTFSTransitData_CT_2014.11.27.zip",
+    "Angel Island - Tiburon Ferry" : "GTFSTransitData_AT_2014.12.08.zip",
+    "San Francisco MUNI"           : "GTFSTransitData_SF_2014.11.29.zip",
 }
 
 if __name__ == '__main__':
@@ -35,7 +37,7 @@ if __name__ == '__main__':
     trn_stop_labels["TM2 Node"] = trn_stop_labels["TM2 Node"].astype(int)
     trn_stop_labels.set_index("TM2 Node", inplace=True)
 
-    for operator in ["San Francisco MUNI"]:
+    for operator in ["Caltrain", "San Francisco MUNI"]:
         Wrangler.WranglerLogger.info("Processing operator %s" % operator)
 
         # get the stop labels for this operator
@@ -53,6 +55,14 @@ if __name__ == '__main__':
         # lets see the stop_times with the stop names
         gtfs_stop_times = pandas.merge(left=feed.stop_times,
                                        right=feed.stops[["stop_id","stop_name"]]).sort_values(by=["trip_id","stop_sequence"])
+        # and the route_id and direction_id
+        gtfs_stop_times = pandas.merge(left=gtfs_stop_times,
+                                       right=feed.trips[["trip_id","route_id","direction_id"]], how="left")
+        # and route_long_name and route_type
+        gtfs_stop_times = pandas.merge(left=gtfs_stop_times,
+                                       right=feed.routes[["route_id","route_long_name","route_type"]], how="left")
+        # => filter out buses since the travel time comes from traffic
+        gtfs_stop_times = gtfs_stop_times.loc[gtfs_stop_times.route_type != 3,:]
         Wrangler.WranglerLogger.debug("gtfs_stop_times.head()\n%s" % gtfs_stop_times.head())
 
         # first we need the number of stops because the last stop is the end of the line
@@ -70,10 +80,16 @@ if __name__ == '__main__':
         gtfs_links = pandas.merge(left    = gtfs_stop_a,
                                   right   = gtfs_stop_b,
                                   how     = "left",
-                                  on      = ["trip_id","linknum"],
+                                  on      = ["route_type","route_id","route_long_name","direction_id","trip_id","linknum"],
                                   suffixes= ["_a","_b"] )
         # drop some useless cols -- note if there are dwells here then keep arrival_time_a
         gtfs_links.drop(["arrival_time_a","departure_time_b","num_stops", "stop_sequence_a","stop_sequence_b"], axis=1, inplace=True)
+
+        # write this to look at
+        debug_file = "gtfs_links_debug.csv"
+        gtfs_links.to_csv(debug_file, index=False)
+        Wrangler.WranglerLogger.info("Wrote %s for debugging" % debug_file)
+
         # drop rows with NaN times
         bad_rows = gtfs_links.loc[ pandas.isnull(gtfs_links["departure_time_a"]) | (pandas.isnull(gtfs_links["arrival_time_b"])) ]
         Wrangler.WranglerLogger.warn("Dropping %d links with missing times:\n%s" % (len(bad_rows), str(bad_rows)))
@@ -83,7 +99,7 @@ if __name__ == '__main__':
         gtfs_links["linktime"] = (gtfs_links["arrival_time_b"] - gtfs_links["departure_time_a"])/60.0
 
         # for simplicity, average across all trips
-        gtfs_link_times = gtfs_links[["stop_id_a","stop_name_a","stop_id_b","stop_name_b","linktime"]].groupby(["stop_id_a","stop_name_a","stop_id_b","stop_name_b"]).mean().reset_index()
+        gtfs_link_times = gtfs_links[["route_id","stop_id_a","stop_name_a","stop_id_b","stop_name_b","linktime"]].groupby(["route_id","stop_id_a","stop_name_a","stop_id_b","stop_name_b"]).mean().reset_index()
         Wrangler.WranglerLogger.debug("gtfs_link_times\n%s" % gtfs_link_times.head())
 
         # add TM2 node ids for stop_id_a and stop_id_b, from NB or SB
@@ -105,6 +121,11 @@ if __name__ == '__main__':
         # process the lines for this operator in the TM2 network
         for line in trn_net:
             if line['USERA1'] == '"' + operator + '"':  # operator with quotes
+
+                # don't do local bus -- transit time is from traffic
+                if line['USERA2'] == '"Local bus"': continue
+
+                Wrangler.WranglerLogger.debug("Processing operator [%s] of type [%s] line [%s]" % (line['USERA1'], line['USERA2'], line.name))
                 prev_stop_num  = -1
                 prev_stop_name = None
 
@@ -126,7 +147,7 @@ if __name__ == '__main__':
                             if (prev_stop_num, node_num) in gtfs_link_times_dict:
                                 line.n[node_idx]["NNTIME"] = "%.2f" % gtfs_link_times_dict[(prev_stop_num, node_num)]["linktime"]
                             else:
-                                Wrangler.WranglerLogger.warn("Line [%s]: Couldn't find link time for %d %20s -> %d %20s" %
+                                Wrangler.WranglerLogger.warn("Line [%s]: Couldn't find link time for %d %50s -> %d %50s" %
                                                              (line.name, prev_stop_num, prev_stop_name,node_num, node_name))
                         # set for next stop
                         prev_stop_num  = node_num
