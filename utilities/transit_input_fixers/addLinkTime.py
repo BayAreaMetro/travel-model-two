@@ -16,9 +16,20 @@ TRN_LABELFILE= os.path.join(TM2_INPUTS,"TM2 Transit Nodes.csv")
 GTFS_DIR     = r"M:\\Data\\Transit\\511\\Dec 2014\\GTFS"
 
 GTFS_NETWORKS = {
-    "Caltrain"                     : "GTFSTransitData_CT_2014.11.27.zip",
-    "Angel Island - Tiburon Ferry" : "GTFSTransitData_AT_2014.12.08.zip",
-    "San Francisco MUNI"           : "GTFSTransitData_SF_2014.11.29.zip",
+    "Caltrain"                       : "GTFSTransitData_CT_2014.11.27.zip",
+    "Angel Island - Tiburon Ferry"   : "GTFSTransitData_AT_2014.12.08.zip",
+    "San Francisco MUNI"             : "GTFSTransitData_SF_2014.11.29.zip",
+	"Vallejo Baylink Ferry"          : "GTFSTransitData_SB_2014.11.29.zip",
+	"Blue and Gold"                  : "GTFSTransitData_BG_2014.11.27.zip",
+	"Amtrak Capitol Cor. & Reg. Svc" : "GTFSTransitData_AM_2014.11.12.zip",
+	"BART"                           : "GTFSTransitData_BA_2014.11.26.zip",
+	"ACE"                            : "GTFSTransitData_CE_2014.11.27.zip",
+	"Golden Gate Ferry"              : "GTFSTransitData_GF_2014.11.27.zip",
+	"Alameda Harbor Bay Ferry"       : "GTFSTransitData_SB_2014.11.29.zip",
+	"Alameda/Oakland Ferry"          : "GTFSTransitData_SB_2014.11.29.zip",
+	"Vallejo Baylink Ferry"          : "GTFSTransitData_SB_2014.11.29.zip",
+	"Santa Clara VTA"                : "GTFSTransitData_SC_2014.12.05.zip",
+	"Blue and Gold"                  : "GTFSTransitData_BG_2014.11.27.zip"
 }
 
 if __name__ == '__main__':
@@ -37,7 +48,8 @@ if __name__ == '__main__':
     trn_stop_labels["TM2 Node"] = trn_stop_labels["TM2 Node"].astype(int)
     trn_stop_labels.set_index("TM2 Node", inplace=True)
 
-    for operator in ["Caltrain", "San Francisco MUNI"]:
+    for operator in ["Caltrain", "San Francisco MUNI","Vallejo Baylink Ferry", "Blue and Gold", "Amtrak Capitol Cor. & Reg. Svc", "BART",
+	                 "ACE", "Golden Gate Ferry", "Alameda Harbor Bay Ferry","Alameda/Oakland Ferry","Vallejo Baylink Ferry", "Santa Clara VTA", "Blue and Gold"]:
         Wrangler.WranglerLogger.info("Processing operator %s" % operator)
 
         # get the stop labels for this operator
