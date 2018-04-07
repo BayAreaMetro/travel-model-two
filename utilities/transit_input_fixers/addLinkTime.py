@@ -134,8 +134,8 @@ if __name__ == '__main__':
         for line in trn_net:
             if line['USERA1'] == '"' + operator + '"':  # operator with quotes
 
-                # don't do local bus -- transit time is from traffic
-                if line['USERA2'] == '"Local bus"': continue
+                # don't do local or express bus -- transit time is from traffic
+                if line['USERA2'] in ['"Local bus"','"Express bus"']: continue
 
                 Wrangler.WranglerLogger.debug("Processing operator [%s] of type [%s] line [%s]" % (line['USERA1'], line['USERA2'], line.name))
                 prev_stop_num  = -1
