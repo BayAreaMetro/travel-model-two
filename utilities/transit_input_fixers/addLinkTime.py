@@ -137,6 +137,12 @@ if __name__ == '__main__':
                 # don't do local or express bus -- transit time is from traffic
                 if line['USERA2'] in ['"Local bus"','"Express bus"']: continue
 
+                # Vallejo Baylink Ferry -- VB_200* is really a bus -- fix
+                if line.name.startswith('VB_200') and line['USERA2'] == '"Ferry service"':
+                    line['USERA2'] = '"Local bus"'
+                    # TODO change MODE number
+                    continue
+
                 Wrangler.WranglerLogger.debug("Processing operator [%s] of type [%s] line [%s]" % (line['USERA1'], line['USERA2'], line.name))
                 prev_stop_num  = -1
                 prev_stop_name = None
