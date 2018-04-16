@@ -965,7 +965,7 @@ public abstract class HouseholdDataManager
                 percentHhsIncome100Kplus[homeTaz] ++; 
             if ( hhs[r].getIncomeInDollars() > 75000 )
                 percentHhsIncome75Kplus[homeTaz] ++;
-            if ( hhs[r].getAutoOwnershipModelResult() > 1 )
+            if ( hhs[r].getAutosOwned() > 1 )
                 percentHhsMultipleAutos[homeTaz] ++; 
         }
 
@@ -1682,8 +1682,7 @@ public abstract class HouseholdDataManager
                         } else if (fieldName.equalsIgnoreCase("AO"))
                         {
                             ao = Integer.parseInt(fieldValue);
-                            // pass in the ao model alternative number to this method
-                            hh.setAutoOwnershipModelResult(ao + 1);
+                            hh.setHhAutos(ao);
                             break;
                         }
 

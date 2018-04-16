@@ -567,7 +567,7 @@ public class TripModeChoiceDMU
     
     public int getAutos()
     {
-        return hh.getAutoOwnershipModelResult();
+        return hh.getAutosOwned();
     }
     
     public int getAge()

@@ -30,7 +30,10 @@ public class HouseholdAutoOwnershipModel
     private MandatoryAccessibilitiesCalculator mandAcc;
     private ChoiceModelApplication             aoModel;
     private AutoOwnershipChoiceDMU             aoDmuObject;
-
+    
+    private int[]                              totalAutosByAlt;
+    private int[]                              automatedVehiclesByAlt;
+    private int[]                              conventionalVehiclesByAlt;
 
     public HouseholdAutoOwnershipModel(HashMap<String, String> rbMap,
             CtrampDmuFactoryIf dmuFactory, AccessibilitiesTable myAccTable, MandatoryAccessibilitiesCalculator myMandAcc)
@@ -59,6 +62,9 @@ public class HouseholdAutoOwnershipModel
         // create the auto ownership choice model object
         aoModel = new ChoiceModelApplication(autoOwnershipUecFile, modelPage, dataPage, rbMap,
                 (VariableTable) aoDmuObject);
+        
+        String[] alternativeNames = aoModel.getAlternativeNames();
+        calculateAlternativeArrays(alternativeNames);
 
     }
 
@@ -265,8 +271,52 @@ public class HouseholdAutoOwnershipModel
         if (preAutoOwnership) hhObj.setPreAoRandomCount(hhObj.getHhRandomCount());
         else hhObj.setAoRandomCount(hhObj.getHhRandomCount());
 
-        hhObj.setAutoOwnershipModelResult(chosenAlt);
+        int autos = totalAutosByAlt[chosenAlt-1];
+        int AVs = automatedVehiclesByAlt[chosenAlt-1];
+        int CVs = conventionalVehiclesByAlt[chosenAlt-1];
+        hhObj.setHhAutos(autos);
+        hhObj.setAutomatedVehicles(AVs);
+        hhObj.setConventionalVehicles(CVs);
 
     }
+    
+    
+    /**
+     * This is a helper method that iterates through the alternative names
+     * in the auto ownership UEC and searches through each name to collect 
+     * the total number of autos (in the first position of the name character
+     * array), the number of AVs for the alternative (preceded by the "AV" substring) 
+     * and the number of CVs for the alternative (preceded by the "CV" substring). The
+     * results are stored in the arrays:
+     * 
+     *  totalAutosByAlt
+     *  automatedVehiclesByAlt
+     *  conventionalVehiclesByAlt
+     *  
+     * @param alternativeNames The array of alternative names.
+     */
+    private void calculateAlternativeArrays(String[] alternativeNames){
+    	
+    	//iterate thru names
+    	for(int i = 0; i < alternativeNames.length;++i){
+    		
+    		String altName = alternativeNames[i];
+    		
+    		//find the number of cars; first element of name (e.g. 0_CARS)
+    		int autos = new Integer(altName.substring(0,1)).intValue();
+    		
+    		int AVPosition = altName.indexOf("AV");
+    		int AVs = new Integer(altName.substring(AVPosition-1, AVPosition)).intValue();
+    		int CVPosition = altName.indexOf("CV");
+    		int CVs = new Integer(altName.substring(CVPosition-1, CVPosition)).intValue();
+    		
+    		totalAutosByAlt[i] = autos;
+    	    automatedVehiclesByAlt[i] = AVs;
+    	    conventionalVehiclesByAlt[i] = CVs;
+   		
+    	}
+    	
+    }
+    
 
 }

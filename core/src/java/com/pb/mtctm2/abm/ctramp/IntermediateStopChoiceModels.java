@@ -2784,7 +2784,7 @@ public class IntermediateStopChoiceModels implements Serializable {
         
         mcDmuObject.setIncomeInDollars( hh.getIncomeInDollars() );
         mcDmuObject.setAdults( hh.getNumPersons18plus() );
-        mcDmuObject.setAutos( hh.getAutoOwnershipModelResult() );
+        mcDmuObject.setAutos( hh.getAutosOwned() );
         mcDmuObject.setAge( p.getAge() );
         mcDmuObject.setHhSize( hh.getHhSize() );
         mcDmuObject.setPersonIsFemale( p.getPersonIsFemale() );

@@ -292,7 +292,7 @@ public class HouseholdDataWriter
         data.add(string(hh.getHhId()));
         data.add(string(hh.getHhMgra()));
         data.add(string(hh.getIncomeInDollars()));
-        data.add(string(hh.getAutoOwnershipModelResult()));
+        data.add(string(hh.getAutosOwned()));
         data.add(string(hh.getTpChoice()));
         data.add(string(hh.getCoordinatedDailyActivityPattern()));
         data.add(string(hh.getJointTourFreqChosenAlt()));

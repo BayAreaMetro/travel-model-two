@@ -30,6 +30,8 @@ public class Household
     private Tour[]                    jointTours;
 
     private int                       aoModelAutos;
+    private int                       automatedVehicles;
+    private int                       conventionalVehicles;
     private String                    cdapModelPattern;
     private int                       imtfModelPattern;
     private String                    jtfModelPattern;
@@ -237,14 +239,7 @@ public class Household
         tpChoice = value;
     }
     
-    public void setAutoOwnershipModelResult(int aoModelAlternativeChosen)
-    {
-        // store the number of autos owned by the household (AO model alternative -
-        // 1).
-        aoModelAutos = aoModelAlternativeChosen - 1;
-    }
-
-    /**
+     /**
      * auto sufficiency: 1 if cars < workers, 2 if cars equal workers, 3 if cars >
      * workers
      * 
@@ -257,12 +252,28 @@ public class Household
         else return 3;
     }
 
-    public int getAutoOwnershipModelResult()
+    public int getAutosOwned()
     {
         return aoModelAutos;
     }
     
-    public int getTpChoice()
+    public int getAutomatedVehicles() {
+		return automatedVehicles;
+	}
+
+	public void setAutomatedVehicles(int automatedVehicles) {
+		this.automatedVehicles = automatedVehicles;
+	}
+
+	public int getConventionalVehicles() {
+		return conventionalVehicles;
+	}
+
+	public void setConventionalVehicles(int conventionalVehicles) {
+		this.conventionalVehicles = conventionalVehicles;
+	}
+
+	public int getTpChoice()
     {
         return tpChoice;
     }
