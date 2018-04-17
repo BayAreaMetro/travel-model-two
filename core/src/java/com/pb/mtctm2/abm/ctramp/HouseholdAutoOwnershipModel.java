@@ -297,6 +297,11 @@ public class HouseholdAutoOwnershipModel
      */
     private void calculateAlternativeArrays(String[] alternativeNames){
     	
+    	totalAutosByAlt = new int[alternativeNames.length];
+	    automatedVehiclesByAlt = new int[alternativeNames.length];
+	    conventionalVehiclesByAlt = new int[alternativeNames.length];
+   	
+    	
     	//iterate thru names
     	for(int i = 0; i < alternativeNames.length;++i){
     		
