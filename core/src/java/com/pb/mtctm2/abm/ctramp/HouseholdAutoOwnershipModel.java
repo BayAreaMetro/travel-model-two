@@ -304,11 +304,14 @@ public class HouseholdAutoOwnershipModel
     		
     		//find the number of cars; first element of name (e.g. 0_CARS)
     		int autos = new Integer(altName.substring(0,1)).intValue();
-    		
+    		int AVs=0;
+    		int CVs=0;
     		int AVPosition = altName.indexOf("AV");
-    		int AVs = new Integer(altName.substring(AVPosition-1, AVPosition)).intValue();
+    		if(AVPosition>=0)
+    			AVs = new Integer(altName.substring(AVPosition-1, AVPosition)).intValue();
     		int CVPosition = altName.indexOf("CV");
-    		int CVs = new Integer(altName.substring(CVPosition-1, CVPosition)).intValue();
+    		if(CVPosition>=0)
+    			CVs = new Integer(altName.substring(CVPosition-1, CVPosition)).intValue();
     		
     		totalAutosByAlt[i] = autos;
     	    automatedVehiclesByAlt[i] = AVs;
