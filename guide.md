@@ -561,7 +561,7 @@ The following transit modes are defined based on the RTD database attributes `CP
 | SR | Santa Rosa CityBus | B | NA | 66 | Local bus |
 | SV | St. Helena VINE | B | NA | 60 | Local bus |
 | UC | Union City Transit | B | NA | 38 | Local bus |
-| VB | Vallejo Baylink Ferry | B | NA | 104 | Ferry service |
+| VB | Vallejo Baylink Ferry | B | NA | 93 | Express bus |
 | VB | Vallejo Baylink Ferry | F | NA | 104 | Ferry service |
 | VC | Vacaville City Coach | B | NA | 56 | Local bus |
 | VN | Napa VINE | B | NA | 60 | Local bus |
