@@ -85,7 +85,7 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;start cluster nodes - one for each skim set and time period
-*Cluster.exe MTC_TRANASN 1-15 start exit
+ *Cluster.exe MTC_TRANASN 1-5 start exit
 
 ;now build transit times based on congested times from loaded network
 ;loop over time period
@@ -104,38 +104,34 @@ LOOP PERIOD = 1,5
         TOKEN_PERIOD = 'EV'
     ENDIF
     
-    LOOP SKIMSET = 1,3
-
-        ; specify SKIMSET specific stuff
-        SKIMSET_NAME = 'SET' + STR(SKIMSET,1,0)
-        counter = 3*(PERIOD - 1) + SKIMSET
+       
+    ; do each time of day and mode as a separate process
+    DistributeMultistep processid = 'MTC_TRANASN', processNum = PERIOD
+        ;make a copy of the network so that we don't walk all over each other
+        *copy hwy\mtc_transit_network_@TOKEN_PERIOD@.net trn\mtc_transit_network_@TOKEN_PERIOD@.net
         
-        ; do each time of day and mode as a separate process
-        DistributeMultistep processid = 'MTC_TRANASN', processNum = counter
-            ;make a copy of the network so that we don't walk all over each other
-            *copy hwy\mtc_transit_network_@TOKEN_PERIOD@.net trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net
 
-            ;next, assign trips
-            RUN PGM = PUBLIC TRANSPORT
-                FILEI NETI = "trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net"
-                FILEI LINEI[1] = "trn\transitLines_new_nodes.lin"
-                FILEI SYSTEMI = "trn\transitSystem.PTS"
-                FILEI FACTORI[1] = "trn\transitFactors_@SKIMSET_NAME@.fac"
-                
-                FILEI FAREMATI[1] = "trn\fareMatrix.txt"
-                FILEI FAREI= "trn\fares.far"
-                
-                FILEI MATI[1] = "ctramp_output\TAP_Demand_set@SKIMSET@_@TOKEN_PERIOD@.mat"
-                
-                FILEO NETO = "trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit_assign.net"
-
-                ; These files are gigantic and writing many simultaneously cause PT to fail
-                ; with the message: F(801): (EnumRoutes) Failure writing to output routes file.
-                ; We cannot comment them out, however, since 
-                ; "The statement ROUTEO[x] invokes the route-enumeration process for user class x." (!!)
-                ; FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit_assign.rte"
-
-                FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit_assign.rpt"
+        ;next, assign trips
+        RUN PGM = PUBLIC TRANSPORT
+            FILEI NETI = "trn\mtc_transit_network_@TOKEN_PERIOD@.net"
+            FILEI LINEI[1] = "trn\transitLines_new_nodes_veh.lin"
+            FILEI SYSTEMI = "trn\transitSystem_new.PTS"
+            FILEI FACTORI[1] = "trn\transitFactors_SET1.fac"
+            FILEI FACTORI[2] = "trn\transitFactors_SET3.fac"
+            FILEI FACTORI[3] = "trn\transitFactors_SET3.fac"
+            
+            FILEI FAREMATI[1] = "trn\fareMatrix.txt"
+            FILEI FAREI= "trn\fares.far"
+            
+            FILEI MATI[1] = "ctramp_output\TAP_Demand_set1_@TOKEN_PERIOD@.mat"
+            FILEI MATI[2] = "ctramp_output\TAP_Demand_set2_@TOKEN_PERIOD@.mat"
+            FILEI MATI[3] = "ctramp_output\TAP_Demand_set3_@TOKEN_PERIOD@.mat"
+            
+            FILEO NETO = "trn\mtc_transit_network_@TOKEN_PERIOD@_with_transit_assign.net"
+            FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET1_with_transit_assign.rte"
+            FILEO ROUTEO[2] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET2_with_transit_assign.rte"
+            FILEO ROUTEO[3] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET3_with_transit_assign.rte"
+            FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_with_transit_assign.rpt"
                 ;
                 ; The stop2stop file is for BART station-station boardings. It writes a dbf file of boardings 
                 : by station pair for the listed station nodes. Note that node numbers change for each network
@@ -143,51 +139,52 @@ LOOP PERIOD = 1,5
                 ; network used for calibration\validation. TODO: automate process for creating node list.
                 ;
                 FILEO STOP2STOPO = "trn\mtc_stop2stop_@TOKEN_PERIOD@_@SKIMSET_NAME@.dbf", ACCUMULATE=FIRSTLASTBYMODE, MODES=120, NODES=1083175,1083190,1083193,1083233,1083275,1083398,1083401,1083492,1129772,1129773,1129776,1129777,1129778,1129786,1314178,1338535,1338536,1338537,1338540,1338543,1338545,1338546,1338547,1338549,1338552,1338553,1338554,1338555,1338557,1338559,1338561,1338563,1338564,1338565,1338566,1419864,1419865,1419866,1419867,1419868,1419869,1419870,1419872,1419873,1419874
-                
-                PARAMETERS HDWAYPERIOD=@PERIOD@
-                PARAMETERS NOROUTEERRS=17000000
-                PARAMETERS TRANTIME=LI.TRANTIME
-                PARAMETERS MAPSCALE=5280
-                                
-                PROCESS PHASE=LINKREAD
-                    LW.TRANTIME = LI.TRANTIME
-                    LW.DISTANCE = LI.FEET/5280
-                ENDPROCESS
-                
-                PHASE=DATAPREP
-                    ;access/egress links
-                    GENERATE,       
-                        NTLEGMODE=991,
-                        INCLUDELINK=(LI.NTL_MODE=1),
-                        COST=LI.WALKTIME,
-                        MAXCOST=999*500,
-                        ONEWAY=T
-                    ;transfer links
-                    GENERATE,
-                        NTLEGMODE=992,       
-                        INCLUDELINK=(LI.NTL_MODE=2),
-                        COST=LI.WALKTIME,
-                        MAXCOST=999*500,
-                        DIRECTLINK = 3,
-                        FROMNODE=1-10000000,
-                        TONODE=1-10000000
-                ENDPHASE
-                
-                PARAMETERS TRIPSIJ[1] = MI.1.1 + MI.1.2 + MI.1.3 ;WLK, PNR, KNR
-                
-                REPORT LINES=T, SORT=MODE, LINEVOLS=T, STOPSONLY=T, SKIP0=T
-                
-            ENDRUN
+            
+            PARAMETERS HDWAYPERIOD=@PERIOD@
+            PARAMETERS NOROUTEERRS=17000000
+            PARAMETERS TRANTIME=LI.TRANTIME
+            PARAMETERS MAPSCALE=5280
+            PARAMETERS USERCLASSES=1,2,3
+                            
+            PROCESS PHASE=LINKREAD
+                LW.TRANTIME = LI.TRANTIME
+                LW.DISTANCE = LI.FEET/5280
+            ENDPROCESS
+            
+            PHASE=DATAPREP
+                ;access/egress links
+                GENERATE,       
+                    NTLEGMODE=991,
+                    INCLUDELINK=(LI.NTL_MODE=1),
+                    COST=LI.WALKTIME,
+                    MAXCOST=999*500,
+                    ONEWAY=T
+                ;transfer links
+                GENERATE,
+                    NTLEGMODE=992,       
+                    INCLUDELINK=(LI.NTL_MODE=2),
+                    COST=LI.WALKTIME,
+                    MAXCOST=999*500,
+                    DIRECTLINK = 3,
+                    FROMNODE=1-10000000,
+                    TONODE=1-10000000
+            ENDPHASE
+            
+            PARAMETERS TRIPSIJ[1] = MI.1.1 + MI.1.2 + MI.1.3 ;WLK, PNR, KNR
+            PARAMETERS TRIPSIJ[2] = MI.2.1 + MI.2.2 + MI.2.3 ;WLK, PNR, KNR
+            PARAMETERS TRIPSIJ[3] = MI.3.1 + MI.3.2 + MI.3.3 ;WLK, PNR, KNR
+            
+            REPORT LINES=T, SORT=MODE, LINEVOLS=T, STOPSONLY=T, SKIP0=T
+            
+        ENDRUN
 
-        EndDistributeMultistep
+    EndDistributeMultistep
 
-    ENDLOOP
 ENDLOOP
 
-Wait4Files files = MTC_TRANASN1.script.end, MTC_TRANASN2.script.end, MTC_TRANASN3.script.end, MTC_TRANASN4.script.end, MTC_TRANASN5.script.end,
-                   MTC_TRANASN6.script.end, MTC_TRANASN7.script.end, MTC_TRANASN8.script.end, MTC_TRANASN9.script.end, MTC_TRANASN10.script.end,
-                   MTC_TRANASN11.script.end, MTC_TRANASN12.script.end, MTC_TRANASN13.script.end, MTC_TRANASN14.script.end, MTC_TRANASN15.script.end,
-           printfiles = merge, deldistribfiles = t, CheckReturnCode = t
+Wait4Files files = MTC_TRANASN1.script.end, MTC_TRANASN2.script.end, MTC_TRANASN3.script.end, 
+                   MTC_TRANASN4.script.end, MTC_TRANASN5.script.end, 
+                   printfiles = merge, deldistribfiles = t, CheckReturnCode = t
 
 ;stop cluster nodes
-*Cluster.exe MTC_TRANASN 1-15 close exit
+*Cluster.exe MTC_TRANASN 1-5 close exit
