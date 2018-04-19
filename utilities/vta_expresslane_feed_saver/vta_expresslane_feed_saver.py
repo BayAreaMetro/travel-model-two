@@ -74,19 +74,26 @@ for feed_name,feed_filename in ONGOING_FEEDS.iteritems():
     out_files[feed_name] = open(os.path.join(OUTPUT_DIR, feed_filename), "w+")
 
 # continous loop
-try:
-    while True:
+while True:
+    try:
         ttl = 15*60
         for feed_name,feed_filename in ONGOING_FEEDS.iteritems():
             feed_ttl = csv_dump_to_file(feed_name, feed_urls[feed_name], out_files[feed_name])
             ttl = min(ttl,feed_ttl)
         if ttl == 0: ttl = 15*60
+        print "Sleeping %d" % ttl
         time.sleep(ttl)
 
-except Exception as ex:
-    print "Exception received"
-    print traceback.format_exc()
-    feed_file.close()
-    for feed_name,feed_filename in ONGOING_FEEDS.iteritems():
-        out_files[feed_name].close()
+    except IOError as ioe:
+        # keep going
+        print "Exception received"
+        print traceback.format_exc()
+        continue
+
+    except Exception as ex:
+        print "Exception received"
+        print traceback.format_exc()
+        feed_file.close()
+        for feed_name,feed_filename in ONGOING_FEEDS.iteritems():
+            out_files[feed_name].close()
 
