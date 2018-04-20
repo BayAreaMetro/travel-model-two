@@ -65,18 +65,18 @@ Code  | County | TAZs | MAZs |  TAPs | Network Node | HOV Lane Node
 
 The following node attributes are included in the master network.
 
-*Field* | *Description* | *Data Type*
+|*Field* | *Description* | *Data Type*
 |:---:|-------------|----------
-**N** | Node Number | Integer (see [Node Numbering](#county-node-numbering-system))
-**X** | X coordinate (feet) | Float
-**Y** | Y coordinate (feet) | Float
-**COUNTY** | County Code | Integer
-**MODE** | Best transit mode served. <br /><ul><li>1: Local bus</li> <li>2: Express bus</li> <li>3: Ferry</li> <li>4: Light rail</li> <li>5: Heavy rail</li> <li>6: Commuter rail</li> </ul> Appears to be set for TAPs and nodes with **STOP** set.| Integer
-**STOP** | Transit stop or terminal name of the node | String
-**PNR_CAP** |  Number of parking spaces at the stop or terminal if a parking facility is available | Integer
-**PNR&lt;TimePeriod&gt;** | Is parking available at the stop or terminal by time period? | Integer (1=available)
-**PNR_Fee&lt;Timeperiod&gt;** | Parking fee at the stop by time period | Float
-**FAREZONE** | Unique sequential fare zone ID for transit skimming and assignment | Integer
+|**N** | Node Number | Integer (see [Node Numbering](#county-node-numbering-system))
+|**X** | X coordinate (feet) | Float
+|**Y** | Y coordinate (feet) | Float
+|**COUNTY** | County Code | Integer
+|**MODE** | Best transit mode served. <br /><ul><li>1: Local bus</li> <li>2: Express bus</li> <li>3: Ferry</li> <li>4: Light rail</li> <li>5: Heavy rail</li> <li>6: Commuter rail</li> </ul> Appears to be set for TAPs and nodes with **STOP** set.| Integer
+|**STOP** | Transit stop or terminal name of the node | String
+|**PNR_CAP** |  Number of parking spaces at the stop or terminal if a parking facility is available | Integer
+|**PNR&lt;TimePeriod&gt;** | Is parking available at the stop or terminal by time period? | Integer (1=available)
+|**PNR_Fee&lt;Timeperiod&gt;** | Parking fee at the stop by time period | Float
+|**FAREZONE** | Unique sequential fare zone ID for transit skimming and assignment | Integer
 
 ### Link Attributes
 
