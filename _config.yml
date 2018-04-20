@@ -12,8 +12,8 @@ permalink:        pretty
 # Setup
 title:            Travel Model Two
 tagline:          'Metropolitan Transportation Commission'
-url:              http://metropolitantransportationcommission.github.io/travel-model-two
-shorturl:         metropolitantransportationcommission.github.io/travel-model-two
+url:              http://bayareametro.github.io/travel-model-two
+shorturl:         bayareametro.github.io/travel-model-two
 
 author:
   name:           'David Ory'
@@ -30,6 +30,8 @@ github:
 # This is the list of pages to include in the header of the website.
 pages_list:       
   Guide: 'guide/'
+  Input: 'input/'
+  Output: 'output/'
   Process: 'process/'
   Geographies: 'geographies/'
   Papers: 'papers/'
