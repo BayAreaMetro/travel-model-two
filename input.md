@@ -34,7 +34,7 @@ The table below contains brief descriptions of the input files required to execu
 | `transitLines.lin` | Transit lines | trn\transit_lines | [Citilabs Cube](http://citilabs.com/products/cube)| TransitNetwork  |
 | `transitFactors_MMMM.fac` | Cube Public Transport (PT) factor files by transit line haul mode MMMM | trn\transit_support | [Citilabs Cube](http://citilabs.com/products/cube) | TransitNetwork |
 
-# Roadway Network
+## Roadway Network
 
 The *all streets highway network* was developed from the [TomTom](http://www.tomtom.com/en_gb/licensing/) (previously TeleAtlas) North America routable network database.  The *projection* is NAD83 California State Plane FIPS VI.
 
@@ -42,7 +42,7 @@ The *bike network* was built from the highway network and the [MTC Bike Mapper](
 
 The *walk network* was built from the highway network and the open source [Open Street Map](http://www.openstreetmap.org/) (OSM) network. 
 
-## County Node Numbering System
+### County Node Numbering System
 
 The highway network uses a numbering system whereby each county has a reserved block of nodes. Within each county’s block, nodes 1 through 9,999 are reserved for TAZs, 10,001 through 89,999 are for MAZs, and 90,001 through 99,999 for transit access points or TAPs. The blocks are assigned to the nine counties per MTC’s numbering scheme, as shown in the table below.
 
@@ -61,7 +61,7 @@ Code  | County | TAZs | MAZs |  TAPs | Network Node | HOV Lane Node
 9 |	Marin |	800,001 – 809,999 |	810,001 – 889,999 |	890,001 – 899,999 |	5,000,000 – 5,500,000 |	9,500,000 – 9,999,999 
   | External | 900,001 - 999,999
 
-## Node Attributes
+### Node Attributes
 
 The following node attributes are included in the master network.
 
@@ -78,7 +78,7 @@ The following node attributes are included in the master network.
 **PNR_Fee&lt;Timeperiod&gt;** | Parking fee at the stop by time period | Float
 **FAREZONE** | Unique sequential fare zone ID for transit skimming and assignment | Integer
 
-## Link Attributes
+### Link Attributes
 
 The following link attributes are included on the master network.
 
@@ -120,13 +120,13 @@ The following link attributes are included on the master network.
 | **PEMSDIST** | Distance from link to PEMS station | Float | PEMS |
 | **TAP_DRIVE** | TAP link to parking lot (1=true) | Int | MTC |
 
-# Transit Network
+## Transit Network
 
 The transit network is made up of three core components: transit lines, transit modes, and transit fares.  The transit lines were built from MTC’s regional transit database (or RTD).  The lines are coded with a mode (see below) and serve a series of stop nodes.  Transit fares are coded according to Cube's Public Transport program (see below).
 
 Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the [Level of Service Information](#level-of-service-information). 
 
-## Line Attributes
+### Line Attributes
 
 | *Field* | *Description* | *Data Type* |
 |:-------:|---------------|-------------|
@@ -143,7 +143,7 @@ Transit trips are assigned between transit access points (TAPs), which represent
 | **HEADWAY[5]** | Evening headway (7PM to 3AM) | Float |
 | **N** | List of stops served.  Lines are coded through stops, not TAPs (which are like transit TAZs).  A negative stop is not served. | List of Integers |
 
-## Transit Modes
+### Transit Modes
 
 The following transit modes are defined based on the RTD database attributes `CPT_AGENCYID`, `CPT_MODE`, and `SCH_ROUTEDESIGNATOR`.  These modes represent combinations of operators and technology. 
 
@@ -225,7 +225,7 @@ The following transit modes are defined based on the RTD database attributes `CP
 | WH | WHEELS | B | NA | 17 | Local bus |
 | YV | Yountville Shuttle | B | NA | 60 | Local bus |
 
-## Transit Fares
+### Transit Fares
 
 Transit fares are modeled in Cube's Public Transport (PT) program as follows:
   1. Each transit mode is assigned a fare system in the Cube factor files
@@ -239,7 +239,7 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
     1. The initial fare is defined via the IBOARDFARE in the fares.far file
     1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file
 
-# Micro Zonal Data
+## Micro Zonal Data
 
 | *Column Name* | *Description* |
 |:-------------:|---------------|
@@ -312,7 +312,7 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 | **DuDenBin** | Dwelling unit density bin |
 | **ACRES** | MAZ acres |
 
-# Zonal Data
+## Zonal Data
 
 | *Field* | *Description* |
 |:-------:|---------------|
@@ -322,11 +322,11 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 | **PCTDETOUR** | Percent detour for transponder ownership model |
 | **TERMINALTIME** | Terminal time |
 
-# Truck Distribution
+## Truck Distribution
 
 MTC uses a simple three-step (generation, distribution, and assignment) commercial vehicle model to generate estimates of four types of commercial vehicles. The four vehicle types are very small (two-axle, four-tire), small (two-axle, six-tire), medium (three-axle), and large or combination trucks (four-or-more-axle).
 
-## Friction Factors
+### Friction Factors
 
 The trip distribution step uses a standard gravity model with a blended travel time impedance measure. This file sets the friction factors, which are vehicle type specific, using an ASCII fixed format text file with the following data:
  
@@ -336,15 +336,15 @@ The trip distribution step uses a standard gravity model with a blended travel t
  * Friction factors for medium trucks (integer, starting in column 25, left justified); and,
  * Friction factors for large trucks (integer, starting in column 33, left justified).
 
-## K-Factors
+### K-Factors
 
 The trip distribution step also uses a matrix of K-factors to adjust the distribution results to better match observed data. This matrix contains a unit-less adjustment value; the higher the number, the more attractive the production/attraction pair.
 
-# Fixed Demand
+## Fixed Demand
 
 MTC uses representations of internal/external and air passenger demand that is year-, but not scenario-, specific -- meaning simple sketch methods are used to estimate this demand from past trends. This demand is then fixed for each forecast year and does not respond to changes in land use or the transport network.
 
-## Internal/external
+### Internal/external
 
 So-called internal/external demand is travel that either begins or ends in the nine county Bay Area. This demand is based on Census journey-to-work data and captures all passenger (i.e. non-commercial) vehicle demand. This demand is introduced to the model via a matrix that contains the following four demand tables in production-attraction format:
 
@@ -353,7 +353,7 @@ So-called internal/external demand is travel that either begins or ends in the n
  * Daily three-or-more occupant vehicle flows; and,
  * Daily vehicle flows, which is the sum of the first three tables and not used by the travel model.
 
-## Air Passenger
+### Air Passenger
 
 Air passenger demand is based on surveys of air passenger and captures demand from the following travel modes: passenger vehicles, rental cars, taxis, limousines, shared ride vans, hotel shuttles, and charter buses. This demand is introduced to the model via Main.TimePeriods specific matrices that contain the following six flow tables:
 
