@@ -117,7 +117,7 @@ LOOP PERIOD = 1,5
             FILEI LINEI[1] = "trn\transitLines_new_nodes_veh.lin"
             FILEI SYSTEMI = "trn\transitSystem_new.PTS"
             FILEI FACTORI[1] = "trn\transitFactors_SET1.fac"
-            FILEI FACTORI[2] = "trn\transitFactors_SET3.fac"
+            FILEI FACTORI[2] = "trn\transitFactors_SET2.fac"
             FILEI FACTORI[3] = "trn\transitFactors_SET3.fac"
             
             FILEI FAREMATI[1] = "trn\fareMatrix.txt"
