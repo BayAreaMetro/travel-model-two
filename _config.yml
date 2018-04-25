@@ -1,7 +1,9 @@
-# Dependencies
-#markdown: redcarpet
-#redcarpet:
-#  extensions: ["tables", "no_intra_emphasis", "fenced_code_blocks", "autolink", "strikethrough", "superscript", "with_toc_data"]
+name:             Travel Model Two
+description:      Travel Model Two Documentation
+markdown:         kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
 
 pygments:         false
 highlighter:      rouge
