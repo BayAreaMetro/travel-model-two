@@ -6,6 +6,8 @@ title: Modeling Process
 *Work in Progress*
 
 # Contents
+{:toc}
+
 1. [Modeling Process](#modeling-process)
   1. [Preprocessing](#preprocessing)
   2. [Shortest Path Skims](#shortest-path-skims)
