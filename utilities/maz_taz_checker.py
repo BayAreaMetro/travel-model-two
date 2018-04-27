@@ -8,6 +8,7 @@ The following verifcations are performed
   - Verifies that there are not multiple tazs or counties per maz
   - Counts/lists first 30 mazs with multiple block groups, tracts
   - Verifies that there are not multiple counties per taz
+  - Counts/lists first 30 tazs with multiple tracts
   - Verifies that all blocks with nonzero land area are assigned a maz/taz
   - Verifies that all blocks with zero land area are not assigned a maz/taz
 
@@ -123,17 +124,24 @@ if __name__ == '__main__':
             print("")
             if fatal: sys.exit(error)
 
-    # verify one COUNTY per unique taz
-    taz_county_df = blocks_maz_df[["taz","GEOID10_COUNTY"]].groupby(["taz"]).agg("nunique")
-    taz_multiple_county_df = taz_county_df.loc[ taz_county_df["GEOID10_COUNTY"] > 1]
-    if len(taz_multiple_county_df) == 0:
-        print("Verified one county per taz")
-    else:
-        error = "ERROR: Multiple counties for a single taz: {1}".format(len(taz_multiple_county_df))
-        print(error)
-        print(taz_multiple_county_df)
-        print("")
-        sys.exit(error)  # this is required
+    # verify one TRACT/COUNTY per unique taz
+    for bigger_geo in ["GEOID10_TRACT","GEOID10_COUNTY"]:
+        taz_geo_df = blocks_maz_df[["taz",bigger_geo]].groupby(["taz"]).agg("nunique")
+        taz_multiple_geo_df = taz_geo_df.loc[ taz_geo_df[bigger_geo] > 1]
+        if len(taz_multiple_geo_df) == 0:
+            print("Verified one {0} per taz".format(bigger_geo))
+        else:
+            if bigger_geo in ["GEOID10_COUNTY"]:
+                fatal = True
+            else:
+                fatal = False
+            error = "{0}: Multiple {1} for a single taz: {2}".format(
+                    "ERROR" if fatal else "WARNING", bigger_geo, len(taz_multiple_geo_df))
+            print(error)
+            print(taz_multiple_geo_df)
+            print("")
+            if fatal: sys.exit(error)
+
 
     # count blocks per maz
     count_df = blocks_maz_df[["GEOID10","maz"]].groupby(["maz"]).agg("nunique")
