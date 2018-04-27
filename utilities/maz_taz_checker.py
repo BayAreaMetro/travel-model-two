@@ -5,12 +5,14 @@ MAZ and TAZ checker.
 Reads the definition of MAZs and TAZs in blocks_mazs_tazs.dbf (converted from csv using csv_to_dbf.R)
 
 The following verifcations are performed
-  - Verifies that all blocks with nonzero land area are assigned a maz/taz
   - Verifies that there are not multiple tazs or counties per maz
   - Counts/lists first 30 mazs with multiple block groups, tracts
   - Verifies that there are not multiple counties per taz
+  - Verifies that all blocks with nonzero land area are assigned a maz/taz
+  - Verifies that all blocks with zero land area are not assigned a maz/taz
 
 Creates a dissolved maz shapefile and a dissolved taz shapefile.
+These also have additional columns, maz_mod10 and taz_mod10, respectively, to make for easier quick symbology.
 
   Notes:
   - Block "06 075 017902 1009" (maz 10186, taz 592) is the little piece of Alameda island that the Census 2010
@@ -21,7 +23,8 @@ Creates a dissolved maz shapefile and a dissolved taz shapefile.
   - Blocks "06 075 017902 10[05,80]" (maz 16495, taz 312) is a tiny sliver that's barely land so not worth
     making a new maz, so that maz includes a second tract (mostly water)
 
-  TODO: remove dependency on dbfread?  Since we're using arcpy, can just use that to read the dbf
+  TODO: Remove the maz=0/taz=0 rows from the dissolved shapefiles
+  TODO: Remove dependency on dbfread?  Since we're using arcpy, can just use that to read the dbf
 
 """
 
@@ -172,6 +175,21 @@ if __name__ == '__main__':
     print("Number of blocks without maz/taz with land area: ", len(block_nomaz_land_df))
     if len(block_nomaz_land_df) > 0:
         print(block_nomaz_land_df)
+        print("")
+        sys.exit("ERROR")
+
+
+    maz_noland_df = pandas.merge(left =blocks_maz_df,
+                                 right=blocks_df,
+                                 how  ="left",
+                                 on   ="GEOID10")
+    maz_noland_df = maz_noland_df.loc[ maz_noland_df.ALAND10 == 0]
+    print("Number of blocks with maz/taz without land area: ", len(maz_noland_df))
+    maz_noland_df[["GEOID10","ALAND10"]].to_csv("block_noland.csv", index=False)
+    if len(maz_noland_df) > 0:
+        print(maz_noland_df)
+        print("")
+        sys.exit("ERROR")
 
     # create our maz shapefile
     try:
@@ -200,12 +218,12 @@ if __name__ == '__main__':
                                    "MULTI_PART", "DISSOLVE_LINES")
         print("Dissolved mazs into {0}.shp".format(MAZS_SHP))
 
-        # add maz mod 1000 to make it easier to add symbology
-        arcpy.AddField_management("{0}.shp".format(MAZS_SHP), "maz_mod_1k", "SHORT")
-        print("Added maz_mod_1k field")
-        arcpy.CalculateField_management("{0}.shp".format(MAZS_SHP), "maz_mod_1k",
-                                        "!maz! % 1000", "PYTHON3")
-        print("Calculated maz_mod_1k field")
+        # add maz mod 10 to make it easier to add symbology
+        arcpy.AddField_management("{0}.shp".format(MAZS_SHP), "maz_mod10", "SHORT")
+        print("Added maz_mod10 field")
+        arcpy.CalculateField_management("{0}.shp".format(MAZS_SHP), "maz_mod10",
+                                        "!maz! % 10", "PYTHON3")
+        print("Calculated maz_mod10 field")
 
         # create tazs shapefile
         arcpy.Dissolve_management (layer_name, TAZS_SHP, "{0}.taz".format(CROSSWALK_ROOT),
@@ -216,12 +234,12 @@ if __name__ == '__main__':
                                    "MULTI_PART", "DISSOLVE_LINES")
         print("Dissolved tazs into {0}.shp".format(TAZS_SHP))
 
-        # add maz mod 1000 to make it easier to add symbology
-        arcpy.AddField_management("{0}.shp".format(TAZS_SHP), "taz_mod_1k", "SHORT")
-        print("Added taz_mod_1k field")
-        arcpy.CalculateField_management("{0}.shp".format(TAZS_SHP), "taz_mod_1k",
-                                        "!taz! % 1000", "PYTHON3")
-        print("Calculated taz_mod_1k field")
+        # add taz mod 100 to make it easier to add symbology
+        arcpy.AddField_management("{0}.shp".format(TAZS_SHP), "taz_mod10", "SHORT")
+        print("Added taz_mod10 field")
+        arcpy.CalculateField_management("{0}.shp".format(TAZS_SHP), "taz_mod10",
+                                        "!taz! % 10", "PYTHON3")
+        print("Calculated taz_mod10 field")
 
     except Exception as err:
         print(err.args[0])
