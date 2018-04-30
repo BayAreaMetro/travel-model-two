@@ -13,7 +13,6 @@ The following verifcations are performed
   - Verifies that all blocks with zero land area are not assigned a maz/taz
 
 Creates a dissolved maz shapefile and a dissolved taz shapefile.
-These also have additional columns, maz_mod10 and taz_mod10, respectively, to make for easier quick symbology.
 
   Notes:
   - Block "06 075 017902 1009" (maz 10186, taz 592) is the little piece of Alameda island that the Census 2010
@@ -25,7 +24,6 @@ These also have additional columns, maz_mod10 and taz_mod10, respectively, to ma
     making a new maz, so that maz includes a second tract (mostly water)
 
   TODO: Remove the maz=0/taz=0 rows from the dissolved shapefiles
-  TODO: Remove dependency on dbfread?  Since we're using arcpy, can just use that to read the dbf
 
 """
 
@@ -34,10 +32,9 @@ These also have additional columns, maz_mod10 and taz_mod10, respectively, to ma
 
 import os, sys
 import pandas
-import dbfread
 import arcpy
 
-WORKSPACE          = "M:\\Data\\GIS layers\\TM2_maz_taz_v2.1"
+WORKSPACE          = "M:\\Data\\GIS layers\\TM2_maz_taz_v2.2"
 CROSSWALK_ROOT     = "blocks_mazs_tazs"
 CROSSWALK_DBF      = os.path.join(WORKSPACE, "{0}.dbf".format(CROSSWALK_ROOT))
 
@@ -45,48 +42,110 @@ CENSUS_BLOCK_DIR   = "M:\\Data\\Census\\Geography\\tl_2010_06_tabblock10"
 CENSUS_BLOCK_ROOT  = "tl_2010_06_tabblock10_9CountyBayArea"
 CENSUS_BLOCK_DBF   = os.path.join(CENSUS_BLOCK_DIR, "{0}.dbf".format(CENSUS_BLOCK_ROOT))
 CENSUS_BLOCK_SHP   = os.path.join(CENSUS_BLOCK_DIR, "{0}.shp".format(CENSUS_BLOCK_ROOT))
+CENSUS_BLOCK_COLS  = ["STATEFP10", "COUNTYFP10", "TRACTCE10", "BLOCKCE10", "GEOID10", "ALAND10", "AWATER10"]
 
 # output files
-MAZS_SHP           = "mazs_TM2_v2_1"
-TAZS_SHP           = "tazs_TM2_v2_1"
+MAZS_SHP           = "mazs_TM2_v2_2"
+TAZS_SHP           = "tazs_TM2_v2_2"
 
 
-class MyFieldParser(dbfread.FieldParser):
-    def parse(self, field, data):
-        try:
-            return dbfread.FieldParser.parse(self, field, data)
-        except ValueError:
-            -1
-            # return dbfread.InvalidValue(data)
+def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, maz_multiple_geo_df, bigger_geo):
+    """
+    The most simplistic fix is to move small blocks to a neighboring maz/taz
+    """
+    print("move_small_block_to_neighbor for {0}".format(bigger_geo))
+    for maz,row in maz_multiple_geo_df.iterrows():
+        print("maz {0:6d}".format(maz), end="")
+
+        # this one we'll leave; see Notes
+        if maz == 16495:
+            print("Special exception -- skipping")
+            continue
+
+        # if it spans more than 2, leave it for nwo
+        if row[bigger_geo] > 2:
+            print("Spans more than 2 {0} elements {1}".format(bigger_geo, row[bigger_geo]))
+            continue
+
+        print("")
+
+        # let's look at the blocks in this maz in the blocks_maz_df
+        this_maz_blocks_df = blocks_maz_df.loc[ blocks_maz_df.maz == maz]
+        print(this_maz_blocks_df)
+        this_maz_aland = this_maz_blocks_df.ALAND10.sum()
+        print(this_maz_aland)
+
+        # find the blocks in this maz
+        arcpy.SelectLayerByAttribute_management(blocks_maz_layer, "NEW_SELECTION", "\"maz\"={0}".format(maz))
+        print("Selected feature count: " + str(arcpy.GetCount_management(blocks_maz_layer)[0]))
+        # sys.exit()
+        return
+
 
 if __name__ == '__main__':
+
     pandas.options.display.width = 300
     pandas.options.display.float_format = '{:.2f}'.format
 
-    # read the crosswalk, with the GEODID10 as text since that's how census shapefiles interpret itf
-    crosswalk_dbf = dbfread.DBF(CROSSWALK_DBF, parserclass=MyFieldParser)
-    print("Read ",CROSSWALK_DBF)
-    crosswalk_df  = pandas.DataFrame(iter(crosswalk_dbf))
+    try:
+        arcpy.env.workspace = WORKSPACE
+        arcpy.env.qualifiedFieldNames = False  # ?
 
-    # the GEOID10 = state(2) + county(3) + tract(6) + block(4)
-    # block group is the firist digit of the block number
-    crosswalk_df["GEOID10_BG"]     = crosswalk_df["GEOID10"].str[:12]
-    crosswalk_df["GEOID10_TRACT"]  = crosswalk_df["GEOID10"].str[:11]
-    crosswalk_df["GEOID10_COUNTY"] = crosswalk_df["GEOID10"].str[:5]
+        ########################################################
+        # Create a feature layer from the 2010 block shapefile
+        blocks_maz_layer = "blocks_maz_lyr"
+        arcpy.MakeFeatureLayer_management(CENSUS_BLOCK_SHP, blocks_maz_layer)
+        block_count = arcpy.GetCount_management(blocks_maz_layer)
+        print("Created feature layer with {0} rows".format(block_count[0]))
 
-    print("Head: ")
-    print(crosswalk_df.head())
-    print("")
+        ########################################################
+        # Join the census blocks to the maz/taz crosswalk
+        arcpy.AddJoin_management(blocks_maz_layer, "GEOID10", CROSSWALK_DBF, "GEOID10")
+        block_join_count = arcpy.GetCount_management(blocks_maz_layer)
+        print("Joined to crosswalk dbf resulting in {0} rows".format(block_join_count[0]))
 
-    print("Number of unique GEOID10: %d" % crosswalk_df.GEOID10.nunique())
-    print("  Min: %s" % str(crosswalk_df.GEOID10.min()))
-    print("  Max: %s" % str(crosswalk_df.GEOID10.max()))
+        # assert we didn't lose rows in the join
+        assert(block_count[0]==block_join_count[0])
+
+        # verify
+        fields = arcpy.ListFields(blocks_maz_layer)
+        for field in fields:
+            print("  {0:20s} is a type of {1} with a length of {2}".format(field.name, field.type, field.length))
+
+        # create Dataframe
+        fields = ["{0}.{1}".format(CENSUS_BLOCK_ROOT,colname) for colname in CENSUS_BLOCK_COLS]
+        fields.append("{0}.maz".format(CROSSWALK_ROOT))
+        fields.append("{0}.taz".format(CROSSWALK_ROOT))
+        blocks_maz_df = pandas.DataFrame(arcpy.da.FeatureClassToNumPyArray(
+                        in_table=blocks_maz_layer,
+                        field_names=fields))
+        print("blocks_maz_df has length ", len(blocks_maz_df))
+
+        # shorten the fields
+        short_fields = CENSUS_BLOCK_COLS
+        short_fields.append("maz")
+        short_fields.append("taz")
+        blocks_maz_df.rename(dict(zip(fields, short_fields)), axis='columns',inplace=True)
+
+        # the GEOID10 = state(2) + county(3) + tract(6) + block(4)
+        # block group is the firist digit of the block number
+        blocks_maz_df["GEOID10_BG"]     = blocks_maz_df["GEOID10"].str[:12]
+        blocks_maz_df["GEOID10_TRACT"]  = blocks_maz_df["GEOID10"].str[:11]
+        blocks_maz_df["GEOID10_COUNTY"] = blocks_maz_df["GEOID10"].str[:5]
+        print(blocks_maz_df.head())
+
+    except Exception as err:
+        print(err.args[0])
+
+    print("Number of unique GEOID10: %d" % blocks_maz_df.GEOID10.nunique())
+    print("  Min: %s" % str(blocks_maz_df.GEOID10.min()))
+    print("  Max: %s" % str(blocks_maz_df.GEOID10.max()))
     print("")
 
     # maz 0 aren't real -- these are blocks without mazs
     # split the blocks up
-    blocks_nomaz_df = crosswalk_df.loc[crosswalk_df.maz == 0]
-    blocks_maz_df   = crosswalk_df.loc[crosswalk_df.maz != 0]
+    blocks_nomaz_df = blocks_maz_df.loc[blocks_maz_df.maz == 0]
+    blocks_maz_df   = blocks_maz_df.loc[blocks_maz_df.maz != 0]
 
     print("Number of unique maz: ", blocks_maz_df.maz.nunique())
     print("   Min: ", blocks_maz_df.maz.min())
@@ -106,7 +165,7 @@ if __name__ == '__main__':
     # verify one taz/BLOCK GROUP/TRACT/COUNTY per unique maz
     # error for taz/COUNTY
     # warn/log for BLOCK GROUP/TRACT
-    for bigger_geo in ["taz","GEOID10_BG","GEOID10_TRACT","GEOID10_COUNTY"]:
+    for bigger_geo in ["taz","GEOID10_COUNTY","GEOID10_TRACT","GEOID10_BG"]:
         maz_geo_df = blocks_maz_df[["maz",bigger_geo]].groupby(["maz"]).agg("nunique")
         maz_multiple_geo_df = maz_geo_df.loc[ maz_geo_df[bigger_geo] > 1]
         if len(maz_multiple_geo_df) == 0:
@@ -122,7 +181,10 @@ if __name__ == '__main__':
             print(error)
             print(maz_multiple_geo_df.head(30))
             print("")
-            if fatal: sys.exit(error)
+            if fatal:
+                sys.exit(error)
+            else:
+                move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, maz_multiple_geo_df, bigger_geo)
 
     # verify one TRACT/COUNTY per unique taz
     for bigger_geo in ["GEOID10_TRACT","GEOID10_COUNTY"]:
@@ -162,23 +224,7 @@ if __name__ == '__main__':
     # lets look at the zeros
     print("Number of blocks without maz/taz: ", blocks_nomaz_df.GEOID10.nunique())
 
-    # read the 2017 vintage Census 2010 Block shapefile dbf
-    blocks_dbf = dbfread.DBF(CENSUS_BLOCK_DBF, parserclass=MyFieldParser)
-    print("Read ",CENSUS_BLOCK_DBF)
-    # for i, record in enumerate(blocks_dbf):
-    #    for name, value in record.items():
-    #        if isinstance(value, dbfread.InvalidValue):
-    #            print('records[{}][{!r}] == {!r}'.format(i, name, value))
-    blocks_df  = pandas.DataFrame(iter(blocks_dbf))
-    print("Head:")
-    print(blocks_df.head())
-
-
-    blocks_nomaz_df = pandas.merge(left =blocks_nomaz_df,
-                                   right=blocks_df,
-                                   how  ="left",
-                                   on   ="GEOID10")
-
+    # blocks with land should have mazs/tazs
     block_nomaz_land_df = blocks_nomaz_df.loc[ blocks_nomaz_df.ALAND10 > 0 ]
     print("Number of blocks without maz/taz with land area: ", len(block_nomaz_land_df))
     if len(block_nomaz_land_df) > 0:
@@ -186,39 +232,22 @@ if __name__ == '__main__':
         print("")
         sys.exit("ERROR")
 
-
-    maz_noland_df = pandas.merge(left =blocks_maz_df,
-                                 right=blocks_df,
-                                 how  ="left",
-                                 on   ="GEOID10")
-    maz_noland_df = maz_noland_df.loc[ maz_noland_df.ALAND10 == 0]
-    print("Number of blocks with maz/taz without land area: ", len(maz_noland_df))
-    maz_noland_df[["GEOID10","ALAND10"]].to_csv("block_noland.csv", index=False)
-    if len(maz_noland_df) > 0:
-        print(maz_noland_df)
+    # blocks with no land should not have mazs/tazs
+    blocks_maz_noland_df = blocks_maz_df.loc[ blocks_maz_df.ALAND10 == 0]
+    print("Number of blocks with maz/taz without land area: ", len(blocks_maz_noland_df))
+    blocks_maz_noland_df[["GEOID10","ALAND10"]].to_csv("block_noland.csv", index=False)
+    if len(blocks_maz_noland_df) > 0:
+        print(blocks_maz_noland_df)
         print("")
         sys.exit("ERROR")
 
     # create our maz shapefile
     try:
-        arcpy.env.workspace = WORKSPACE
-        arcpy.env.qualifiedFieldNames = False  # ?
-
-        # create a feature layer
-        layer_name = "tl_2010_06_tabblock10_9CountyBayArea_lyr"
-        arcpy.MakeFeatureLayer_management(CENSUS_BLOCK_SHP, layer_name)
-        print("Created feature layer")
-        # join the feature layer to a table
-        arcpy.AddJoin_management(layer_name, "GEOID10", CROSSWALK_DBF, "GEOID10")
-        print("Joined to crosswalk dbf")
-
-        # verify
-        fields = arcpy.ListFields(layer_name)
-        for field in fields:
-            print("  {0} is a type of {1} with a length of {2}".format(field.name, field.type, field.length))
+        # clear selection
+        arcpy.SelectLayerByAttribute_management(blocks_maz_layer, "CLEAR_SELECTION")
 
         # create mazs shapefile
-        arcpy.Dissolve_management (layer_name, MAZS_SHP, "{0}.maz".format(CROSSWALK_ROOT),
+        arcpy.Dissolve_management (blocks_maz_layer, MAZS_SHP, "{0}.maz".format(CROSSWALK_ROOT),
                                    [["{0}.ALAND10".format(CENSUS_BLOCK_ROOT),  "SUM"  ],
                                     ["{0}.AWATER10".format(CENSUS_BLOCK_ROOT), "SUM"  ],
                                     ["{0}.GEOID10".format(CENSUS_BLOCK_ROOT),  "COUNT"],  # count block per maz
@@ -226,28 +255,14 @@ if __name__ == '__main__':
                                    "MULTI_PART", "DISSOLVE_LINES")
         print("Dissolved mazs into {0}.shp".format(MAZS_SHP))
 
-        # add maz mod 10 to make it easier to add symbology
-        arcpy.AddField_management("{0}.shp".format(MAZS_SHP), "maz_mod10", "SHORT")
-        print("Added maz_mod10 field")
-        arcpy.CalculateField_management("{0}.shp".format(MAZS_SHP), "maz_mod10",
-                                        "!maz! % 10", "PYTHON3")
-        print("Calculated maz_mod10 field")
-
         # create tazs shapefile
-        arcpy.Dissolve_management (layer_name, TAZS_SHP, "{0}.taz".format(CROSSWALK_ROOT),
+        arcpy.Dissolve_management (blocks_maz_layer, TAZS_SHP, "{0}.taz".format(CROSSWALK_ROOT),
                                    [["{0}.ALAND10".format(CENSUS_BLOCK_ROOT),  "SUM"  ],
                                     ["{0}.AWATER10".format(CENSUS_BLOCK_ROOT), "SUM"  ],
                                     ["{0}.GEOID10".format(CENSUS_BLOCK_ROOT),  "COUNT"],  # count block per taz
                                     ["{0}.maz".format(CROSSWALK_ROOT),         "COUNT"]], # count maz per taz
                                    "MULTI_PART", "DISSOLVE_LINES")
         print("Dissolved tazs into {0}.shp".format(TAZS_SHP))
-
-        # add taz mod 100 to make it easier to add symbology
-        arcpy.AddField_management("{0}.shp".format(TAZS_SHP), "taz_mod10", "SHORT")
-        print("Added taz_mod10 field")
-        arcpy.CalculateField_management("{0}.shp".format(TAZS_SHP), "taz_mod10",
-                                        "!taz! % 10", "PYTHON3")
-        print("Calculated taz_mod10 field")
 
     except Exception as err:
         print(err.args[0])
