@@ -24,6 +24,9 @@ IF ERRORLEVEL 1 goto error
 copy maz_taz_checker.log maz_taz_checker_v%VERSION_NEXT%.log
 copy blocks_mazs_tazs_updated.csv blocks_mazs_tazs_v%VERSION_NEXT%.csv
 
+echo Success!
+goto done
+
 :error
 echo Oh no, an error
 
