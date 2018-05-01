@@ -349,3 +349,5 @@ if __name__ == '__main__':
 
     except Exception as err:
         logging.error(err.args[0])
+
+    sys.exit(0)
