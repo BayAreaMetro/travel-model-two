@@ -6,11 +6,19 @@ Reads the definition of MAZs and TAZs in blocks_mazs_tazs.dbf (converted from cs
 
 The following verifcations are performed
   - Verifies that there are not multiple tazs or counties per maz
-  - Counts/lists first 30 mazs with multiple block groups, tracts
   - Verifies that there are not multiple counties per taz
-  - Counts/lists first 30 tazs with multiple tracts
   - Verifies that all blocks with nonzero land area are assigned a maz/taz
   - Verifies that all blocks with zero land area are not assigned a maz/taz
+
+Also, given the following issues:
+  - Counts/lists first 30 mazs with multiple block groups, tracts
+  - Counts/lists first 30 tazs with multiple tracts
+The script attempts to fix them with move_small_block_to_neighbor()
+  - For each small (<25 percent land area) blocks in the maz
+  - Looks at neighboring blocks in the same block group
+  - If there are any with a maz, picks the one with the most border length in common
+  - Move the original block to inherit the maz/taz of this neighbor
+This draft update is saved into blocks_mazs_tazs_updated.csv
 
 Creates a dissolved maz shapefile and a dissolved taz shapefile.
 
@@ -91,11 +99,13 @@ def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbo
 
                 # find the neighboring blocks
                 this_block_id = block_row["GEOID10"]
+                this_block_maz = block_row["maz"]
                 # look at neighbors for candidates
                 this_block_neighbors = blocks_neighbor_df.loc[blocks_neighbor_df.src_GEOID1 == this_block_id].copy()
-                # only neighbors in the same block group with maz/taz set
+                # only neighbors in the same block group with maz/taz set and maz differs
                 this_block_neighbors = this_block_neighbors.loc[ (this_block_neighbors.nbr_GEIOID10_BG == block_row["GEOID10_BG"]) &
-                                                                 (this_block_neighbors.maz != 0)]
+                                                                 (this_block_neighbors.maz != 0) &
+                                                                 (this_block_neighbors.maz != this_block_maz)]
 
                 if len(this_block_neighbors) == 0:
                     logging.debug("  No neighbors in same block group with maz/taz")
