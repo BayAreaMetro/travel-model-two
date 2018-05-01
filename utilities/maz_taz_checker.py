@@ -93,11 +93,12 @@ def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbo
                 this_block_id = block_row["GEOID10"]
                 # look at neighbors for candidates
                 this_block_neighbors = blocks_neighbor_df.loc[blocks_neighbor_df.src_GEOID1 == this_block_id].copy()
-                # only neighbors in the same block group
-                this_block_neighbors = this_block_neighbors.loc[ this_block_neighbors.nbr_GEIOID10_BG == block_row["GEOID10_BG"]]
+                # only neighbors in the same block group with maz/taz set
+                this_block_neighbors = this_block_neighbors.loc[ (this_block_neighbors.nbr_GEIOID10_BG == block_row["GEOID10_BG"]) &
+                                                                 (this_block_neighbors.maz != 0)]
 
                 if len(this_block_neighbors) == 0:
-                    logging.debug("  No neighbors in same block group")
+                    logging.debug("  No neighbors in same block group with maz/taz")
                     continue
 
                 # pick the neighboring block with the most length adjacent
@@ -192,11 +193,17 @@ if __name__ == '__main__':
                         in_table=CENSUS_BLOCK_NEIGHBOR_DBF,
                         field_names=["src_GEOID1","nbr_GEOID1","LENGTH","NODE_COUNT"]))
         blocks_neighbor_df["nbr_GEIOID10_BG"] = blocks_neighbor_df["nbr_GEOID1"].str[:12]
+        # get the maz/taz for these neighbors
+        blocks_neighbor_df = pandas.merge(left    =blocks_neighbor_df,
+                                          right   =blocks_maz_df[["GEOID10","maz","taz"]],
+                                          how     ="left",
+                                          left_on ="nbr_GEOID1",
+                                          right_on="GEOID10")
         logging.info("blocks_neighbor_df has length {0}".format(len(blocks_neighbor_df)))
         logging.info("\n{0}".format(blocks_neighbor_df.head()))
 
     except Exception as err:
-        logging.info(err.args[0])
+        logging.error(err.args[0])
 
     logging.info("Number of unique GEOID10: {0}".format(blocks_maz_df.GEOID10.nunique()))
     logging.info("  Min: {0}".format(blocks_maz_df.GEOID10.min()))
