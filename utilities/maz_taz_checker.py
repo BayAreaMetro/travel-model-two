@@ -20,8 +20,6 @@ The script attempts to fix them with move_small_block_to_neighbor()
   - Move the original block to inherit the maz/taz of this neighbor
 This draft update is saved into blocks_mazs_tazs_updated.csv
 
-Creates a dissolved maz shapefile and a dissolved taz shapefile.
-
   Notes:
   - Block "06 075 017902 1009" (maz 10186, taz 592) is the little piece of Alameda island that the Census 2010
     calls San Francisco.  Left in SF as its own maz.
@@ -31,6 +29,12 @@ Creates a dissolved maz shapefile and a dissolved taz shapefile.
   - Blocks "06 075 017902 10[05,80]" (maz 16495, taz 312) is a tiny sliver that's barely land so not worth
     making a new maz, so that maz includes a second tract (mostly water)
 
+  - Blocks "06 041 104300 10[17,18,19]" (maz 810745, taz 800095) are also tiny slivers of a mostly water tract that are
+    not worth a new maz
+
+  - Blocks "06 041 122000 100[0,1,2]" (maz 813480, taz 800203) are a tract that is inside another tract so keeping
+    as is so as not to create a donut hole maz
+
   TODO: Remove the maz=0/taz=0 rows from the dissolved shapefiles
 
 """
@@ -38,7 +42,7 @@ Creates a dissolved maz shapefile and a dissolved taz shapefile.
 # use python in c:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3
 # in order to import arcpy
 
-import csv, logging, os, sys
+import argparse, csv, logging, os, sys
 import pandas
 import arcpy
 
@@ -69,8 +73,8 @@ def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbo
     for maz,row in maz_multiple_geo_df.iterrows():
         logging.info("Attempting to fix maz {0:6d}  ".format(maz))
 
-        # this one we'll leave; see Notes
-        if maz == 16495:
+        # these we'll leave; see Notes
+        if maz in [16495, 810745, 813480]:
             logging.info("Special exception -- skipping")
             continue
 
@@ -78,6 +82,13 @@ def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbo
         if row[bigger_geo] > 3:
             logging.info("Spans more than 2 {0} elements {1}".format(bigger_geo, row[bigger_geo]))
             continue
+
+        # if there's three, 25% or less is ok to move
+        # it two, 32% or less
+        if row[bigger_geo] == 3:
+            pct_threshold = 0.25
+        else:
+            pct_threshold = 0.32
 
         # let's look at the blocks in this maz in the blocks_maz_df
         this_maz_blocks_df = blocks_maz_df.loc[ blocks_maz_df.maz == maz]
@@ -91,8 +102,8 @@ def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbo
             logging.debug("group {0} has {1} rows and {2:.1f} percent of land".format(name, len(group), 100.0*land_pct))
             logging.debug("\n{0}".format(group))
 
-            # 25% or less is ok to move
-            if land_pct > 0.25: continue
+            # is this land area too much to move?
+            if land_pct > pct_threshold: continue
 
             # these blocks are candidates for moving -- let's look at where to move to
             for block_index,block_row in group.iterrows():
@@ -128,6 +139,10 @@ def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbo
 
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description=USAGE, formatter_class=argparse.RawDescriptionHelpFormatter,)
+    parser.add_argument("--dissolve", dest="dissolve", action="store_true", help="Creates a dissolved maz shapefile and a dissolved taz shapefile.")
+    args = parser.parse_args()
 
     pandas.options.display.width = 300
     pandas.options.display.float_format = '{:.2f}'.format
@@ -324,7 +339,10 @@ if __name__ == '__main__':
         logging.fatal("")
         sys.exit("ERROR")
 
-    # create our maz shapefile
+    # if we're not instructed to do this, we're done
+    if args.dissolve == False: sys.exit(0)
+
+    # create our maz and taz shapefile
     try:
         # clear selection
         arcpy.SelectLayerByAttribute_management(blocks_maz_layer, "CLEAR_SELECTION")
