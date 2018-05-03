@@ -8,7 +8,7 @@ set WORKSPACE=M:\Data\GIS layers\TM2_maz_taz_v2.2
 set TM2_DIR=C:\Users\lzorn\Documents\travel-model-two
 
 :: loop
-for /L %%V in (1,1,4) do (
+for /L %%V in (1,1,5) do (
 
   set /a NEXTV=%%V+1
   echo 2.1.%%V 2.1.!NEXTV!
@@ -25,8 +25,8 @@ for /L %%V in (1,1,4) do (
   del mazs_TM2_v2_2.*
   del tazs_TM2_v2_2.*
 
-  if not %%V==4 python "%TM2_DIR%\utilities\maz_taz_checker.py"
-  if %%V==4 python "%TM2_DIR%\utilities\maz_taz_checker.py" --dissolve
+  if not %%V==5 python "%TM2_DIR%\utilities\maz_taz_checker.py"
+  if %%V==5 python "%TM2_DIR%\utilities\maz_taz_checker.py" --dissolve
   IF ERRORLEVEL 1 goto error
 
   copy maz_taz_checker.log maz_taz_checker_v2.1.!NEXTV!.log

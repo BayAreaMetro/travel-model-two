@@ -70,16 +70,16 @@ MAZS_SHP           = "mazs_TM2_v2_2"
 TAZS_SHP           = "tazs_TM2_v2_2"
 
 
-def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbor_df,
+def move_small_block_to_neighbor(blocks_maz_df, blocks_neighbor_df,
                                  maz_multiple_geo_df, bigger_geo, crosswalk_out_df):
     """
-    The most simplistic fix is to move small blocks to a neighboring maz/taz.
+    The simplest fix is to move small blocks to a neighboring maz/taz.
     Returns number of blocks moved.
     """
     blocks_moved = 0
     logging.info("move_small_block_to_neighbor for {0}".format(bigger_geo))
     for maz,row in maz_multiple_geo_df.iterrows():
-        logging.info("Attempting to fix maz {0:6d}  ".format(maz))
+        logging.info("Attempting to fix maz {0:6d}".format(maz))
 
         # these we'll leave; see Notes
         if maz in EXEMPT_MAZ:
@@ -88,7 +88,7 @@ def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbo
 
         # if it spans more than 3, leave it for now
         if row[bigger_geo] > 3:
-            logging.info("Spans more than 2 {0} elements {1}".format(bigger_geo, row[bigger_geo]))
+            logging.info("Spans more than 3 {0} elements {1} -- skipping".format(bigger_geo, row[bigger_geo]))
             continue
 
         # if there's three, 25% or less is ok to move
@@ -146,6 +146,72 @@ def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbo
 
     logging.info("====> moved {0} blocks to neighbor".format(blocks_moved))
     return blocks_moved
+
+def find_next_unused_taz_id(crosswalk_out_df, taz):
+    """
+    Find the next unused taz id after taz
+    """
+    # this is a little wasteful but ok
+    taz_ids = crosswalk_out_df["taz"].drop_duplicates() # series
+    # also I'm assuming these are easy to find
+    unused_taz_id = taz + 1
+    while True:
+        if unused_taz_id in taz_ids.values:
+            unused_taz_id += 1
+        else:
+            logging.debug("find_next_unused_taz_id for {0:6d} returning {1:6d}".format(taz, unused_taz_id))
+            return unused_taz_id
+    return -1
+
+def split_taz_for_tract(blocks_maz_df, taz_multiple_geo_df, crosswalk_out_df):
+    """
+    The simplest fix for TAZs that span tract boundaries is to split the TAZ.
+    Since there aren't that many, let's do that so long as the tract portions are non-trivial (>20%)
+    """
+    tazs_split = 0
+    logging.info("splitting taz for tract")
+    for taz,row in taz_multiple_geo_df.iterrows():
+        logging.info("Attempting to fix taz {0:6d}".format(taz))
+
+        # if it spans more than 2, leave it for now
+        if row[bigger_geo] > 2:
+            logging.info("Spans more than 2 {0} elements {1} -- skipping".format(bigger_geo, row[bigger_geo]))
+            continue
+
+        # let's look at the blocks in this taz in the blocks_maz_df
+        this_taz_blocks_df = blocks_maz_df.loc[ blocks_maz_df.taz == taz]
+        this_taz_aland = this_taz_blocks_df.ALAND10.sum()
+
+        # check if the chunks are all pretty big
+        this_taz_grouped = this_taz_blocks_df.groupby(bigger_geo)
+        groups_aland = this_taz_grouped.agg({"ALAND10":"sum"})
+        groups_aland["ALAND10_pct"] = groups_aland["ALAND10"]/this_taz_aland
+        logging.debug("\n{0}".format(groups_aland))
+
+        # if too small, punt
+        if groups_aland["ALAND10_pct"].min() < 0.20:
+            logging.debug("Tract/taz portion too small -- skipping")
+            continue
+
+        first = True
+        for name,group in this_taz_grouped:
+            land_pct = group.ALAND10.sum()/this_taz_aland
+            logging.debug("\n{0}".format(group))
+            # don't touch the first tract
+            if first:
+                logging.info("  group {0} has {1:3d} rows and {2:.1f} percent of land".format(name, len(group), 100.0*land_pct))
+                first = False
+                continue
+
+            # move the mazs in this tract to a new taz
+            new_taz_id = find_next_unused_taz_id(crosswalk_out_df, taz)
+
+            # convert these mazs into the new taz
+            crosswalk_out_df.loc[ (crosswalk_out_df.taz==taz)&(crosswalk_out_df[bigger_geo]==name), "taz"] = new_taz_id
+            logging.info("  group {0} has {1:3d} rows and {2:.1f} percent of land => new taz {3:6d}".format(name, len(group), 100.0*land_pct, new_taz_id))
+            tazs_split += 1
+
+    return tazs_split
 
 
 if __name__ == '__main__':
@@ -219,7 +285,7 @@ if __name__ == '__main__':
         logging.info("\n{0}".format(blocks_maz_df.head()))
 
         # this is the one we'll modify and output
-        crosswalk_out_df = blocks_maz_df[["GEOID10","maz","taz"]]
+        crosswalk_out_df = blocks_maz_df[["GEOID10","maz","taz","GEOID10_TRACT"]]
 
         #####################################################
         # Create a table from the 2010 block neighbor mapping
@@ -277,10 +343,10 @@ if __name__ == '__main__':
             continue
 
         if bigger_geo in ["GEOID10_BG","GEOID10_TRACT"]:
-            # warn
+            # warn and try to fix
             logging.warning("Multiple {0} for a single maz: {1}".format(bigger_geo, len(maz_multiple_geo_df)))
             logging.warning("\n{0}".format(maz_multiple_geo_df.head(30)))
-            blocks_moved += move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbor_df,
+            blocks_moved += move_small_block_to_neighbor(blocks_maz_df, blocks_neighbor_df,
                                                          maz_multiple_geo_df, bigger_geo, crosswalk_out_df)
         else:
             # fatal
@@ -288,31 +354,33 @@ if __name__ == '__main__':
             logging.fatal("\n{0}".format(maz_multiple_geo_df.head(30)))
             sys.exit(2)
 
-
-    # save updated draft crosswalk to look at if blocks have been moved
-    if blocks_moved > 0:
-        crosswalk_out_df.sort_values(by="GEOID10", ascending=True, inplace=True)
-        crosswalk_out_df.to_csv(CROSSWALK_OUT, index=False, quoting=csv.QUOTE_NONNUMERIC)
-        logging.info("Wrote updated draft crosswalk to {0}".format(CROSSWALK_OUT))
-
     # verify one TRACT/COUNTY per unique taz
     for bigger_geo in ["GEOID10_TRACT","GEOID10_COUNTY"]:
         taz_geo_df = blocks_maz_df[["taz",bigger_geo]].groupby(["taz"]).agg("nunique")
         taz_multiple_geo_df = taz_geo_df.loc[ (taz_geo_df[bigger_geo] > 1) & (taz_geo_df.index.isin(EXEMPT_TAZ)==False) ]
         if len(taz_multiple_geo_df) == 0:
             logging.info("Verified one {0} per taz".format(bigger_geo))
-        else:
-            if bigger_geo in ["GEOID10_COUNTY"]:
-                fatal = True
-            else:
-                fatal = False
-            error = "{0}: Multiple {1} for a single taz: {2}".format(
-                    "ERROR" if fatal else "WARNING", bigger_geo, len(taz_multiple_geo_df))
-            logging.warning(error)
-            logging.warning("\n{0}".format(taz_multiple_geo_df))
-            logging.warning("")
-            if fatal: sys.exit(error)
+            continue
 
+        if bigger_geo in ["GEOID10_TRACT"]:
+            # warn
+            logging.warning("Multiple {0} for a single taz: {1}".format(bigger_geo, len(taz_multiple_geo_df)))
+            logging.warning("\n{0}".format(taz_multiple_geo_df.head(30)))
+            # try to fix if mazs are all stable (so blocks_moved == 0) -- that should be fixed first
+            if blocks_moved == 0:
+                tazs_split = split_taz_for_tract(blocks_maz_df, taz_multiple_geo_df, crosswalk_out_df)
+        else:
+            # fatal
+            logging.fatal("Multiple {0} for a single taz: {1}".format(bigger_geo, len(taz_multiple_geo_df)))
+            logging.fatal("\n{0}".format(taz_multiple_geo_df.head(30)))
+            sys.exit()
+
+    # save updated draft crosswalk to look at if blocks have been moved or tazs have been split
+    if (blocks_moved > 0) or (tazs_split > 0):
+        crosswalk_out_df = crosswalk_out_df[["GEOID10","maz","taz"]]
+        crosswalk_out_df.sort_values(by="GEOID10", ascending=True, inplace=True)
+        crosswalk_out_df.to_csv(CROSSWALK_OUT, index=False, quoting=csv.QUOTE_NONNUMERIC)
+        logging.info("Wrote updated draft crosswalk to {0}".format(CROSSWALK_OUT))
 
     # count blocks per maz
     count_df = blocks_maz_df[["GEOID10","maz"]].groupby(["maz"]).agg("nunique")
