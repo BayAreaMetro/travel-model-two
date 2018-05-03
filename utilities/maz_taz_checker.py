@@ -173,9 +173,9 @@ def split_taz_for_tract(blocks_maz_df, taz_multiple_geo_df, crosswalk_out_df):
     for taz,row in taz_multiple_geo_df.iterrows():
         logging.info("Attempting to fix taz {0:6d}".format(taz))
 
-        # if it spans more than 2, leave it for now
-        if row[bigger_geo] > 2:
-            logging.info("Spans more than 2 {0} elements {1} -- skipping".format(bigger_geo, row[bigger_geo]))
+        # if it spans more than 3, leave it for now
+        if row[bigger_geo] > 3:
+            logging.info("Spans more than 3 {0} elements {1} -- skipping".format(bigger_geo, row[bigger_geo]))
             continue
 
         # let's look at the blocks in this taz in the blocks_maz_df
