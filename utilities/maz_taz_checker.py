@@ -24,13 +24,17 @@ This draft update is saved into blocks_mazs_tazs_updated.csv
   - Block "06 075 017902 1009" (maz 10186, taz 592) is the little piece of Alameda island that the Census 2010
     calls San Francisco.  Left in SF as its own maz.
 
-  - Blocks "06 075 980401 100[1,2,3]" (maz 16084, taz 287) are the Farallon Islands.  It's a standalone maz.
+  - Blocks "06 075 980401 100[1,2,3]" (maz 16084, taz 287) are the Farallon Islands.  It's a standalone maz but the
+    taz spans tracts because it's not worth it's own taz.
+
+  - Block "06 081 608002 2004" (maz 112279, taz 100178) spans a block group boundary but not doing so would split up
+    and island with two blocks.
 
   - Blocks "06 075 017902 10[05,80]" (maz 16495, taz 312) is a tiny sliver that's barely land so not worth
     making a new maz, so that maz includes a second tract (mostly water)
 
-  - Blocks "06 041 104300 10[17,18,19]" (maz 810745, taz 800095) are also tiny slivers of a mostly water tract that are
-    not worth a new maz
+  - Blocks "06 041 104300 10[17,18,19]" (maz 810745, taz 800095) spans a block group/tract boundary but the're a
+    tiny bit on the water's edge and moving them would separate them from the rest of the maz/taz
 
   - Blocks "06 041 122000 100[0,1,2]" (maz 813480, taz 800203) are a tract that is inside another tract so keeping
     as is so as not to create a donut hole maz
@@ -38,6 +42,8 @@ This draft update is saved into blocks_mazs_tazs_updated.csv
   TODO: Remove the maz=0/taz=0 rows from the dissolved shapefiles
 
 """
+EXEMPT_MAZ = [16495, 112279, 810745, 813480]
+EXEMPT_TAZ = [287]
 
 # use python in c:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3
 # in order to import arcpy
@@ -67,14 +73,16 @@ TAZS_SHP           = "tazs_TM2_v2_2"
 def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbor_df,
                                  maz_multiple_geo_df, bigger_geo, crosswalk_out_df):
     """
-    The most simplistic fix is to move small blocks to a neighboring maz/taz
+    The most simplistic fix is to move small blocks to a neighboring maz/taz.
+    Returns number of blocks moved.
     """
+    blocks_moved = 0
     logging.info("move_small_block_to_neighbor for {0}".format(bigger_geo))
     for maz,row in maz_multiple_geo_df.iterrows():
         logging.info("Attempting to fix maz {0:6d}  ".format(maz))
 
         # these we'll leave; see Notes
-        if maz in [16495, 810745, 813480]:
+        if maz in EXEMPT_MAZ:
             logging.info("Special exception -- skipping")
             continue
 
@@ -132,10 +140,12 @@ def move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbo
                 match_row = crosswalk_out_df.loc[ crosswalk_out_df.GEOID10 == this_neighbor_id]
                 crosswalk_out_df.loc[ crosswalk_out_df.GEOID10 == this_block_id, "maz"] = match_row["maz"].iloc[0]
                 crosswalk_out_df.loc[ crosswalk_out_df.GEOID10 == this_block_id, "taz"] = match_row["taz"].iloc[0]
+                blocks_moved += 1
                 logging.debug("\n{0}".format(crosswalk_out_df.loc[ (crosswalk_out_df.GEOID10 == this_block_id)|
                                                                    (crosswalk_out_df.GEOID10 == this_neighbor_id) ]))
 
-        # return
+    logging.info("====> moved {0} blocks to neighbor".format(blocks_moved))
+    return blocks_moved
 
 
 if __name__ == '__main__':
@@ -258,36 +268,37 @@ if __name__ == '__main__':
     # verify one taz/BLOCK GROUP/TRACT/COUNTY per unique maz
     # error for taz/COUNTY
     # warn/log for BLOCK GROUP/TRACT
+    blocks_moved = 0
     for bigger_geo in ["taz","GEOID10_COUNTY","GEOID10_TRACT","GEOID10_BG"]:
         maz_geo_df = blocks_maz_df[["maz",bigger_geo]].groupby(["maz"]).agg("nunique")
-        maz_multiple_geo_df = maz_geo_df.loc[ maz_geo_df[bigger_geo] > 1]
+        maz_multiple_geo_df = maz_geo_df.loc[ (maz_geo_df[bigger_geo] > 1) & ( maz_geo_df.index.isin(EXEMPT_MAZ)==False) ]
         if len(maz_multiple_geo_df) == 0:
             logging.info("Verified one {0} per maz".format(bigger_geo))
-        else:
-            if bigger_geo in ["GEOID10_BG","GEOID10_TRACT"]:
-                fatal = False
-            else:
-                fatal = True
+            continue
 
-            error = "{0}: Multiple {1} for a single maz: {2}".format(
-                    "ERROR" if fatal else "WARNING", bigger_geo, len(maz_multiple_geo_df))
-            logging.warning(error)
+        if bigger_geo in ["GEOID10_BG","GEOID10_TRACT"]:
+            # warn
+            logging.warning("Multiple {0} for a single maz: {1}".format(bigger_geo, len(maz_multiple_geo_df)))
             logging.warning("\n{0}".format(maz_multiple_geo_df.head(30)))
-            logging.warning("")
-            if fatal:
-                sys.exit(error)
-            else:
-                move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbor_df,
-                                             maz_multiple_geo_df, bigger_geo, crosswalk_out_df)
+            blocks_moved += move_small_block_to_neighbor(blocks_maz_layer, blocks_maz_df, blocks_neighbor_df,
+                                                         maz_multiple_geo_df, bigger_geo, crosswalk_out_df)
+        else:
+            # fatal
+            logging.fatal("Multiple {0} for a single maz: {1}".format(bigger_geo, len(maz_multiple_geo_df)))
+            logging.fatal("\n{0}".format(maz_multiple_geo_df.head(30)))
+            sys.exit(2)
 
-    # save updated draft crosswalk to look at
-    crosswalk_out_df.sort_values(by="GEOID10", ascending=True, inplace=True)
-    crosswalk_out_df.to_csv(CROSSWALK_OUT, index=False, quoting=csv.QUOTE_NONNUMERIC)
-    logging.info("Wrote updated draft crosswalk to {0}".format(CROSSWALK_OUT))
+
+    # save updated draft crosswalk to look at if blocks have been moved
+    if blocks_moved > 0:
+        crosswalk_out_df.sort_values(by="GEOID10", ascending=True, inplace=True)
+        crosswalk_out_df.to_csv(CROSSWALK_OUT, index=False, quoting=csv.QUOTE_NONNUMERIC)
+        logging.info("Wrote updated draft crosswalk to {0}".format(CROSSWALK_OUT))
+
     # verify one TRACT/COUNTY per unique taz
     for bigger_geo in ["GEOID10_TRACT","GEOID10_COUNTY"]:
         taz_geo_df = blocks_maz_df[["taz",bigger_geo]].groupby(["taz"]).agg("nunique")
-        taz_multiple_geo_df = taz_geo_df.loc[ taz_geo_df[bigger_geo] > 1]
+        taz_multiple_geo_df = taz_geo_df.loc[ (taz_geo_df[bigger_geo] > 1) & (taz_geo_df.index.isin(EXEMPT_TAZ)==False) ]
         if len(taz_multiple_geo_df) == 0:
             logging.info("Verified one {0} per taz".format(bigger_geo))
         else:
@@ -342,6 +353,7 @@ if __name__ == '__main__':
     # if we're not instructed to do this, we're done
     if args.dissolve == False: sys.exit(0)
 
+    logging.info("Dissolving blocks into MAZs and TAZs")
     # create our maz and taz shapefile
     try:
         # clear selection
@@ -355,6 +367,9 @@ if __name__ == '__main__':
                                     ["{0}.taz".format(CROSSWALK_ROOT),         "FIRST"]], # verified taz are unique for maz above
                                    "MULTI_PART", "DISSOLVE_LINES")
         logging.info("Dissolved mazs into {0}.shp".format(MAZS_SHP))
+
+        # delete maz=0, that's not a real maz
+
 
         # create tazs shapefile
         arcpy.Dissolve_management (blocks_maz_layer, TAZS_SHP, "{0}.taz".format(CROSSWALK_ROOT),
