@@ -10,14 +10,21 @@ The following verifcations are performed
   - Verifies that all blocks with nonzero land area are assigned a maz/taz
   - Verifies that all blocks with zero land area are not assigned a maz/taz
 
-Also, given the following issues:
+Also, given the following issue:
   - Counts/lists first 30 mazs with multiple block groups, tracts
-  - Counts/lists first 30 tazs with multiple tracts
 The script attempts to fix them with move_small_block_to_neighbor()
   - For each small (<25 percent land area) blocks in the maz
   - Looks at neighboring blocks in the same block group
   - If there are any with a maz, picks the one with the most border length in common
   - Move the original block to inherit the maz/taz of this neighbor
+
+If the mazs are aok, then given the following issue:
+  - Counts/lists first 30 tazs with multiple tracts
+The script attempts to fix them with split_taz_for_tract()
+  - For each taz that spans multiple tracts, if the smallest portion in a tract is
+    non-trivial (>10 percent of land), then split the taz on the tract boundary,
+    creating new tazs.
+
 This draft update is saved into blocks_mazs_tazs_updated.csv
 
   Notes:
@@ -39,11 +46,14 @@ This draft update is saved into blocks_mazs_tazs_updated.csv
   - Blocks "06 041 122000 100[0,1,2]" (maz 813480, taz 800203) are a tract that is inside another tract so keeping
     as is so as not to create a donut hole maz
 
-  TODO: Remove the maz=0/taz=0 rows from the dissolved shapefiles
+  - Block "06 013 301000 3000" (maz 410304, taz 400507) is a block that Census 2010 claims has no land area ("Webb Tract")
+    but appears to be a delta island so it's an exception to the zero-land/non-zero water blocks having a maz/taz
 
 """
-EXEMPT_MAZ = [16495, 112279, 810745, 813480]
-EXEMPT_TAZ = [287]
+EXEMPT_MAZ = [     16495, 112279, 810745, 813480]
+EXEMPT_TAZ = [287,                800095, 800203]
+
+EXEMPT_NOLAND_BLOCK = ["060133010003000"]
 
 # use python in c:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3
 # in order to import arcpy
@@ -166,7 +176,7 @@ def find_next_unused_taz_id(crosswalk_out_df, taz):
 def split_taz_for_tract(blocks_maz_df, taz_multiple_geo_df, crosswalk_out_df):
     """
     The simplest fix for TAZs that span tract boundaries is to split the TAZ.
-    Since there aren't that many, let's do that so long as the tract portions are non-trivial (>20%)
+    Since there aren't that many, let's do that so long as the tract portions are non-trivial (>10%)
     """
     tazs_split = 0
     logging.info("splitting taz for tract")
@@ -189,14 +199,15 @@ def split_taz_for_tract(blocks_maz_df, taz_multiple_geo_df, crosswalk_out_df):
         logging.debug("\n{0}".format(groups_aland))
 
         # if too small, punt
-        if groups_aland["ALAND10_pct"].min() < 0.20:
-            logging.debug("Tract/taz portion too small -- skipping")
+        if groups_aland["ALAND10_pct"].min() < 0.10:
+            logging.info("Tract/taz portion too small -- skipping")
             continue
 
         first = True
         for name,group in this_taz_grouped:
             land_pct = group.ALAND10.sum()/this_taz_aland
-            logging.debug("\n{0}".format(group))
+            # logging.debug("\n{0}".format(group))
+
             # don't touch the first tract
             if first:
                 logging.info("  group {0} has {1:3d} rows and {2:.1f} percent of land".format(name, len(group), 100.0*land_pct))
@@ -213,6 +224,64 @@ def split_taz_for_tract(blocks_maz_df, taz_multiple_geo_df, crosswalk_out_df):
 
     return tazs_split
 
+def dissolve_into_shapefile(blocks_maz_layer, maz_or_taz):
+    """
+    Dissolve the blocks into final MAZ/TAZ shapefile
+    """
+    shapefile = MAZS_SHP if maz_or_taz=="maz" else TAZS_SHP
+
+    # don't care if this fails, just want to head off error since arcpy gets mad if we try to overwrite
+    try:
+        arcpy.Delete_management("{0}_temp.shp".format(shapefile))
+    except Exception as err:
+        logging.debug(err.args[0])
+
+    # don't care if this fails, just want to head off error since arcpy gets mad if we try to overwrite
+    try:
+        arcpy.Delete_management("{0}.shp".format(shapefile))
+    except Exception as err:
+        logging.debug(err.args[0])
+
+    try:
+        # create mazs shapefile -- save as temp since we'll do a bit more to it
+        arcpy.Dissolve_management (blocks_maz_layer, "{0}_temp".format(shapefile), "{0}.maz".format(CROSSWALK_ROOT),
+                                   [["{0}.ALAND10".format(CENSUS_BLOCK_ROOT),  "SUM"  ],
+                                    ["{0}.AWATER10".format(CENSUS_BLOCK_ROOT), "SUM"  ],
+                                    ["{0}.GEOID10".format(CENSUS_BLOCK_ROOT),  "COUNT"],  # count block per maz
+                                    ["{0}.taz".format(CROSSWALK_ROOT),         "FIRST"]], # verified taz are unique for maz above
+                                   "MULTI_PART", "DISSOLVE_LINES")
+        logging.info("Dissolved {0}s into {1}_temp.shp".format(maz_or_taz, shapefile))
+
+        # calculate partcount
+        my_layer = "my_{0}_layer".format(maz_or_taz)
+        arcpy.MakeFeatureLayer_management("{0}_temp.shp".format(shapefile), my_layer)
+        arcpy.AddField_management(my_layer, "partcount", "SHORT", 6)
+        arcpy.CalculateField_management(my_layer, "partcount", "!Shape.partCount!", "PYTHON3")
+        logging.info("Calculated part count for {0}s".format(maz_or_taz))
+
+        # add perimeter.  In meters because ALAND10 is square meters
+        arcpy.AddField_management(my_layer, "PERIM_GEO", "DOUBLE", 10, 0)
+        arcpy.AddGeometryAttributes_management(my_layer, "PERIMETER_LENGTH_GEODESIC", "METERS")
+        logging.info("Calulated perimeter length for {0}s".format(maz_or_taz))
+
+        # add perimeter squared over area
+        arcpy.AddField_management(my_layer, "psq_overa", "DOUBLE", 10, 0)
+        arcpy.CalculateField_management(my_layer, "psq_overa", "!PERIM_GEO!*!PERIM_GEO!/!ALAND10!", "PYTHON3")
+        logging.info("Calculated perim*perim/area for {0}s".format(maz_or_taz))
+
+        # delete maz/taz=0, that's not a real maz/taz
+        arcpy.SelectLayerByAttribute_management(my_layer, "NEW_SELECTION", "{0} > 0".format(maz_or_taz))
+        logging.info("Selecting out water for {0}s".format(maz_or_taz))
+
+        # Write the selected features to a new feature class
+        arcpy.CopyFeatures_management(my_layer, shapefile)
+        logging.info("Saving final {0}s into {1}.shp".format(maz_or_taz, shapefile))
+
+        # delete the temp
+        arcpy.Delete_management("{0}_temp.shp".format(shapefile))
+
+    except Exception as err:
+        logging.error(err.args[0])
 
 if __name__ == '__main__':
 
@@ -355,6 +424,7 @@ if __name__ == '__main__':
             sys.exit(2)
 
     # verify one TRACT/COUNTY per unique taz
+    tazs_split = 0
     for bigger_geo in ["GEOID10_TRACT","GEOID10_COUNTY"]:
         taz_geo_df = blocks_maz_df[["taz",bigger_geo]].groupby(["taz"]).agg("nunique")
         taz_multiple_geo_df = taz_geo_df.loc[ (taz_geo_df[bigger_geo] > 1) & (taz_geo_df.index.isin(EXEMPT_TAZ)==False) ]
@@ -410,7 +480,7 @@ if __name__ == '__main__':
         sys.exit("ERROR")
 
     # blocks with no land should not have mazs/tazs
-    blocks_maz_noland_df = blocks_maz_df.loc[ blocks_maz_df.ALAND10 == 0]
+    blocks_maz_noland_df = blocks_maz_df.loc[ (blocks_maz_df.ALAND10 == 0)&(blocks_maz_df.GEOID10.isin(EXEMPT_NOLAND_BLOCK)==False) ]
     logging.info("Number of blocks with maz/taz without land area: {0}".format(len(blocks_maz_noland_df)))
     blocks_maz_noland_df[["GEOID10","ALAND10"]].to_csv("block_noland.csv", index=False)
     if len(blocks_maz_noland_df) > 0:
@@ -422,33 +492,13 @@ if __name__ == '__main__':
     if args.dissolve == False: sys.exit(0)
 
     logging.info("Dissolving blocks into MAZs and TAZs")
-    # create our maz and taz shapefile
-    try:
-        # clear selection
-        arcpy.SelectLayerByAttribute_management(blocks_maz_layer, "CLEAR_SELECTION")
 
-        # create mazs shapefile
-        arcpy.Dissolve_management (blocks_maz_layer, MAZS_SHP, "{0}.maz".format(CROSSWALK_ROOT),
-                                   [["{0}.ALAND10".format(CENSUS_BLOCK_ROOT),  "SUM"  ],
-                                    ["{0}.AWATER10".format(CENSUS_BLOCK_ROOT), "SUM"  ],
-                                    ["{0}.GEOID10".format(CENSUS_BLOCK_ROOT),  "COUNT"],  # count block per maz
-                                    ["{0}.taz".format(CROSSWALK_ROOT),         "FIRST"]], # verified taz are unique for maz above
-                                   "MULTI_PART", "DISSOLVE_LINES")
-        logging.info("Dissolved mazs into {0}.shp".format(MAZS_SHP))
+    # clear selection
+    arcpy.SelectLayerByAttribute_management(blocks_maz_layer, "CLEAR_SELECTION")
 
-        # delete maz=0, that's not a real maz
+    dissolve_into_shapefile(blocks_maz_layer, "maz")
 
+    dissolve_into_shapefile(blocks_maz_layer, "taz")
 
-        # create tazs shapefile
-        arcpy.Dissolve_management (blocks_maz_layer, TAZS_SHP, "{0}.taz".format(CROSSWALK_ROOT),
-                                   [["{0}.ALAND10".format(CENSUS_BLOCK_ROOT),  "SUM"  ],
-                                    ["{0}.AWATER10".format(CENSUS_BLOCK_ROOT), "SUM"  ],
-                                    ["{0}.GEOID10".format(CENSUS_BLOCK_ROOT),  "COUNT"],  # count block per taz
-                                    ["{0}.maz".format(CROSSWALK_ROOT),         "COUNT"]], # count maz per taz
-                                   "MULTI_PART", "DISSOLVE_LINES")
-        logging.info("Dissolved tazs into {0}.shp".format(TAZS_SHP))
-
-    except Exception as err:
-        logging.error(err.args[0])
 
     sys.exit(0)
