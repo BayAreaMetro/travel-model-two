@@ -9,6 +9,13 @@ set WORKSPACE=M:\Data\GIS layers\TM2_maz_taz_v2.2
 set TM2_DIR=C:\Users\lzorn\Documents\travel-model-two
 set NUM_ITERS=5
 
+:: run this in WORKSPACE
+
+:: copy initial Files
+copy %TM2_DIR%\utilities\maz_taz_checker\Readme.txt .
+copy %TM2_DIR%\utilities\maz_taz_checker\csv_to_dbf.R .
+copy %TM2_DIR%\utilities\maz_taz_checker\blocks_mazs_tazs_v2.1.1.csv .
+
 :: loop
 for /L %%V in (1,1,%NUM_ITERS%) do (
 
@@ -23,8 +30,8 @@ for /L %%V in (1,1,%NUM_ITERS%) do (
   rem save the dbf for this version
   copy blocks_mazs_tazs.dbf blocks_mazs_tazs_v2.1.%%V.dbf
 
-  if not %%V==%NUM_ITERS% python "%TM2_DIR%\utilities\maz_taz_checker.py"
-  if %%V==%NUM_ITERS% python "%TM2_DIR%\utilities\maz_taz_checker.py" --dissolve
+  if not %%V==%NUM_ITERS% python "%TM2_DIR%\utilities\maz_taz_checker\maz_taz_checker.py"
+  if %%V==%NUM_ITERS% python "%TM2_DIR%\utilities\maz_taz_checker\maz_taz_checker.py" --dissolve
   IF ERRORLEVEL 1 goto error
 
   if not %%V==%NUM_ITERS% (

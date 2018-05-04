@@ -244,7 +244,7 @@ def dissolve_into_shapefile(blocks_maz_layer, maz_or_taz):
 
     try:
         # create mazs shapefile -- save as temp since we'll do a bit more to it
-        arcpy.Dissolve_management (blocks_maz_layer, "{0}_temp".format(shapefile), "{0}.maz".format(CROSSWALK_ROOT),
+        arcpy.Dissolve_management (blocks_maz_layer, "{0}_temp".format(shapefile), "{0}.{1}".format(CROSSWALK_ROOT, maz_or_taz),
                                    [["{0}.ALAND10".format(CENSUS_BLOCK_ROOT),  "SUM"  ],
                                     ["{0}.AWATER10".format(CENSUS_BLOCK_ROOT), "SUM"  ],
                                     ["{0}.GEOID10".format(CENSUS_BLOCK_ROOT),  "COUNT"],  # count block per maz
@@ -260,7 +260,6 @@ def dissolve_into_shapefile(blocks_maz_layer, maz_or_taz):
         logging.info("Calculated part count for {0}s".format(maz_or_taz))
 
         # add perimeter.  In meters because ALAND10 is square meters
-        arcpy.AddField_management(my_layer, "PERIM_GEO", "DOUBLE", 10, 0)
         arcpy.AddGeometryAttributes_management(my_layer, "PERIMETER_LENGTH_GEODESIC", "METERS")
         logging.info("Calulated perimeter length for {0}s".format(maz_or_taz))
 
