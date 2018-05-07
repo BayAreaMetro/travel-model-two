@@ -1,9 +1,9 @@
-# Micro-analysis Zones (MAZs) and Travel Analysis Zones (TAZs) for Travel Model Two
+# MAZs and TAZs for Travel Model Two
 
 The files in this directory were used to develop micro-analysis zones (MAZs) and
-travel analysis zones (TAZs) for Travel Model Two.
+travel analysis zones (TAZs) for Travel Model Two (TM2).
 
-[Internal asana link](https://app.asana.com/0/inbox/15119358130896/626340099942965/653367336829779)
+See [web map](https://arcg.is/aLz8f) with Version 2.2 and 1.0 of TM2 MAZs and TAZs, along with TrCensus 2010 places, tracts, block groups.
 
 ## Axioms
 * MAZs and TAZs are *defined* as a union of [2010 vintage Census 2010 Blocks](https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2010&layergroup=Blocks).  The shapefiles are dissolved from this definition.
