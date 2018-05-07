@@ -320,9 +320,15 @@ def dissolve_into_shapefile(blocks_maz_layer, maz_or_taz):
         # delete the temp
         arcpy.Delete_management("{0}_temp.shp".format(shapefile))
 
+        # don't care if this fails, just want to head off error since arcpy gets mad if we try to overwrite
+        try:
+            arcpy.Delete_management("{0}.json".format(shapefile))
+        except Exception as err:
+            logging.debug(err.args[0])
+
         # create geojson
         arcpy.FeaturesToJSON_conversion("{0}.shp".format(shapefile), "{0}.json".format(shapefile),
-                                        geoJSON="GEOJSON")
+                                        format_json="FORMATTED", geoJSON="GEOJSON")
         logging.info("Created {0}.json".format(shapefile))
 
     except Exception as err:
