@@ -224,6 +224,32 @@ def split_taz_for_tract(blocks_maz_df, taz_multiple_geo_df, crosswalk_out_df):
 
     return tazs_split
 
+def rename_fields(input_feature, output_feature, old_to_new):
+    """
+    Renames specified fields in input feature class/table
+    old_to_new: {old_field: [new_field, new_alias]}
+    """
+    existing_field_names = [field.name for field in arcpy.ListFields(input_feature)]
+    field_mappings = arcpy.FieldMappings()
+    field_mappings.addTable(input_feature)
+
+    for (old_field_name, new_list) in old_to_new.items():
+        if old_field_name not in existing_field_names:
+            message = "Field: {0} not in {1}".format(old_field_name, input_feature)
+            raise Exception(message)
+
+        mapping_index          = field_mappings.findFieldMapIndex(old_field_name)
+        field_map              = field_mappings.fieldMappings[mapping_index]
+        output_field           = field_map.outputField
+        output_field.name      = new_list[0]
+        output_field.aliasName = new_list[1]
+        field_map.outputField  = output_field
+        field_mappings.replaceFieldMap(mapping_index, field_map)
+
+    # use merge with single input just to use new field_mappings
+    arcpy.Merge_management(input_feature, output_feature, field_mappings)
+    return output_feature
+
 def dissolve_into_shapefile(blocks_maz_layer, maz_or_taz):
     """
     Dissolve the blocks into final MAZ/TAZ shapefile
@@ -244,11 +270,19 @@ def dissolve_into_shapefile(blocks_maz_layer, maz_or_taz):
 
     try:
         # create mazs shapefile -- save as temp since we'll do a bit more to it
-        arcpy.Dissolve_management (blocks_maz_layer, "{0}_temp".format(shapefile), "{0}.{1}".format(CROSSWALK_ROOT, maz_or_taz),
-                                   [["{0}.ALAND10".format(CENSUS_BLOCK_ROOT),  "SUM"  ],
-                                    ["{0}.AWATER10".format(CENSUS_BLOCK_ROOT), "SUM"  ],
-                                    ["{0}.GEOID10".format(CENSUS_BLOCK_ROOT),  "COUNT"],  # count block per maz
-                                    ["{0}.taz".format(CROSSWALK_ROOT),         "FIRST"]], # verified taz are unique for maz above
+        fields = [["{0}.ALAND10".format(CENSUS_BLOCK_ROOT),  "SUM"  ],
+                  ["{0}.AWATER10".format(CENSUS_BLOCK_ROOT), "SUM"  ],
+                  ["{0}.GEOID10".format(CENSUS_BLOCK_ROOT),  "COUNT"],  # count block per maz
+                 ]
+        if maz_or_taz=="maz":
+            # list the taz for the maz
+            fields.append(["{0}.taz".format(CROSSWALK_ROOT), "FIRST"]) # verified taz are unique for maz above
+        else:
+            # count the mazs per taz
+            fields.append(["{0}.maz".format(CROSSWALK_ROOT), "COUNT"])
+
+        arcpy.Dissolve_management (blocks_maz_layer, "{0}_temp".format(shapefile),
+                                   "{0}.{1}".format(CROSSWALK_ROOT, maz_or_taz), fields,
                                    "MULTI_PART", "DISSOLVE_LINES")
         logging.info("Dissolved {0}s into {1}_temp.shp".format(maz_or_taz, shapefile))
 
@@ -270,14 +304,26 @@ def dissolve_into_shapefile(blocks_maz_layer, maz_or_taz):
 
         # delete maz/taz=0, that's not a real maz/taz
         arcpy.SelectLayerByAttribute_management(my_layer, "NEW_SELECTION", "{0} > 0".format(maz_or_taz))
-        logging.info("Selecting out water for {0}s".format(maz_or_taz))
+        logging.info("Selected out water for {0}s".format(maz_or_taz))
 
-        # Write the selected features to a new feature class
-        arcpy.CopyFeatures_management(my_layer, shapefile)
+        # Write the selected features to a new feature class and rename fields for clarity
+        # todo: the alias names don't seem to be getting picked up, not sure why
+        old_to_new = {"GEOID10":    ["blockcount","block count"],
+                      "PERIM_GEO":  ["PERIM_GEO", "perimeter in meters"],
+                      "psq_overa":  ["psq_overa", "perimeter squared over area"]}
+
+        if maz_or_taz == "taz": old_to_new["maz"] = ["mazcount", "maz count"]
+
+        rename_fields(my_layer, shapefile, old_to_new)
         logging.info("Saving final {0}s into {1}.shp".format(maz_or_taz, shapefile))
 
         # delete the temp
         arcpy.Delete_management("{0}_temp.shp".format(shapefile))
+
+        # create geojson
+        arcpy.FeaturesToJSON_conversion("{0}.shp".format(shapefile), "{0}.json".format(shapefile),
+                                        geoJSON="GEOJSON")
+        logging.info("Created {0}.json".format(shapefile))
 
     except Exception as err:
         logging.error(err.args[0])
