@@ -1,14 +1,9 @@
 name:             Travel Model Two
 description:      Travel Model Two Documentation
-markdown:         redcarpet
-  extensions:
-    - no_intra_emphasis
-    - fenced_code_blocks
-    - autolink
-    - tables
-    - strikethrough
-    - superscript
-    - with_to_data
+markdown:         kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
 
 pygments:         false
 highlighter:      rouge
