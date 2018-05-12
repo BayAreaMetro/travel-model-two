@@ -1,0 +1,10 @@
+; export network
+;
+run PGM=NETWORK
+
+  filei neti[1] = "%NET_INFILE%"    ; suggest .net
+  fileo nodeo   = "%NODE_OUTFILE%"  ; suggest .dbf
+  fileo linko   = "%LINK_OUTFILE%"  ; suggest .dbf
+
+  ; do nothing else
+endrun
