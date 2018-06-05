@@ -129,19 +129,19 @@ Transit trips are assigned between transit access points (TAPs), which represent
 ### Line Attributes
 
 | *Field* | *Description* | *Data Type* |
-|:-------:|---------------|-------------|
-| **NAME** | RTD CPT_AGENCYID and SCH_ROUTEDESIGNATOR | String |
-| **USERA1** | Transit operator | String |
-| **USERA2** | Line haul mode, one of <ul> <li>Local bus (LB)</li> <li>Express Bus (EB)</li> <li>Ferry service (FY)</li> <li>Light rail (LR)</li> <li>Heavy rail (HR)</li> <li>Commuter rail (CR)</li> </ul> | String |
-| **MODE** | Mode code | Integer |
-| **ONEWAY** | set to TRUE since each route is coded by direction | Character |
-| **XYSPEED** | set to 15 by default (not used) | Integer |
-| **HEADWAY[1]** | early AM headway (3AM to 6AM) | Float |
-| **HEADWAY[2]** | AM peak headway (6AM to 10AM) | Float |
-| **HEADWAY[3]** | Midday headway (10AM to 3PM) | Float |
-| **HEADWAY[4]** | PM peak headway (3PM to 7PM) | Float |
-| **HEADWAY[5]** | Evening headway (7PM to 3AM) | Float |
-| **N** | List of stops served.  Lines are coded through stops, not TAPs (which are like transit TAZs).  A negative stop is not served. | List of Integers |
+|---------|---------------|-------------|
+| *NAME* | RTD CPT_AGENCYID and SCH_ROUTEDESIGNATOR | String |
+| *USERA1* | Transit operator | String |
+| *USERA2* | Line haul mode, one of {::nomarkdown}<br/><ul><li>Local bus (LB)</li> <li>Express Bus (EB)</li> <li>Ferry service (FY)</li> <li>Light rail (LR)</li> <li>Heavy rail (HR)</li> <li>Commuter rail (CR)</li></ul>{:/} | String |
+| *MODE* | Mode code | Integer |
+| *ONEWA* | set to TRUE since each route is coded by direction | Character |
+| *XYSPEED* | set to 15 by default (not used) | Integer |
+| *HEADWAY[1]* | early AM headway (3AM to 6AM) | Float |
+| *HEADWAY[2]* | AM peak headway (6AM to 10AM) | Float |
+| *HEADWAY[3]* | Midday headway (10AM to 3PM) | Float |
+| *HEADWAY[4]* | PM peak headway (3PM to 7PM) | Float |
+| *HEADWAY[5]* | Evening headway (7PM to 3AM) | Float |
+| *N* | List of stops served.  Lines are coded through stops, not TAPs (which are like transit TAZs).  A negative stop is not served. | List of Integers |
 
 ### Transit Modes
 
@@ -242,85 +242,85 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 ## Micro Zonal Data
 
 | *Column Name* | *Description* |
-|:-------------:|---------------|
-| **MAZ_ORIGINAL** | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system) |
-| **TAZ_ORIGINAL** | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  |
-| **hh** | Total number of households |
-| **pop** | Total population |
-| **emp_self** | Self-employed |
-| **emp_ag** | Agriculture employment |
-| **emp_const_non_bldg_prod** | Construction Non-Building production (including mining) employment |
-| **emp_const_non_bldg_office** | Construction Non-Building office support (including mining) employment |
-| **emp_utilities_prod** | Utilities production employment |
-| **emp_utilities_office** | Utilities office support employment |
-| **emp_const_bldg_prod** | Construction of Buildings production employment |
-| **emp_const_bldg_office** | Construction of Buildings office support employment |
-| **emp_mfg_prod** | Manufacturing production employment |
-| **emp_mfg_office** | Manufacturing office support employment |
-| **emp_whsle_whs** | Wholesale and Warehousing employment |
-| **emp_trans** | Transportation Activity employment |
-| **emp_retail** | Retail Activity employment |
-| **emp_prof_bus_svcs** | Professional and Business Services employment |
-| **emp_prof_bus_svcs_bldg_maint** | Professional and Business Services (Building Maintenance) employment |
-| **emp_pvt_ed_k12** | Private Education K-12 employment |
-| **emp_pvt_ed_post_k12_oth** | Private Education Post-Secondary (Post K-12) and Other employment |
-| **emp_health** | Health Services employment |
-| **emp_personal_svcs_office** | Personal Services Office Based employment |
-| **emp_amusement** | Amusement Services employment |
-| **emp_hotel** | Hotels and Motels employment |
-| **emp_restaurant_bar** | Restaurants and Bars employment |
-| **emp_personal_svcs_retail** | Personal Services Retail Based employment |
-| **emp_religious** | Religious Activity employment |
-| **emp_pvt_hh** | Private Households employment |
-| **emp_state_local_gov_ent** | State and Local Government Enterprises Activity employment |
-| **emp_scrap_other** | Scrap other employment |
-| **emp_fed_non_mil** | Federal Non-Military Activity employment |
-| **emp_fed_mil** | Federal Military Activity employment |
-| **emp_state_local_gov_blue** | State and Local Government Non-Education Activity production employment |
-| **emp_state_local_gov_white** | State and Local Government Non-Education Activity office support employment |
-| **emp_public_ed** | Public Education K-12 and other employment |
-| **emp_own_occ_dwell_mgmt** | Owner-Occupied Dwellings Management and Maintenance Activity employment |
-| **emp_fed_gov_accts** | Federal Government Accounts employment |
-| **emp_st_lcl_gov_accts** | State and Local Government Accounts employment |
-| **emp_cap_accts** | Capital Accounts employment |
-| **emp_total** | Total employment |
-| **EnrollGradeKto8** | Grade School K-8 enrollment |
-| **EnrollGrade9to12** | Grade School 9-12 enrollment |
-| **collegeEnroll** | Major College enrollment |
-| **otherCollegeEnroll** | Other College enrollment |
-| **AdultSchEnrl** | Adult School enrollment |
-| **ech_dist** | Elementary school district |
-| **hch_dist** | High school district |
-| **parkarea** | <ul><li>1: Trips with destinations in this MAZ may choose to park in a different MAZ, parking charges apply (downtown)</li> <li>2: Trips with destinations in parkarea 1 may choose to park in this MAZ, parking charges might apply (quarter mile buffer around downtown)</li> <li>3: Only trips with destinations in this MAZ may park here, parking charges apply (outside downtown paid parking, only show cost no capacity issue)</li> <li>4: Only trips with destinations in this MAZ may park here, parking charges do not apply (outside downtown, free parking)</li> </ul> |
-| **hstallsoth** | Number of stalls allowing hourly parking for trips with destinations in other MAZs |
-| **hstallssam** | Number of stalls allowing hourly parking for trips with destinations in the same MAZ |
-| **hparkcost** | Average cost of parking for one hour in hourly stalls in this MAZ, dollars |
-| **numfreehrs** | Number of hours of free parking allowed before parking charges begin in hourly stalls |
-| **dstallsoth** | Stalls allowing daily parking for trips with destinations in other MAZs |
-| **dstallssam** | Stalls allowing daily parking for trips with destinations in the same MAZ |
-| **dparkcost** | Average cost of parking for one day in daily stalls, dollars |
-| **mstallsoth** | Stalls allowing monthly parking for trips with destinations in other MAZs |
-| **mstallssam** | Stalls allowing monthly parking for trips with destinations in the same MAZ |
-| **mparkcost** | Average cost of parking for one day in monthly stalls, amortized over 22 workdays, dollars |
-| **TotInt** | Total intersections |
-| **DUDen** | Dwelling unit density |
-| **EmpDen** | Employment density |
-| **PopDen** | Population density |
-| **RetEmpDen** | Retail employment density |
-| **TotIntBin** | Total intersection bin |
-| **EmpDenBin** | Employment density bin |
-| **DuDenBin** | Dwelling unit density bin |
-| **ACRES** | MAZ acres |
+|---------------|---------------|
+| *MAZ_ORIGINAL* | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system) |
+| *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  |
+| *hh** | Total number of households |
+| *pop* | Total population |
+| *emp_self* | Self-employed |
+| *emp_ag* | Agriculture employment |
+| *emp_const_non_bldg_prod* | Construction Non-Building production (including mining) employment |
+| *emp_const_non_bldg_office* | Construction Non-Building office support (including mining) employment |
+| *emp_utilities_prod* | Utilities production employment |
+| *emp_utilities_office* | Utilities office support employment |
+| *emp_const_bldg_prod* | Construction of Buildings production employment |
+| *emp_const_bldg_office* | Construction of Buildings office support employment |
+| *emp_mfg_prod* | Manufacturing production employment |
+| *emp_mfg_office* | Manufacturing office support employment |
+| *emp_whsle_whs* | Wholesale and Warehousing employment |
+| *emp_trans* | Transportation Activity employment |
+| *emp_retail* | Retail Activity employment |
+| *emp_prof_bus_svcs* | Professional and Business Services employment |
+| *emp_prof_bus_svcs_bldg_maint* | Professional and Business Services (Building Maintenance) employment |
+| *emp_pvt_ed_k12* | Private Education K-12 employment |
+| *emp_pvt_ed_post_k12_oth* | Private Education Post-Secondary (Post K-12) and Other employment |
+| *emp_health* | Health Services employment |
+| *emp_personal_svcs_office* | Personal Services Office Based employment |
+| *emp_amusement* | Amusement Services employment |
+| *emp_hotel* | Hotels and Motels employment |
+| *emp_restaurant_bar* | Restaurants and Bars employment |
+| *emp_personal_svcs_retail* | Personal Services Retail Based employment |
+| *emp_religious* | Religious Activity employment |
+| *emp_pvt_hh* | Private Households employment |
+| *emp_state_local_gov_ent* | State and Local Government Enterprises Activity employment |
+| *emp_scrap_other* | Scrap other employment |
+| *emp_fed_non_mil* | Federal Non-Military Activity employment |
+| *emp_fed_mil* | Federal Military Activity employment |
+| *emp_state_local_gov_blue* | State and Local Government Non-Education Activity production employment |
+| *emp_state_local_gov_white* | State and Local Government Non-Education Activity office support employment |
+| *emp_public_ed* | Public Education K-12 and other employment |
+| *emp_own_occ_dwell_mgmt* | Owner-Occupied Dwellings Management and Maintenance Activity employment |
+| *emp_fed_gov_accts* | Federal Government Accounts employment |
+| *emp_st_lcl_gov_accts* | State and Local Government Accounts employment |
+| *emp_cap_accts* | Capital Accounts employment |
+| *emp_total* | Total employment |
+| *EnrollGradeKto8* | Grade School K-8 enrollment |
+| *EnrollGrade9to12* | Grade School 9-12 enrollment |
+| *collegeEnroll* | Major College enrollment |
+| *otherCollegeEnroll* | Other College enrollment |
+| *AdultSchEnrl* | Adult School enrollment |
+| *ech_dist* | Elementary school district |
+| *hch_dist* | High school district |
+| *parkarea* | {::nomarkdown}<ul><li>1: Trips with destinations in this MAZ may choose to park in a different MAZ, parking charges apply (downtown)</li> <li>2: Trips with destinations in parkarea 1 may choose to park in this MAZ, parking charges might apply (quarter mile buffer around downtown)</li> <li>3: Only trips with destinations in this MAZ may park here, parking charges apply (outside downtown paid parking, only show cost no capacity issue)</li> <li>4: Only trips with destinations in this MAZ may park here, parking charges do not apply (outside downtown, free parking)</li> </ul>{:/} |
+| *hstallsoth* | Number of stalls allowing hourly parking for trips with destinations in other MAZs |
+| *hstallssam* | Number of stalls allowing hourly parking for trips with destinations in the same MAZ |
+| *hparkcost* | Average cost of parking for one hour in hourly stalls in this MAZ, dollars |
+| *numfreehrs* | Number of hours of free parking allowed before parking charges begin in hourly stalls |
+| *dstallsoth* | Stalls allowing daily parking for trips with destinations in other MAZs |
+| *dstallssam* | Stalls allowing daily parking for trips with destinations in the same MAZ |
+| *dparkcost* | Average cost of parking for one day in daily stalls, dollars |
+| *mstallsoth* | Stalls allowing monthly parking for trips with destinations in other MAZs |
+| *mstallssam* | Stalls allowing monthly parking for trips with destinations in the same MAZ |
+| *mparkcost* | Average cost of parking for one day in monthly stalls, amortized over 22 workdays, dollars |
+| *TotInt* | Total intersections |
+| *DUDen* | Dwelling unit density |
+| *EmpDen* | Employment density |
+| *PopDen* | Population density |
+| *RetEmpDen* | Retail employment density |
+| *TotIntBin* | Total intersection bin |
+| *EmpDenBin* | Employment density bin |
+| *DuDenBin* | Dwelling unit density bin |
+| *ACRES* | MAZ acres |
 
 ## Zonal Data
 
 | *Field* | *Description* |
-|:-------:|---------------|
-| **TAZ_ORIGINAL** | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  |
-| **AVGTTS** | Average travel time savings for transponder ownership model |
-| **DIST** | Distance for transponder ownership model |
-| **PCTDETOUR** | Percent detour for transponder ownership model |
-| **TERMINALTIME** | Terminal time |
+|---------|---------------|
+| *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  |
+| *AVGTTS* | Average travel time savings for transponder ownership model |
+| *DIST* | Distance for transponder ownership model |
+| *PCTDETOUR* | Percent detour for transponder ownership model |
+| *TERMINALTIME* | Terminal time |
 
 ## Truck Distribution
 
