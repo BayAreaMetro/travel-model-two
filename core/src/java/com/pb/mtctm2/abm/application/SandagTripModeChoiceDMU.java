@@ -22,7 +22,7 @@ public class SandagTripModeChoiceDMU
      * @param hhIndex is the DMU household index
      * @param zoneIndex is the DMU zone index
      * @param origIndex is the DMU origin index
-     * @param destIndex is the DMU desatination index
+     * @param destIndex is the DMU destination index
      */
     public void setDmuIndexValues(int hhIndex, int zoneIndex, int origIndex, int destIndex,
             boolean debug)
@@ -251,6 +251,7 @@ public class SandagTripModeChoiceDMU
         
         methodIndexMap.put("getTpChoice", 400);
         
+        methodIndexMap.put("getUseOwnedAV", 500);
 
     }
 
@@ -431,6 +432,10 @@ public class SandagTripModeChoiceDMU
             case 400:
                 returnValue = getTpChoice();
                 break;
+            case 500: 
+            	returnValue = getUseOwnedAV();
+            	break;
+                
 
             default:
                 logger.error( "method number = " + variableIndex + " not found" );

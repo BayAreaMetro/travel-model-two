@@ -54,7 +54,7 @@ public class TourModeChoiceDMU
     
     protected int                      parkingArea;
 
-    protected double[][]                 transitLogSum;
+    protected double[][]               transitLogSum;
     
     protected int oMaz;
     protected int dMaz;
@@ -389,7 +389,16 @@ public class TourModeChoiceDMU
     }
         
     
-    public int getIndexValue(String variableName)
+    /** 
+     * Return a 1 if this tour has an AV available else 0
+     * @return
+     */
+    public int getUseOwnedAV() {
+		return tour.getUseOwnedAV() ? 1 : 0;
+	}
+
+
+	public int getIndexValue(String variableName)
     {
         return methodIndexMap.get(variableName);
     }

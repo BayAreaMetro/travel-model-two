@@ -848,6 +848,12 @@ public class BestTransitPathCalculator implements Serializable
     	
     	Arrays.fill(expUtilities, 0);
     	int alt=-1;
+    	
+    	if(bestTapPairs==null){
+    		myLogger.warn("Warning: Attempting to choose trip path for null TAP pairs, unknown household/person/tour/trip");
+    		return alt;
+    	}
+    	
     	//iterate through paths and calculate exponentiated utility and sum
     	double sumExpUtility=0;
     	for(int i = 0; i<bestTapPairs.length;++i){

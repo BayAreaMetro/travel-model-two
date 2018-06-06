@@ -66,34 +66,40 @@ public class SkimBuilder {
     private static final int DA_TIME_INDEX = 0;
     private static final int DA_FF_TIME_INDEX = 1;
     private static final int DA_DIST_INDEX = 2;
-    private static final int DA_TOLL_TIME_INDEX = 3;
-    private static final int DA_TOLL_FF_TIME_INDEX = 4;
-    private static final int DA_TOLL_DIST_INDEX = 5;
-    private static final int DA_TOLL_COST_INDEX = 6;
-    private static final int DA_TOLL_TOLLDIST_INDEX = 7;
-    private static final int HOV_TIME_INDEX = 8;
-    private static final int HOV_FF_TIME_INDEX = 9;
-    private static final int HOV_DIST_INDEX = 10;
-    private static final int HOV_HOVDIST_INDEX = 11;
+    private static final int DA_BTOLL_INDEX = 3;
     
-    private static final int HOV3_TIME_INDEX = 12;
-    private static final int HOV3_FF_TIME_INDEX = 13;
-    private static final int HOV3_DIST_INDEX = 14;
-    private static final int HOV3_HOVDIST_INDEX = 15;
+    private static final int DA_TOLL_TIME_INDEX = 4;
+    private static final int DA_TOLL_FF_TIME_INDEX = 5;
+    private static final int DA_TOLL_DIST_INDEX = 6;
+    private static final int DA_TOLL_TOLL_INDEX = 7;
+    private static final int DA_TOLL_TOLLDIST_INDEX = 8;
+    private static final int DA_TOLL_BTOLL_INDEX = 9;
     
-    private static final int HOV_TOLL_TIME_INDEX = 16;
-    private static final int HOV_TOLL_FF_TIME_INDEX = 17;
-    private static final int HOV_TOLL_DIST_INDEX = 18;
-    private static final int HOV_TOLL_COST_INDEX = 19;
-    private static final int HOV_TOLL_HOV_DIST_INDEX = 20;
-    private static final int HOV_TOLL_TOLL_DIST_INDEX = 21;
+    private static final int HOV_TIME_INDEX = 10;
+    private static final int HOV_FF_TIME_INDEX = 11;
+    private static final int HOV_DIST_INDEX = 12;
+    private static final int HOV_HOVDIST_INDEX = 13;
+    private static final int HOV_BTOLL_INDEX = 14;
     
-    private static final int HOV3_TOLL_TIME_INDEX = 22;
-    private static final int HOV3_TOLL_FF_TIME_INDEX = 23;
-    private static final int HOV3_TOLL_DIST_INDEX = 24;
-    private static final int HOV3_TOLL_COST_INDEX = 25;
-    private static final int HOV3_TOLL_HOV_DIST_INDEX = 26;
-    private static final int HOV3_TOLL_TOLL_DIST_INDEX = 27;
+    private static final int HOV3_TIME_INDEX = 15;
+    private static final int HOV3_FF_TIME_INDEX = 16;
+    private static final int HOV3_DIST_INDEX = 17;
+    private static final int HOV3_HOVDIST_INDEX = 18;
+    private static final int HOV3_BTOLL_INDEX = 19;
+    
+    private static final int HOV_TOLL_TIME_INDEX = 20;
+    private static final int HOV_TOLL_FF_TIME_INDEX = 21;
+    private static final int HOV_TOLL_DIST_INDEX = 22;
+    private static final int HOV_TOLL_TOLL_INDEX = 23;
+    private static final int HOV_TOLL_HOV_DIST_INDEX = 24;
+    private static final int HOV_TOLL_BTOLL_INDEX = 25;
+    
+    private static final int HOV3_TOLL_TIME_INDEX = 26;
+    private static final int HOV3_TOLL_FF_TIME_INDEX = 27;
+    private static final int HOV3_TOLL_DIST_INDEX = 28;
+    private static final int HOV3_TOLL_TOLL_INDEX = 29;
+    private static final int HOV3_TOLL_HOV_DIST_INDEX = 30;
+    private static final int HOV3_TOLL_BTOLL_INDEX = 31;
 
     private static final int TRANSIT_SET_ACCESS_TIME_INDEX = 0;
     private static final int TRANSIT_SET_EGRESS_TIME_INDEX = 1;
@@ -122,6 +128,10 @@ public class SkimBuilder {
     private float DEFAULT_BIKE_SPEED;//get values from autoNonMotSkims
     private float DEFAULT_WALK_SPEED;//get values from autoNonMotSkims
 
+    private final String 			FUEL_COST_PROPERTY          = "aoc.fuel";
+    private final String 			MAINTENANCE_COST_PROPERTY = "aoc.maintenance";
+    private float autoOperatingCost;
+
     public SkimBuilder(Properties properties) {
 
         HashMap<String,String> rbMap = new HashMap<String,String>((Map<String,String>) (Map) properties);
@@ -145,7 +155,11 @@ public class SkimBuilder {
         wtd.setup(rbMap,logger, bestPathUEC);
         dtw = new DriveTransitWalkSkimsCalculator(rbMap);
         dtw.setup(rbMap,logger, bestPathUEC);
-        
+
+        float fuelCost = new Float(properties.getProperty(FUEL_COST_PROPERTY));
+        float mainCost = new Float(properties.getProperty(MAINTENANCE_COST_PROPERTY));
+        autoOperatingCost = (fuelCost + mainCost)  * 0.01f;
+
     }
 
     private void startMatrixServer(Properties properties) {
@@ -182,7 +196,10 @@ public class SkimBuilder {
             TripModeChoice.BIKE,				//BIKE
             TripModeChoice.WALK_SET,			//WALK_TRANSIT           
             TripModeChoice.PNR_SET,				//PNR_TRANSIT
-            TripModeChoice.KNR_SET,				//KNR_TRANSIT
+            TripModeChoice.KNR_PVT,				//KNR_TRANSIT_PVT
+            TripModeChoice.KNR_TNC,				//KNR_TRANSIT_TNC
+            TripModeChoice.TAXI,				//TAXI
+            TripModeChoice.TNC,                 //TNC
             TripModeChoice.SCHOOLBUS			//SHOOLBUS
     };
 
@@ -210,94 +227,85 @@ public class SkimBuilder {
     }
 
     private TripAttributes getTripAttributesUnknown() {
-        return new TripAttributes(-1,-1,-1,-1,-1,-1);
-    }
-
-    private double getCost(double baseCost, double driveDist) {
-        return baseCost;
+        return new TripAttributes(-1,-1,-1,-1,-1);
     }
 
     private TripAttributes getTripAttributes(TripModeChoice modeChoice, int origin, int destination, int boardTap, int alightTap, int tod, boolean inbound, int set) {
         int timeIndex = -1;
         int distIndex = -1;
-        int costIndex = -1;
-        int fullMode = -1;
-
+        int tollIndex = -1;
+        int btollIndex = -1;
+   
         switch (modeChoice) {
             case UNKNOWN : return getTripAttributesUnknown();
             case DRIVE_ALONE_NO_TOLL : {
                 timeIndex = DA_TIME_INDEX;
                 distIndex = DA_DIST_INDEX;
-                costIndex = -1;
-                fullMode = TripModeChoice.DRIVE_ALONE_NO_TOLL.ordinal();
-            }
+                btollIndex = DA_BTOLL_INDEX;
+                double[] autoSkims = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger);
+                double cost = autoSkims[distIndex] * autoOperatingCost + autoSkims[btollIndex];
+                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],cost);
+          }
             case DRIVE_ALONE_TOLL : {
-                if (timeIndex < 0) {
-                    timeIndex = DA_TOLL_TIME_INDEX;
-                    distIndex = DA_TOLL_DIST_INDEX;
-                    costIndex = DA_TOLL_COST_INDEX;
-                    fullMode = TripModeChoice.DRIVE_ALONE_TOLL.ordinal();
-                }
+                timeIndex = DA_TOLL_TIME_INDEX;
+                distIndex = DA_TOLL_DIST_INDEX;
+                tollIndex = DA_TOLL_TOLL_INDEX;
+                btollIndex = DA_TOLL_BTOLL_INDEX;
+                double[] autoSkims = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger);
+                double cost = autoSkims[distIndex] * autoOperatingCost + autoSkims[btollIndex] + autoSkims[tollIndex];
+                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],cost);
             }
             case S2_GP : {
-                if (timeIndex < 0) {
-                    timeIndex = DA_TIME_INDEX;
-                    distIndex = DA_DIST_INDEX;
-                    costIndex = -1;
-                    fullMode = TripModeChoice.S2_GP.ordinal();
-                }                                 
+                timeIndex = DA_TIME_INDEX;
+                distIndex = DA_DIST_INDEX;
+                btollIndex = DA_BTOLL_INDEX;
                 double[] autoSkims = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger);
-                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],getCost(costIndex < 0 ? 0.0 : autoSkims[costIndex],autoSkims[distIndex]),fullMode);
+                double cost = autoSkims[distIndex] * autoOperatingCost + autoSkims[btollIndex];
+                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],cost);
             }
-            case S2_TOLL : {
-                if (timeIndex < 0) {
-                    timeIndex = HOV_TOLL_TIME_INDEX;
-                    distIndex = HOV_TOLL_DIST_INDEX;
-                    costIndex = HOV_TOLL_COST_INDEX;
-                    fullMode = TripModeChoice.S2_TOLL.ordinal();
-                }                                 
+            case S2_TOLL : 
+            case TAXI: 
+            case TNC: {
+                timeIndex = HOV_TOLL_TIME_INDEX;
+                distIndex = HOV_TOLL_DIST_INDEX;
+                tollIndex = HOV_TOLL_TOLL_INDEX;
+                btollIndex = HOV_TOLL_BTOLL_INDEX;
                 double[] autoSkims = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger);
-                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],getCost(costIndex < 0 ? 0.0 : autoSkims[costIndex],autoSkims[distIndex]),fullMode);
+                double cost = autoSkims[distIndex] * autoOperatingCost + autoSkims[btollIndex] + autoSkims[tollIndex];
+                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],cost);
             }
             case S2_NO_TOLL : {
-                if (timeIndex < 0) {
-                    timeIndex = HOV_TIME_INDEX;
-                    distIndex = HOV_DIST_INDEX;
-                    costIndex = -1;
-                    fullMode = TripModeChoice.S2_NO_TOLL.ordinal();
-                }                                 
+                timeIndex = HOV_TIME_INDEX;
+                distIndex = HOV_DIST_INDEX;
+                btollIndex = HOV_BTOLL_INDEX;
                 double[] autoSkims = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger);
-                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],getCost(costIndex < 0 ? 0.0 : autoSkims[costIndex],autoSkims[distIndex]),fullMode);
+                double cost = autoSkims[distIndex] * autoOperatingCost + autoSkims[btollIndex];
+                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],cost);
             }
             case S3_GP : {
-                if (timeIndex < 0) {
-                    timeIndex = DA_TIME_INDEX;
-                    distIndex = DA_DIST_INDEX;
-                    costIndex = -1;
-                    fullMode = TripModeChoice.S3_GP.ordinal();
-                }                                 
+                timeIndex = DA_TIME_INDEX;
+                distIndex = DA_DIST_INDEX;
+                btollIndex = DA_BTOLL_INDEX;
                 double[] autoSkims = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger);
-                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],getCost(costIndex < 0 ? 0.0 : autoSkims[costIndex],autoSkims[distIndex]),fullMode);
+                double cost = autoSkims[distIndex] * autoOperatingCost + autoSkims[btollIndex];
+                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],cost);
             }
             case S3_TOLL : {
-                if (timeIndex < 0) {
-                    timeIndex = HOV3_TOLL_TIME_INDEX;
-                    distIndex = HOV3_TOLL_DIST_INDEX;
-                    costIndex = HOV3_TOLL_COST_INDEX;
-                    fullMode = TripModeChoice.S3_TOLL.ordinal();
-                }                                 
+                timeIndex = HOV3_TOLL_TIME_INDEX;
+                distIndex = HOV3_TOLL_DIST_INDEX;
+                tollIndex = HOV3_TOLL_TOLL_INDEX;
+                btollIndex = HOV3_TOLL_BTOLL_INDEX;
                 double[] autoSkims = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger);
-                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],getCost(costIndex < 0 ? 0.0 : autoSkims[costIndex],autoSkims[distIndex]),fullMode);
+                double cost = autoSkims[distIndex] * autoOperatingCost + autoSkims[btollIndex] + autoSkims[tollIndex];
+                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],cost);
             }
             case S3_NO_TOLL : {
-                if (timeIndex < 0) {
-                    timeIndex = HOV3_TIME_INDEX;
-                    distIndex = HOV3_DIST_INDEX;
-                    costIndex = -1;
-                    fullMode = TripModeChoice.S3_NO_TOLL.ordinal();
-                }                                 
+                timeIndex = HOV3_TIME_INDEX;
+                distIndex = HOV3_DIST_INDEX;
+                btollIndex = HOV3_BTOLL_INDEX;
                 double[] autoSkims = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger);
-                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],getCost(costIndex < 0 ? 0.0 : autoSkims[costIndex],autoSkims[distIndex]),fullMode);
+                double cost = autoSkims[distIndex] * autoOperatingCost + autoSkims[btollIndex];
+                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],cost);
             }
 
             case WALK :
@@ -305,21 +313,21 @@ public class SkimBuilder {
             	
             	double distance = 0.0;
             	double speed = modeChoice == TripModeChoice.BIKE ? DEFAULT_BIKE_SPEED : DEFAULT_WALK_SPEED;
-            	fullMode = modeChoice == TripModeChoice.BIKE ? TripModeChoice.BIKE.ordinal() : TripModeChoice.WALK.ordinal();
             	//If mgras are within walking distance, use the mgraToMgra file, else use auto skims distance.
             	if(mgraManager.getMgrasAreWithinWalkDistance(origin, destination)){
             		distance = mgraManager.getMgraToMgraWalkDistFrom(origin, destination);
-            		return new TripAttributes((distance/5280)*60/speed,distance/5280,0,fullMode);
+            		return new TripAttributes((distance/5280)*60/speed,distance/5280,0);
             	} else {
             		distance = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger)[DA_DIST_INDEX];
-            		return new TripAttributes(distance*60/speed,distance,0,fullMode);
+            		return new TripAttributes(distance*60/speed,distance,0);
             	}
                 
 
             }
             case WALK_SET : 
             case PNR_SET : 
-            case KNR_SET : {
+            case KNR_PVT :
+            case KNR_TNC :{
                 boolean isDrive = modeChoice.isDrive;
 
                 double[] skims;
@@ -430,33 +438,15 @@ public class SkimBuilder {
                 time += skims[TRANSIT_SET_FIRST_WAIT_TIME_INDEX];
                 time += skims[TRANSIT_SET_TRANSFER_WAIT_TIME_INDEX];
                 
-                int modeIndex = 0;
-                for(modeIndex = TRANSIT_SET_LOCAL_BUS_TIME_INDEX; modeIndex <= TRANSIT_SET_CR_TIME_INDEX; modeIndex++){
-                	if(skims[modeIndex] > 0)
-                		break;
-                }
-                
-                if(modeChoice == TripModeChoice.WALK_SET)
-                	fullMode = TripModeChoice.WALK_SET.ordinal() + (modeIndex - 3);//11-16
-                
-                if(modeChoice == TripModeChoice.PNR_SET)
-                	fullMode = TripModeChoice.PNR_SET.ordinal() + (modeIndex + 2);//17-22
-                
-                if(modeChoice == TripModeChoice.KNR_SET)
-                	fullMode = TripModeChoice.KNR_SET.ordinal() + (modeIndex + 7);//23-28
-                
                 double dist = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger)[DA_DIST_INDEX];  //todo: is this correct enough?
-                return new TripAttributes(time,dist,skims[TRANSIT_SET_FARE_INDEX],fullMode,boardTaz,alightTaz);
+                return new TripAttributes(time,dist,skims[TRANSIT_SET_FARE_INDEX],boardTaz,alightTaz);
             }
             case SCHOOLBUS : {
-                if (timeIndex < 0) {
-                    timeIndex = HOV_TIME_INDEX;
-                    distIndex = HOV_DIST_INDEX;
-                    costIndex = -1;
-                    fullMode = TripModeChoice.SCHOOLBUS.ordinal() + 15;//29
-                }                                 
+                timeIndex = HOV_TIME_INDEX;
+                distIndex = HOV_DIST_INDEX;
+                double cost = 0.0;
                 double[] autoSkims = autoNonMotSkims.getAutoSkims(origin,destination,tod,false,logger);
-                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],getCost(costIndex < 0 ? 0.0 : autoSkims[costIndex],autoSkims[distIndex]),fullMode);
+                return new TripAttributes(autoSkims[timeIndex],autoSkims[distIndex],cost);
             }
             default : throw new IllegalStateException("Should not be here: " + modeChoice);
         }
@@ -476,7 +466,10 @@ public class SkimBuilder {
         BIKE(false,false),
         WALK_SET(false,false),
         PNR_SET(true,false),
-        KNR_SET(true,false),
+        KNR_PVT(true,false),
+        KNR_TNC(true,false),
+        TAXI(true,true),
+        TNC(true,true),
         SCHOOLBUS(true,false);
         
         private final boolean isDrive;
@@ -496,8 +489,7 @@ public class SkimBuilder {
         private final int tripAlightTaz;
         private int originTAZ;
         private int destinationTAZ;
-        private int fullMode;
-
+ 
         public int getTripStartTime() {
             return tripStartTime;
         }
@@ -509,17 +501,16 @@ public class SkimBuilder {
         private int tripStartTime;
 
 
-        public TripAttributes(double tripTime, double tripDistance, double tripCost, int fullMode, int tripBoardTaz, int tripAlightTaz) {
+        public TripAttributes(double tripTime, double tripDistance, double tripCost, int tripBoardTaz, int tripAlightTaz) {
             this.tripTime = (float) tripTime;
             this.tripDistance = (float) tripDistance;
             this.tripCost = (float) tripCost;
             this.tripBoardTaz = tripBoardTaz;
             this.tripAlightTaz = tripAlightTaz;
-            this.fullMode = fullMode;
-        }
+       }
 
-        public TripAttributes(double tripTime, double tripDistance, double tripCost, int fullMode) {
-            this(tripTime,tripDistance,tripCost,fullMode,-1,-1);
+        public TripAttributes(double tripTime, double tripDistance, double tripCost) {
+            this(tripTime,tripDistance,tripCost,-1,-1);
         }
         
         public void setOriginTAZ(int oTaz) {
@@ -558,10 +549,7 @@ public class SkimBuilder {
         	return destinationTAZ;
         }
         
-        
-        public int getFullMode() {
-        	return fullMode;
-        }
-    }
+       
+     }
 
 }
