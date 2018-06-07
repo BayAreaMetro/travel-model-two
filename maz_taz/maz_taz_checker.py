@@ -9,9 +9,11 @@ The following verifcations are performed
   - Verifies that there are not multiple counties per taz
   - Verifies that all blocks with nonzero land area are assigned a maz/taz
   - Verifies that all blocks with zero land area are not assigned a maz/taz
+  - Verifies that maz and taz numbers are numbered according to county ranges:
+    http://bayareametro.github.io/travel-model-two/input/#micro-zonal-data
 
 Also, given the following issue:
-  - Counts/lists first 30 mazs with multiple block groups, tracts
+  - If there are mazs with multiple block groups, tracts
 The script attempts to fix them with move_small_block_to_neighbor()
   - For each small (<25 percent land area) blocks in the maz
   - Looks at neighboring blocks in the same block group
@@ -19,7 +21,7 @@ The script attempts to fix them with move_small_block_to_neighbor()
   - Move the original block to inherit the maz/taz of this neighbor
 
 If the mazs are aok, then given the following issue:
-  - Counts/lists first 30 tazs with multiple tracts
+  - If there are tazs with multiple tracts
 The script attempts to fix them with split_taz_for_tract()
   - For each taz that spans multiple tracts, if the smallest portion in a tract is
     non-trivial (>10 percent of land), then split the taz on the tract boundary,
@@ -37,7 +39,7 @@ This draft update is saved into blocks_mazs_tazs_updated.csv
   - Block "06 081 608002 2004" (maz 112279, taz 100178) spans a block group boundary but not doing so would split up
     and island with two blocks.
 
-  - Blocks "06 075 017902 10[05,80]" (maz 16495, taz 312) is a tiny sliver that's barely land so not worth
+  - Blocks "06 075 017902 10[05,80]" (maz 16495, taz 327) is a tiny sliver that's barely land so not worth
     making a new maz, so that maz includes a second tract (mostly water)
 
   - Blocks "06 041 104300 10[17,18,19]" (maz 810745, taz 800095) spans a block group/tract boundary but the're a
@@ -538,6 +540,11 @@ if __name__ == '__main__':
         logging.fatal("\n{0}".format(blocks_maz_noland_df))
         logging.fatal("")
         sys.exit("ERROR")
+
+    # verify maz/taz numbering alignment with http://bayareametro.github.io/travel-model-two/input/#micro-zonal-data
+    maz_taz_county_check = blocks_maz_df.groupby("GEOID10_COUNTY").agg({'maz':['min','max'],
+                                                                        'taz':['min','max']})
+    logging.info("maz_taz_county_check=\n{0}".format(str(maz_taz_county_check)))
 
     # if we're not instructed to do this, we're done
     if args.dissolve == False: sys.exit(0)
