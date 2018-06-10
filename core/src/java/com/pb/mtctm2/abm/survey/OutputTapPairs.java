@@ -168,15 +168,19 @@ public class OutputTapPairs {
 		//iterate through data and calculate
 		for(int row = 1; row<=inputDataTable.getRowCount();++row ){
 		
+			boolean debug = false;
 			if((row<=100) || ((row % 100) == 0))
 				logger.info("Processing input record "+row);
 			
 			String label=inputDataTable.getStringValueAt(row, "rownames");
+			int rowName = new Integer(label);
 			int originMaz = (int) inputDataTable.getValueAt(row, "orig_maz");
 			int destinationMaz = (int) inputDataTable.getValueAt(row, "dest_maz");
 			int period = (int) inputDataTable.getValueAt(row, "time_period")-1; //Input is 1=EA, 2=AM, 3=MD, 4=PM, 5=EV
 			int accessMode = (int) inputDataTable.getValueAt(row, "access_mode_recode"); // 1 walk, 2 PNR, 3 KNR\bike
 			int inbound = (int) inputDataTable.getValueAt(row, "inbound"); // 1 if inbound, else 0
+			if(rowName==120323)
+				debug=true;
 			
 			int accessEgressMode = -1;
 			
@@ -197,7 +201,7 @@ public class OutputTapPairs {
 			int originTaz = mgraManager.getTaz(originMaz);
 			int destinationTaz = mgraManager.getTaz(destinationMaz);
 		
-			bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, accessEgressMode, originMaz, destinationMaz, period, false, logger);
+			bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, accessEgressMode, originMaz, destinationMaz, period, debug, logger);
 			double[] bestUtilities = bestPathCalculator.getBestUtilities();
 			
 			//iterate through n-best paths
@@ -220,15 +224,15 @@ public class OutputTapPairs {
 				if(accessEgressMode==bestPathCalculator.WTW){
                     boardAccessTime = mgraManager.getWalkTimeFromMgraToTap(originMaz,boardTap);
                     alightAccessTime = mgraManager.getWalkTimeFromMgraToTap(destinationMaz,alightTap);
-					skims = wtw.getWalkTransitWalkSkims(set, boardAccessTime, alightAccessTime, boardTap, alightTap, period, false); 
+					skims = wtw.getWalkTransitWalkSkims(set, boardAccessTime, alightAccessTime, boardTap, alightTap, period, debug); 
 				}else if (accessEgressMode==bestPathCalculator.DTW){
 					boardAccessTime = tazManager.getTimeToTapFromTaz(originTaz,boardTap,( accessMode==2? Modes.AccessMode.PARK_N_RIDE : Modes.AccessMode.KISS_N_RIDE));
                     alightAccessTime = mgraManager.getWalkTimeFromMgraToTap(destinationMaz,alightTap);
-					skims = dtw.getDriveTransitWalkSkims(set, boardAccessTime, alightAccessTime, boardTap, alightTap, period, false); 
+					skims = dtw.getDriveTransitWalkSkims(set, boardAccessTime, alightAccessTime, boardTap, alightTap, period, debug); 
 				}else if(accessEgressMode==bestPathCalculator.WTD){
                     boardAccessTime = mgraManager.getWalkTimeFromMgraToTap(originMaz,boardTap);
                     alightAccessTime = tazManager.getTimeToTapFromTaz(destinationTaz,alightTap,( accessMode==2? Modes.AccessMode.PARK_N_RIDE : Modes.AccessMode.KISS_N_RIDE));
-                    skims = wtd.getWalkTransitDriveSkims(set, boardAccessTime, alightAccessTime, boardTap, alightTap, period, false); 
+                    skims = wtd.getWalkTransitDriveSkims(set, boardAccessTime, alightAccessTime, boardTap, alightTap, period, debug); 
 				}
 	        	
 				for(int j=0; j < skims.length; ++j)

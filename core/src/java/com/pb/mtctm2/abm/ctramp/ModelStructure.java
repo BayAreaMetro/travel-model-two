@@ -330,6 +330,14 @@ public abstract class ModelStructure
     
     abstract public boolean getTripModeIsKnrTransit(int tripMode);
     
+    abstract public boolean getTourModeIsTNC(int tourMode);
+    
+    abstract public boolean getTourModeIsTaxi(int tourMode);
+    
+    abstract public boolean getTripModeIsTNC(int tripMode);
+    
+    abstract public boolean getTripModeIsTaxi(int tripMode);
+    
     abstract public double[][] getCdap6PlusProps();
 
     abstract public int getDefaultAmPeriod();

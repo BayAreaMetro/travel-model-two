@@ -431,8 +431,63 @@ public class SandagModelStructure
         }
         return returnValue;
     }
-    
-    /**
+ 
+    public boolean getTourModeIsTNC(int tourMode)
+    {
+        boolean returnValue = false;
+        for (int i = 0; i < TNC_ALTS.length; i++)
+        {
+            if (TNC_ALTS[i] == tourMode)
+            {
+                returnValue = true;
+                break;
+            }
+        }
+        return returnValue;
+    }
+
+    public boolean getTourModeIsTaxi(int tourMode)
+    {
+        boolean returnValue = false;
+        for (int i = 0; i < TAXI_ALTS.length; i++)
+        {
+            if (TAXI_ALTS[i] == tourMode)
+            {
+                returnValue = true;
+                break;
+            }
+        }
+        return returnValue;
+    }
+
+    public boolean getTripModeIsTNC(int tripMode)
+    {
+        boolean returnValue = false;
+        for (int i = 0; i < TNC_ALTS.length; i++)
+        {
+            if (TNC_ALTS[i] == tripMode)
+            {
+                returnValue = true;
+                break;
+            }
+        }
+        return returnValue;
+    }
+
+    public boolean getTripModeIsTaxi(int tripMode)
+    {
+        boolean returnValue = false;
+        for (int i = 0; i < TAXI_ALTS.length; i++)
+        {
+            if (TAXI_ALTS[i] == tripMode)
+            {
+                returnValue = true;
+                break;
+            }
+        }
+        return returnValue;
+    }
+   /**
      * Get the name of the mode
      * @param mode The mode index (1-26)
      * @return  The name of the mode
