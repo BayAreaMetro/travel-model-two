@@ -219,7 +219,7 @@ public abstract class DestChoiceDMU
 
     protected int getAutos()
     {
-        return hh.getAutoOwnershipModelResult();
+        return hh.getAutosOwned();
     }
 
     protected int getWorkers()

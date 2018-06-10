@@ -101,6 +101,7 @@ public final class MgraDataManager
     // [mgra], [0=tapID, 1=Distance], [tap number (0-number of taps)]
     private int[][][]                   mgraWlkTapsDistArray;
     private int[]                       mgraTaz;
+    private float                       maxWalkTapDistMi = 1.25f;  
 
     // An array of Hashmaps dimensioned by origin mgra, with distance in feet, in a ragged
     // array (no key for mgra means no other mgras in walk distance)
@@ -154,6 +155,12 @@ public final class MgraDataManager
     private MgraDataManager(HashMap<String, String> rbMap)
     {
         logger.info("MgraDataManager Started");
+        
+        if(rbMap.containsKey("maz.tap.maxWalkTapDistInMiles")){
+        
+        	maxWalkTapDistMi = Util.getFloatValueFromPropertyMap(rbMap, "maz.tap.maxWalkTapDistInMiles");
+        }
+        
         readMgraTableData(rbMap);
         
         //read maz to tap and trim set 
@@ -353,6 +360,10 @@ public final class MgraDataManager
         		int maz = Integer.parseInt(data[0]);
         		int tap = Integer.parseInt(data[1]);
         		int distance = new Double(data[4]).intValue();
+        		
+        		if(((float)distance) > (maxWalkTapDistMi * 5280.0))
+        			continue;
+        		
         		if (!mgraToTapToDistance.containsKey(maz)) 
         			mgraToTapToDistance.put(maz,new TreeMap<Integer,Integer>());
         		mgraToTapToDistance.get(maz).put(tap,distance);

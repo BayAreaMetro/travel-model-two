@@ -189,6 +189,8 @@ public class SandagTourModeChoiceDMU
         
         methodIndexMap.put("getOMaz", 401);
         methodIndexMap.put("getDMaz", 402);
+        
+        methodIndexMap.put("getUseOwnedAV", 500);
 
     }
 
@@ -321,6 +323,9 @@ public class SandagTourModeChoiceDMU
             case 402:
                 returnValue = getDMaz();
                 break;
+            case 500: 
+            	returnValue = getUseOwnedAV();
+            	break;
                 
             default:
                 logger.error("method number = " + variableIndex + " not found");

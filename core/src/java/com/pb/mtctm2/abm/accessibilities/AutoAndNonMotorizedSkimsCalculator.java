@@ -58,34 +58,38 @@ public class AutoAndNonMotorizedSkimsCalculator
     private MgraDataManager               mgraManager;                                                                           
                                                                                                                                  
     private static final String[]         AUTO_SKIM_NAMES        = {                                                             
-            "DA_NT_Time",                                                                                                        
-            "DA_NT_FFTime",                                                                                                      
-            "DA_NT_Dist",                                                                                                        
-            "DA_TL_Time",                                                                                                        
-            "DA_TL_FFTime",                                                                                                      
-            "DA_TL_Dist",                                                                                                        
-            "DA_TL_Value",                                                                                                       
-            "DA_TL_FacLen",                                                                                                      
-            "HOV_NT_Time",                                                                                                       
-            "HOV_NT_FFTime",                                                                                                     
-            "HOV_NT_Dist",                                                                                                       
-            "HOV_NT_FacLen",
-            "S2TH_TIME",
-            "S2TH_FFTIME",
-            "S2TH_DIST",
-            "S2TH_TOLLCOST",
-            "S2TH_TOLLDIST",
-            "S2TH_HOVDIST",
-            "S3NH_TIME",
-            "S3NH_FFTIME",
-            "S3NH_DIST",
-            "S3NH_HOVDIST",
-            "S3TH_TIME",
-            "S3TH_FFTIME",
-            "S3TH_DIST",
-            "S3TH_TOLLCOST",
-            "S3TH_TOLLDIST",
-            "S3TH_HOVDIST"
+    	"da_nt_time",
+    	"da_nt_fftime",
+    	"da_nt_dist",
+    	"da_nt_btoll",
+    	"da_t_time",
+    	"da_t_fftime",
+    	"da_t_dist",
+    	"da_t_value",
+    	"da_t_length",
+    	"da_t_btoll",
+    	"s2_nt_time",
+    	"s2_nt_fftime",
+    	"s2_nt_dist",
+    	"s2_nt_length",
+    	"s2_nt_btoll",
+    	"s3_nt_time",
+    	"s3_nt_fftime",
+    	"s3_nt_dist",
+    	"s3_nt_length",
+    	"s3_nt_btoll",
+    	"s2_th_time",
+    	"s2_th_fftime",
+    	"s2_th_dist",
+    	"s2_th_value",
+    	"s2_th_length",
+    	"s2_th_btoll",
+    	"s3_th_time",
+    	"s3_th_fftime",
+    	"s3_th_dist",
+    	"s3_th_value",
+    	"s3_th_length",
+    	"s3_th_btoll"
     };                                                                                                                           
     private static final int              NUM_AUTO_SKIMS         = AUTO_SKIM_NAMES.length;                                       
                                                                                                                                  
@@ -93,31 +97,35 @@ public class AutoAndNonMotorizedSkimsCalculator
             "DA NonToll - Time",                    	// 0                                                                         
             "DA NonToll - Free Flow Time",          	// 1                                                                         
             "DA NonToll - Distance",                	// 2                                                                         
-            "DA Toll - Time",                       	// 3                                                                         
-            "DA Toll - Free Flow Time",             	// 4                                                                         
-            "DA Toll - Distance",                   	// 5                                                                         
-            "DA Toll - Toll Value",                 	// 6                                                                         
-            "DA Toll - Length on Toll Facility",    	// 7                                                                         
-            "S2 NonToll - Time",                    	// 8                                                                         
-            "S2 NonToll - Free Flow Time",          	// 9                                                                         
-            "S2 NonToll - Distance",                	// 10                                                                        
-            "S2 NonToll - Length on HOV Facility",   	// 11 
-            "HOV Toll - Time",							// 12
-            "HOV Toll - Free Flow Time",				// 13
-            "HOV Toll - Distance",						// 14
-            "HOV Toll - Cost of Toll Facility",			// 15
-            "HOV Toll - Length on Toll Facility",		// 16
-            "HOV Toll - Length on HOV Toll Facility",	// 17
-            "HOV3 - Time",								// 18
-            "HOV3 - Free Flow Time",					// 19
-            "HOV3 - Distance",							// 20
-            "HOV3 - Length on Toll Facility",			// 21
-            "HOV3 Toll - Time",							// 22
-            "HOV3 Toll - Free Flow Time",				// 23
-            "HOV3 Toll - Distance",						// 24
-            "HOV3 Toll - Cost of Toll Facility",		// 25
-            "HOV3 Toll - Length on Toll Facility",		// 26
-            "HOV3 Toll - Length on HOV Toll Facility"	// 27
+            "DA NonToll - Bridge Toll",                	// 3                                                                         
+            "DA Toll - Time",                       	// 4                                                                         
+            "DA Toll - Free Flow Time",             	// 5                                                                         
+            "DA Toll - Distance",                   	// 6                                                                         
+            "DA Toll - Toll Value",                 	// 7                                                                         
+            "DA Toll - Length on Toll Facility",    	// 8                                                                         
+            "DA Toll - Bridge Toll",    	            // 9                                                                         
+            "S2 HOV - Time",                    	    // 10                                                                         
+            "S2 HOV - Free Flow Time",          	    // 11                                                                         
+            "S2 HOV - Distance",                	    // 12                                                                        
+            "S2 HOV - Length on HOV Facility",   	    // 13 
+            "S2 HOV - Bridge Toll",              	    // 14 
+            "S3 HOV - Time",                    	    // 15                                                                         
+            "S3 HOV - Free Flow Time",          	    // 16                                                                        
+            "S3 HOV - Distance",                	    // 17                                                                        
+            "S3 HOV - Length on HOV Facility",   	    // 18 
+            "S3 HOV - Bridge Toll",              	    // 19 
+            "S2 Toll - Time",							// 20
+            "S2 Toll - Free Flow Time",				    // 21
+            "S2 Toll - Distance",						// 22
+            "S2 Toll - Cost of Toll Facility",			// 23
+            "S2 Toll - Length on Toll Facility",		// 24
+            "S2 Toll - Bridge Toll",		            // 25
+            "S3 Toll - Time",							// 26
+            "S3 Toll - Free Flow Time",				    // 27
+            "S3 Toll - Distance",						// 28
+            "S3 Toll - Cost of Toll Facility",			// 29
+            "S3 Toll - Length on Toll Facility",		// 30
+            "S3 Toll - Bridge Toll",		            // 31
 
     };                                                                                                                           
                                                                                                                                  
