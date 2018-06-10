@@ -1,0 +1,51 @@
+; ----------------------------------------------------------------------------------------------------------------
+;
+; Fix_USECLASS.job
+;
+; TP+ script to reset the USECLASS variables as from 2 (HOV2+) to 0 (link open to everyone) only for following links
+; Express Lanes- ((TOLLBOOTH) >= 11)
+; Set USECLASS = 6 or USECLASS = 7 to USECLASS = 2.
+; Set USECLASS = 1 to USECLASS = 0
+; 
+; Input:  input highway network 
+;
+; Output: highway network with fixed USECLASS variable
+;
+; version:  Travel Model Zed
+; authors:  an (2018 May)
+; ----------------------------------------------------------------------------------------------------------------
+
+
+run pgm = hwynet
+
+   ; begin with the standard input network
+   neti = input\mtc_final_network_base.net
+
+   ; write out to the same name with the added variables   
+   neto = output\mtc_final_network_base.net
+   
+   ; Fix the USECLASS of Express Lanes from HOV2 to GP
+   if (TOLLBOOTH >= 11)
+   
+      ;USECLASS  = 0 (link open to everyone)
+	  USECLASS  = 0
+      
+   endif
+   
+   if ((USECLASS == 6) | (USECLASS = 7))
+   
+      ;USECLASS  = 2 (these links are HOV2+ lanes)
+	  USECLASS  = 2
+      
+   endif
+   
+   if (USECLASS == 1)
+   
+      ;USECLASS  = 0 (the correct code for general purpose lanes is 0)
+	  USECLASS  = 0
+      
+   endif
+   
+endrun
+
+; copy input\mtc_final_network_base_fixedlanes.net input\mtc_final_network_base.net
