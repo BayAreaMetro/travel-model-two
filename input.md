@@ -247,51 +247,51 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 | *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  | |
 | *hh* | Total number of households | [MgraDataManager] |
 | *pop* | Total population | [MgraDataManager] |
-| *emp_self* | Self-employed | [MgraDataManager] |
-| *emp_ag* | Agriculture employment | [Accessibilities] |
-| *emp_const_non_bldg_prod* | Construction Non-Building production (including mining) employment |
-| *emp_const_non_bldg_office* | Construction Non-Building office support (including mining) employment |
-| *emp_utilities_prod* | Utilities production employment |
-| *emp_utilities_office* | Utilities office support employment |
-| *emp_const_bldg_prod* | Construction of Buildings production employment |
-| *emp_const_bldg_office* | Construction of Buildings office support employment |
-| *emp_mfg_prod* | Manufacturing production employment |
-| *emp_mfg_office* | Manufacturing office support employment |
-| *emp_whsle_whs* | Wholesale and Warehousing employment |
-| *emp_trans* | Transportation Activity employment |
-| *emp_retail* | Retail Activity employment |
-| *emp_prof_bus_svcs* | Professional and Business Services employment |
-| *emp_prof_bus_svcs_bldg_maint* | Professional and Business Services (Building Maintenance) employment |
-| *emp_pvt_ed_k12* | Private Education K-12 employment |
-| *emp_pvt_ed_post_k12_oth* | Private Education Post-Secondary (Post K-12) and Other employment |
-| *emp_health* | Health Services employment |
-| *emp_personal_svcs_office* | Personal Services Office Based employment |
-| *emp_amusement* | Amusement Services employment |
-| *emp_hotel* | Hotels and Motels employment |
-| *emp_restaurant_bar* | Restaurants and Bars employment |
-| *emp_personal_svcs_retail* | Personal Services Retail Based employment |
-| *emp_religious* | Religious Activity employment |
-| *emp_pvt_hh* | Private Households employment |
-| *emp_state_local_gov_ent* | State and Local Government Enterprises Activity employment |
-| *emp_scrap_other* | Scrap other employment |
-| *emp_fed_non_mil* | Federal Non-Military Activity employment |
-| *emp_fed_mil* | Federal Military Activity employment |
-| *emp_state_local_gov_blue* | State and Local Government Non-Education Activity production employment |
-| *emp_state_local_gov_white* | State and Local Government Non-Education Activity office support employment |
-| *emp_public_ed* | Public Education K-12 and other employment |
-| *emp_own_occ_dwell_mgmt* | Owner-Occupied Dwellings Management and Maintenance Activity employment |
-| *emp_fed_gov_accts* | Federal Government Accounts employment |
-| *emp_st_lcl_gov_accts* | State and Local Government Accounts employment |
-| *emp_cap_accts* | Capital Accounts employment |
-| *emp_total* | Total employment |
-| *EnrollGradeKto8* | Grade School K-8 enrollment |
-| *EnrollGrade9to12* | Grade School 9-12 enrollment |
-| *collegeEnroll* | Major College enrollment |
-| *otherCollegeEnroll* | Other College enrollment |
-| *AdultSchEnrl* | Adult School enrollment |
-| *ech_dist* | Elementary school district |
-| *hch_dist* | High school district |
-| *parkarea* | {::nomarkdown}<ul><li>1: Trips with destinations in this MAZ may choose to park in a different MAZ, parking charges apply (downtown)</li> <li>2: Trips with destinations in parkarea 1 may choose to park in this MAZ, parking charges might apply (quarter mile buffer around downtown)</li> <li>3: Only trips with destinations in this MAZ may park here, parking charges apply (outside downtown paid parking, only show cost no capacity issue)</li> <li>4: Only trips with destinations in this MAZ may park here, parking charges do not apply (outside downtown, free parking)</li> </ul>{:/} |
+| **Employment Industry Categories** |||
+| *ag* | Employment in agriculture: [NAICS] 11 | [Accessibilities] |
+| *art_rec* | Employment in arts, entertainment and recreation: [NAICS] 71 | [Accessibilities] |
+| *const* | Employment in construction: [NAICS] 23 | [Accessibilities] |
+| *eat* | Employment in food services and drinking places: [NAICS] 722 | [Accessibilities] |
+| *ed_high* | Employment in junior colleges, colleges, universities: [NAICS] 6112, 6113, 6114, 6115 | [Accessibilities] |
+| *ed_k12* | Employment in K-12 schools: [NAICS] 6111 | [Accessibilities] |
+| *ed_oth* | Employment in other schools, libraries and educational services: [NAICS] 6116, 6117 | [Accessibilities] |
+| *fire* | Employment in FIRE (finance, insurance and real estate): NAICS 52, 53 not in leasing | [Accessibilities] |
+| *gov* | Employment in government: [NAICS] 92 | [Accessibilities] |
+| *health* | Employment in health care: [NAICS] 62 except those in *serv_soc* | [Accessibilities] |
+| *hotel* | Employment in hotels and other accomodations: [NAICS] 721 | [Accessibilities] |
+| *info* | Employment in information-based services: [NAICS] 51 | [Accessibilities] |
+| *lease* | Employment in leasing: [NAICS] 532 | [Accessibilities] |
+| *logis* | Employment in logistics/warehousing and distribution: [NAICS] 42, 493 | [Accessibilities] |
+| *man_bio* | Employment in biological/drug manufacturing: [NAICS] 325411, 325412, 325313, 325414 | [Accessibilities] |
+| *man_hvy* | Employment in heavy manufacturing: [NAICS] 31-33 subset | [Accessibilities] |
+| *man_lgt* | Employment in light manufacturing: [NAICS] 31-33 subset | [Accessibilities] |
+| *man_tech* | Employment in high-tech manufacturing: [NAICS] 334 | [Accessibilities] |
+| *natres* | Employment in mining and resource extraction: [NAICS] 21 | [Accessibilities] |
+| *prof* | Employment in professional and technical services: [NAICS] 54 | [Accessibilities] |
+| *prof_comp* | ? | is this used? |
+| *prof_rd* | ? | is this used? |
+| *ret_loc* | Employment in local-serving retail: [NAICS] 444130, 444190, 444210, 444220, 445110, 445120, 445210, 445220, 445230, 445291, 445292, 445299, 445310, 446110, 446120, 446130, 446191, 446199, 447110, 447190, 448110, 448120, 448130, 448140, 448150, 448190, 448210, 448310, 448320, 451110, 451120, 451130, 451140, 451211, 451212, 452910, 452990, 453110, 453220, 453310, 453910, 453920, 453930, 453991, 453998, 454111, 454112, 454113 | [Accessibilities] |
+| *ret_reg* | Employment in regional retail: [NAICS] 441110, 441120, 441210, 441222, 441228, 441310, 441320, 442110, 442210, 442291, 442299, 443141, 443142, 444110, 444120, 452111, 452112, 453210, 454210, 454310, 454390 | [Accessibilities] |
+| *serv_bus* | Employment in managerial services, administrative and business services: [NAICS] 55,56 | [Accessibilities] |
+| *serv_pers* | Employment in personal and other services: [NAICS] 53, 81 | [Accessibilities] |
+| *serv_soc* | Employment in social services and childcare: [NAICS] 624 | [Accessibilities] |
+| *transp* | Employment in transportation: [NAICS] 48 (most of it), 49 (not in *logis*) | [Accessibilities] |
+| *util* | Employment in utilities: [NAICS] 22, 56 | [Accessibilities] |
+| *unclass* | Employment not classified | is this used? |
+| *emp_total* | Total employment | [Accessibilities] |
+| **School Enrollment Categories** |||
+| *publicenrollgradekto8* | Public school grade K-8 enrollment | [Accessibilities] |
+| *privateenrollgradekto8* | Private school grade K-8 enrollment | [Accessibilities] |
+| *publicenrollgrade9to12* | Public high school grade 9-12 enrollment | [Accessibilities] |
+| *privateenrollgrade9to12* | Private high school grade 9-12 enrollment | [Accessibilities] |
+| *comm_coll_enroll* | Community college enrollment | [Accessibilities] |
+| *collegeEnroll* | Major College enrollment | is this used? |
+| *otherCollegeEnroll* | Other College enrollment | is this used? |
+| *AdultSchEnrl* | Adult School enrollment | is this used? |
+| *ech_dist* | Elementary school district | is this used? |
+| *hch_dist* | High school district | is this used? |
+| **Parking** |||
+| *parkarea* | {::nomarkdown}<ul><li>1: Trips with destinations in this MAZ may choose to park in a different MAZ, parking charges apply (downtown)</li> <li>2: Trips with destinations in parkarea 1 may choose to park in this MAZ, parking charges might apply (quarter mile buffer around downtown)</li> <li>3: Only trips with destinations in this MAZ may park here, parking charges apply (outside downtown paid parking, only show cost no capacity issue)</li> <li>4: Only trips with destinations in this MAZ may park here, parking charges do not apply (outside downtown, free parking)</li> </ul>{:/} | [Accessibilities] |
 | *hstallsoth* | Number of stalls allowing hourly parking for trips with destinations in other MAZs |
 | *hstallssam* | Number of stalls allowing hourly parking for trips with destinations in the same MAZ |
 | *hparkcost* | Average cost of parking for one hour in hourly stalls in this MAZ, dollars |
@@ -302,6 +302,7 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 | *mstallsoth* | Stalls allowing monthly parking for trips with destinations in other MAZs |
 | *mstallssam* | Stalls allowing monthly parking for trips with destinations in the same MAZ |
 | *mparkcost* | Average cost of parking for one day in monthly stalls, amortized over 22 workdays, dollars |
+| **Calculated land use measures** |||
 | *TotInt* | Total intersections |
 | *DUDen* | Dwelling unit density |
 | *EmpDen* | Employment density |
@@ -366,3 +367,4 @@ Air passenger demand is based on surveys of air passenger and captures demand fr
 
 [Accessibilities]: https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls
 [MgraDataManager]: https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47
+[NAICS]: https://www.census.gov/eos/www/naics/
