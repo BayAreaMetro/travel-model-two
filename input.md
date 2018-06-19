@@ -241,14 +241,14 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 
 ## Micro Zonal Data
 
-| *Column Name* | *Description* |
-|---------------|---------------|
-| *MAZ_ORIGINAL* | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system) |
-| *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  |
-| *hh** | Total number of households |
-| *pop* | Total population |
-| *emp_self* | Self-employed |
-| *emp_ag* | Agriculture employment |
+| *Column Name* | *Description* | *Used by* |
+|---------------|---------------|-----------|
+| *MAZ_ORIGINAL* | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system) | |
+| *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  | |
+| *hh* | Total number of households | [MgraDataManager] |
+| *pop* | Total population | [MgraDataManager] |
+| *emp_self* | Self-employed | [MgraDataManager] |
+| *emp_ag* | Agriculture employment | [Accessibilities] |
 | *emp_const_non_bldg_prod* | Construction Non-Building production (including mining) employment |
 | *emp_const_non_bldg_office* | Construction Non-Building office support (including mining) employment |
 | *emp_utilities_prod* | Utilities production employment |
@@ -363,3 +363,6 @@ Air passenger demand is based on surveys of air passenger and captures demand fr
  * Single-occupant vehicles that are willing to pay a high-occupancy toll lane fee;
  * Two-occupant vehicles that are willing to pay a high-occupancy toll lane fee; and,
  * Three-occupant vehicles that are willing to pay a high-occupancy toll lane fee.
+
+[Accessibilities]: https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls
+[MgraDataManager]: https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47
