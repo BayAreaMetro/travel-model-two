@@ -285,43 +285,45 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 | *publicenrollgrade9to12* | Public high school grade 9-12 enrollment | [Accessibilities] |
 | *privateenrollgrade9to12* | Private high school grade 9-12 enrollment | [Accessibilities] |
 | *comm_coll_enroll* | Community college enrollment | [Accessibilities] |
-| *collegeEnroll* | Major College enrollment | is this used? |
-| *otherCollegeEnroll* | Other College enrollment | is this used? |
-| *AdultSchEnrl* | Adult School enrollment | is this used? |
-| *ech_dist* | Elementary school district | is this used? |
-| *hch_dist* | High school district | is this used? |
+| *EnrollGradeKto8* | Total high school grade 9-12 enrollment | [MgraDataManager] |
+| *EnrollGrade9to12* | Total high school grade 9-12 enrollment | [MgraDataManager] |
+| *collegeEnroll* | Major College enrollment | [MgraDataManager] |
+| *otherCollegeEnroll* | Other College enrollment | [MgraDataManager] |
+| *AdultSchEnrl* | Adult School enrollment | [MgraDataManager] |
+| *ech_dist* | Elementary school district | [MgraDataManager] |
+| *hch_dist* | High school district | [MgraDataManager] |
 | **Parking** |||
-| *parkarea* | {::nomarkdown}<ul><li>1: Trips with destinations in this MAZ may choose to park in a different MAZ, parking charges apply (downtown)</li> <li>2: Trips with destinations in parkarea 1 may choose to park in this MAZ, parking charges might apply (quarter mile buffer around downtown)</li> <li>3: Only trips with destinations in this MAZ may park here, parking charges apply (outside downtown paid parking, only show cost no capacity issue)</li> <li>4: Only trips with destinations in this MAZ may park here, parking charges do not apply (outside downtown, free parking)</li> </ul>{:/} | [Accessibilities] |
-| *hstallsoth* | Number of stalls allowing hourly parking for trips with destinations in other MAZs |
-| *hstallssam* | Number of stalls allowing hourly parking for trips with destinations in the same MAZ |
-| *hparkcost* | Average cost of parking for one hour in hourly stalls in this MAZ, dollars |
-| *numfreehrs* | Number of hours of free parking allowed before parking charges begin in hourly stalls |
-| *dstallsoth* | Stalls allowing daily parking for trips with destinations in other MAZs |
-| *dstallssam* | Stalls allowing daily parking for trips with destinations in the same MAZ |
-| *dparkcost* | Average cost of parking for one day in daily stalls, dollars |
-| *mstallsoth* | Stalls allowing monthly parking for trips with destinations in other MAZs |
-| *mstallssam* | Stalls allowing monthly parking for trips with destinations in the same MAZ |
-| *mparkcost* | Average cost of parking for one day in monthly stalls, amortized over 22 workdays, dollars |
+| *parkarea* | {::nomarkdown}<ul><li>1: Trips with destinations in this MAZ may choose to park in a different MAZ, parking charges apply (downtown)</li> <li>2: Trips with destinations in parkarea 1 may choose to park in this MAZ, parking charges might apply (quarter mile buffer around downtown)</li> <li>3: Only trips with destinations in this MAZ may park here, parking charges apply (outside downtown paid parking, only show cost no capacity issue)</li> <li>4: Only trips with destinations in this MAZ may park here, parking charges do not apply (outside downtown, free parking)</li> </ul>{:/} | [MgraDataManager] |
+| *hstallsoth* | Number of stalls allowing hourly parking for trips with destinations in other MAZs | [MgraDataManager] |
+| *hstallssam* | Number of stalls allowing hourly parking for trips with destinations in the same MAZ | [MgraDataManager] |
+| *hparkcost* | Average cost of parking for one hour in hourly stalls in this MAZ, dollars | [MgraDataManager] |
+| *numfreehrs* | Number of hours of free parking allowed before parking charges begin in hourly stalls | [MgraDataManager] |
+| *dstallsoth* | Stalls allowing daily parking for trips with destinations in other MAZs | [MgraDataManager] |
+| *dstallssam* | Stalls allowing daily parking for trips with destinations in the same MAZ | [MgraDataManager] |
+| *dparkcost* | Average cost of parking for one day in daily stalls, dollars | [MgraDataManager] |
+| *mstallsoth* | Stalls allowing monthly parking for trips with destinations in other MAZs | [MgraDataManager] |
+| *mstallssam* | Stalls allowing monthly parking for trips with destinations in the same MAZ | [MgraDataManager] |
+| *mparkcost* | Average cost of parking for one day in monthly stalls, amortized over 22 workdays, dollars | [MgraDataManager] |
 | **Calculated land use measures** |||
-| *TotInt* | Total intersections |
-| *DUDen* | Dwelling unit density |
-| *EmpDen* | Employment density |
-| *PopDen* | Population density |
-| *RetEmpDen* | Retail employment density |
-| *TotIntBin* | Total intersection bin |
-| *EmpDenBin* | Employment density bin |
-| *DuDenBin* | Dwelling unit density bin |
-| *ACRES* | MAZ acres |
+| *TotInt* | Total intersections | [MgraDataManager] |
+| *DUDen* | Dwelling unit density | [MgraDataManager] |
+| *EmpDen* | Employment density | [MgraDataManager] |
+| *PopDen* | Population density | is this used? |
+| *RetEmpDen* | Retail employment density | is this used? |
+| *TotIntBin* | Total intersection bin | is this used? |
+| *EmpDenBin* | Employment density bin | is this used? |
+| *DuDenBin* | Dwelling unit density bin | is this used? |
+| *ACRES* | MAZ acres | is this used? |
 
 ## Zonal Data
 
-| *Field* | *Description* |
-|---------|---------------|
+| *Field* | *Description* | *Used by* |
+|---------|---------------|-----------|
 | *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  |
-| *AVGTTS* | Average travel time savings for transponder ownership model |
-| *DIST* | Distance for transponder ownership model |
-| *PCTDETOUR* | Percent detour for transponder ownership model |
-| *TERMINALTIME* | Terminal time |
+| *AVGTTS* | Average travel time savings for transponder ownership model | [TazDataManager] |
+| *DIST* | Distance for transponder ownership model | [TazDataManager] |
+| *PCTDETOUR* | Percent detour for transponder ownership model | [TazDataManager] |
+| *TERMINALTIME* | Terminal time | [TazDataManager] |
 
 ## Truck Distribution
 
@@ -368,3 +370,4 @@ Air passenger demand is based on surveys of air passenger and captures demand fr
 [Accessibilities]: https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls
 [MgraDataManager]: https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47
 [NAICS]: https://www.census.gov/eos/www/naics/
+[TazDataManager]: https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/TazDataManager.java#L37
