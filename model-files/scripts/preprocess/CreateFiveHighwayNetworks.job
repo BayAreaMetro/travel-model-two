@@ -222,7 +222,7 @@ loop period = 1, 5
       token_period = 'EV'
       
       ; turn HOV into free flow
-      token_hov_to_freeflow = ''; do not turn HOV into free flow''
+      token_hov_to_freeflow = '; do not turn HOV into free flow'
       
       ; reversible infrastructure
       token_golden_gate_nb_lanes = '4'
