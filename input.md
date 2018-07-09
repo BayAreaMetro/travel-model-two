@@ -258,8 +258,8 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 
 ## Micro Zonal Data
 
-| *Column Name* | *Description* | *Used by* |
-|---------------|---------------|-----------|
+| *Column Name* | *Description* | *Used by* | *Source* |
+|---------------|---------------|-----------|----------|
 | *MAZ_ORIGINAL* | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system) | |
 | *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  | |
 | *hh* | Total number of households | [MgraDataManager] |
@@ -322,15 +322,15 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 | *mstallssam* | Stalls allowing monthly parking for trips with destinations in the same MAZ | [MgraDataManager] |
 | *mparkcost* | Average cost of parking for one day in monthly stalls, amortized over 22 workdays, dollars | [MgraDataManager] |
 | **Calculated land use measures** |||
-| *TotInt* | Total intersections | [MgraDataManager] |
-| *DUDen* | Dwelling unit density | [MgraDataManager] |
-| *EmpDen* | Employment density | [MgraDataManager] |
-| *PopDen* | Population density | is this used? |
-| *RetEmpDen* | Retail employment density | is this used? |
-| *TotIntBin* | Total intersection bin | is this used? |
-| *EmpDenBin* | Employment density bin | is this used? |
-| *DuDenBin* | Dwelling unit density bin | is this used? |
-| *ACRES* | MAZ acres | is this used? |
+| *TotInt* | Total intersections | [MgraDataManager], [AutoOwnership] | [createMazDensityFile.py] |
+| *DUDen* | Dwelling unit density | [MgraDataManager] | [createMazDensityFile.py] |
+| *EmpDen* | Employment density | [MgraDataManager] | [createMazDensityFile.py] |
+| *PopDen* | Population density | [AutoOwnership] | [createMazDensityFile.py] |
+| *RetEmpDen* | Retail employment density | [AutoOwnership] | [createMazDensityFile.py] |
+| *TotIntBin* | Total intersection bin | is this used? | [createMazDensityFile.py] |
+| *EmpDenBin* | Employment density bin | [AtWorkSubtourFrequency] | [createMazDensityFile.py] |
+| *DuDenBin* | Dwelling unit density bin | [AtWorkSubtourFrequency] | [createMazDensityFile.py] |
+| *ACRES* | MAZ acres | [createMazDensityFile.py] |
 
 ## Zonal Data
 
@@ -423,6 +423,9 @@ Air passenger demand is based on surveys of air passenger and captures demand fr
  * Three-occupant vehicles that are willing to pay a high-occupancy toll lane fee.
 
 [Accessibilities]: https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls
+[AtWorkSubtourFrequency]: https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/AtWorkSubtourFrequency.xls
+[AutoOwnership]: https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/AutoOwnership.xls
+[createMazDensityFile.py]: https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py
 [MgraDataManager]: https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47
 [NAICS]: https://www.census.gov/eos/www/naics/
 [TazDataManager]: https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/TazDataManager.java#L37
