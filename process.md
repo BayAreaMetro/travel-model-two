@@ -21,9 +21,14 @@ title: Modeling Process
 
 ## Preprocessing
 
+1. [`preprocess\writeZoneSystems.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/writeZoneSystems.job)
+   * Summary: Counts tazs, mazs, taps and external zones based on [node number conventions](/travel-model-two/input/#county-node-numbering-system)
+   * Input: `hwy\mtc_final_network_base.net`, the roadway network
+   * Output: `zoneSystem.bat`, a local batch file that defines `TAZ_COUNT`, `TAZ_EXTS_COUNT`, `TAP_COUNT`, and `MAZ_COUNT` environment variables
+
 1. [`preprocess\zone_seq_net_builder.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/zone_seq_net_builder.job)
    * Summary: Builds a sequential zone numbering system for TAZs, MAZs, TAPs and Externals 
-     given the [node number conventions](/travel-model-two/guide/#county-node-numbering-system).
+     given the [node number conventions](/travel-model-two/input/#county-node-numbering-system).
    * Input: `hwy\mtc_final_network_base.net`, the roadway network
    * Output:
      1. `hwy\mtc_final_network.net` with additional nodeattributes, **TAZSEQ**, **MAZSEQ**, **TAPSEQ** and **EXTSEQ**
