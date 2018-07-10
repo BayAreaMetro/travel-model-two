@@ -32,12 +32,29 @@ for line in open(transit_line_file):
     continue
   
   lineName = split_line[1]
-  for i in range(split_line.index('N') + 1,len(split_line)):
-    n = int(split_line[i])
+  iter = split_line.index('N') + 1
+  while iter < len(split_line):
+    #skip NNTIME token and value	
+    if (split_line[iter] == "NNTIME") or (split_line[iter] == "TIME"):
+        iter = iter + 2
+        continue
+    #skip N token
+    if (split_line[iter] == "N"):
+        iter = iter + 1
+        continue
+    n = int(split_line[iter])
     if n > 0:
       if n not in linesByNode:
         linesByNode[n] = set()
       linesByNode[n].add(lineName.replace('"',""))
+    iter = iter + 1
+	
+#  for i in range(split_line.index('N') + 1,len(split_line)):
+#    n = int(split_line[i])
+#    if n > 0:
+#      if n not in linesByNode:
+#        linesByNode[n] = set()
+#      linesByNode[n].add(lineName.replace('"',""))
 
 print 'reading tap connectors'
 access_links = []

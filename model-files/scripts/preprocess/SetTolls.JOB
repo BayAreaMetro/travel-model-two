@@ -43,7 +43,8 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 RUN PGM=HWYNET
-     ; begin with the standard input network
+ 
+    ; begin with the standard input network
    neti = hwy\mtc_final_network_base.net
    
    ; write out to the same name with the added variables   

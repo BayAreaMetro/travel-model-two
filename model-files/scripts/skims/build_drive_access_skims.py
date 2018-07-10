@@ -151,6 +151,7 @@ for period in periods:
 #LINE NAME="EM_HOLLIS", USERA1="Emery Go-Round", USERA2="Local bus", MODE=12, ONEWAY=T, XYSPEED=15, HEADWAY[1]=60.0, HEADWAY[2]=12.0, HEADWAY[3]=20.0, HEADWAY[4]=12.0, HEADWAY[5]=30.0, N=2565595,...
 for line in open(transit_line_file):
     split_line = map(str.strip,re.split('[=,]',line.strip()))
+
     if len(split_line) < 3:
         continue
     mode = split_line[split_line.index('USERA2') + 1].replace('"','').upper().replace(' ','_')
@@ -161,10 +162,24 @@ for line in open(transit_line_file):
         if not mode in stops_by_tod_and_mode[period]:
             stops_by_tod_and_mode[period][mode] = {}
     stop_nodes = {}
-    for i in range(split_line.index('N') + 1,len(split_line)):
-        n = int(split_line[i])
+    iter = split_line.index('N') + 1
+    while iter < len(split_line):
+        #skip NNTIME token and value	
+        if (split_line[iter] == "NNTIME") or (split_line[iter] == "TIME"):
+            iter = iter + 2
+            continue
+        #skip N token
+        if (split_line[iter] == "N"):
+            iter = iter + 1
+            continue
+        n = int(split_line[iter])
         if n > 0:
-            stop_nodes[n] = None
+           stop_nodes[n] = None
+        iter = iter + 1			
+#    for i in range(split_line.index('N') + 1,len(split_line)):
+#        n = int(split_line[i])
+#        if n > 0:
+#            stop_nodes[n] = None
     for i in range(len(tod)):
         if tod[i]:
             for n in stop_nodes:

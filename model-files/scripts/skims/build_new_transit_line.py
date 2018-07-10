@@ -37,13 +37,23 @@ for line in open(line_file):
         f.write(line[0] + os.linesep)
         continue
     f.write(line[0] + ' N=')
-    seq = []
-    for n in line[1].split(','):
-        n = int(n)
-        #make sure that the sign of the nodes (for stop/pass-through) is retained
-        sign = int(math.copysign(1,n))
-        new_n = sign*node_map[n*sign]
-        seq.append(new_n)
-    f.write(','.join(map(str,seq)) + os.linesep)
+    for i in range(1,len(line)):
+        seq = []
+        for n in line[i].strip().split(','):
+            str_n = n
+            if str_n.lstrip('-').isdigit():
+               n = int(n)
+            else:
+               if len(n)>0:
+			      seq.append(n)
+               continue
+            #make sure that the sign of the nodes (for stop/pass-through) is retained
+            sign = int(math.copysign(1,n))
+            new_n = sign*node_map[n*sign]
+            seq.append(new_n)
+        if i < len(line)-1:
+            seq.append(' N=')
+        f.write(','.join(map(str,seq)))
+    f.write(os.linesep)
 f.close()
         

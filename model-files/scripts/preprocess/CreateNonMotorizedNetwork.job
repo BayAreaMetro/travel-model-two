@@ -27,7 +27,8 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;read max cost parameters
-read file=%BASE_SCRIPTS%\block\maxCosts.block
+;read file=%BASE_SCRIPTS%\block\maxCosts.block
+read file=E:\projects\clients\marin\2015_calibration\ctramp\scripts\block\maxCosts.block
 
 ;first create the pedestrian network
 ;create temporary network with one-way links allowing walking in both directions
