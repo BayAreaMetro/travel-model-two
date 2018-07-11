@@ -262,6 +262,7 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 |---------------|---------------|-----------|----------|
 | *MAZ_ORIGINAL* | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system) | |
 | *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  | |
+| *ACRES* | MAZ acres | [createMazDensityFile.py] | Calculated from shapefile |
 | *HH* | Total number of households | [MgraDataManager] |
 | *POP* | Total population | [MgraDataManager] |
 | **Employment Industry Categories** |||
@@ -330,7 +331,7 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 | *TotIntBin* | Total intersection bin | is this used? | [createMazDensityFile.py] |
 | *EmpDenBin* | Employment density bin | [AtWorkSubtourFrequency] | [createMazDensityFile.py] |
 | *DuDenBin* | Dwelling unit density bin | [AtWorkSubtourFrequency] | [createMazDensityFile.py] |
-| *ACRES* | MAZ acres | [createMazDensityFile.py] |
+
 
 ## Zonal Data
 
