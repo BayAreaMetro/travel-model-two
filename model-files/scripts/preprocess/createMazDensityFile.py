@@ -21,30 +21,33 @@
 #       intDenBin       Intersection density bin (1 through 3 where 3 is the highest)
 #       empDenBin       Employment density bin (1 through 3 where 3 is the highest)
 #       duDenBin        Houseold density bin (1 through 3 where 3 is the highest)
-#
+#   landuse\maz_data_withDensity.csv: landuse\maz_data.csv joined with landuse\maz_density.csv on MAZ_ORIGINAL
+#   
 # Requires: Basic python 2.7.x, pandas
 #
 
 # Import modules
-import os, csv, sys, math
+import os, csv, datetime, sys, math
 import pandas as pd, numpy as np
 from shutil import copyfile
 
 # Variables: Input
-inMazNodes = "hwy\maz_nodes.csv" # VAR=N,X,Y
-inIntersectionNodes="hwy\intersection_nodes.csv" # VAR=N, X, Y
-inMazData = "landuse\maz_data.csv" # "maz_data.csv"
-outDensityData = "landuse\maz_density.csv"
-outMazData = "landuse\maz_data_withDensity.csv"
+inMazNodes          = "hwy\maz_nodes.csv"
+inIntersectionNodes = "hwy\intersection_nodes.csv"
+inMazData           = "landuse\maz_data.csv"
+outDensityData      = "landuse\maz_density.csv"
+outMazData          = "landuse\maz_data_withDensity.csv"
+start_time          = datetime.datetime.now()
 
 print inMazNodes
 print inIntersectionNodes
 print inMazData
 print outDensityData
 
-
 # Open intersection file as pandas table
-intersections = pd.read_csv(inIntersectionNodes, names=['N','X','Y'])
+intersections = pd.read_csv(inIntersectionNodes)
+print("Read {} intersections from {}".format(len(intersections), inIntersectionNodes))
+
 # add columns to intersections dataframe
 intersections['maz_x'] = 0
 intersections['maz_y'] = 0
@@ -55,7 +58,7 @@ intersections['count'] = 0
 readMazNodeFile = open(inMazNodes, 'r')
 
 # Create file reader
-reader = csv.reader(readMazNodeFile, delimiter=',')
+reader = csv.DictReader(readMazNodeFile)
 
 # iterate through file and store count of intersections within 1/2 mile of XY coordinates
 max_dist_fact = 0.5 # 1/2 mile radius from centroid
@@ -67,9 +70,9 @@ maz_nonseq = []
 
 n = 0
 for row in reader:
-    maz_n = int(row[0])
-    x = float(row[1])
-    y = float(row[2])
+    maz_n = int(row['MAZ_ORIGINAL'])
+    x = float(row['MAZ_X'])
+    y = float(row['MAZ_Y'])
     maz_x.append(x)
     maz_y.append(y)
     maz_nonseq.append(maz_n)
@@ -80,7 +83,7 @@ for row in reader:
     
     intersections['distance'] = intersections.eval("((X-maz_x)**2 + (Y-maz_y)**2)**0.5")    
     int_cnt.append(len(intersections[intersections.distance <= max_dist]))
-    if((n ==1) or (n % 100) == 0):
+    if((n % 1000) == 0):
         print "Counting Intersections for MAZ ", maz_n, " : ", int_cnt[n] 
     n = n + 1
      
@@ -199,4 +202,7 @@ mazData.drop('distance', axis=1, inplace=True)
 # write the data back out
 mazData.to_csv(outMazData, index=False)
 
-print "*** Finished ***"
+end_time = datetime.datetime.now()
+duration = end_time - start_time
+
+print "*** Finished in {} minutes ***".format(duration.total_seconds()/60.0)
