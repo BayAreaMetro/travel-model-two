@@ -48,6 +48,23 @@ title: Modeling Process
      5. `CTRAMP\model\SoaTazDistAlternatives.csv`  **TODO**: what are these?  Move this from _CTRAMP_
      6. `CTRAMP\model\ParkLocationSampleAlts.csv`  **TODO**: what are these?  Move this from _CTRAMP_
 
+1. [`preprocessing\maz_densities.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/maz_densities.job)
+   * Summary: Creates intermediate files for calculating maz densities: maz centroid location file and intersection location file.
+   * Input: `hwy\mtc_final_network_base.net`, the roadway network
+   * Output:
+     1. `hwy\maz_nodes.csv`, the maz centroids and their coordinates
+     1. `hwy\intersection_nodes.csv`, intersection nodes and their coordinates, where intersections are defined by having 5 non-freeway, non-connector links attached
+
+1. [`preprocessing\createMazDensityFile.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py)
+   * Summary: Calculates density-related columns to add to [Micro Zonal Data](/travel-model-two/guide/#micro-zonal-data)
+   * Input:
+     1. `hwy\maz_nodes.csv`, the maz centroids and their coordinates
+     1. `hwy\intersection_nodes.csv`, intersection nodes and their coordinates
+     1. `landuse\maz_data.csv` - [Micro Zonal Data](/travel-model-two/guide/#micro-zonal-data)
+   * Output:
+     1. `landuse\maz_density.csv` - Density measures for MAZs (TotInt, EmpDen, RetDen, DUDen, PopDen, intDenBin, empDenBin, duDenBin)
+     1. `landuse\maz_data_withDensity.csv` - [Micro Zonal Data](/travel-model-two/guide/#micro-zonal-data) joined with density measures
+
 1. [`preprocess\CreateNonMotorizedNetwork.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/CreateNonMotorizedNetwork.job)
    * Summary: Create pedestrian, bicycle and pedestrian TAP (Transit Access Point) to TAP networks.  The procedure to create the non-motorized networks (walk and bike) extracts the links from the network which have **CNTYPE** equal to TANA, PED/BIKE, MAZ, TAZ, or TAP and which are not freeways, or which have the BIKEPEDOK flag set to true (1). For the pedestrian network, any link that is one-way has an opposite direction link generated. 
    * Input: 
