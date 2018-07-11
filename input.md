@@ -262,8 +262,8 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 |---------------|---------------|-----------|----------|
 | *MAZ_ORIGINAL* | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system) | |
 | *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  | |
-| *hh* | Total number of households | [MgraDataManager] |
-| *pop* | Total population | [MgraDataManager] |
+| *HH* | Total number of households | [MgraDataManager] |
+| *POP* | Total population | [MgraDataManager] |
 | **Employment Industry Categories** |||
 | *ag* | Employment in agriculture: [NAICS] 11 | [Accessibilities] |
 | *art_rec* | Employment in arts, entertainment and recreation: [NAICS] 71 | [Accessibilities] |
