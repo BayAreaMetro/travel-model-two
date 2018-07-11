@@ -48,7 +48,7 @@ def map_data(filename, sequence_mapping, mapping_dict):
 
     Returns the resulting DataFrame (after writing it out again)
     """
-    dframe                = pandas.DataFrame.from_csv(filename)
+    dframe                = pandas.read_csv(filename)
     dframe.reset_index(inplace=True)
 
     for mapkey, mapdef in mapping_dict.iteritems():
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     soa_dist_alts_file      = os.path.join(model_files_dir,'SoaTazDistAlternatives.csv')  # a,dest (a,taz)
     parking_soa_alts_file   = os.path.join(model_files_dir,'ParkLocationSampleAlts.csv')  # a,mgra
     
-    sequence_mapping        = pandas.DataFrame.from_csv(zone_seq_mapping_file)
+    sequence_mapping        = pandas.read_csv(zone_seq_mapping_file)
     sequence_mapping.reset_index(inplace=True)
     
     ######### map TAZ_ORIGINAL to the actual TAZ
