@@ -11,7 +11,7 @@
     This script first reads in the zone sequence correspondence, and builds mappings from/to the
     (CUBE) network zone numbers to the (CTRAMP) sequential zone numbers. This file is:
    
-        base_dir\hwy\mtc_final_netwok_zone_seq.csv
+        base_dir\hwy\mtc_final_network_zone_seq.csv
         
     Then this script builds a number of output files, replacing the existing one, only with updated/added
     sequential numbers:
@@ -58,6 +58,11 @@ def map_data(filename, sequence_mapping, mapping_dict):
         # join with sequence mapping (e.g. join N,TAZSEQ on TAZ_ORIGINAL)
         dframe = pandas.merge(left=sequence_mapping[['N',mapdef['seqcol']]], right=dframe, how='right', 
                               left_on='N', right_on=mapdef['N_col'])
+
+        # verify everything in the original dataset joined
+        missing_vals = dframe.loc[ dframe[mapdef['seqcol']].isnull() ]
+        # print(missing_vals)
+        assert(len(missing_vals)==0)
 
         # drop N - it's redundant
         dframe.drop('N', axis=1, inplace=True)
