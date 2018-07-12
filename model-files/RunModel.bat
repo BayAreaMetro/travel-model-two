@@ -153,7 +153,7 @@ if ERRORLEVEL 2 goto done
 
 :: Calculate density fields and append to MAZ file
 "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\createMazDensityFile.py 
-
+IF ERRORLEVEL 1 goto done
 
 :: Translate the roadway network into a non-motorized network
 runtpp %BASE_SCRIPTS%\preprocess\CreateNonMotorizedNetwork.job
@@ -162,6 +162,9 @@ if ERRORLEVEL 2 goto done
 :: Create the tap data
 runtpp %BASE_SCRIPTS%\preprocess\tap_to_taz_for_parking.job
 if ERRORLEVEL 2 goto done
+
+"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
+IF ERRORLEVEL 1 goto done
 
 :: Set the prices in the roadway network
 runtpp %BASE_SCRIPTS%\preprocess\SetTolls.job
