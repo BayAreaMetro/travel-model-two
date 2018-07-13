@@ -5,8 +5,6 @@
 ; This is used to build a tap-taz correspondence. The skimming procedure builds the closest tap for each 
 ; taz, whereas this script's results are used to build the closest taz for each tap.
 ;
-; As a last step, this script calls the python script which builds the tap data file.
-;
 ; Inputs: mtc_ped_network.net - the pedestrian walk network
 ; Outputs: tap_to_taz_for_parking.txt - csv file holding shortest path tree, with the following columns:
 ;              tap - the origin tap
