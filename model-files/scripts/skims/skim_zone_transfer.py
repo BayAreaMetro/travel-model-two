@@ -17,7 +17,7 @@ skim_zone_transfer.py zone_mapping_file skim_file columns_to_transfer [transfer_
                                  EXT - going from sequence to original node numbering for EXTs
 
 """
-import csv,sys,os
+import csv,sys,os,shutil
 
 zone_mapping_file = os.path.abspath(sys.argv[1])
 skim_file = os.path.abspath(sys.argv[2])
@@ -37,16 +37,16 @@ tap_mapping = {}
 ext_mapping = {}
 reader = csv.DictReader(open(zone_mapping_file))
 for data in reader:
-    if data["TAZSEQ"] > 0:
+    if int(data["TAZSEQ"]) > 0:
         seq_mapping[int(data["N"     ])] = str(data["TAZSEQ"])
         taz_mapping[int(data["TAZSEQ"])] = str(data["N"     ])
-    if data["MAZSEQ"] > 0:
+    if int(data["MAZSEQ"]) > 0:
         seq_mapping[int(data["N"     ])] = str(data["MAZSEQ"])
         maz_mapping[int(data["MAZSEQ"])] = str(data["N"     ])
-    if data["TAPSEQ"] > 0:
+    if int(data["TAPSEQ"]) > 0:
         seq_mapping[int(data["N"     ])] = str(data["TAPSEQ"])
         tap_mapping[int(data["TAPSEQ"])] = str(data["N"     ])
-    if data["EXTSEQ"] > 0:
+    if int(data["EXTSEQ"]) > 0:
         seq_mapping[int(data["N"     ])] = str(data["EXTSEQ"])
         ext_mapping[int(data["EXTSEQ"])] = str(data["N"     ])
 
@@ -64,6 +64,9 @@ if transfer:
             transfer[i] = ext_mapping
         else:
             raise Exception('Unknown transfer: ' + transfer[i])
+
+# save the original?
+# shutil.copy2(skim_file, skim_file + '.bak')
 
 temp_skim_file = skim_file + '.tmp'
 f = open(temp_skim_file,'wb')
