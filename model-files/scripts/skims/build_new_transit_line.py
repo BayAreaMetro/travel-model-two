@@ -31,14 +31,47 @@ for line in open(node_mapping):
 
 #next, read in the transit lines, change the node, and write out the results
 f = open(out_line_file,'wb')
-for line in open(line_file):
-    line = line.strip().split(' N=')
-    if len(line) < 2: #keep everything before node sequence as-is
-        f.write(line[0] + os.linesep)
+trn_line          = ""
+trn_line_count    = 0
+node_update_count = 0
+for temp_line in open(line_file):
+
+    # strip leading and trailing whitespace
+    temp_line = temp_line.strip()
+
+    # if our line has a comment - cut it out
+    semicolon_index = temp_line.find(";")
+    if semicolon_index >= 0:
+        temp_line = temp_line[:semicolon_index].strip()
+    
+    # skip blank lines
+    if len(temp_line)==0: continue
+
+    # append to our transit line string
+    trn_line = trn_line + temp_line
+
+    # if it ends in a comma, continue until we find the end
+    if temp_line[-1]==",":
         continue
+
+    trn_line_count += 1
+    # print("{} trn_line={}".format(trn_line_count, trn_line))
+
+    line = trn_line.strip().split('N=')
+    if len(line) < 2: #keep everything before node sequence as-is
+        raise
+        # f.write(line[0] + os.linesep)
+        # continue
+
+    # print the attributes that come before N
     f.write(line[0] + ' N=')
+
     for i in range(1,len(line)):
         seq = []
+
+        # print("")
+        # print("line[{}]={}".format(i,line[i]))
+
         for n in line[i].strip().split(','):
             str_n = n
             if str_n.lstrip('-').isdigit():
@@ -50,10 +83,16 @@ for line in open(line_file):
             #make sure that the sign of the nodes (for stop/pass-through) is retained
             sign = int(math.copysign(1,n))
             new_n = sign*node_map[n*sign]
+            node_update_count += 1
             seq.append(new_n)
         if i < len(line)-1:
             seq.append(' N=')
         f.write(','.join(map(str,seq)))
     f.write(os.linesep)
+    
+    # just processed the line, rset
+    trn_line = ""
+
 f.close()
         
+print("Updated {} nodes in {} lines".format(node_update_count, trn_line_count))
