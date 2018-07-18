@@ -33,7 +33,9 @@
 ;         where @set@ is one of the transit skim sets (1,2,3)
 ;
 ; version:  Travel Model Zed
-; authors:  Ben Stabler (2013); crf (2014)
+; authors:  Ben Stabler (2013); crf (2014); 
+;           Joel Freedman (2018) - to handle Taxi, TNCs, TNC-access to transit. TODO:Handle CAVs
+;                                  Note: TNCs added to S2 HOV mode if AV_SCENARIO=0, else added to DA mode                                     
 ;
 ; ----------------------------------------------------------------------------------------------------------------
 
@@ -72,13 +74,29 @@ loop period = 1, 5
     
     MATI[11]="ctramp_output\other_@p@_SCHLBUS_@p@.mat"
     
+    ;added 2018-07-18 JEF
+    MATI[12]="ctramp_output\other_@p@_TAXI_@p@.mat"
+    MATI[13]="ctramp_output\other_@p@_TNC_@p@.mat"
+    
     MATO[1]="ctramp_output\TAZ_Demand_@p@.mat", MO=1-11, Name=SOV_GP_@p@, SOV_PAY_@p@, SR2_GP_@p@, SR2_HOV_@p@, SR2_PAY_@p@, SR3_GP_@p@, SR3_HOV_@p@, SR3_PAY_@p@, BIKE_@p@, WALK_@p@, SCHLBUS_@p@
     
-    FILLMW MW[1]=MI.1.1
-    FILLMW MW[2]=MI.2.1
-    FILLMW MW[3]=MI.3.1 
-    FILLMW MW[4]=MI.4.1 
-    FILLMW MW[5]=MI.5.1 
+    FILLMW MW[1]=MI.1.1 ;sov-nt
+    
+    if(%AV_SCENARIO%=0) 
+      FILLMW MW[2]=MI.2.1 ; sov-toll
+    else
+      FILLMW MW[2]=MI.2.1 + MI.13.1 ;sov-toll + TNC
+    endif
+    
+    FILLMW MW[3]=MI.3.1 ; sr2
+    FILLMW MW[2]=MI.4.1 ; sr2-hov
+    
+    if(%AV_SCENARIO%=0) 
+      FILLMW MW[5]=MI.5.1 + MI.12.1 + MI.13.1; sr2-toll + taxi + TNC
+    else
+      FILLMW MW[5]=MI.5.1 + MI.12.1 ; sr2-toll + taxi
+    endif 
+    
     FILLMW MW[6]=MI.6.1 
     FILLMW MW[7]=MI.7.1 
     FILLMW MW[8]=MI.8.1 
@@ -108,26 +126,22 @@ loop period = 1, 5
       
       ZONES=%TAP_COUNT%
       
-
-      ;MATI[1]="ctramp_output\transit_set@set@_@p@_KNR_SET_@p@.mat"
-      ;MATI[2]="ctramp_output\transit_set@set@_@p@_PNR_SET_@p@.mat"
-      ;MATI[3]="ctramp_output\transit_set@set@_@p@_WLK_SET_@p@.mat"
-
-      MATI[1]="ctramp_output\transit_@p@_KNR_SET_set@set@_@p@.mat"
-      MATI[2]="ctramp_output\transit_@p@_PNR_SET_set@set@_@p@.mat"
-      MATI[3]="ctramp_output\transit_@p@_WLK_SET_set@set@_@p@.mat"
+      MATI[1]="ctramp_output\transit_@p@_WLK_TRN_set@set@_@p@.mat"
+      MATI[2]="ctramp_output\transit_@p@_PNR_TRN_set@set@_@p@.mat"
+      MATI[3]="ctramp_output\transit_@p@_KNRPRV_TRN_set@set@_@p@.mat"
+      MATI[4]="ctramp_output\transit_@p@_KNRTNC_TRN_set@set@_@p@.mat"
       
       MATO[1]="ctramp_output\TAP_Demand_set@set@_@p@.mat", MO=1-3, Name=WLK_SET_@p@, PNR_SET_@p@, KNR_SET_@p@
       
       FILLMW MW[1]=MI.1.1
       FILLMW MW[2]=MI.2.1
-      FILLMW MW[3]=MI.3.1 
+      FILLMW MW[3]=MI.3.1 + MI.4.1 
       
     ENDRUN
     
-  ;  *del "ctramp_output\transit_set@set@_@p@_KNR_SET_@p@.mat"
-  ;  *del "ctramp_output\transit_set@set@_@p@_PNR_SET_@p@.mat"
-  ;  *del "ctramp_output\transit_set@set@_@p@_WLK_SET_@p@.mat"
+  ;  *del "ctramp_output\transit_set@set@_@p@_KNR_TRN_@p@.mat"
+  ;  *del "ctramp_output\transit_set@set@_@p@_PNR_TRN_@p@.mat"
+  ;  *del "ctramp_output\transit_set@set@_@p@_WLK_TRN_@p@.mat"
 
   endloop ; set
 
