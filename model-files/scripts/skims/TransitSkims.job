@@ -151,13 +151,16 @@ ENDRUN
 
 ;call python program to build transit drive access skims
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
+IF (RETURNCODE > 0) abort
 ;*del skims\DA_*_taz_time.csv
 
 ; run script used to help consolidate taps
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\tap_lines.py
+IF (RETURNCODE > 0) abort
 
 ;rebuild transit line file with new numbers
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_new_transit_line.py "trn\transitLines.lin" "trn\transitLines_new_nodes.lin" "hwy\mtc_transit_network_tap_to_node.txt"
+IF (RETURNCODE > 0) abort
 
 ;start cluster nodes - one for each skim set and time period
 *Cluster.exe MTC_TRANSKIM 1-15 start exit

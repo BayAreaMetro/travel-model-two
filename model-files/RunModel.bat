@@ -134,6 +134,10 @@ IF %SELECT_COUNTY% GTR 0 (
 runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
 if ERRORLEVEL 2 goto done
 
+:: Create all necessary input files based on updated sequential zone numbering
+"%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
+IF ERRORLEVEL 1 goto done
+
 IF %SELECT_COUNTY% GTR 0 (
   :: Renumber the household file MAZs
   "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\RenumberHHFileMAZs.PY popsyn\households.csv landuse\maz_data.csv %SELECT_COUNTY%
@@ -149,7 +153,7 @@ if ERRORLEVEL 2 goto done
 
 :: Calculate density fields and append to MAZ file
 "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\createMazDensityFile.py 
-
+IF ERRORLEVEL 1 goto done
 
 :: Translate the roadway network into a non-motorized network
 runtpp %BASE_SCRIPTS%\preprocess\CreateNonMotorizedNetwork.job
@@ -158,6 +162,9 @@ if ERRORLEVEL 2 goto done
 :: Create the tap data
 runtpp %BASE_SCRIPTS%\preprocess\tap_to_taz_for_parking.job
 if ERRORLEVEL 2 goto done
+
+"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
+IF ERRORLEVEL 1 goto done
 
 :: Set the prices in the roadway network
 runtpp %BASE_SCRIPTS%\preprocess\SetTolls.job

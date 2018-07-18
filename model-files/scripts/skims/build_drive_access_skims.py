@@ -36,7 +36,7 @@
 
 """
 
-import os,sys,re
+import csv,os,sys,re
 import time as pytime
 
 base_dir = sys.argv[1]
@@ -76,20 +76,20 @@ tazseq_mapping = {}
 mazseq_mapping = {}
 tapseq_mapping = {}
 extseq_mapping = {}
-for line in open(n_seq_file):
-    data = map(int,line.strip().split(','))
-    if data[1] > 0:
-        seq_mapping[data[0]] = data[1]
-        tazseq_mapping[data[1]] = data[0]
-    if data[2] > 0:
-        seq_mapping[data[0]] = data[2]
-        mazseq_mapping[data[2]] = data[0]
-    if data[3] > 0:
-        seq_mapping[data[0]] = data[3]
-        tapseq_mapping[data[3]] = data[0]
-    if data[4] > 0:
-        seq_mapping[data[0]] = data[4]
-        extseq_mapping[data[4]] = data[0]
+reader = csv.DictReader(open(n_seq_file))
+for data in reader:
+    if int(data["TAZSEQ"]) > 0:
+        seq_mapping[   int(data["N"     ])] = int(data["TAZSEQ"])
+        tazseq_mapping[int(data["TAZSEQ"])] = int(data["N"     ])
+    if int(data["MAZSEQ"]) > 0:
+        seq_mapping[   int(data["N"     ])] = int(data["MAZSEQ"])
+        mazseq_mapping[int(data["MAZSEQ"])] = int(data["N"     ])
+    if int(data["TAPSEQ"]) > 0:
+        seq_mapping[   int(data["N"     ])] = int(data["TAPSEQ"])
+        tapseq_mapping[int(data["TAPSEQ"])] = int(data["N"     ])
+    if int(data["EXTSEQ"]) > 0:
+        seq_mapping[   int(data["N"     ])] = int(data["EXTSEQ"])
+        extseq_mapping[int(data["EXTSEQ"])] = int(data["N"     ])
 
 print 'reading maz->taz'
 #read maz->taz mapping
@@ -143,32 +143,76 @@ tapns = list(tapns.keys())
 tapns.sort()
 
 
-print 'reading transit lines'
+print 'reading transit lines from {}'.format(transit_line_file)
 #read transit lines to pull out tod and stop information
 stops_by_tod_and_mode = {}
 for period in periods:
     stops_by_tod_and_mode[period] = {}
 #LINE NAME="EM_HOLLIS", USERA1="Emery Go-Round", USERA2="Local bus", MODE=12, ONEWAY=T, XYSPEED=15, HEADWAY[1]=60.0, HEADWAY[2]=12.0, HEADWAY[3]=20.0, HEADWAY[4]=12.0, HEADWAY[5]=30.0, N=2565595,...
-for line in open(transit_line_file):
-    split_line = map(str.strip,re.split('[=,]',line.strip()))
+trn_line = ""
+for temp_line in open(transit_line_file):
+    # strip leading and trailing whitespace
+    temp_line = temp_line.strip()
+
+    # if our line has a comment - cut it out
+    semicolon_index = temp_line.find(";")
+    if semicolon_index >= 0:
+        temp_line = temp_line[:semicolon_index].strip()
+    
+    # skip blank lines
+    if len(temp_line)==0: continue
+
+    # append to our transit line string
+    trn_line = trn_line + temp_line
+
+    # if it ends in a comma, continue until we find the end
+    if temp_line[-1]==",":
+        continue
+
+    # print("trn_line={}".format(trn_line))
+
+    # split it on equals or comma
+    split_line = map(str.strip,re.split('[=,]',trn_line))
+    # print("split_line={}".format(split_line))
+
     if len(split_line) < 3:
         continue
     mode = split_line[split_line.index('USERA2') + 1].replace('"','').upper().replace(' ','_')
+    # print("mode={}".format(mode))
+
     tod = []
     for i in range(len(periods)):
         tod.append(float(split_line[split_line.index('HEADWAY[' + str(i+1) + ']') + 1]) > 0.0)
         period = periods[i]
         if not mode in stops_by_tod_and_mode[period]:
             stops_by_tod_and_mode[period][mode] = {}
+    # print("tod={}".format(tod))
+    # print("stops_by_tod_and_mode={}".format(stops_by_tod_and_mode))
+
     stop_nodes = {}
-    for i in range(split_line.index('N') + 1,len(split_line)):
-        n = int(split_line[i])
+    iter = split_line.index('N') + 1
+    while iter < len(split_line):
+        #skip NNTIME token and value	
+        if (split_line[iter] == "NNTIME") or (split_line[iter] == "TIME"):
+            iter = iter + 2
+            continue
+        #skip N token
+        if (split_line[iter] == "N"):
+            iter = iter + 1
+            continue
+        n = int(split_line[iter])
         if n > 0:
-            stop_nodes[n] = None
+           stop_nodes[n] = None
+        iter = iter + 1			
+#    for i in range(split_line.index('N') + 1,len(split_line)):
+#        n = int(split_line[i])
+#        if n > 0:
+#            stop_nodes[n] = None
     for i in range(len(tod)):
         if tod[i]:
             for n in stop_nodes:
                 stops_by_tod_and_mode[periods[i]][mode][n] = None
+    trn_line = ""
 
                 
 id_mode_map = {1:'LOCAL_BUS',
@@ -284,7 +328,7 @@ for period in drive_access_costs:
 f.close()
     
 end_time = pytime.time()
-print 'elapsed time in seconds: ' + str((end_time - start_time) / 1000.0)
+print 'elapsed time in minutes: ' + str((end_time - start_time) / 60.0)
 
 
         

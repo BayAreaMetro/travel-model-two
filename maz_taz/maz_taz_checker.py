@@ -304,6 +304,12 @@ def dissolve_into_shapefile(blocks_maz_layer, maz_or_taz):
         arcpy.CalculateField_management(my_layer, "psq_overa", "!PERIM_GEO!*!PERIM_GEO!/!ALAND10!", "PYTHON3")
         logging.info("Calculated perim*perim/area for {0}s".format(maz_or_taz))
 
+        # add acres from ALAND10
+        SQUARE_METERS_PER_ACRE = 4046.86
+        arcpy.AddField_management(my_layer, "acres", "DOUBLE", 10, 5)
+        arcpy.CalculateField_management(my_layer, "acres", "!ALAND10!/{}".format(SQUARE_METERS_PER_ACRE))
+        logging.info("Calculated acres for {0}s".format(maz_or_taz))
+
         # delete maz/taz=0, that's not a real maz/taz
         arcpy.SelectLayerByAttribute_management(my_layer, "NEW_SELECTION", "{0} > 0".format(maz_or_taz))
         logging.info("Selected out water for {0}s".format(maz_or_taz))
