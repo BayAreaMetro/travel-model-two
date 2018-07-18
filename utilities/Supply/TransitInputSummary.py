@@ -307,12 +307,23 @@ if __name__ == '__main__':
 
     # trn_net.write(path=".", name="transitLines", writeEmptyFiles=False, suppressValidation=True)
 
-    fileObj = open("transit_input_summary.txt", "w")
-    fileObj.write("Operator" + ", " + "Technology" + ", " + "Line Name" + ", " + "Time Period" + ", " + "Headway" + ", " + "Vehicle Type" + "\n")
+    # code to output a transit input summary as a csv file
+    #fileObj = open("transit_input_summary.txt", "w")
+    #fileObj.write("Operator" + ", " + "Transit_mode" + ", " + "Line Name" + ", " + "Headway_EA" + ", " + "Headway_AM" + ", "  + "Headway_MD" + ", " + "Headway_PM" + ", "  + "Headway_EV" + ", "  "Vehicle Type" + "\n")
+    #for line in trn_net:
+    #        fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + line['HEADWAY[1]'] + ", " + line['HEADWAY[2]'] + ", " + line['HEADWAY[3]'] + ", " + line['HEADWAY[4]'] + ", " + line['HEADWAY[5]'] + ", " + line['VEHICLETYPE'] + "\n")
+    #fileObj.close()
+
+    df = pandas.DataFrame()
     for line in trn_net:
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + "EA" + ", " + line['HEADWAY[1]'] + ", " + line['VEHICLETYPE'] + "\n")
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + "AM" + ", " + line['HEADWAY[2]'] + ", " + line['VEHICLETYPE'] + "\n")
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + "MD" + ", " + line['HEADWAY[3]'] + ", " + line['VEHICLETYPE'] + "\n")
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + "PM" + ", " + line['HEADWAY[4]'] + ", " + line['VEHICLETYPE'] + "\n")
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + "EV" + ", " + line['HEADWAY[5]'] + ", " + line['VEHICLETYPE'] + "\n")
-    fileObj.close()
+        df = df.append({'Operator': line['USERA1'], 'Transit_mode': line['USERA2'], 'Line_name': line.name, 'Headway_EA': line['HEADWAY[1]'], 'Headway_AM': line['HEADWAY[2]'], 'Headway_MD': line['HEADWAY[3]'], 'Headway_PM': line['HEADWAY[4]'], 'Headway_EV': line['HEADWAY[5]'], 'Vehicle_type': line['VEHICLETYPE']}, ignore_index=True)
+
+    df = df.sort_values(by=['Operator', 'Transit_mode', 'Line_name'], ascending=[True, True, True])
+    # print df
+    df.to_csv('transit_input_summary.csv')
+    df = df[['Operator','Transit_mode','Line_name','Headway_EA','Headway_AM','Headway_MD','Headway_PM','Headway_EV','Vehicle_type']]
+    # print df
+
+
+
+    df.to_csv('transit_input_summary.csv', index = False)
