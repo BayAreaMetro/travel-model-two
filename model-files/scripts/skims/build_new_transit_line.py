@@ -14,7 +14,7 @@
     crf 8/2013
 
 """
-import os,sys,math
+import csv, os,sys,math
 
 line_file = sys.argv[1]
 out_line_file = sys.argv[2]
@@ -22,12 +22,9 @@ node_mapping = sys.argv[3]
 
 #first, read in the node mapping
 node_map = {}
-for line in open(node_mapping):
-    #N,OLD_NODE
-    line = line.strip().split()
-    if len(line) < 2:
-        continue
-    node_map[int(line[1].strip())] = int(line[0].strip())
+reader = csv.DictReader(open(node_mapping))
+for line in reader:
+    node_map[int(line["OLD_NODE"])] = int(line["N"])
 
 #next, read in the transit lines, change the node, and write out the results
 f = open(out_line_file,'wb')
