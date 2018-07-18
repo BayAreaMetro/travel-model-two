@@ -308,11 +308,7 @@ if __name__ == '__main__':
     # trn_net.write(path=".", name="transitLines", writeEmptyFiles=False, suppressValidation=True)
 
     fileObj = open("transit_input_summary.txt", "w")
-    fileObj.write("Operator" + ", " + "Technology" + ", " + "Line Name" + ", " + "Time Period" + ", " + "Headway" + ", " + "Vehicle Type" + "\n")
+    fileObj.write("Operator" + ", " + "Transit_mode" + ", " + "Line Name" + ", " + "Headway_EA" + ", " + "Headway_AM" + ", "  + "Headway_MD" + ", " + "Headway_PM" + ", "  + "Headway_EV" + ", "  "Vehicle Type" + "\n")
     for line in trn_net:
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + "EA" + ", " + line['HEADWAY[1]'] + ", " + line['VEHICLETYPE'] + "\n")
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + "AM" + ", " + line['HEADWAY[2]'] + ", " + line['VEHICLETYPE'] + "\n")
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + "MD" + ", " + line['HEADWAY[3]'] + ", " + line['VEHICLETYPE'] + "\n")
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + "PM" + ", " + line['HEADWAY[4]'] + ", " + line['VEHICLETYPE'] + "\n")
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + "EV" + ", " + line['HEADWAY[5]'] + ", " + line['VEHICLETYPE'] + "\n")
+            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + line['HEADWAY[1]'] + ", " + line['HEADWAY[2]'] + ", " + line['HEADWAY[3]'] + ", " + line['HEADWAY[4]'] + ", " + line['HEADWAY[5]'] + ", " + line['VEHICLETYPE'] + "\n")
     fileObj.close()
