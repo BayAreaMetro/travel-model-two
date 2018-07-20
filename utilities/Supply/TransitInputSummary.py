@@ -307,8 +307,40 @@ if __name__ == '__main__':
 
     # trn_net.write(path=".", name="transitLines", writeEmptyFiles=False, suppressValidation=True)
 
-    fileObj = open("transit_input_summary.txt", "w")
-    fileObj.write("Operator" + ", " + "Transit_mode" + ", " + "Line Name" + ", " + "Headway_EA" + ", " + "Headway_AM" + ", "  + "Headway_MD" + ", " + "Headway_PM" + ", "  + "Headway_EV" + ", "  "Vehicle Type" + "\n")
+    # code to output a transit input summary as a csv file
+    #fileObj = open("transit_input_summary.txt", "w")
+    #fileObj.write("Operator" + ", " + "Transit_mode" + ", " + "Line Name" + ", " + "Headway_EA" + ", " + "Headway_AM" + ", "  + "Headway_MD" + ", " + "Headway_PM" + ", "  + "Headway_EV" + ", "  "Vehicle Type" + "\n")
+    #for line in trn_net:
+    #        fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + line['HEADWAY[1]'] + ", " + line['HEADWAY[2]'] + ", " + line['HEADWAY[3]'] + ", " + line['HEADWAY[4]'] + ", " + line['HEADWAY[5]'] + ", " + line['VEHICLETYPE'] + "\n")
+    #fileObj.close()
+
+    df = pandas.DataFrame()
     for line in trn_net:
-            fileObj.write(line['USERA1']+ ", " + line['USERA2']+ ", " + line.name + ", " + line['HEADWAY[1]'] + ", " + line['HEADWAY[2]'] + ", " + line['HEADWAY[3]'] + ", " + line['HEADWAY[4]'] + ", " + line['HEADWAY[5]'] + ", " + line['VEHICLETYPE'] + "\n")
-    fileObj.close()
+        df = df.append({'Operator': line['USERA1'], 'Transit_mode': line['USERA2'], 'Line_name': line.name, 'Headway_EA': line['HEADWAY[1]'], 'Headway_AM': line['HEADWAY[2]'], 'Headway_MD': line['HEADWAY[3]'], 'Headway_PM': line['HEADWAY[4]'], 'Headway_EV': line['HEADWAY[5]'], 'Vehicle_type_number': line['VEHICLETYPE']}, ignore_index=True)
+
+    df = df.sort_values(by=['Operator', 'Transit_mode', 'Line_name'], ascending=[True, True, True])
+    df = df[['Operator','Transit_mode','Line_name','Headway_EA','Headway_AM','Headway_MD','Headway_PM','Headway_EV','Vehicle_type_number']]
+    # print df
+
+    # read vehicle type defintions
+    # vehicle_type_definitions.csv was created manually from transitSystem.pts
+    # ideally we'll code it so that the .pts file can be directly read by the script
+    df_veh_def = pandas.read_csv('vehicle_type_definitions.csv')
+    print df_veh_def
+
+    # check that the variable we want to join on have the same data type
+    print df['Vehicle_type_number'].dtype
+    print df_veh_def['Vehicle_type_number'].dtype
+
+    # since they do not have the same data type, change the data type for one of them
+    # somehow changing the Vehicle_type_number in the vehicle_type_definitions.csv to "object" doesn't help the join
+    # but chaning the Vehicle_type_number in the data frame with all the data to "int" works
+    # df_veh_def['Vehicle_type_number'] = df_veh_def['Vehicle_type_number'].astype(object)
+    df['Vehicle_type_number'] = df['Vehicle_type_number'].astype(int)
+
+    print df['Vehicle_type_number'].dtype
+    print df_veh_def['Vehicle_type_number'].dtype
+
+    df = pandas.merge(df, df_veh_def, on='Vehicle_type_number', how='left')
+
+    df.to_csv('transit_input_summary.csv', index = False)

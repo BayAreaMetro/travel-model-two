@@ -186,6 +186,8 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\preprocess\BuildTazNetworks.job
 if ERRORLEVEL 2 goto done
 
+echo COMPLETED PREPROCESS  %DATE% %TIME% >> logs\feedback.rpt 
+
 :: ------------------------------------------------------------------------------------------------------
 ::
 :: Step 4:  Build non-motorized level-of-service matrices
@@ -202,6 +204,7 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\skims\MazMazSkims.job
 if ERRORLEVEL 2 goto done
 
+echo COMPLETED NON-MOTORIZED-SKIMS  %DATE% %TIME% >> logs\feedback.rpt 
 
 :: ------------------------------------------------------------------------------------------------------
 ::
@@ -295,8 +298,8 @@ rem CTRAMP\runtime\config\psexec %MATRIX_SERVER% -d %MATRIX_SERVER_ABSOLUTE_BASE
 rem ping -n 10 localhost
 
 
-start CTRAMP\runtime\runDriver.cmd
-start CTRAMP\runtime\runNode0.cmd
+start "Driver" CTRAMP\runtime\runDriver.cmd
+start "Node0" CTRAMP\runtime\runNode0.cmd
 
 copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"

@@ -251,7 +251,7 @@ LOOP PROC_COUNT=1,9
              ENDRUN
             
             ;run script
-            *"C:\Program Files\Citilabs\CubeVoyager\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
+            *Voyager.exe @SFILE@_@SKIM_COUNTY@.s /Start
             
             ;clean-up
 ;            *del @SFILE@_@SKIM_COUNTY@.s

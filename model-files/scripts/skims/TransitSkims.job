@@ -127,7 +127,6 @@ Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM
 
 ;export taps connectors from network
 RUN PGM=NETWORK
-;    PAR  NODES=10000000
     NETI = hwy\mtc_final_network_with_tolls.net
     LINKO = hwy\mtc_final_network_tap_links.csv FORMAT=SDF DELIMITER=',' INCLUDE=A,B
     NODEO = hwy\mtc_final_network_tap_nodes.csv FORMAT=SDF DELIMITER=',' INCLUDE=N,MODE
@@ -278,7 +277,11 @@ LOOP PERIOD = 1,5
                                         LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
                 FILEO LINEO = "trn\mtc_transit_lines_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.lin"
                 FILEO NTLEGO = "trn\mtc_transit_ntlegs_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.ntl"
-                FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.rte"
+
+                ; These files are gigantic and writing many simultaneously cause PT to fail
+                ; with the message: F(801): (EnumRoutes) Failure writing to output routes file.
+                ; As such, commenting out writing these as assignment does not use them
+                ; FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.rte"
 
                 FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.rpt"
                 

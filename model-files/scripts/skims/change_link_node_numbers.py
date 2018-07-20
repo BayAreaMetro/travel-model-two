@@ -16,7 +16,7 @@
 
 """
 
-import os,sys
+import csv,os,sys
 
 link_file = sys.argv[1]
 out_link_file = sys.argv[2]
@@ -24,12 +24,9 @@ node_mapping = sys.argv[3]
 
 #first collect all of the node mappings
 node_map = {}
-for line in open(node_mapping):
-    #N,OLD_NODE
-    line = line.strip().split()
-    if len(line) < 2:
-        continue
-    node_map[int(line[1].strip())] = int(line[0].strip())
+reader = csv.DictReader(open(node_mapping))
+for line in reader:
+    node_map[int(line["OLD_NODE"])] = int(line["N"])
 
 #now read the link file, transfer the a/b nodes, and write the new file
 f = open(out_link_file,'wb')

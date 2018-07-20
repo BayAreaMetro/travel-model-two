@@ -128,7 +128,12 @@ LOOP PERIOD = 1,5
                 FILEI MATI[1] = "ctramp_output\TAP_Demand_set@SKIMSET@_@TOKEN_PERIOD@.mat"
                 
                 FILEO NETO = "trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit_assign.net"
-                FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit_assign.rte"
+
+                ; These files are gigantic and writing many simultaneously cause PT to fail
+                ; with the message: F(801): (EnumRoutes) Failure writing to output routes file.
+                ; As such, commenting out writing these as assignment does not use them
+                ; FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit_assign.rte"
+
                 FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit_assign.rpt"
                 ;
                 ; The stop2stop file is for BART station-station boardings. It writes a dbf file of boardings 
