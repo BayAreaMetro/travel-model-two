@@ -454,7 +454,7 @@ public class MandatoryAccessibilitiesCalculator
             //////////////////////////////////////////////////////////////////////////
             
             // determine the best transit path, which also stores the best utilities array and the best mode
-            bestPathCalculator.findBestDriveTransitWalkTaps(walkDmu, driveDmu, TransitWalkAccessUEC.AM, oMgra, dMgra, debug, aLogger);
+            bestPathCalculator.findBestDriveTransitWalkTaps(walkDmu, driveDmu, TransitWalkAccessUEC.AM, oMgra, dMgra, debug, aLogger, (float) autoResults[PEAK_NONTOLL_SOV_DIST_INDEX]);
             
             // sum the exponentiated utilities over modes
             double sumDrvExpUtilities = 0;

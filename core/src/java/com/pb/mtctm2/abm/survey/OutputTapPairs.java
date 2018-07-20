@@ -26,6 +26,7 @@ import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
 import com.pb.mtctm2.abm.ctramp.McLogsumsCalculator;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
+import com.pb.mtctm2.abm.ctramp.ModelStructure;
 import com.pb.mtctm2.abm.ctramp.Modes;
 import com.pb.mtctm2.abm.ctramp.TazDataManager;
 import com.pb.mtctm2.abm.ctramp.TransitDriveAccessDMU;
@@ -65,7 +66,8 @@ public class OutputTapPairs {
     
      protected PrintWriter writer;
     
-    
+     AutoTazSkimsCalculator tazDistanceCalculator;
+
     public OutputTapPairs(HashMap<String, String> propertyMap, String inputFile, String outputFile){
     	this.inputFile = inputFile;
     	this.outputFile = outputFile;
@@ -87,6 +89,8 @@ public class OutputTapPairs {
 	    tazManager = TazDataManager.getInstance(propertyMap);
 
         bestPathCalculator = new BestTransitPathCalculator(propertyMap);
+        tazDistanceCalculator = new AutoTazSkimsCalculator(propertyMap);
+        tazDistanceCalculator.computeTazDistanceArrays();
 
         wtw = new WalkTransitWalkSkimsCalculator(propertyMap);
         wtw.setup(propertyMap, logger, bestPathCalculator);
@@ -201,7 +205,9 @@ public class OutputTapPairs {
 			int originTaz = mgraManager.getTaz(originMaz);
 			int destinationTaz = mgraManager.getTaz(destinationMaz);
 		
-			bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, accessEgressMode, originMaz, destinationMaz, period, debug, logger);
+			float odDistance  = (float) tazDistanceCalculator.getTazToTazDistance(ModelStructure.AM_SKIM_PERIOD_INDEX, originTaz, destinationTaz);
+		
+			bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, accessEgressMode, originMaz, destinationMaz, period, debug, logger, odDistance);
 			double[] bestUtilities = bestPathCalculator.getBestUtilities();
 			
 			//iterate through n-best paths
