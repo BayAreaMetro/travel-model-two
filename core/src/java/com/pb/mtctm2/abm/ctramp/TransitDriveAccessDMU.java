@@ -26,6 +26,7 @@ public class TransitDriveAccessDMU
     double                              driveDistToTap;
     double                              driveDistFromTap;
     double                              driveTimeFromTap;
+    double                              OrigDestDistance;
     double                              tapToMgraWalkTime;
     double                              mgraToTapWalkTime;
     double                              carToStationWalkTime;
@@ -226,6 +227,12 @@ public class TransitDriveAccessDMU
         driveDistFromTap = driveDist;
     }
     
+    public double getOrigDestDistance() {
+		return OrigDestDistance;
+	}
+	public void setOrigDestDistance(double origDestDistance) {
+		OrigDestDistance = origDestDistance;
+	}
     public void setTOD(int period) {
     	this.period = period;
     }
@@ -300,6 +307,7 @@ public class TransitDriveAccessDMU
         localLogger.info(String.format("tourCateogryIsJoint:      %9s", tourCateogryIsJoint));
         localLogger.info(String.format("personType:               %9s", personType));
         localLogger.info(String.format("valueOfTime:              %9.4f", valueOfTime));
+        localLogger.info(String.format("origDestDistance          %9.4f, origDestDistance"));
 
 
         AccessMode[] accessModes = AccessMode.values();
@@ -327,6 +335,8 @@ public class TransitDriveAccessDMU
         methodIndexMap.put("getTourCategoryIsJoint", 13);
         methodIndexMap.put("getPersonType", 14);
         methodIndexMap.put("getValueOfTime", 15);
+        methodIndexMap.put("getOrigDestDistance",17);
+
 
     }
 
@@ -366,6 +376,9 @@ public class TransitDriveAccessDMU
                 return getPersonType();
             case 15:
                 return getValueOfTime();
+            case 17:
+            	return getOrigDestDistance();
+
 
 
             default:
