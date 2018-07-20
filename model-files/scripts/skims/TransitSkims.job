@@ -280,8 +280,9 @@ LOOP PERIOD = 1,5
 
                 ; These files are gigantic and writing many simultaneously cause PT to fail
                 ; with the message: F(801): (EnumRoutes) Failure writing to output routes file.
-                ; As such, commenting out writing these as assignment does not use them
-                ; FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.rte"
+                ; We cannot comment them out, however, since 
+                ; "The statement ROUTEO[x] invokes the route-enumeration process for user class x." (!!)
+                FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.rte"
 
                 FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.rpt"
                 
