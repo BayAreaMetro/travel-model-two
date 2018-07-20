@@ -1,7 +1,0 @@
-; PT System Data File
-
-; Wait Curve Definitions
-WAITCRVDEF NUMBER=1 LONGNAME="Standard Wait Time" NAME="WAIT1" ,
-           CURVE=0-0,14-14,30-22,66-40,180-97
-WAITCRVDEF NUMBER=2 LONGNAME="Zero Wait Time" NAME="WAIT2" ,
-           CURVE=0-0,15-0,30-0, 60-0, 180-0
