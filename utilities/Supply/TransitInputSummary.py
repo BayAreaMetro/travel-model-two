@@ -13,6 +13,7 @@ LOG_FILENAME = "addLinkTime_info.log"
 TM2_INPUTS   = os.path.join(r"C:\\Users", USERNAME, "Box\\Modeling and Surveys\\Development\\Travel Model Two Development\\Model Inputs")
 TRN_NETFILE  = os.path.join(TM2_INPUTS,"2015","trn","transit_lines")
 TRN_LABELFILE= os.path.join(TM2_INPUTS,"TM2 Transit Nodes.csv")
+TRN_VEHDEFCSV= os.path.join(TM2_INPUTS,"2015","trn","transit_support","vehicle_type_definitions.csv")
 GTFS_DIR     = r"M:\\Data\\Transit\\511\\Dec 2014\\GTFS"
 
 GTFS_NETWORKS = {
@@ -325,7 +326,7 @@ if __name__ == '__main__':
     # read vehicle type defintions
     # vehicle_type_definitions.csv was created manually from transitSystem.pts
     # ideally we'll code it so that the .pts file can be directly read by the script
-    df_veh_def = pandas.read_csv('vehicle_type_definitions.csv')
+    df_veh_def = pandas.read_csv(TRN_VEHDEFCSV)
     print df_veh_def
 
     # check that the variable we want to join on have the same data type
