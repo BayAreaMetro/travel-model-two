@@ -36,7 +36,7 @@ if __name__ == '__main__':
         # sum these over MAZs
         COLS_SUM         = ["publicEnrollGradeKto8", "privateEnrollGradeKto8", "publicEnrollGrade9to12", "privateEnrollGrade9to12",
                             "comm_coll_enroll", "EnrollGradeKto8", "EnrollGrade9to12", "collegeEnroll", "otherCollegeEnroll", "AdultSchEnrl",
-                            "hstallsoth", "hstallssam", "dstallsoth", "dstallssam", "mstallsoth", "mstallssam"]
+                            "hstallsoth", "hstallssam", "dstallsoth", "dstallssam", "mstallsoth", "mstallssam", "park_area"]
 
         # weighted average these over MAZs based on the given columns
         COLS_AVG         = collections.OrderedDict([
