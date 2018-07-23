@@ -322,6 +322,8 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 | *mstallsoth* | Stalls allowing monthly parking for trips with destinations in other MAZs | [MgraDataManager] |
 | *mstallssam* | Stalls allowing monthly parking for trips with destinations in the same MAZ | [MgraDataManager] |
 | *mparkcost* | Average cost of parking for one day in monthly stalls, amortized over 22 workdays, dollars | [MgraDataManager] |
+| **Other** |||
+| *park_area* | Area of park space, in square meters | [Accessibilities] |
 | **Calculated land use measures** |||
 | *TotInt* | Total intersections | [MgraDataManager], [AutoOwnership] | [createMazDensityFile.py] |
 | *DUDen* | Dwelling unit density | [MgraDataManager] | [createMazDensityFile.py] |
