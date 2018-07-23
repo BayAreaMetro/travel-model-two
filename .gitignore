@@ -3,3 +3,4 @@ core/build/
 core/release/
 /bin/
 *.log
+*.bak
