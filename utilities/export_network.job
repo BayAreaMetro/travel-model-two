@@ -6,43 +6,4 @@ run PGM=NETWORK
   fileo nodeo   = "%NODE_OUTFILE%" FORMAT=SHP
   fileo linko   = "%LINK_OUTFILE%" FORMAT=SHP
 
-  ; do nothing else
 endrun
-
-
-; run PGM=PUBLIC TRANSPORT
-;   filei neti     = "%NET_INFILE%"
-;   filei linei    = "%LINE_INFILE%"
-;   filei systemi  = "%SYSTEM_INFILE%"
-;   filei factori  = "%FACTOR_INFILE%"
-;   fileo neto     = "network_with_transit.net"
-; 
-;   PARAMETERS HDWAYPERIOD=1
-;   PARAMETERS NOROUTEERRS=17000000
-;   PARAMETERS TRANTIME=LI.TRANTIME
-;   PARAMETERS MAPSCALE=5280
-;   PROCESS PHASE=LINKREAD
-;       LW.TRANTIME = LI.TRANTIME
-;       LW.DISTANCE = LI.FEET/5280
-;   ENDPROCESS
-; 
-;   PHASE=DATAPREP
-;       ;access/egress links
-;       GENERATE,
-;           NTLEGMODE=991,
-;           INCLUDELINK=(LI.NTL_MODE=1),
-;           COST=LI.WALKTIME,
-;           MAXCOST=999*500,
-;           ONEWAY=T
-;       ;transfer links
-;       GENERATE,
-;           NTLEGMODE=992,
-;           INCLUDELINK=(LI.NTL_MODE=2),
-;           COST=LI.WALKTIME,
-;           MAXCOST=999*500,
-;           DIRECTLINK = 3,
-;           FROMNODE=1-10000000,
-;           TONODE=1-10000000
-;   ENDPHASE
-; 
-; endrun
