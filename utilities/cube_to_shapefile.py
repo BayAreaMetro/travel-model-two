@@ -111,8 +111,9 @@ if __name__ == '__main__':
     parser.add_argument("netfile",  metavar="network.net", nargs=1, help="Cube input roadway network file")
     parser.add_argument("--linefile", metavar="transit.lin", nargs=1, help="Cube input transit line file", required=False)
     parser.add_argument("--by_operator", action="store_true", help="Split transit lines by operator")
+    parser.add_argument("--trn_stop_info", metavar="transit_stops.csv", help="CSV with extra transit stop information")
     args = parser.parse_args()
-    print(args)
+    # print(args)
 
     # setup the environment
     script_env                 = os.environ.copy()
@@ -189,14 +190,14 @@ if __name__ == '__main__':
         # create the stops shapefile
         arcpy.CreateFeatureclass_management(WORKING_DIR, TRN_STOPS_SHPFILE.format(operator_file), "POINT")
         arcpy.AddField_management(TRN_STOPS_SHPFILE.format(operator_file), "NAME",     "TEXT", field_length=25)
+        arcpy.AddField_management(TRN_STOPS_SHPFILE.format(operator_file), "STATION",  "TEXT", field_length=40)
         arcpy.AddField_management(TRN_STOPS_SHPFILE.format(operator_file), "N",        "LONG")
         arcpy.AddField_management(TRN_STOPS_SHPFILE.format(operator_file), "SEQ",      "SHORT")
         arcpy.AddField_management(TRN_STOPS_SHPFILE.format(operator_file), "IS_STOP",  "SHORT")
 
         stop_cursor[operator_file] = arcpy.da.InsertCursor(TRN_STOPS_SHPFILE.format(operator_file),
-                                                           ["NAME", "SHAPE@", "N", "SEQ", "IS_STOP"])
-
-    print(operator_to_file)
+                                                           ["NAME", "SHAPE@", "STATION", "N", "SEQ", "IS_STOP"])
+    # print(operator_to_file)
 
     # read the node points
     nodes_array = arcpy.da.TableToNumPyArray(in_table="{}.DBF".format(NODE_SHPFILE[:-4]),
@@ -204,8 +205,17 @@ if __name__ == '__main__':
     nodes_x =  dict(zip(nodes_array["N"].tolist(), nodes_array["X"].tolist()))
     nodes_y =  dict(zip(nodes_array["N"].tolist(), nodes_array["Y"].tolist()))
 
+    # read the stop information, if there is any
+    stops_to_station = {}
+    if args.trn_stop_info:
+        stop_info_df = pandas.read_csv(args.trn_stop_info)
+        print("Read {} lines from {}".format(len(stop_info_df), args.trn_stop_info))
+        # only want node numbers and names
+        stop_info_dict = stop_info_df[["TM2 Node","Station"]].to_dict(orient='list')
+        stops_to_station = dict(zip(stop_info_dict["TM2 Node"],
+                                    stop_info_dict["Station"]))
+
     (trn_file_base, trn_file_name) = os.path.split(args.linefile[0])
-    print(trn_file_base, trn_file_name)
     trn_net = Wrangler.TransitNetwork(champVersion=4.3, basenetworkpath=trn_file_base, isTiered=True, networkName=trn_file_name[:-4])
     print("Read trn_net: {}".format(trn_net))
 
@@ -239,12 +249,13 @@ if __name__ == '__main__':
 
         for node in line.n:
             n = abs(int(node.num))
+            station = stops_to_station[n] if n in stops_to_station else ""
             is_stop = 1 if node.isStop() else 0
             # print(node.num, n, node.attr, node.stop)
             point = arcpy.Point( nodes_x[n], nodes_y[n] )
 
             # start at 0 for stops
-            stop_cursor[operator_file].insertRow([line.name, point, n, seq-0, is_stop])
+            stop_cursor[operator_file].insertRow([line.name, point, station, n, seq-0, is_stop])
             stop_count += 1
 
             # add to line array
