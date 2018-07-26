@@ -123,7 +123,7 @@ if __name__ == '__main__':
     script_env["LINK_OUTFILE"] = LINK_SHPFILE
 
     # run the script to do the work
-    # runCubeScript(WORKING_DIR, os.path.join(CODE_DIR, "export_network.job"), script_env)
+    runCubeScript(WORKING_DIR, os.path.join(CODE_DIR, "export_network.job"), script_env)
     print("Wrote network node file to {}".format(NODE_SHPFILE))
     print("Wrote network link file to {}".format(LINK_SHPFILE))
 
