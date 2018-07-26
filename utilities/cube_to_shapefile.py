@@ -45,7 +45,7 @@ def runCubeScript(workingdir, script_filename, script_env):
     Returns the return code.
     """
     # run it
-    proc = subprocess.Popen("{0} {1}".format(os.path.join(RUNTPP_PATH,"runtpp"), script_filename), 
+    proc = subprocess.Popen('"{0}" "{1}"'.format(os.path.join(RUNTPP_PATH,"runtpp"), script_filename), 
                             cwd=workingdir, env=script_env,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     for line in proc.stdout:
