@@ -39,15 +39,20 @@ def sample_hhs(group):
     #sample using the taz sample rate with replacement and a stable group seed
     seed = int(group.taz.min()*100 + group.hhincbin.min()*10 + group.hhsizebin.min())
     sample = group.sample(frac=group.SampleRate.min(), replace=True, random_state=seed)
-        
+    
     if len(sample)==0:
-#        print 'taz ',group.taz.min(),' sample is empty '
+        print 'taz ',group.taz.min(),' inc ', group.hhincbin.min(), ' size ', group.hhsizebin.min(),' sample is empty. Sample rate is ',group.SampleRate.min(),' size is ',len(group)
         sample = group
+        effectiveRate = 1.0
     else:
         #set hh expansion factor based on actual sample size since sampling is lumpy
-        sample.hhexpfac = 1.0 / (len(sample)*1.0/len(group))           
-
-#    print("taz %i hhincbin %s hhsizebin %s sample rate %.2f effective rate %.2f" % (group.taz.min(), group.hhincbin.min(), group.hhsizebin.min(), group.SampleRate.min(), 1.0 / sample.hhexpfac.min()))
+        sample.hhexpfac = 1.0 / (len(sample)*1.0/len(group)) 
+        effectiveRate = 1.0 * len(sample)/len(group)		
+        print("taz %i hhincbin %s hhsizebin %s sample rate %.2f effective rate %.2f" % (group.taz.min(), group.hhincbin.min(), group.hhsizebin.min(), group.SampleRate.min(), 1.0 / sample.hhexpfac))
+    
+    # replace the target sample rate with the actual sample rate
+    sample['SampleRate'] = effectiveRate
+    
     return(sample)
 
 
@@ -65,7 +70,7 @@ def runPopSampler(tazSampleRateFileName, hhFileName, perFileName):
     households = pd.merge(households, sampleRates, left_on='taz', right_on='TAZ_SEQ')
     
     #bin hhs by income and size
-    incbins = [-1, 50000, 100000, households['hincp'].max()+1]
+    incbins = [-99999, 50000, 100000, households['hincp'].max()+1]
     households['hhincbin'] = pd.cut(households['hincp'], incbins, labels=False) # Double check household income field
     sizebins = [-1, 1, 2, 3, households['np'].max()+1]
     households['hhsizebin'] = pd.cut(households['np'], sizebins, labels=False) # Double check househod size field
