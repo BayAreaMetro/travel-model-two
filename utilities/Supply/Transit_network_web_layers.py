@@ -8,6 +8,10 @@ import collections
 
 INFILE_LOCATION = r"M:\Development\Travel Model Two\Supply\Transit\Network_QA\Cube_to_shapefile"
 
+# the version indicator will appear as a suffix of the map layer
+# it is needed so that different versions of the same operator's web map can be saved on ArcGIS online
+VERSION_INDICATOR = ""
+
 TRN_OPERATORS = collections.OrderedDict([
     # filename_append       # list of operator text
     ("other" ,              []),
@@ -28,6 +32,9 @@ TRN_OPERATORS = collections.OrderedDict([
     ("SF_Muni",             ["San Francisco MUNI"]),
 ])
 
+# refer to current ArcGIS project
+aprx = arcpy.mp.ArcGISProject("CURRENT")	
+
 operator_files = [""]
 operator_files = list(TRN_OPERATORS.keys())
 
@@ -41,12 +48,11 @@ for operator_file in operator_files:
     arcpy.DefineProjection_management(operator_layer, sr)
 
 	# simplify the name of each layer
-    aprx = arcpy.mp.ArcGISProject("CURRENT")	
     for m in aprx.listMaps():
         for lyr in m.listLayers():
             if lyr.name == "network_trn_lines_" + operator_file:
-                print("Layer " + lyr.name + " is renamed to" + operator_file)
-                lyr.name = operator_file 
+                print("Layer " + lyr.name + " is renamed to " + operator_file + VERSION_INDICATOR)
+                lyr.name = operator_file + VERSION_INDICATOR
        
 
 # save the ArcGIS project
@@ -75,4 +81,6 @@ for m in aprx.listMaps():
 
 print("Finished publishing web layers")
 
-# When the script is completed, user will have to go to ArcGIS Online, create a web map, and add the 15 layers to it
+# Post-processing: when the script is completed, user will have to go to ArcGIS Online, create a web map, and add the 15 layers to it
+
+# Note: the script will not overwrite web layers on ArcGIS Online. If users want to replace the web layers of a web map, they will need to delete the layers from ArcGIS Online manually
