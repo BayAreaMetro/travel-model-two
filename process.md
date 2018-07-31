@@ -279,9 +279,36 @@ title: Modeling Process
 
 ## Core
 
-* Summary:
-* Input:
-    1. [`mtctm2.properties`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties), the configuration for the core
+* Summary: The series of behavioral models where households and persons make decisions that ultimately result in daily trips.
+* Configuration:
+    1. [`mtctm2.properties`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties) is the primary configuration file for all models
+* Steps:
+    1. **PreAutoOwnership**
+    1. **UsualWorkAndSchoolLocationChoice**
+    1. **AutoOwnership**
+    1. **TransponderChoice**
+    1. **FreeParking**
+    1. **CoordinatedDailyActivityPattern**
+    1. **IndividualMandatoryTourFrequency**
+    1. **MandatoryTourModeChoice**
+    1. **MandatoryTourDepartureTimeAndDuration**
+    1. **JointTourFrequency**
+    1. **JointTourLocationChoice**
+    1. **JointTourDepartureTimeAndDuration**
+    1. **JointTourModeChoice**
+    1. **IndividualNonMandatoryTourFrequency**
+    1. **IndividualNonMandatoryTourLocationChoice**
+    1. **IndividualNonMandatoryTourDepartureTimeAndDuration**
+    1. **IndividualNonMandatoryTourModeChoice**
+    1. **AtWorkSubTourFrequency**
+    1. **AtWorkSubTourLocationChoice**
+    1. **AtWorkSubTourDepartureTimeAndDuration**
+    1. **AtWorkSubTourModeChoice**
+    1. **StopFrequency**
+    1. **StopLocation**
+
+    1. [`skims\SkimSetsAdjustment.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/SkimSetsAdjustment.job)
+
 * Output:
     1. `ctramp_output\wsLocResults.csv`, work and school location choice results
     2. ...
