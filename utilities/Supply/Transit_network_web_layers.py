@@ -1,26 +1,31 @@
+# This script takes 15 shapefiles generated from Cube_to_shapefile.py as input and produces 15 web layers on ArcGIS Online
+
+# The script is to be run within ArcGIS Pro's python window
+# User will need top start a blank ArcGIS project (a .aprx file), open a basemap, and copy the following code in the Python window
+
 import arcpy
 import collections
 
-file_location = r"M:\Development\Travel Model Two\Supply\Transit\Network_QA\Cube_to_shapefile\network_trn_lines"
+INFILE_LOCATION = r"M:\Development\Travel Model Two\Supply\Transit\Network_QA\Cube_to_shapefile"
 
 TRN_OPERATORS = collections.OrderedDict([
     # filename_append       # list of operator text
-    ("_other" ,              []),
-    ("_ferry",               ["Alameda Harbor Bay Ferry", "Alameda/Oakland Ferry","Angel Island - Tiburon Ferry",
+    ("other" ,              []),
+    ("ferry",               ["Alameda Harbor Bay Ferry", "Alameda/Oakland Ferry","Angel Island - Tiburon Ferry",
                               "Oakland/South SSF Ferry", "South SF/Oakland Ferry", "Vallejo Baylink Ferry"]),
-    ("_BART",                ["BART"]),
-    ("_Caltrain",            ["Caltrain"]),
-    ("_TriDelta",            ["TriDelta Transit"]),
-    ("_Stanford",            ["Stanford Marguerite Shuttle"]),
-    ("_WHEELS",              ["WHEELS"]),
-    ("_WestCAT",             ["WestCAT"]),
-    ("_GG_Transit",          ["Golden Gate Transit", "Golden Gate Ferry"]),
-    ("_CC_CountyConnection", ["The County Connection"]),
-    ("_SC_Transit",          ["Sonoma County Transit"]),
-    ("_SM_SamTrans",         ["samTrans"]),
-    ("_AC_Transit",          ["AC Transit", "AC Transbay"]),
-    ("_SC_VTA",              ["Santa Clara VTA"]),
-    ("_SF_Muni",             ["San Francisco MUNI"]),
+    ("BART",                ["BART"]),
+    ("Caltrain",            ["Caltrain"]),
+    ("TriDelta",            ["TriDelta Transit"]),
+    ("Stanford",            ["Stanford Marguerite Shuttle"]),
+    ("WHEELS",              ["WHEELS"]),
+    ("WestCAT",             ["WestCAT"]),
+    ("GG_Transit",          ["Golden Gate Transit", "Golden Gate Ferry"]),
+    ("CC_CountyConnection", ["The County Connection"]),
+    ("SC_Transit",          ["Sonoma County Transit"]),
+    ("SM_SamTrans",         ["samTrans"]),
+    ("AC_Transit",          ["AC Transit", "AC Transbay"]),
+    ("SC_VTA",              ["Santa Clara VTA"]),
+    ("SF_Muni",             ["San Francisco MUNI"]),
 ])
 
 operator_files = [""]
@@ -31,15 +36,24 @@ sr = arcpy.SpatialReference("NAD 1983 StatePlane California VI FIPS 0406 (US Fee
 
 for operator_file in operator_files:
 
-#   operator_layer = r"M:\Development\Travel Model Two\Supply\Transit\Network_QA\Cube_to_shapefile\network_trn_lines" + operator_file + ".shp"
-#   operator_layer = r"" + file_location + operator_file + ".shp"
-   operator_layer = file_location + operator_file + ".shp"
+    operator_layer = INFILE_LOCATION + "/network_trn_lines_" + operator_file + ".shp"
 
-   arcpy.DefineProjection_management(operator_layer, sr)
+    arcpy.DefineProjection_management(operator_layer, sr)
+
+	# simplify the name of each layer
+    aprx = arcpy.mp.ArcGISProject("CURRENT")	
+    for m in aprx.listMaps():
+        for lyr in m.listLayers():
+            if lyr.name == "network_trn_lines_" + operator_file:
+                print("Layer " + lyr.name + " is renamed to" + operator_file)
+                lyr.name = operator_file 
+       
+
+# save the ArcGIS project
+aprx.save()
 
 
-# publish web layers
-# references: http://pro.arcgis.com/en/pro-app/arcpy/mapping/createweblayersddraft.htm
+# A references publishing web layers: http://pro.arcgis.com/en/pro-app/arcpy/mapping/createweblayersddraft.htm
 # import arcpy
 # aprx = arcpy.mp.ArcGISProject('C:/Project/Counties.aprx')
 # m = aprx.listMaps('USA Counties')[0]
@@ -49,25 +63,16 @@ for operator_file in operator_files:
 # arcpy.UploadServiceDefinition_server('C:/Project/Cities.sd', 'My Hosted Services')
 
 
-aprx = arcpy.mp.ArcGISProject("CURRENT")
+# publish web layers 
+# aprx = arcpy.mp.ArcGISProject("CURRENT")
 for m in aprx.listMaps():
-    print("Map: {0} Layers".format(m.name))
     for lyr in m.listLayers():
-        if lyr.isBroken:
-            print("(BROKEN) " + lyr.name)
-        else:
-            print("  " + lyr.name)
-
+	
         if lyr.name != 'Topographic':
-            arcpy.mp.CreateWebLayerSDDraft(lyr, 'M:/Development/Travel Model Two/Supply/Transit/Network_QA/Cube_to_shapefile/' + lyr.name + '.sddraft', lyr.name, 'MY_HOSTED_SERVICES', 'FEATURE_ACCESS')
-            arcpy.StageService_server('M:/Development/Travel Model Two/Supply/Transit/Network_QA/Cube_to_shapefile/' + lyr.name + '.sddraft', 'M:/Development/Travel Model Two/Supply/Transit/Network_QA/Cube_to_shapefile/' + lyr.name + '.sd')
-            arcpy.UploadServiceDefinition_server('M:/Development/Travel Model Two/Supply/Transit/Network_QA/Cube_to_shapefile/' + lyr.name + '.sd', 'My Hosted Services')
+            arcpy.mp.CreateWebLayerSDDraft(lyr, INFILE_LOCATION + "/" + lyr.name + '.sddraft', lyr.name, 'MY_HOSTED_SERVICES', 'FEATURE_ACCESS')
+            arcpy.StageService_server(INFILE_LOCATION + "/"  + lyr.name + '.sddraft', 'M:/Development/Travel Model Two/Supply/Transit/Network_QA/Cube_to_shapefile/' + lyr.name + '.sd')
+            arcpy.UploadServiceDefinition_server(INFILE_LOCATION + "/"  + lyr.name + '.sd', 'My Hosted Services')
 
+print("Finished publishing web layers")
 
-
-# The process is not fully automated yet. 
-# The script works if you run it for the first time. It'll take you to the point which 15 web layers will be created in your "my content" on ArcGIS online. You'll still need to create a web map and add all the layers to it.
-# The intent is that in future updates you just need to overwrite the layers and not have to redo the web map.
-# But currently the script has problems with overwriting the service definition (the line with "arcpy.UploadServiceDefinition_server")
-# As a work around for now, I'll need to remove the web layers on ArcGIS online manually, and the recreate the web map. 
-# URL for the web map: https://arcg.is/uLPeT
+# When the script is completed, user will have to go to ArcGIS Online, create a web map, and add the 15 layers to it
