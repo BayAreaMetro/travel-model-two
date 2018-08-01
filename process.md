@@ -283,9 +283,12 @@ title: Modeling Process
 * Configuration:
     1. [`mtctm2.properties`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties) is the primary configuration file for all models
 * Steps:
-    1. **PreAutoOwnership**
-    1. **UsualWorkAndSchoolLocationChoice**
-    1. **AutoOwnership**
+    1. [**PreAutoOwnership**](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdAutoOwnershipModel.java)
+       * Logfile: `event-ao.log`
+    1. [**UsualWorkAndSchoolLocationChoice**](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MandatoryDestChoiceModel.java)
+       * Logile: `event-tourDcMan.log`
+    1. [**AutoOwnership**](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdAutoOwnershipModel.java)
+       * Logfile: `event-ao.log`
     1. **TransponderChoice**
     1. **FreeParking**
     1. **CoordinatedDailyActivityPattern**
