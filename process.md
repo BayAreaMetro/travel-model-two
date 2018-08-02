@@ -282,46 +282,80 @@ title: Modeling Process
 * Summary: The series of behavioral models where households and persons make decisions that ultimately result in daily trips.
 * Configuration:
     1. [`mtctm2.properties`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties) is the primary configuration file for all models
-* Steps:
-    1. [**Accessibilities**]
-       * Summary: All accessibility measures for are calculated at the MAZ level. The auto travel times and cost are TAZ-based and the size variables are MAZ-based. This necessitates that auto accessibilities be calculated at the MAZ level.
-    1. [**PreAutoOwnership**](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdAutoOwnershipModel.java)
-       * Summary: This step selects the preliminary auto ownership level for the household, based upon household demographic variables, household ‘4D’ variables, and destination-choice accessibility terms created in the *Accessibilities* sub-model (see above). This auto ownership level is used to create mode choice logsums for workers and students in the household, which are then used to select work and school locations in model **UsualWorkAndSchoolLocationChoice**. The auto ownership model is re-run (*AutoOwnership*) in order to select the actual auto ownership for the household, but this subsequent version is informed by the work and school locations chosen by the *UsualWorkAndSchoolLocationChoice* model. All other variables and coefficients are held constant between the two models, except for alternativespecific constants.
-       * Logfile: `event-ao.log`
-    1. [**WorkFromHomeChoice**](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MandatoryDestChoiceModel.java#L496)
-    1. [**UsualWorkAndSchoolLocationChoice**](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MandatoryDestChoiceModel.java#L129)
-       * Summary: <p>A workplace location choice model assigns a workplace MAZ for every employed person in the synthetic population who does not choose ‘works at home’ from the previous model. Every worker is assigned a regular work location zone (TAZ) and MAZ according to a multinomial logit destination choice model. Size terms in the model vary according to worker occupation, to reflect the different types of jobs that are likely to attract different workers. Each occupation category utilizes different coefficients for categories of employment by industry, to reflect the different likelihood of workers by occupation to work in each industry. Accessibility from the workers home to the alternative workplace is measured by a mode choice logsum taken directly from the tour mode choice model, based on peak period travel (A.M. departure and P.M. return). Various distance terms are also used.</p><p>Since mode choice logsums are required for each destination, a two-stage procedure is used for all destination choice models in the CT-RAMP system in order to reduce computational time (it would be computationally prohibitive to compute a mode choice logsum for over 40,000 MAZs and every tour). In the first stage, a simplified destination choice model is applied in which all TAZs are alternatives. The only variables in this model are the size term (accumulated from all MAZs in the TAZ) and distance. This model creates a probability distribution for all possible alternative TAZs (TAZs with no employment are not sampled). A set of alternatives are sampled from the probability distribution and, for each TAZ, a MAZ is chosen according to its size relative to the sum of all MAZs within the TAZ. These sampled alternatives constitute the choice set in the full destination choice model. Mode choice logsums are computed for these alternatives and the destination choice model is applied. A discrete choice of MAZ is made for each worker from this more limited set of alternatives. In the case of the work location choice model, a set of 30 alternatives is sampled.</p> <p>The application procedure utilizes an iterative shadow pricing mechanism in order to match workers to input employment totals. The shadow pricing process compares the share of workers who choose each MAZ by occupation to the relative size of the MAZ compared to all MAZ. A shadow prices is computed which scales the size of the MAZ based on the ratio of the observed share to the estimated share. The model is re-run until the estimated and observed shares are within a reasonable tolerance. The shadow prices are written to a file and can be used in subsequent model runs to cut down computational time.</p>
-       * Inputs:
-       * Outputs:
-       * Logfile: `event-tourDcMan.log`
-    1. [**AutoOwnership**](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdAutoOwnershipModel.java)
-       * Logfile: `event-ao.log`
-    1. **TransponderChoice**
-    1. **FreeParking**
-    1. **CoordinatedDailyActivityPattern**
-    1. **IndividualMandatoryTourFrequency**
-    1. **MandatoryTourModeChoice**
-    1. **MandatoryTourDepartureTimeAndDuration**
-    1. **JointTourFrequency**
-    1. **JointTourLocationChoice**
-    1. **JointTourDepartureTimeAndDuration**
-    1. **JointTourModeChoice**
-    1. **IndividualNonMandatoryTourFrequency**
-    1. **IndividualNonMandatoryTourLocationChoice**
-    1. **IndividualNonMandatoryTourDepartureTimeAndDuration**
-    1. **IndividualNonMandatoryTourModeChoice**
-    1. **AtWorkSubTourFrequency**
-    1. **AtWorkSubTourLocationChoice**
-    1. **AtWorkSubTourDepartureTimeAndDuration**
-    1. **AtWorkSubTourModeChoice**
-    1. **StopFrequency**
-    1. **StopLocation**
 
-    1. [`skims\SkimSetsAdjustment.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/SkimSetsAdjustment.job)
+### Accessibilities
+Summary: All accessibility measures for are calculated at the MAZ level. The auto travel times and cost are TAZ-based and the size variables are MAZ-based. This necessitates that auto accessibilities be calculated at the MAZ level.
+
+### [PreAutoOwnership](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdAutoOwnershipModel.java)
+
+This step selects the preliminary auto ownership level for the household, based upon household demographic variables, household ‘4D’ variables, and destination-choice accessibility terms created in the *Accessibilities* sub-model (see above). This auto ownership level is used to create mode choice logsums for workers and students in the household, which are then used to select work and school locations in model **UsualWorkAndSchoolLocationChoice**. The auto ownership model is re-run (*AutoOwnership*) in order to select the actual auto ownership for the household, but this subsequent version is informed by the work and school locations chosen by the **UsualWorkAndSchoolLocationChoice** model. All other variables and coefficients are held constant between the two models, except for alternativespecific constants.
+
+    * Logfile: `event-ao.log`
+
+### [WorkFromHomeChoice](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MandatoryDestChoiceModel.java#L496)
+
+### [UsualWorkAndSchoolLocationChoice](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MandatoryDestChoiceModel.java#L129)
+
+A workplace location choice model assigns a workplace MAZ for every employed person in the synthetic population who does not choose ‘works at home’ from the previous model. Every worker is assigned a regular work location zone (TAZ) and MAZ according to a multinomial logit destination choice model. Size terms in the model vary according to worker occupation, to reflect the different types of jobs that are likely to attract different workers. Each occupation category utilizes different coefficients for categories of employment by industry, to reflect the different likelihood of workers by occupation to work in each industry. Accessibility from the workers home to the alternative workplace is measured by a mode choice logsum taken directly from the tour mode choice model, based on peak period travel (A.M. departure and P.M. return). Various distance terms are also used.
+
+Since mode choice logsums are required for each destination, a two-stage procedure is used for all destination choice models in the CT-RAMP system in order to reduce computational time (it would be computationally prohibitive to compute a mode choice logsum for over 40,000 MAZs and every tour). In the first stage, a simplified destination choice model is applied in which all TAZs are alternatives. The only variables in this model are the size term (accumulated from all MAZs in the TAZ) and distance. This model creates a probability distribution for all possible alternative TAZs (TAZs with no employment are not sampled). A set of alternatives are sampled from the probability distribution and, for each TAZ, a MAZ is chosen according to its size relative to the sum of all MAZs within the TAZ. These sampled alternatives constitute the choice set in the full destination choice model. Mode choice logsums are computed for these alternatives and the destination choice model is applied. A discrete choice of MAZ is made for each worker from this more limited set of alternatives. In the case of the work location choice model, a set of 30 alternatives is sampled.
+  
+The application procedure utilizes an iterative shadow pricing mechanism in order to match workers to input employment totals. The shadow pricing process compares the share of workers who choose each MAZ by occupation to the relative size of the MAZ compared to all MAZ. A shadow prices is computed which scales the size of the MAZ based on the ratio of the observed share to the estimated share. The model is re-run until the estimated and observed shares are within a reasonable tolerance. The shadow prices are written to a file and can be used in subsequent model runs to cut down computational time.
+
+    * Inputs:
+    * Outputs:
+    * Logfile: `event-tourDcMan.log`
+
+### [AutoOwnership](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdAutoOwnershipModel.java)
+    * Logfile: `event-ao.log`
+
+### TransponderChoice
+
+### FreeParking
+
+### CoordinatedDailyActivityPattern
+
+### IndividualMandatoryTourFrequency
+
+### MandatoryTourModeChoice
+
+### MandatoryTourDepartureTimeAndDuration
+
+### JointTourFrequency
+
+### JointTourLocationChoice
+
+### JointTourDepartureTimeAndDuration
+
+### JointTourModeChoice
+
+### IndividualNonMandatoryTourFrequency
+
+### IndividualNonMandatoryTourLocationChoice
+
+### IndividualNonMandatoryTourDepartureTimeAndDuration
+
+### IndividualNonMandatoryTourModeChoice
+
+### AtWorkSubTourFrequency
+
+### AtWorkSubTourLocationChoice
+
+### AtWorkSubTourDepartureTimeAndDuration
+
+### AtWorkSubTourModeChoice
+
+### StopFrequency
+
+### StopLocation
+
 
 * Output:
     1. `ctramp_output\wsLocResults.csv`, work and school location choice results
     2. ...
+
+1. [`skims\SkimSetsAdjustment.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/SkimSetsAdjustment.job)
+
 
 1. [`assign\merge_demand_matrices.s`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/merge_demand_matrices.s)
     * Summary: Consolidates the output matrix files from the core into TAZ- and TAP-level demand matrices.
