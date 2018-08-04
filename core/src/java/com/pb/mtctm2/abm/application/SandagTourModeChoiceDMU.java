@@ -191,7 +191,11 @@ public class SandagTourModeChoiceDMU
         methodIndexMap.put("getDMaz", 402);
         
         methodIndexMap.put("getUseOwnedAV", 500);
-
+        methodIndexMap.put("getOrigTaxiWaitTime", 501);
+        methodIndexMap.put("getOrigTNCWaitTime", 502);
+        methodIndexMap.put("getDestTaxiWaitTime", 503);
+        methodIndexMap.put("getDestTNCWaitTime", 504);
+        
     }
 
     public double getValueForIndex(int variableIndex, int arrayIndex)
@@ -325,6 +329,18 @@ public class SandagTourModeChoiceDMU
                 break;
             case 500: 
             	returnValue = getUseOwnedAV();
+            	break;
+            case 501: 
+            	returnValue = getOrigTaxiWaitTime();
+            	break;
+            case 502: 
+            	returnValue = getOrigTNCWaitTime();
+            	break;
+            case 503: 
+            	returnValue = getDestTaxiWaitTime();
+            	break;
+            case 504: 
+            	returnValue = getDestTNCWaitTime();
             	break;
                 
             default:

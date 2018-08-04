@@ -56,6 +56,11 @@ public class TourModeChoiceDMU
 
     protected double[][]               transitLogSum;
     
+    protected float                    origTNCWaitTime;
+    protected float                    origTaxiWaitTime;
+    protected float                    destTNCWaitTime;
+    protected float                    destTaxiWaitTime;
+    
     protected int oMaz;
     protected int dMaz;
     
@@ -397,6 +402,44 @@ public class TourModeChoiceDMU
 		return tour.getUseOwnedAV() ? 1 : 0;
 	}
 
+
+	public float getOrigTNCWaitTime() {
+		return origTNCWaitTime;
+	}
+
+
+	public void setOrigTNCWaitTime(float origTNCWaitTime) {
+		this.origTNCWaitTime = origTNCWaitTime;
+	}
+
+
+	public float getOrigTaxiWaitTime() {
+		return origTaxiWaitTime;
+	}
+
+
+	public void setOrigTaxiWaitTime(float origTaxiWaitTime) {
+		this.origTaxiWaitTime = origTaxiWaitTime;
+	}
+
+	public float getDestTNCWaitTime() {
+		return destTNCWaitTime;
+	}
+
+
+	public void setDestTNCWaitTime(float destTNCWaitTime) {
+		this.destTNCWaitTime = destTNCWaitTime;
+	}
+
+
+	public float getDestTaxiWaitTime() {
+		return destTaxiWaitTime;
+	}
+
+
+	public void setDestTaxiWaitTime(float destTaxiWaitTime) {
+		this.destTaxiWaitTime = destTaxiWaitTime;
+	}
 
 	public int getIndexValue(String variableName)
     {
