@@ -3,7 +3,10 @@ package com.pb.mtctm2.abm.ctramp;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
+
 import org.apache.log4j.Logger;
+
 import com.pb.mtctm2.abm.accessibilities.AutoAndNonMotorizedSkimsCalculator;
 import com.pb.mtctm2.abm.accessibilities.BestTransitPathCalculator;
 import com.pb.common.newmodel.Alternative;
@@ -63,8 +66,9 @@ public class McLogsumsCalculator implements Serializable
     private int                                setTourMcLogsumDmuAttributesTotalTime = 0;
     private int                                setTripMcLogsumDmuAttributesTotalTime = 0;
 
-
-    
+    //added for TNC and Taxi modes
+    TNCAndTaxiWaitTimeCalculator tncTaxiWaitTimeCalculator = null;
+       
     public McLogsumsCalculator()
     {
         if (mgraManager == null)
@@ -77,7 +81,8 @@ public class McLogsumsCalculator implements Serializable
         this.lsWgtAvgCostD = mgraManager.getLsWgtAvgCostD();
         this.lsWgtAvgCostH = mgraManager.getLsWgtAvgCostH();
         this.parkingArea = mgraManager.getMgraParkAreas();
-    }
+        
+      }
     
     
     public BestTransitPathCalculator getBestTransitPathCalculator()
@@ -90,6 +95,10 @@ public class McLogsumsCalculator implements Serializable
     {
         bestPathUEC = new BestTransitPathCalculator(rbMap);
         anm = new AutoAndNonMotorizedSkimsCalculator(rbMap);
+        
+        tncTaxiWaitTimeCalculator = new TNCAndTaxiWaitTimeCalculator();
+        tncTaxiWaitTimeCalculator.createWaitTimeDistributions(rbMap);
+
     }
 
     public void setTazDistanceSkimArrays( double[][][] storedFromTazDistanceSkims, double[][][] storedToTazDistanceSkims ) {     
@@ -123,7 +132,7 @@ public class McLogsumsCalculator implements Serializable
         mcDmuObject.setLsWgtAvgCostM( lsWgtAvgCostM[destMgra] );
         mcDmuObject.setLsWgtAvgCostD( lsWgtAvgCostD[destMgra] );
         mcDmuObject.setLsWgtAvgCostH( lsWgtAvgCostH[destMgra] );
-       
+        
         int tourOrigTaz = mgraManager.getTaz(origMgra);
         int tourDestTaz = mgraManager.getTaz(destMgra);
         
@@ -140,6 +149,32 @@ public class McLogsumsCalculator implements Serializable
         mcDmuObject.setReimburseProportion( reimbursePct );
         mcDmuObject.setParkingArea(parkingArea[destMgra]);
  
+        float TNCWaitTimeOrig = 0;
+        float TaxiWaitTimeOrig = 0;
+        float TNCWaitTimeDest = 0;
+        float TaxiWaitTimeDest = 0;
+        float popEmpDenOrig = (float) mgraManager.getPopEmpPerSqMi(origMgra);
+        float popEmpDenDest = (float) mgraManager.getPopEmpPerSqMi(destMgra);
+        
+        Household household = mcDmuObject.getHouseholdObject();
+        if(household!=null){
+            Random hhRandom = household.getHhRandom();
+            double rnum = hhRandom.nextDouble();
+            TNCWaitTimeOrig = (float) tncTaxiWaitTimeCalculator.sampleFromTNCWaitTimeDistribution(rnum, popEmpDenOrig);
+            TaxiWaitTimeOrig = (float) tncTaxiWaitTimeCalculator.sampleFromTaxiWaitTimeDistribution(rnum, popEmpDenOrig);
+            TNCWaitTimeDest = (float) tncTaxiWaitTimeCalculator.sampleFromTNCWaitTimeDistribution(rnum, popEmpDenDest);
+            TaxiWaitTimeDest = (float) tncTaxiWaitTimeCalculator.sampleFromTaxiWaitTimeDistribution(rnum, popEmpDenDest);
+        }else{
+            TNCWaitTimeOrig = (float) tncTaxiWaitTimeCalculator.getMeanTNCWaitTime( popEmpDenOrig);
+            TaxiWaitTimeOrig = (float) tncTaxiWaitTimeCalculator.getMeanTaxiWaitTime( popEmpDenOrig);
+            TNCWaitTimeDest = (float) tncTaxiWaitTimeCalculator.getMeanTNCWaitTime( popEmpDenDest);
+            TaxiWaitTimeDest = (float) tncTaxiWaitTimeCalculator.getMeanTaxiWaitTime(popEmpDenDest);
+        }
+        
+        mcDmuObject.setOrigTaxiWaitTime(TaxiWaitTimeOrig);
+        mcDmuObject.setDestTaxiWaitTime(TaxiWaitTimeDest);
+        mcDmuObject.setOrigTNCWaitTime(TNCWaitTimeOrig);
+        mcDmuObject.setDestTNCWaitTime(TNCWaitTimeDest);
 
     }
     
@@ -211,7 +246,24 @@ public class McLogsumsCalculator implements Serializable
         mcDmuObject.setPTazTerminalTime( tazManager.getOriginTazTerminalTime(mgraManager.getTaz(origMgra)) );
         mcDmuObject.setATazTerminalTime( tazManager.getDestinationTazTerminalTime(mgraManager.getTaz(destMgra)) );
 
+        float TNCWaitTime = 0;
+        float TaxiWaitTime = 0;
+        float popEmpDen = (float) mgraManager.getPopEmpPerSqMi(origMgra);
         
+        Household household = mcDmuObject.getHouseholdObject();
+        if(household!=null){
+            Random hhRandom = household.getHhRandom();
+            double rnum = hhRandom.nextDouble();
+            TNCWaitTime = (float) tncTaxiWaitTimeCalculator.sampleFromTNCWaitTimeDistribution(rnum, popEmpDen);
+            TaxiWaitTime = (float) tncTaxiWaitTimeCalculator.sampleFromTaxiWaitTimeDistribution(rnum, popEmpDen);
+       }else{
+            TNCWaitTime = (float) tncTaxiWaitTimeCalculator.getMeanTNCWaitTime( popEmpDen);
+            TaxiWaitTime = (float) tncTaxiWaitTimeCalculator.getMeanTaxiWaitTime( popEmpDen);
+        }
+        
+        mcDmuObject.setWaitTimeTaxi(TaxiWaitTime);
+        mcDmuObject.setWaitTimeTNC(TNCWaitTime);
+
         mcModel.computeUtilities(mcDmuObject, mcDmuIndex);
         double logsum = mcModel.getLogsum();
         tripModeChoiceSegmentStoredProbabilities = Arrays.copyOf( mcModel.getCumulativeProbabilities(), mcModel.getNumberOfAlternatives() );

@@ -38,23 +38,23 @@ public interface HouseholdDataManagerIf
     
     public void setupHouseholdDataManager(ModelStructure modelStructure, String inputHouseholdFileName, String inputPersonFileName);
 
-    public int[][] getTourPurposePersonsByHomeMgra(String[] purposeList);
+    public double[][] getTourPurposePersonsByHomeMgra(String[] purposeList);
 
-    public int[][] getWorkersByHomeMgra(HashMap<Integer, Integer> segmentValueIndexMap);
+    public double[][] getWorkersByHomeMgra(HashMap<Integer, Integer> segmentValueIndexMap);
 
-    public int[][] getStudentsByHomeMgra();
+    public double[][] getStudentsByHomeMgra();
 
-    public int[][] getWorkToursByDestMgra(HashMap<Integer, Integer> segmentValueIndexMap);
+    public double[][] getWorkToursByDestMgra(HashMap<Integer, Integer> segmentValueIndexMap);
 
-    public int[] getWorksAtHomeBySegment(HashMap<Integer, Integer> segmentValueIndexMap);
+    public double[] getWorksAtHomeBySegment(HashMap<Integer, Integer> segmentValueIndexMap);
     
-    public int[][] getSchoolToursByDestMgra();
+    public double[][] getSchoolToursByDestMgra();
 
-    public int[] getIndividualNonMandatoryToursByHomeMgra(String purposeString);
+    public double[] getIndividualNonMandatoryToursByHomeMgra(String purposeString);
 
-    public int[] getJointToursByHomeMgra(String purposeString);
+    public double[] getJointToursByHomeMgra(String purposeString);
 
-    public int[] getAtWorkSubtoursByWorkMgra(String purposeString);
+    public double[] getAtWorkSubtoursByWorkMgra(String purposeString);
 
     public void logPersonSummary();
 

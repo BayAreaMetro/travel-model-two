@@ -588,7 +588,7 @@ public class SandagHouseholdDataManager
 
     }
 
-    public int[] getJointToursByHomeMgra(String purposeString)
+    public double[] getJointToursByHomeMgra(String purposeString)
     {
         // TODO Auto-generated method stub
         return null;

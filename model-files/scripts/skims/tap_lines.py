@@ -55,8 +55,8 @@ for temp_line in open(transit_line_file):
   lineName = split_line[1]
   iter = split_line.index('N') + 1
   while iter < len(split_line):
-    #skip NNTIME token and value	
-    if (split_line[iter] == "NNTIME") or (split_line[iter] == "TIME"):
+    #skip NNTIME,TIME,ACCESS,etc token and value
+    if split_line[iter] in ["NNTIME", "TIME", "ACCESS", "ACCESS_C", "DELAY", "DELAY_C", "DWELL", "DWELL_C"]:
         iter = iter + 2
         continue
     #skip N token

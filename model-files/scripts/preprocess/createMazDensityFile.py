@@ -63,6 +63,9 @@ reader = csv.DictReader(readMazNodeFile)
 # iterate through file and store count of intersections within 1/2 mile of XY coordinates
 max_dist_fact = 0.5 # 1/2 mile radius from centroid
 max_dist = 5280 * max_dist_fact
+
+max_dist_popempden = 5280 * 5 # 5 miles radius to approximate a zip code (note: avg zip code size in US is 90 sq mi)
+
 int_cnt = []
 maz_x = []
 maz_y = []
@@ -112,7 +115,7 @@ maz_nonseqn = mazData['MAZ_ORIGINAL'].tolist()
 # create writer
 writeMazDensityFile = open(outDensityData, "wb")
 writer = csv.writer(writeMazDensityFile, delimiter=',')
-outHeader = ["MAZ_ORIGINAL","TotInt","EmpDen","RetEmpDen","DUDen","PopDen","IntDenBin","EmpDenBin","DuDenBin"]
+outHeader = ["MAZ_ORIGINAL","TotInt","EmpDen","RetEmpDen","DUDen","PopDen","IntDenBin","EmpDenBin","DuDenBin","PopEmpDenPerMi"]
 writer.writerow(outHeader)
 
 # iterate through MAZs and calculate density terms
@@ -133,6 +136,12 @@ while i < len(maz_seqn):
     intDenBin = 0
     empDenBin = 0
     duDenBin = 0
+
+    #added for TNC\Taxi wait times
+    totPopWaitTime = 0
+    totEmpWaitTime = 0
+    totAcreWaitTime = 0    
+    popEmpWaitTimeDen = 0
     
     mazData['dest_x'] = maz_x_seq[i]
     mazData['dest_y'] = maz_y_seq[i]
@@ -149,12 +158,20 @@ while i < len(maz_seqn):
     totPop = mazData.loc[mazData['distance'] < max_dist, 'POP'].sum()
     totAcres = mazData.loc[mazData['distance'] < max_dist, 'ACRES'].sum()
     
+    # TNC\Taxi wait time density fields
+    totPopWaitTime = mazData.loc[mazData['distance'] < max_dist_popempden, 'POP'].sum()
+    totEmpWaitTime = mazData.loc[mazData['distance'] < max_dist_popempden, 'emp_total'].sum()
+    totAcreWaitTime = mazData.loc[mazData['distance'] < max_dist_popempden, 'ACRES'].sum()
+    
     # calculate density variables
     if(totAcres>0):
         empDen = totEmp/totAcres
         retDen = totRet/totAcres
         duDen = totHH/totAcres
         popDen = totPop/totAcres
+
+    if(totAcreWaitTime>0):
+        popEmpWaitTimeDen = (totPopWaitTime + totEmpWaitTime)/(totAcreWaitTime * 0.0015625)
     
     # calculate bins based on sandag bin ranges
     if (interCount < 80):
@@ -182,7 +199,7 @@ while i < len(maz_seqn):
  
     
     #write out results to csv file
-    outList = [origNonSeqMaz,interCount,empDen,retDen,duDen,popDen,intDenBin,empDenBin,duDenBin]
+    outList = [origNonSeqMaz,interCount,empDen,retDen,duDen,popDen,intDenBin,empDenBin,duDenBin,popEmpWaitTimeDen]
     writer.writerow(outList)
 
 writeMazDensityFile.close()
