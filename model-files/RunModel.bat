@@ -166,7 +166,10 @@ if ERRORLEVEL 2 goto done
 "%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
 IF ERRORLEVEL 1 goto done
 
-:: Set the prices in the roadway network
+:: Set the prices in the roadway network (convert csv to dbf first)
+"%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\tolls.csv hwy\tolls.dbf
+IF ERRORLEVEL 1 goto done
+
 runtpp %BASE_SCRIPTS%\preprocess\SetTolls.job
 if ERRORLEVEL 2 goto done
 
