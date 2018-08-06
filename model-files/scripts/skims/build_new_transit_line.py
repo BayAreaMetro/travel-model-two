@@ -28,6 +28,7 @@ for line in reader:
 
 #next, read in the transit lines, change the node, and write out the results
 f = open(out_line_file,'wb')
+f.write(";;<<PT>><<LINE>>;;"+os.linesep)
 trn_line          = ""
 trn_line_count    = 0
 node_update_count = 0
@@ -52,9 +53,12 @@ for temp_line in open(line_file):
         continue
 
     trn_line_count += 1
+
+    # if trn_line_count==4: sys.exit()
+    # print("==================")
     # print("{} trn_line={}".format(trn_line_count, trn_line))
 
-    line = trn_line.strip().split('N=')
+    line = trn_line.strip().split('N=')  # todo: this is not robust to whitespace between N and =
     if len(line) < 2: #keep everything before node sequence as-is
         raise
         # f.write(line[0] + os.linesep)
@@ -65,25 +69,35 @@ for temp_line in open(line_file):
 
     for i in range(1,len(line)):
         seq = []
-
-        # print("")
         # print("line[{}]={}".format(i,line[i]))
+        last_is_non_node_attr = False
 
-        for n in line[i].strip().split(','):
-            str_n = n
+        for str_n in line[i].strip().split(','):
+            # strip whitespace
+            str_n = str_n.strip()
+            # print("str_n={}".format(str_n))
+
             if str_n.lstrip('-').isdigit():
-               n = int(n)
-            else:
-               if len(n)>0:
-			      seq.append(n)
-               continue
+               n = int(str_n)
+            elif len(str_n)>0:
+                # print(str_n)
+                seq.append(str_n)
+                last_is_non_node_attr = True
+                continue
+
             #make sure that the sign of the nodes (for stop/pass-through) is retained
             sign = int(math.copysign(1,n))
             new_n = sign*node_map[n*sign]
             node_update_count += 1
-            seq.append(new_n)
+            if last_is_non_node_attr:
+                seq.append("N=" + str(new_n))
+                last_is_non_node_attr = False
+            else:
+                seq.append(new_n)
+
         if i < len(line)-1:
             seq.append(' N=')
+        # print(seq)
         f.write(','.join(map(str,seq)))
     f.write(os.linesep)
     
