@@ -2,6 +2,9 @@ USAGE = """
 
 Create shapefile of Cube network, roadway and transit.
 
+Requires arcpy, so may need to need arcgis version of python
+(e.g. c:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3)
+
 """
 
 import argparse, collections, csv, logging, os, subprocess, sys, traceback
@@ -216,7 +219,8 @@ if __name__ == '__main__':
                                     stop_info_dict["Station"]))
 
     (trn_file_base, trn_file_name) = os.path.split(args.linefile[0])
-    trn_net = Wrangler.TransitNetwork(champVersion=4.3, basenetworkpath=trn_file_base, isTiered=True, networkName=trn_file_name[:-4])
+    trn_net = Wrangler.TransitNetwork(modelType="TravelModelTwo", modelVersion=1.0,
+                                      basenetworkpath=trn_file_base, isTiered=True, networkName=trn_file_name[:-4])
     print("Read trn_net: {}".format(trn_net))
 
     # build lines and links
