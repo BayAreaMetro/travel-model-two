@@ -203,7 +203,7 @@ The following transit modes are defined based on the RTD database attributes `CP
 | MS | Stanford Marguerite Shuttle | B | NA | 13 | Local bus |
 | PE | Petaluma Transit | B | NA | 68 | Local bus |
 | RV | Rio Vista Delta Breeze | B | NA | 52 | Local bus |
-| SA | Sonoma Marin Area Rail Transit (SMART) | | 112 | Light rail | 
+| SA | Sonoma Marin Area Rail Transit (SMART) | | 134 | Commuter rail | 
 | SC | Santa Clara VTA | B | 101 | 81 | Express Bus |
 | SC | Santa Clara VTA | B | 102 | 81 | Express Bus |
 | SC | Santa Clara VTA | B | 103 | 81 | Express Bus |
