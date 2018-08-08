@@ -149,7 +149,7 @@ Transit trips are assigned between transit access points (TAPs), which represent
 |---------|---------------|-------------|
 | *NAME* | RTD CPT_AGENCYID and SCH_ROUTEDESIGNATOR | String |
 | *USERA1* | Transit operator | String |
-| *USERA2* | Line haul mode, one of {::nomarkdown}<br/><ul><li>Local bus (LB)</li> <li>Express Bus (EB)</li> <li>Ferry service (FY)</li> <li>Light rail (LR)</li> <li>Heavy rail (HR)</li> <li>Commuter rail (CR)</li></ul>{:/} | String |
+| *USERA2* | Line haul mode, one of {::nomarkdown}<br/><ul><li>`Local bus`</li> <li>`Express bus`</li> <li>`Ferry service`</li> <li>`Light rail`</li> <li>`Heavy rail`</li> <li>`Commuter rail`</li></ul>{:/} | String |
 | *MODE* | Mode code | Integer |
 | *ONEWA* | set to TRUE since each route is coded by direction | Character |
 | *XYSPEED* | set to 15 by default (not used) | Integer |
@@ -203,6 +203,7 @@ The following transit modes are defined based on the RTD database attributes `CP
 | MS | Stanford Marguerite Shuttle | B | NA | 13 | Local bus |
 | PE | Petaluma Transit | B | NA | 68 | Local bus |
 | RV | Rio Vista Delta Breeze | B | NA | 52 | Local bus |
+| SA | Sonoma Marin Area Rail Transit (SMART) | | 112 | Light rail | 
 | SC | Santa Clara VTA | B | 101 | 81 | Express Bus |
 | SC | Santa Clara VTA | B | 102 | 81 | Express Bus |
 | SC | Santa Clara VTA | B | 103 | 81 | Express Bus |
