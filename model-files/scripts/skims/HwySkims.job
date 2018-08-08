@@ -451,6 +451,9 @@ loop period = 1, 5
       mw[10]   = mi.1.TOLLFFTDA
       mw[11]   = mi.1.TOLLHOVDISTDA
       mw[12]   = mi.1.TOLLTOLLDISTDA
+
+      ; if there's no DA from any TAZ to TAZ, this will cause problems in the long run
+      if (ROWMAX(2) == 1000000) ABORT msg="FATAL: TAZ-pairs exist with no DA path"
       
       ; shared ride 2
       mw[13]  = mi.2.TIMES2
