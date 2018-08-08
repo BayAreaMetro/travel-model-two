@@ -151,7 +151,9 @@ Transit trips are assigned between transit access points (TAPs), which represent
 | *USERA1* | Transit operator | String |
 | *USERA2* | Line haul mode, one of {::nomarkdown}<br/><ul><li>`Local bus`</li> <li>`Express bus`</li> <li>`Ferry service`</li> <li>`Light rail`</li> <li>`Heavy rail`</li> <li>`Commuter rail`</li></ul>{:/} | String |
 | *MODE* | Mode code | Integer |
-| *ONEWA* | set to TRUE since each route is coded by direction | Character |
+| *FARESYSTEM* | Faresystem code. Not necessary if *MODE* corresponds to *FARESYSTEM* in the factors file. | Integer |
+| *OPERATOR* | Operator code | Integer |
+| *ONEWAY* | set to TRUE since each route is coded by direction | Character |
 | *XYSPEED* | set to 15 by default (not used) | Integer |
 | *HEADWAY[1]* | early AM headway (3AM to 6AM) | Float |
 | *HEADWAY[2]* | AM peak headway (6AM to 10AM) | Float |
@@ -162,9 +164,9 @@ Transit trips are assigned between transit access points (TAPs), which represent
 
 ### Transit Modes
 
-The following transit modes are defined based on the RTD database attributes `CPT_AGENCYID`, `CPT_MODE`, and `SCH_ROUTEDESIGNATOR`.  These modes represent combinations of operators and technology. 
+The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) (or Regional Transit Database) attributes.  These modes represent combinations of operators and technology. 
 
-| *CPT_AGENCYID* | *AGENCYNAME* | *CPT_MODE* | *SCH_ROUTEDESIGNATOR* | *MODECODE* | *MODEGROUP* |
+| *Operator/Agency ID* | *Agency Name* | *CPT_MODE* | *SCH_ROUTEDESIGNATOR* | *Mode* | *Mode Group* |
 |----------------|--------------|------------|-----------------------|------------|-------------|
 | 3D | TriDelta Transit | B | NA | 44 | Local bus |
 | AB | AirBART | B | NA | 40 | Local bus |
