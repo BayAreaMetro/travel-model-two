@@ -164,86 +164,59 @@ Transit trips are assigned between transit access points (TAPs), which represent
 
 ### Transit Modes
 
-The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) (or Regional Transit Database) attributes.  These modes represent combinations of operators and technology. 
+The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology. 
 
-| *Operator/Agency ID* | *Agency Name* | *CPT_MODE* | *SCH_ROUTEDESIGNATOR* | *Mode* | *Mode Group* |
-|----------------|--------------|------------|-----------------------|------------|-------------|
-| 3D | TriDelta Transit | B | NA | 44 | Local bus |
-| AB | AirBART | B | NA | 40 | Local bus |
-| AC | AC Transit | B | NA | 30 | Local bus |
-| AD | AC Transbay | B | NA | 84 | Express Bus |
-| AM | Amtrak Capitol Cor. & Reg. Svc | T | NA | 131 | Commuter rail |
-| AO | Alameda/Oakland Ferry | F | NA | 100 | Ferry service |
-| AT | Angel Island - Tiburon Ferry | F | NA | 103 | Ferry service |
-| AY | American Canyon Transit | B | NA | 55 | Local bus |
-| BA | BART | T | NA | 120 | Heavy rail |
-| BG | Blue and Gold | F | NA | 103 | Ferry service |
-| BT | Benicia Transit | B | NA | 58 | Local bus |
-| CC | The County Connection | B | 91X | 86 | Express Bus |
-| CC | The County Connection | B | 92X | 86 | Express Bus |
-| CC | The County Connection | B | 93X | 86 | Express Bus |
-| CC | The County Connection | B | 95X | 86 | Express Bus |
-| CC | The County Connection | B | 96X | 86 | Express Bus |
-| CC | The County Connection | B | 97X | 86 | Express Bus |
-| CC | The County Connection | B | 98X | 86 | Express Bus |
-| CC | The County Connection | B | NA | 42 | Local bus |
-| CE | ACE | T | NA | 133 | Commuter rail |
-| CT | Caltrain | T | NA | 130 | Commuter rail |
-| DE | Dumbarton Express | B | NA | 82 | Express Bus |
-| EM | Emery Go-Round | B | NA | 12 | Local bus |
-| FS | Fairfield-Suisun Transit | B | 40 | 92 | Express Bus |
-| FS | Fairfield-Suisun Transit | B | NA | 52 | Local bus |
-| GF | Golden Gate Ferry | F | NA | 101 | Ferry service |
-| GG | Golden Gate Transit | B | 22 | 87 | Express Bus |
-| GG | Golden Gate Transit | B | 23 | 87 | Express Bus |
-| GG | Golden Gate Transit | B | 29 | 87 | Express Bus |
-| GG | Golden Gate Transit | B | 35 | 87 | Express Bus |
-| GG | Golden Gate Transit | B | 36 | 87 | Express Bus |
-| GG | Golden Gate Transit | B | 71 | 88 | Express Bus |
-| GG | Golden Gate Transit | B | NA | 70 | Local bus |
-| HB | Alameda Harbor Bay Ferry | F | NA | 100 | Ferry service |
-| MS | Stanford Marguerite Shuttle | B | NA | 13 | Local bus |
-| PE | Petaluma Transit | B | NA | 68 | Local bus |
-| RV | Rio Vista Delta Breeze | B | NA | 52 | Local bus |
-| SA | Sonoma Marin Area Rail Transit (SMART) | | 134 | Commuter rail | 
-| SC | Santa Clara VTA | B | 101 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 102 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 103 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 104 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 120 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 121 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 122 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 140 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 168 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 180 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 181 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | 182 | 81 | Express Bus |
-| SC | Santa Clara VTA | B | NA | 28 | Local bus |
-| SC | Santa Clara VTA | LR | NA | 111 | Light rail |
-| SF | San Francisco MUNI | B | NA | 21 | Local bus |
-| SF | San Francisco MUNI | LR | NA | 110 | Light rail |
-| SF | San Francisco MUNI | CC | NA | 20 | Local bus |
-| SM | samTrans | B | KX | 80 | Express Bus |
-| SM | samTrans | B | NA | 24 | Local bus |
-| SO | Sonoma County Transit | B | NA | 63 | Local bus |
-| SR | Santa Rosa CityBus | B | NA | 66 | Local bus |
-| SV | St. Helena VINE | B | NA | 60 | Local bus |
-| UC | Union City Transit | B | NA | 38 | Local bus |
-| VB | Vallejo Baylink Ferry | B | NA | 93 | Express bus |
-| VB | Vallejo Baylink Ferry | F | NA | 104 | Ferry service |
-| VC | Vacaville City Coach | B | NA | 56 | Local bus |
-| VN | Napa VINE | B | NA | 60 | Local bus |
-| VT | Vallejo Transit | B | 80 | 91 | Express Bus |
-| VT | Vallejo Transit | B | 85 | 91 | Express Bus |
-| VT | Vallejo Transit | B | NA | 49 | Local bus |
-| WC | WestCAT | B | JL | 90 | Express Bus |
-| WC | WestCAT | B | JPX | 90 | Express Bus |
-| WC | WestCAT | B | JR | 90 | Express Bus |
-| WC | WestCAT | B | JX | 90 | Express Bus |
-| WC | WestCAT | B | LYNX | 90 | Express Bus |
-| WC | WestCAT | B | NA | 46 | Local bus |
-| WH | WHEELS | B | NA | 17 | Local bus |
-| YV | Yountville Shuttle | B | NA | 60 | Local bus |
+| *Operator/Agency ID* | *Agency Name* | *Mode* | *Mode Group* | * Farezones * |
+|----------------------|---------------|--------|--------------|---------------|
+| 3D | TriDelta Transit | 44 | Local bus | |
+| AB | AirBART | 40 | Local bus | |
+| AC | AC Transit | 30 | Local bus | |
+| AD | AC Transbay | 84 | Express Bus | |
+| AM | Amtrak Capitol Cor. & Reg. Svc | 131 | Commuter rail | yes: to be added |
+| AO | Alameda/Oakland Ferry | 100 | Ferry service | |
+| AT | Angel Island - Tiburon Ferry | 103 | Ferry service | |
+| AY | American Canyon Transit | 55 | Local bus | |
+| BA | BART | 120 | Heavy rail | yes: to be added |
+| BG | Blue and Gold | 103 | Ferry service | |
+| BT | Benicia Transit | 58 | Local bus | |
+| CC | The County Connection | 86 | Express Bus | |
+| CC | The County Connection | 42 | Local bus | |
+| CE | ACE | 133 | Commuter rail | yes: to be added |
+| CT | Caltrain | 130 | Commuter rail | yes: to be added |
+| DE | Dumbarton Express | 82 | Express Bus | |
+| EM | Emery Go-Round | 12 | Local bus | |
+| FS | Fairfield-Suisun Transit | 92 | Express Bus | |
+| FS | Fairfield-Suisun Transit | 52 | Local bus | |
+| GF | Golden Gate Ferry | 101 | Ferry service | yes: to be added |
+| GG | Golden Gate Transit | 87 | Express Bus | |
+| GG | Golden Gate Transit | 70 | Local bus | |
+| HB | Alameda Harbor Bay Ferry | 100 | Ferry service | |
+| MS | Stanford Marguerite Shuttle | 13 | Local bus | |
+| PE | Petaluma Transit | 68 | Local bus | |
+| RV | Rio Vista Delta Breeze | 52 | Local bus | |
+| SA | [Sonoma Marin Area Rail Transit (SMART)](https://sonomamarintrain.org/) | 134 | Commuter rail | |
+| SC | Santa Clara VTA | 81 | Express Bus | |
+| SC | Santa Clara VTA | 28 | Local bus | |
+| SC | Santa Clara VTA | 111 | Light rail | |
+| SF | San Francisco MUNI | 21 | Local bus | |
+| SF | San Francisco MUNI | 110 | Light rail | |
+| SF | San Francisco MUNI | 20 | Local bus | |
+| SM | SamTrans | 80 | Express Bus | |
+| SM | SamTrans | 24 | Local bus | |
+| SO | Sonoma County Transit | 63 | Local bus | |
+| SR | Santa Rosa CityBus | 66 | Local bus | |
+| SV | St. Helena VINE | 60 | Local bus | |
+| UC | Union City Transit | B | NA | 38 | Local bus | |
+| VB | [Vallejo Baylink Ferry](https://www.vallejobayferry.com/) | 93 | Express bus | |
+| VB | [Vallejo Baylink Ferry](https://www.vallejobayferry.com/) | 104 | Ferry service | |
+| VC | Vacaville City Coach | 56 | Local bus | |
+| VN | [Napa VINE](http://www.ridethevine.com/vine) | 60 | Local bus | |
+| VT | Vallejo Transit | 91 | Express Bus | |
+| VT | Vallejo Transit | 49 | Local bus | |
+| WC | [WestCAT](https://www.westcat.org/) | 90 | Express Bus | |
+| WC | [WestCAT](https://www.westcat.org/) | 46 | Local bus | |
+| WH | [Livermore Amador Valley Transit Authority (LAVTA)](https://www.wheelsbus.com/) | 17 | Local bus | |
+| YV | Yountville Shuttle | 60 | Local bus | |
 
 ### Transit Fares
 
