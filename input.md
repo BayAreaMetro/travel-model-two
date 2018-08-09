@@ -166,13 +166,13 @@ Transit trips are assigned between transit access points (TAPs), which represent
 
 The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology. 
 
-| *Operator/Agency ID* | *Agency Name* | *Mode* | *Mode Group* | * Farezones * |
-|----------------------|---------------|--------|--------------|---------------|
+| *Operator/Agency ID* | *Agency Name* | *Mode* | *Mode Group* | *Farezones* |
+|----------------------|---------------|--------|--------------|-------------|
 | 3D | TriDelta Transit | 44 | Local bus | |
 | AB | AirBART | 40 | Local bus | |
 | AC | AC Transit | 30 | Local bus | |
 | AD | AC Transbay | 84 | Express Bus | |
-| AM | Amtrak Capitol Cor. & Reg. Svc | 131 | Commuter rail | yes: to be added |
+| AM | Amtrak Capitol Cor. & Reg. Svc | 131 | Commuter rail | 15-34 |
 | AO | Alameda/Oakland Ferry | 100 | Ferry service | |
 | AT | Angel Island - Tiburon Ferry | 103 | Ferry service | |
 | AY | American Canyon Transit | 55 | Local bus | |
@@ -182,19 +182,19 @@ The following transit modes are defined based on the [Open511](https://511.org/d
 | CC | The County Connection | 86 | Express Bus | |
 | CC | The County Connection | 42 | Local bus | |
 | CE | ACE | 133 | Commuter rail | yes: to be added |
-| CT | Caltrain | 130 | Commuter rail | yes: to be added |
+| CT | Caltrain | 130 | Commuter rail | 63-68 |
 | DE | Dumbarton Express | 82 | Express Bus | |
 | EM | Emery Go-Round | 12 | Local bus | |
 | FS | Fairfield-Suisun Transit | 92 | Express Bus | |
 | FS | Fairfield-Suisun Transit | 52 | Local bus | |
-| GF | Golden Gate Ferry | 101 | Ferry service | yes: to be added |
+| GF | Golden Gate Ferry | 101 | Ferry service | 77-79 |
 | GG | Golden Gate Transit | 87 | Express Bus | |
 | GG | Golden Gate Transit | 70 | Local bus | |
 | HB | Alameda Harbor Bay Ferry | 100 | Ferry service | |
 | MS | Stanford Marguerite Shuttle | 13 | Local bus | |
 | PE | Petaluma Transit | 68 | Local bus | |
 | RV | Rio Vista Delta Breeze | 52 | Local bus | |
-| SA | [Sonoma Marin Area Rail Transit (SMART)](https://sonomamarintrain.org/) | 134 | Commuter rail | |
+| SA | [Sonoma Marin Area Rail Transit (SMART)](https://sonomamarintrain.org/) | 134 | Commuter rail | 97-101 |
 | SC | Santa Clara VTA | 81 | Express Bus | |
 | SC | Santa Clara VTA | 28 | Local bus | |
 | SC | Santa Clara VTA | 111 | Light rail | |
@@ -206,7 +206,7 @@ The following transit modes are defined based on the [Open511](https://511.org/d
 | SO | Sonoma County Transit | 63 | Local bus | |
 | SR | Santa Rosa CityBus | 66 | Local bus | |
 | SV | St. Helena VINE | 60 | Local bus | |
-| UC | Union City Transit | B | NA | 38 | Local bus | |
+| UC | [Union City Transit](https://www.unioncity.org/170/Union-City-Transit) | 38 | Local bus | |
 | VB | [Vallejo Baylink Ferry](https://www.vallejobayferry.com/) | 93 | Express bus | |
 | VB | [Vallejo Baylink Ferry](https://www.vallejobayferry.com/) | 104 | Ferry service | |
 | VC | Vacaville City Coach | 56 | Local bus | |
