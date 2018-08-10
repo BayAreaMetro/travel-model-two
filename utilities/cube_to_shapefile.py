@@ -3,13 +3,17 @@ USAGE = """
 Create shapefile of Cube network, roadway and transit.
 
 Requires arcpy, so may need to need arcgis version of python
-(e.g. c:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3)
+
+ e.g. set PATH=C:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3
+      python cube_to_shapefile.py roadway.net
+
+ It saves all output to the current working directory.
+ The roadway network is: network_nodes.shp and network_links.shp
 
 """
 
 import argparse, collections, csv, logging, os, subprocess, sys, traceback
 import numpy, pandas
-import Wrangler
 
 RUNTPP_PATH     = "C:\\Program Files (x86)\\Citilabs\\CubeVoyager"
 LOG_FILE        = "cube_to_shapefile.log"
@@ -141,6 +145,8 @@ if __name__ == '__main__':
 
     # if we don't have a transit file, then we're done
     if not args.linefile: sys.exit(0)
+
+    import Wrangler
 
     operator_files = [""]
     if args.by_operator:
