@@ -4,6 +4,7 @@ USAGE = """
 
   Developed to update maz_data.csv from tm2 maz v1.0 to maz v2.2
   Extended to update taz airport trips from taz v1.0 to taz v2.2
+  Extended to update the internal/external trips from tm1 taz to tm2 taz v2.2
 
   Specify which type of conversion you want to do as an argument.
 
@@ -15,9 +16,10 @@ import pandas
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=USAGE, formatter_class=argparse.RawDescriptionHelpFormatter,)
-    parser.add_argument("convert_type", choices=["maz_data_v1_to_v22","airport_taz_v1_to_v22"])
+    parser.add_argument("convert_type", choices=["maz_data_v1_to_v22","airport_taz_v1_to_v22","ix_tm1_taz_to_tm2_taz_v22"])
     args = parser.parse_args()
 
+    INPUT_DATA_EXTRA_INDEX_COLS = None
     if args.convert_type == "maz_data_v1_to_v22":
         # mazdata conversion
 
@@ -89,6 +91,26 @@ if __name__ == '__main__':
         COLS_AVG     = {}
         COLS_ORDINAL = {}
 
+    elif args.convert_type == "ix_tm1_taz_to_tm2_taz_v22":
+
+        # these are lists to iterate over - this is a two pass process.  Convert J first, then I.
+        INPUT_DATA_FILES            = ["IXDaily2006x4.may2208.csv"          , "IXDaily2006x4.may2208_updated_j.csv"]
+        INPUT_DATA_GEOS             = ["J"                                  , "I"]
+        INPUT_DATA_EXTRA_INDEX_COLS = [["I"]                                , ["J_tm2"]]
+        OUTPUT_DATA_FILES           = ["IXDaily2006x4.may2208_updated_j.csv", "IXDaily2006x4.may2208_updated_ij.csv"]
+        OUTPUT_DATA_GEOS            = ["J_tm2"                              , "I_tm2"]
+
+        # translation
+        GEO_TRANSLATION_FILE       = "M:\\Data\\GIS layers\\\maz_taz_conversion\\taz_tm1_intersect_taz_tm2.xlsx"
+        GEO_TRANSLATION_SRC_GEO    = "taz_tm1"
+        GEO_TRANSLATION_TARGET_GEO = "taz_tm2_v2_2"
+        GEO_TRANSLATION_SRC_PCT    = "pct_of_taz_tm1"
+
+        # sum these over MAZs
+        COLS_SUM         = ["IX_Daily_DA", "IX_DAILY_SR2", "IX_Daily_SR3", "IX_Daily_Total"]
+        COLS_AVG     = {}
+        COLS_ORDINAL = {}
+
     pandas.options.display.width = 300
     pandas.options.display.float_format = '{:.2f}'.format
 
@@ -102,15 +124,20 @@ if __name__ == '__main__':
 
         INPUT_DATA_FILE   = INPUT_DATA_FILES[input_number]
         INPUT_DATA_GEO    = INPUT_DATA_GEOS[input_number]
+        if INPUT_DATA_EXTRA_INDEX_COLS:
+            INPUT_DATA_INDEX = INPUT_DATA_EXTRA_INDEX_COLS[input_number] # serves as index along with the INPUT_DATA_GEO
+        else:
+            INPUT_DATA_INDEX = []
         OUTPUT_DATA_FILE  = OUTPUT_DATA_FILES[input_number]
         OUTPUT_DATA_GEO   = OUTPUT_DATA_GEOS[input_number]
+
 
         # read the source data
         data_source_df = pandas.read_csv(INPUT_DATA_FILE)
         print("Read source data {}".format(INPUT_DATA_FILE))
 
         # look at only the colums we care about
-        cols = [INPUT_DATA_GEO] + COLS_SUM + list(COLS_AVG.keys()) + list(COLS_ORDINAL.keys())
+        cols = [INPUT_DATA_GEO] + INPUT_DATA_INDEX + COLS_SUM + list(COLS_AVG.keys()) + list(COLS_ORDINAL.keys())
         data_source_df = data_source_df[cols]
         print("data_source_df Length: {} Head:\n{}".format(len(data_source_df), data_source_df.head()))
         # print("data_source_df sum:\n{}".format(data_source_df.sum()))
@@ -134,7 +161,7 @@ if __name__ == '__main__':
                 data_source_df[col] = data_source_df[col] + temp_col*data_source_df[GEO_TRANSLATION_SRC_PCT]*data_source_df[weight_col]
 
         # group to target geography
-        data_target_df = data_source_df[[GEO_TRANSLATION_TARGET_GEO] + COLS_SUM + list(COLS_AVG.keys())].groupby(GEO_TRANSLATION_TARGET_GEO).agg("sum")
+        data_target_df = data_source_df[[GEO_TRANSLATION_TARGET_GEO] + INPUT_DATA_INDEX + COLS_SUM + list(COLS_AVG.keys())].groupby([GEO_TRANSLATION_TARGET_GEO]+INPUT_DATA_INDEX).agg("sum")
         # COLS_AVG need to be divided by the sum of percent x weight
         for col in COLS_AVG.keys():
             temp_col = data_target_df[col] - data_target_df[col]  # to make the right size/index

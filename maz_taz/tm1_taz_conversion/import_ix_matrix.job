@@ -1,0 +1,12 @@
+;;
+;; reverse export_ix_matrix.job
+;;
+
+RUN PGM=MATRIX
+  filei mati[1] = "IXDaily2006x4.may2208_updated_ij_seq.csv", pattern = IJM:V, fields=#1,2,0,3-6 SKIPRECS=1
+  fileo mato    = "IXDaily2006x4.may2208.new.mat", mo = 1-4, name =IX_Daily_DA,IX_Daily_SR2,IX_Daily_SR3,IX_Daily_Total
+
+  ZONES = %TAZ_EXTS_COUNT%
+
+  FILLMW mw[1]  = mi.1.1(4)
+ENDRUN

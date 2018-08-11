@@ -30,7 +30,7 @@ if __name__ == '__main__':
     parser.add_argument("--input_col",         metavar="input_col",        required=True, nargs="+", help="Input column(s) to renumber")
     parser.add_argument("--renum_join_col",    metavar="renum_join_col",   required=True, nargs="+", help="Join column(s) in the renumber key")
     parser.add_argument("--renum_out_col",     metavar="renum_out_col",    required=True, nargs="+", help="Output column(s) in the renumber key")
-    parser.add_argument("--output_rename_col", metavar="output_rename_col",required=True, nargs="+", help="Rename of the input column(s)")
+    parser.add_argument("--output_rename_col", metavar="output_rename_col",required=True, nargs="+", help="Rename of the input column(s).  Pass DELETE to delete it.")
     parser.add_argument("--output_new_col",    metavar="output_new_col",   required=True, nargs="+", help="Name of new column(s) in output file")
     args = parser.parse_args()
 
@@ -87,10 +87,34 @@ if __name__ == '__main__':
             data_df.drop(columns=[renum_join_col], inplace=True)
             print(data_df.head())
 
-        # do the rename; input_col => output_rename_col
-        #                renum_out_col => output_new_col
-        data_df.rename(columns={input_col:output_rename_col, renum_out_col:output_new_col}, inplace=True)
+        if output_rename_col == "DELETE":
+            data_df.rename(columns={renum_out_col:output_new_col}, inplace=True)
+            data_df.drop(columns=[input_col], inplace=True)
+        else:
+            # do the rename; input_col => output_rename_col
+            #                renum_out_col => output_new_col
+            data_df.rename(columns={input_col:output_rename_col, renum_out_col:output_new_col}, inplace=True)
+
+        # try to downcast the new col so it's not an uncessary float from the join
+        try:
+            new_col = pandas.to_numeric(data_df[output_new_col], errors="raise", downcast="integer")
+            if str(new_col.dtype) != str(data_df[output_new_col].dtype):
+                data_df[output_new_col] = new_col
+            else:
+                pass
+        except Exception, e:
+            print e
+
         print(data_df.head())
+
+    # put the new columns on the left
+    cols = list(data_df.columns)
+    for output_new_col in args.output_new_col:
+        cols.remove(output_new_col)
+    cols = args.output_new_col + cols
+    # print(cols)
+    data_df = data_df[cols]
+    print(data_df.head())
 
     # write it
     data_df.to_csv(args.output_csv, index=False)
