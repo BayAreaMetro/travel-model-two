@@ -5,21 +5,28 @@ USAGE = """
   Developed to update maz_data.csv from tm2 maz v1.0 to maz v2.2
   Extended to update taz airport trips from taz v1.0 to taz v2.2
   Extended to update the internal/external trips from tm1 taz to tm2 taz v2.2
+  Extended to update the truck K factors from tm1 taz to tm2 taz v2.2
 
   Specify which type of conversion you want to do as an argument.
 
 """
 
-import argparse, collections, os, sys
+import argparse, collections, itertools, os, sys
 import pandas
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=USAGE, formatter_class=argparse.RawDescriptionHelpFormatter,)
-    parser.add_argument("convert_type", choices=["maz_data_v1_to_v22","airport_taz_v1_to_v22","ix_tm1_taz_to_tm2_taz_v22"])
+    parser.add_argument("convert_type", choices=["maz_data_v1_to_v22","airport_taz_v1_to_v22","ix_tm1_taz_to_tm2_taz_v22", "truck_tm1_taz_to_tm2_taz_v22"])
     args = parser.parse_args()
 
     INPUT_DATA_EXTRA_INDEX_COLS = None
+
+    # Fill these in to define the mapping
+    COLS_SUM      = []
+    COLS_AVG      = {}
+    COLS_ORDINAL  = {}
+
     if args.convert_type == "maz_data_v1_to_v22":
         # mazdata conversion
 
@@ -88,8 +95,6 @@ if __name__ == '__main__':
             "PM_ES_DA","PM_ES_S2","PM_ES_S3","PM_PK_DA","PM_PK_S2","PM_PK_S3","PM_RN_DA","PM_RN_S2","PM_RN_S3","PM_TX_DA","PM_TX_S2","PM_TX_S3","PM_LI_DA","PM_LI_S2","PM_LI_S3","PM_VN_S3","PM_HT_S3","PM_CH_S3",
             "EV_ES_DA","EV_ES_S2","EV_ES_S3","EV_PK_DA","EV_PK_S2","EV_PK_S3","EV_RN_DA","EV_RN_S2","EV_RN_S3","EV_TX_DA","EV_TX_S2","EV_TX_S3","EV_LI_DA","EV_LI_S2","EV_LI_S3","EV_VN_S3","EV_HT_S3","EV_CH_S3"
         ]
-        COLS_AVG     = {}
-        COLS_ORDINAL = {}
 
     elif args.convert_type == "ix_tm1_taz_to_tm2_taz_v22":
 
@@ -108,8 +113,24 @@ if __name__ == '__main__':
 
         # sum these over MAZs
         COLS_SUM         = ["IX_Daily_DA", "IX_DAILY_SR2", "IX_Daily_SR3", "IX_Daily_Total"]
-        COLS_AVG     = {}
-        COLS_ORDINAL = {}
+
+    elif args.convert_type == "truck_tm1_taz_to_tm2_taz_v22":
+
+        # these are lists to iterate over - this is a two pass process.  Convert J first, then I.
+        INPUT_DATA_FILES            = ["truckkfact.k22.z1454.csv"]
+        INPUT_DATA_GEOS             = ["I"]
+        INPUT_DATA_EXTRA_INDEX_COLS = [["J"]]
+        OUTPUT_DATA_FILES           = ["truck_kfactors_taz.csv"]
+        OUTPUT_DATA_GEOS            = ["I_tm2", "J_tm2"]
+
+        # translation
+        GEO_TRANSLATION_FILE       = "M:\\Data\\GIS layers\\\maz_taz_conversion\\taz_tm1_intersect_taz_tm2.xlsx"
+        GEO_TRANSLATION_SRC_GEO    = "taz_tm1"
+        GEO_TRANSLATION_TARGET_GEO = "taz_tm2_v2_2"
+        GEO_TRANSLATION_SRC_PCT    = "pct_of_taz_tm1"
+
+        # this isn't really a sum, it'll be treated specially
+        COLS_SUM                   = ["truck_k"]
 
     pandas.options.display.width = 300
     pandas.options.display.float_format = '{:.2f}'.format
@@ -142,59 +163,104 @@ if __name__ == '__main__':
         print("data_source_df Length: {} Head:\n{}".format(len(data_source_df), data_source_df.head()))
         # print("data_source_df sum:\n{}".format(data_source_df.sum()))
 
-        # left join to the translation
-        data_source_df = pandas.merge(left    =data_source_df,
-                                      right   =translate_df,
-                                      left_on =INPUT_DATA_GEO,
-                                      right_on=GEO_TRANSLATION_SRC_GEO)
-        print("data_source_df joined Length: {} Head:\n{}".format(len(data_source_df), data_source_df.head()))
+        # this one is special
+        if args.convert_type == "truck_tm1_taz_to_tm2_taz_v22":
+            # create a simple translation from target to source
+            simple_translate_df = translate_df[[GEO_TRANSLATION_SRC_GEO, GEO_TRANSLATION_TARGET_GEO, "area_calc"]].copy()
+            # don't include external zones
+            simple_translate_df = simple_translate_df.loc[ simple_translate_df[GEO_TRANSLATION_SRC_GEO] <= 1454, :]
 
-        # COLS_SUM: want sum of (percent x val)
-        for col in COLS_SUM:
-            data_source_df[col] = data_source_df[GEO_TRANSLATION_SRC_PCT]*data_source_df[col]
+            # choose the one with the largest area_calc for each target (TM2) geography
+            simple_translate_df = simple_translate_df.sort_values(by=[GEO_TRANSLATION_TARGET_GEO, "area_calc"], ascending=[True, False])
+            simple_translate_df.drop_duplicates(subset=[GEO_TRANSLATION_TARGET_GEO], keep="first", inplace=True)
 
-        # COLS_AVG: want sum of (percent x weight x val) / (sum of percent x weight)
-        for col in COLS_AVG.keys():
-            temp_col = data_source_df[col]
-            data_source_df[col] = 0
-            for weight_col in COLS_AVG[col]:
-                data_source_df[col] = data_source_df[col] + temp_col*data_source_df[GEO_TRANSLATION_SRC_PCT]*data_source_df[weight_col]
+            simple_translate_df = simple_translate_df[[GEO_TRANSLATION_SRC_GEO, GEO_TRANSLATION_TARGET_GEO]].reset_index(drop=True)
+            print("simple_translate_df Length: {} Head:\n{}".format(len(simple_translate_df), simple_translate_df.head()))
 
-        # group to target geography
-        data_target_df = data_source_df[[GEO_TRANSLATION_TARGET_GEO] + INPUT_DATA_INDEX + COLS_SUM + list(COLS_AVG.keys())].groupby([GEO_TRANSLATION_TARGET_GEO]+INPUT_DATA_INDEX).agg("sum")
-        # COLS_AVG need to be divided by the sum of percent x weight
-        for col in COLS_AVG.keys():
-            temp_col = data_target_df[col] - data_target_df[col]  # to make the right size/index
-            for weight_col in COLS_AVG[col]: # these are already summed now
-                temp_col = temp_col + data_target_df[weight_col]
-            # divide
-            data_target_df[col] = data_target_df[col] / temp_col
+            # create I x J
+            i_df = simple_translate_df.copy().rename({GEO_TRANSLATION_SRC_GEO:"I_{}".format(GEO_TRANSLATION_SRC_GEO),
+                                                      GEO_TRANSLATION_TARGET_GEO:"I_{}".format(GEO_TRANSLATION_TARGET_GEO)},
+                                                      axis='columns',)
+            i_df["IJ"] = 1
+            j_df = simple_translate_df.copy().rename({GEO_TRANSLATION_SRC_GEO:"J_{}".format(GEO_TRANSLATION_SRC_GEO),
+                                                      GEO_TRANSLATION_TARGET_GEO:"J_{}".format(GEO_TRANSLATION_TARGET_GEO)},
+                                                      axis='columns',)
+            j_df["IJ"] = 1
 
-        # fillna and reset index
-        data_target_df.fillna(value=0, inplace=True)
-        data_target_df.reset_index(inplace=True)
-        # print("data_target_df Length: {} Head:\n{}".format(len(data_target_df), data_target_df.head()))
-        # print("data_target_df sum:\n{}".format(data_target_df.sum()))
+            data_target_df = pandas.merge(left=i_df, right=j_df, on=["IJ"]).drop(columns=["IJ"])
+            # print("data_target_df IxJ Length: {} Head:\n{}".format(len(data_target_df), data_target_df.head()))
 
-        # COLS_ORDINAL: groupby the maz and the column itself
-        for col in COLS_ORDINAL.keys():
-            weight_col = COLS_ORDINAL[col]
-            # groupby the maz and the ordinal column, summing the weights
-            maz_by_target_val = data_source_df[[GEO_TRANSLATION_TARGET_GEO, col, weight_col]].groupby([GEO_TRANSLATION_TARGET_GEO, col]).agg("sum")
+            data_target_df = pandas.merge(left      = data_target_df,
+                                          right     = data_source_df,
+                                          left_on   = ["I_{}".format(GEO_TRANSLATION_SRC_GEO), "J_{}".format(GEO_TRANSLATION_SRC_GEO)],
+                                          right_on  = ["I","J"],
+                                          how       = "left")
+            # drop I, J - duplicative; drop I_taz_tm1, J_taz_tm1 since we don't need them any more
+            data_target_df.drop(columns=["I","J","I_{}".format(GEO_TRANSLATION_SRC_GEO), "J_{}".format(GEO_TRANSLATION_SRC_GEO)], inplace=True)
 
-            # sort by the maz and the weight col - so the last one for the maz will be the biggest weight
-            maz_by_target_val = maz_by_target_val.reset_index().sort_values(by=[GEO_TRANSLATION_TARGET_GEO,weight_col])
+            # check everything joined
+            assert( len(data_target_df.loc[ pandas.isnull(data_target_df.truck_k) ]) == 0 )
 
-            # deduplicate, taking the last
-            maz_by_target_val.drop_duplicates(subset=[GEO_TRANSLATION_TARGET_GEO], keep="last", inplace=True)
-            print("maz_by_target_val Length: {} Head:\n{}".format(len(maz_by_target_val), maz_by_target_val.head()))
+        else:
 
-            # join to the result
-            data_target_df = pandas.merge(left=data_target_df, right=maz_by_target_val[[GEO_TRANSLATION_TARGET_GEO,col]], how="left")
+            # left join to the translation
+            data_source_df = pandas.merge(left    =data_source_df,
+                                          right   =translate_df,
+                                          left_on =INPUT_DATA_GEO,
+                                          right_on=GEO_TRANSLATION_SRC_GEO)
+            print("data_source_df joined Length: {} Head:\n{}".format(len(data_source_df), data_source_df.head()))
 
-        # rename the output geo if needed
-        if OUTPUT_DATA_GEO != GEO_TRANSLATION_TARGET_GEO:
-            data_target_df.rename({GEO_TRANSLATION_TARGET_GEO:OUTPUT_DATA_GEO}, axis='columns', inplace=True)
+            # COLS_SUM: want sum of (percent x val)
+            for col in COLS_SUM:
+                data_source_df[col] = data_source_df[GEO_TRANSLATION_SRC_PCT]*data_source_df[col]
+
+            # COLS_AVG: want sum of (percent x weight x val) / (sum of percent x weight)
+            for col in COLS_AVG.keys():
+                temp_col = data_source_df[col]
+                data_source_df[col] = 0
+                for weight_col in COLS_AVG[col]:
+                    data_source_df[col] = data_source_df[col] + temp_col*data_source_df[GEO_TRANSLATION_SRC_PCT]*data_source_df[weight_col]
+
+            # group to target geography
+            keep_cols = [GEO_TRANSLATION_TARGET_GEO] + INPUT_DATA_INDEX + COLS_SUM + list(COLS_AVG.keys())
+            extra_cols = list(itertools.chain.from_iterable(COLS_AVG.values()))
+            for extra_col in extra_cols:
+                if extra_col not in keep_cols: keep_cols.append(extra_col)
+
+            data_target_df = data_source_df[keep_cols].groupby([GEO_TRANSLATION_TARGET_GEO]+INPUT_DATA_INDEX).agg("sum")
+
+            # COLS_AVG need to be divided by the sum of percent x weight
+            for col in COLS_AVG.keys():
+                temp_col = data_target_df[col] - data_target_df[col]  # to make the right size/index
+                for weight_col in COLS_AVG[col]: # these are already summed now
+                    temp_col = temp_col + data_target_df[weight_col]
+                # divide
+                data_target_df[col] = data_target_df[col] / temp_col
+
+            # fillna and reset index
+            data_target_df.fillna(value=0, inplace=True)
+            data_target_df.reset_index(inplace=True)
+            # print("data_target_df Length: {} Head:\n{}".format(len(data_target_df), data_target_df.head()))
+            # print("data_target_df sum:\n{}".format(data_target_df.sum()))
+
+            # COLS_ORDINAL: groupby the maz and the column itself
+            for col in COLS_ORDINAL.keys():
+                weight_col = COLS_ORDINAL[col]
+                # groupby the maz and the ordinal column, summing the weights
+                maz_by_target_val = data_source_df[[GEO_TRANSLATION_TARGET_GEO, col, weight_col]].groupby([GEO_TRANSLATION_TARGET_GEO, col]).agg("sum")
+
+                # sort by the maz and the weight col - so the last one for the maz will be the biggest weight
+                maz_by_target_val = maz_by_target_val.reset_index().sort_values(by=[GEO_TRANSLATION_TARGET_GEO,weight_col])
+
+                # deduplicate, taking the last
+                maz_by_target_val.drop_duplicates(subset=[GEO_TRANSLATION_TARGET_GEO], keep="last", inplace=True)
+
+                # join to the result
+                data_target_df = pandas.merge(left=data_target_df, right=maz_by_target_val[[GEO_TRANSLATION_TARGET_GEO,col]], how="left")
+
+            # rename the output geo if needed
+            if OUTPUT_DATA_GEO != GEO_TRANSLATION_TARGET_GEO:
+                data_target_df.rename({GEO_TRANSLATION_TARGET_GEO:OUTPUT_DATA_GEO}, axis='columns', inplace=True)
 
         # special airport bit -- need the orig/dest column to be the airport in question
         if args.convert_type == "airport_taz_v1_to_v22":
