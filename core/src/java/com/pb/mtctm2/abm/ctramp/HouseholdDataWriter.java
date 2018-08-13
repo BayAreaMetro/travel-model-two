@@ -265,6 +265,7 @@ public class HouseholdDataWriter
         data.add("home_mgra");
         data.add("income");
         data.add("autos");
+        data.add("automated_vehicles");
         data.add("transponder");
         data.add("cdap_pattern");
         data.add("jtf_choice");
@@ -275,6 +276,7 @@ public class HouseholdDataWriter
     private List<SqliteDataTypes> formHouseholdColumnTypes()
     {
         List<SqliteDataTypes> data = new LinkedList<SqliteDataTypes>();
+        data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
@@ -293,6 +295,7 @@ public class HouseholdDataWriter
         data.add(string(hh.getHhMgra()));
         data.add(string(hh.getIncomeInDollars()));
         data.add(string(hh.getAutosOwned()));
+        data.add(string(hh.getAutomatedVehicles()));
         data.add(string(hh.getTpChoice()));
         data.add(string(hh.getCoordinatedDailyActivityPattern()));
         data.add(string(hh.getJointTourFreqChosenAlt()));
@@ -387,6 +390,7 @@ public class HouseholdDataWriter
         data.add("out_set");
         data.add("in_set");
         data.add("sampleRate");
+        data.add("avAvailable");
 
         if (saveUtilsProbsFlag)
         {
@@ -440,6 +444,7 @@ public class HouseholdDataWriter
         data.add("in_set");
 
         data.add("sampleRate");
+        data.add("avAvailable");
         
         if (saveUtilsProbsFlag)
         {
@@ -494,6 +499,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.INTEGER);
         
         if (saveUtilsProbsFlag)
         {
@@ -544,6 +550,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.INTEGER);
 
         if (saveUtilsProbsFlag)
         {
@@ -613,6 +620,8 @@ public class HouseholdDataWriter
         
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
+        int avAvailable = t.getUseOwnedAV() ? 1 : 0;
+        data.add(string(avAvailable));
         
         if (saveUtilsProbsFlag)
         {
@@ -687,6 +696,8 @@ public class HouseholdDataWriter
         
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
+        int avAvailable = t.getUseOwnedAV() ? 1 : 0;
+        data.add(string(avAvailable));
         
         
         if (saveUtilsProbsFlag)
@@ -820,6 +831,7 @@ public class HouseholdDataWriter
         data.add("set");
         
         data.add("sampleRate");
+        data.add("avAvailable");
         return data;
     }
 
@@ -847,6 +859,7 @@ public class HouseholdDataWriter
         data.add("set");
         
         data.add("sampleRate");
+        data.add("avAvailable");
         return data;
     }
 
@@ -873,6 +886,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.INTEGER);
         return data;
     }
 
@@ -898,6 +912,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.INTEGER);
         return data;
     }
 
@@ -992,7 +1007,9 @@ public class HouseholdDataWriter
         data.add(string(set));
         float sampleRate = s.getSampleRate();
         data.add(string(sampleRate));
-
+        int avAvailable = t.getUseOwnedAV() ? 1 : 0;
+        data.add(string(avAvailable));
+        
         return data;
         
         
@@ -1092,6 +1109,8 @@ public class HouseholdDataWriter
         data.add(string(set));
         float sampleRate = s.getSampleRate();
         data.add(string(sampleRate));
+        int avAvailable = t.getUseOwnedAV() ? 1 : 0;
+        data.add(string(avAvailable));
         
         return data;
     }
@@ -1148,7 +1167,9 @@ public class HouseholdDataWriter
         data.add(string(0));							// set
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
-
+        int avAvailable = t.getUseOwnedAV() ? 1 : 0;
+        data.add(string(avAvailable));
+        
         return data;
     }
 
@@ -1219,7 +1240,9 @@ public class HouseholdDataWriter
         data.add(string(0));							// set
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
-
+        int avAvailable = t.getUseOwnedAV() ? 1 : 0;
+        data.add(string(avAvailable));
+        
         return data;
     }
 

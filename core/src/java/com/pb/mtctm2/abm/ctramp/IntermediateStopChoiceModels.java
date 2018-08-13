@@ -2799,6 +2799,8 @@ public class IntermediateStopChoiceModels implements Serializable {
         mcDmuObject.setTourModeIsPnr( modelStructure.getTourModeIsPnr( tourMode ) ? 1 : 0 );
         mcDmuObject.setTourModeIsKnr( modelStructure.getTourModeIsKnr( tourMode ) ? 1 : 0 );
         mcDmuObject.setTourModeIsSchBus( modelStructure.getTourModeIsSchoolBus( tourMode ) ? 1 : 0 );
+        mcDmuObject.setTourModeIsTNC( modelStructure.getTourModeIsTNC( tourMode ) ? 1 : 0 );
+        mcDmuObject.setTourModeIsTaxi( modelStructure.getTourModeIsTaxi( tourMode ) ? 1 : 0 );
 
         mcDmuObject.setPTazTerminalTime(tazs.getOriginTazTerminalTime(mgraManager.getTaz(origMgra)));
         

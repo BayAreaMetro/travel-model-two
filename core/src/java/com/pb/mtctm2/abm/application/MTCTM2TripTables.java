@@ -33,7 +33,7 @@ public class MTCTM2TripTables {
     private  TableDataSet jointTripData;
     
     //Some parameters
-    private int[] modeIndex;  // an index array, dimensioned by number of total modes, returns 0=auto modes, 1=non-motor, 2=transit, 3= other
+    private int[] modeIndex;  // an index array, dimensioned by number of total modes, returns 0=auto modes, 1=non-motor, 2=transit, 3= other, 4 AV auto modes
     private int[] matrixIndex; // an index array, dimensioned by number of modes, returns the element of the matrix array to store value
     
     //array modes: AUTO, NON-MOTORIZED, TRANSIT,  OTHER
@@ -41,6 +41,7 @@ public class MTCTM2TripTables {
 	private int tranModes=0;
 	private int nmotModes=0;
 	private int othrModes=0;
+	private int avModes = 0;
     
     //one file per time period
     private int numberOfPeriods;
@@ -101,6 +102,7 @@ public class MTCTM2TripTables {
 				modeIndex[i] = 0;
 				matrixIndex[i]= autoModes;
 				++autoModes;
+				++avModes;
 			}else if(modelStructure.getTourModeIsNonMotorized(i)){
 				modeIndex[i] = 1;
 				matrixIndex[i]= nmotModes;
@@ -115,6 +117,8 @@ public class MTCTM2TripTables {
 				++othrModes;
 			}
 		}
+		
+		
 		readOccupancies();
 		//Initialize arrays (need for all periods, so initialize here)
 		CBDVehicles = new float[mgraManager.getMaxMgra()+1][numberOfPeriods];
@@ -151,8 +155,8 @@ public class MTCTM2TripTables {
         int tazs = tazManager.getMaxTaz();
 		int taps = tapManager.getMaxTap();
 		
-		//Initialize matrices; one for each mode group (auto, non-mot, tran, other)
-		int numberOfModes = 4;
+		//Initialize matrices; one for each mode group (auto, non-mot, tran, other, AVs)
+		int numberOfModes = 5;
 		matrix = new Matrix[numberOfModes][];
 		for(int i = 0; i < numberOfModes; ++ i){
 			
@@ -188,12 +192,27 @@ public class MTCTM2TripTables {
 						matrix[i][(j*numSkimSets)+k] = new Matrix(modeName+"_set"+setName+"_"+periodName,"",taps,taps);
 					}
 				}
-			}else{
+			}else if(i==3){
 				matrix[i] = new Matrix[othrModes];
 				for(int j=0;j<othrModes;++j){
 					modeName = modelStructure.getModeName(j+1+autoModes+nmotModes+tranModes);
 					matrix[i][j] = new Matrix(modeName+"_"+periodName,"",tazs,tazs);
 				}
+			}else{ //AVs
+				//dim TAZ to TAZ auto matrices + MAZ to MAZ matrices
+				matrix[i] = new Matrix[autoModes + mazSets.numSets];
+				for(int j=0;j<autoModes;++j){
+					modeName = modelStructure.getModeName(j+1);
+					matrix[i][j] = new Matrix(modeName+"_AV_"+periodName,"",tazs,tazs);
+					
+					mazSets.autoMatOffset = j;
+				}
+				
+				//dim MAZ to MAZ auto matrices
+				for(int k=0;k<mazSets.numSets;k++){
+			      matrix[i][mazSets.autoMatOffset + k+1] = new Matrix("MAZ_AUTO"+"_AV_"+(k+1)+"_"+periodName,"",mazSets.numZones[k],mazSets.numZones[k]);	
+				}
+				
 			}
 		}
 	}
@@ -314,6 +333,7 @@ public class MTCTM2TripTables {
 			float tripdist = (int) tripData.getValueAt(i,"TRIP_DISTANCE");
 			
 			float sampleRate = tripData.getValueAt(i,"sampleRate");
+			int avAvailable = (int) tripData.getValueAt(i, "avAvailable");
 
         	//transit trip - get boarding and alighting tap
         	int boardTap=0;
@@ -372,13 +392,25 @@ public class MTCTM2TripTables {
         			int mazSet = mazSets.getZoneSet(originMGRA, destinationMGRA);
         			int omaz = mazSets.getNewZoneSetNum(originMGRA);
         			int dmaz = mazSets.getNewZoneSetNum(destinationMGRA);
-        			float value = matrix[mode][mazSets.autoMatOffset + mazSet].getValueAt(omaz, dmaz);
-            		matrix[mode][mazSets.autoMatOffset + mazSet].setValueAt(omaz, dmaz, (value + vehicleTrips));
-        		
+        			
+        			if(avAvailable==0){
+        				float value = matrix[mode][mazSets.autoMatOffset + mazSet].getValueAt(omaz, dmaz);
+        				matrix[mode][mazSets.autoMatOffset + mazSet].setValueAt(omaz, dmaz, (value + vehicleTrips));
+        			}else{
+        				float value = matrix[4][mazSets.autoMatOffset + mazSet].getValueAt(omaz, dmaz);
+        				matrix[4][mazSets.autoMatOffset + mazSet].setValueAt(omaz, dmaz, (value + vehicleTrips));
+        			}
+            		
         		} else {        
         			//taz level
-        			float value = matrix[mode][mat].getValueAt(originTAZ, destinationTAZ);
-            		matrix[mode][mat].setValueAt(originTAZ, destinationTAZ, (value + vehicleTrips));
+        			if(avAvailable==0){
+        				float value = matrix[mode][mat].getValueAt(originTAZ, destinationTAZ);
+        				matrix[mode][mat].setValueAt(originTAZ, destinationTAZ, (value + vehicleTrips));
+        			}else{
+        				float value = matrix[4][mat].getValueAt(originTAZ, destinationTAZ);
+        				matrix[4][mat].setValueAt(originTAZ, destinationTAZ, (value + vehicleTrips));
+        				
+        			}
         		}
         		
         	} else if (mode==1){
@@ -434,12 +466,13 @@ public class MTCTM2TripTables {
 		
 		String per = modelStructure.getModelPeriodLabel(period);
 		String end = "_" + per;
-		String[] fileName = new String[4];
+		String[] fileName = new String[5];
 		
 		fileName[0] = directory + properties.getProperty("Results.AutoTripMatrix") + end;
 		fileName[1] = directory + properties.getProperty("Results.NMotTripMatrix") + end;
 		fileName[2] = directory + properties.getProperty("Results.TranTripMatrix") + end; 
 		fileName[3] = directory + properties.getProperty("Results.OthrTripMatrix") + end; 
+		fileName[4] = directory + properties.getProperty("Results.AutoAVTripMatrix") + end;
 		
 		for(int i=0;i<fileName.length;++i) {
 			writeMatricesToFile(fileName[i], matrix[i]);
@@ -635,7 +668,6 @@ public class MTCTM2TripTables {
         float[] tripTime = new float[rowCount];
         float[] tripDistance = new float[rowCount];
         float[] tripCost = new float[rowCount];
-        int[] fullMode = new int[rowCount];
         
         //setup skim builder class
         SkimBuilder skimBuilder = new SkimBuilder(properties);
@@ -657,14 +689,12 @@ public class MTCTM2TripTables {
             tripTime[i] = attributes.getTripTime();
             tripDistance[i] = attributes.getTripDistance();
             tripCost[i] = attributes.getTripCost();
-            fullMode[i] = attributes.getFullMode();
         }
         
         //append data
         table.appendColumn(tripTime,"TRIP_TIME");
         table.appendColumn(tripDistance,"TRIP_DISTANCE");
         table.appendColumn(tripCost,"TRIP_COST");
-        table.appendColumn(fullMode,"FULL_MODE");
 	}
 	
 	public class MazSets implements Serializable

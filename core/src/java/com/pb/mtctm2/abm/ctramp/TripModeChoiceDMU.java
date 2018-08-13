@@ -77,7 +77,8 @@ public class TripModeChoiceDMU
     protected int tourModeIsPnr;
     protected int tourModeIsKnr;
     protected int tourModeIsSchBus;
-    
+    protected int tourModeIsTaxi;
+    protected int tourModeIsTNC;
 
     protected double reimburseAmount;
     
@@ -330,6 +331,15 @@ public class TripModeChoiceDMU
         tourModeIsSchBus = arg;
     }
 
+    public void setTourModeIsTNC(int arg)
+    {
+        tourModeIsTNC = arg;
+    }
+
+    public void setTourModeIsTaxi(int arg)
+    {
+        tourModeIsTaxi = arg;
+    }
     
     
     
@@ -494,7 +504,19 @@ public class TripModeChoiceDMU
         return tourModeIsKnr ? 1 : 0;
     }
     
-    public double getODUDen()
+    public int getTourModeIsTNC()
+    {
+    	boolean tourModeIsTNC = modelStructure.getTourModeIsTNC(tour.getTourModeChoice());
+    	return tourModeIsTNC ? 1 : 0;
+    }
+    
+    public int getTourModeIsTaxi()
+    {
+    	boolean tourModeIsTaxi = modelStructure.getTourModeIsTaxi(tour.getTourModeChoice());
+    	return tourModeIsTaxi ? 1 : 0;
+    }
+    
+   public double getODUDen()
     {
         return origDuDen;
     }
@@ -661,7 +683,14 @@ public class TripModeChoiceDMU
         return max_hh_vot;
     }
     
-    
+    /** 
+     * Return a 1 if this tour has an AV available else 0
+     * @return
+     */
+    public int getUseOwnedAV() {
+		return tour.getUseOwnedAV() ? 1 : 0;
+	}
+
     public int getIndexValue(String variableName)
     {
         return methodIndexMap.get(variableName);
