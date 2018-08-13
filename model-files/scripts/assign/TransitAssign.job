@@ -84,6 +84,8 @@
 ; author: sn(11/7/2014)
 ; ----------------------------------------------------------------------------------------------------------------
 
+CROWDING_SKIM_BLOCK = '%BASE_SCRIPTS%\block\transit_assign_type.block'
+
 ;start cluster nodes - one for each skim set and time period
 *Cluster.exe MTC_TRANASN 1-5 start exit
 
@@ -189,24 +191,8 @@ LOOP PERIOD = 1,5
             
             REPORT LINES=T, SORT=MODE, LINEVOLS=T, STOPSONLY=T, SKIP0=T
             
-            CROWDMODEL APPLY=T, ADJUSTLINK=T, ADJUSTWAIT=F, ITERATIONS=10, PERIOD=@PERIOD_DURATION@,
-                   RDIFF=T, RMSE=T, STOP2STOP=T, SKIMS=T, LINKDF=0.6, VOLDF=0.6, WAITDF=0.6, RMSESTOP=T, RMSECUTOFF=0.00001
-            
-            PHASE=SKIMIJ
-                MW[1] = CWDWAITA(0)
-                MW[2] = IWAITA(0)
-                MW[3] = XWAITA(0)
-                MW[4] = CWDWAITP(0)
-                MW[5] = IWAITP(0)
-                MW[6] = XWAITP(0)
-                MW[7] = TIMEA(0,ALLMODES)
-                MW[8] = CWDCOSTP(0,ALLMODES)
-                MW[9] = TIMEP(0,ALLMODES)
-                MW[10] = EXCESSDEMAND
-                MW[11] = EXCESSPROP
-                MW[12] = COMPCOST(0)
-            ENDPHASE
-            
+			READ FILE = @CROWDING_SKIM_BLOCK@
+			
         ENDRUN
 
     EndDistributeMultistep
