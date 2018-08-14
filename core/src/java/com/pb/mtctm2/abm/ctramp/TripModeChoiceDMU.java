@@ -100,6 +100,9 @@ public class TripModeChoiceDMU
     protected int oMaz;
     protected int dMaz;
     
+    protected float waitTimeTNC;
+    protected float waitTimeTaxi;
+    
     
     public TripModeChoiceDMU(ModelStructure modelStructure)
     {
@@ -691,7 +694,27 @@ public class TripModeChoiceDMU
 		return tour.getUseOwnedAV() ? 1 : 0;
 	}
 
-    public int getIndexValue(String variableName)
+    public float getWaitTimeTNC() {
+		return waitTimeTNC;
+	}
+
+
+	public void setWaitTimeTNC(float waitTimeTNC) {
+		this.waitTimeTNC = waitTimeTNC;
+	}
+
+
+	public float getWaitTimeTaxi() {
+		return waitTimeTaxi;
+	}
+
+
+	public void setWaitTimeTaxi(float waitTimeTaxi) {
+		this.waitTimeTaxi = waitTimeTaxi;
+	}
+
+
+	public int getIndexValue(String variableName)
     {
         return methodIndexMap.get(variableName);
     }

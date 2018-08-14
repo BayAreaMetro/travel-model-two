@@ -263,6 +263,8 @@ public class SandagTripModeChoiceDMU
         methodIndexMap.put("getUseOwnedAV", 500);
         methodIndexMap.put("getTourModeIsTaxi",501);
         methodIndexMap.put("getTourModeIsTNC",502);
+        methodIndexMap.put("getWaitTimeTNC",503);
+        methodIndexMap.put("getWaitTimeTaxi",504);
 
     }
 
@@ -452,7 +454,12 @@ public class SandagTripModeChoiceDMU
             case 502:
             	returnValue = getTourModeIsTNC();
             	break;
-            	
+            case 503:
+            	returnValue = getWaitTimeTNC();
+            	break;
+            case 504:
+            	returnValue = getWaitTimeTaxi();
+            	break;            	
             default:
                 logger.error( "method number = " + variableIndex + " not found" );
                 throw new RuntimeException( "method number = " + variableIndex + " not found" );

@@ -127,7 +127,6 @@ Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM
 
 ;export taps connectors from network
 RUN PGM=NETWORK
-;    PAR  NODES=10000000
     NETI = hwy\mtc_final_network_with_tolls.net
     LINKO = hwy\mtc_final_network_tap_links.csv FORMAT=SDF DELIMITER=',' INCLUDE=A,B
     NODEO = hwy\mtc_final_network_tap_nodes.csv FORMAT=SDF DELIMITER=',' INCLUDE=N,MODE
@@ -151,13 +150,16 @@ ENDRUN
 
 ;call python program to build transit drive access skims
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
+IF (RETURNCODE > 0) abort
 ;*del skims\DA_*_taz_time.csv
 
 ; run script used to help consolidate taps
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\tap_lines.py
+IF (RETURNCODE > 0) abort
 
 ;rebuild transit line file with new numbers
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_new_transit_line.py "trn\transitLines.lin" "trn\transitLines_new_nodes.lin" "hwy\mtc_transit_network_tap_to_node.txt"
+IF (RETURNCODE > 0) abort
 
 ;start cluster nodes - one for each skim set and time period
 *Cluster.exe MTC_TRANSKIM 1-15 start exit
@@ -275,6 +277,11 @@ LOOP PERIOD = 1,5
                                         LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
                 FILEO LINEO = "trn\mtc_transit_lines_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.lin"
                 FILEO NTLEGO = "trn\mtc_transit_ntlegs_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.ntl"
+
+                ; These files are gigantic and writing many simultaneously cause PT to fail
+                ; with the message: F(801): (EnumRoutes) Failure writing to output routes file.
+                ; We cannot comment them out, however, since 
+                ; "The statement ROUTEO[x] invokes the route-enumeration process for user class x." (!!)
                 FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.rte"
 
                 FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.rpt"

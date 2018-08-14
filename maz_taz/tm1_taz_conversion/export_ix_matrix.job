@@ -1,0 +1,24 @@
+;;
+;; export IX source matrix to csv
+;;
+;; set TAZ_COUNT=1454
+;; set TAZ_EXTS_COUNT=1475
+
+RUN PGM=MATRIX
+
+  filei mati[1]   = "M:\Development\Travel Model One\InternalExternal\IXDaily2006x4.may2208.mat"
+  fileo printo[1] = "IXDaily2006x4.may2208.csv"
+
+  _FIRST_EXT_TAZ = %TAZ_COUNT% + 1
+
+  if (I == 1) print CSV=T PRINTO=1 LIST="I","J","IX_Daily_DA","IX_DAILY_SR2","IX_Daily_SR3","IX_Daily_Total"
+  if (I <= %TAZ_COUNT%)
+    JLOOP J=_FIRST_EXT_TAZ,%TAZ_EXTS_COUNT%
+      print CSV=T PRINTO=1 LIST=I(L), J(L), MI.1.IX_Daily_DA(16.3L), MI.1.IX_DAILY_SR2(16.3L), MI.1.IX_Daily_SR3(16.3L), MI.1.IX_Daily_Total(16.3L)
+    ENDJLOOP
+  else
+    JLOOP J=1,%TAZ_EXTS_COUNT%
+      print CSV=T PRINTO=1 LIST=I(L), J(L), MI.1.IX_Daily_DA(16.3L), MI.1.IX_DAILY_SR2(16.3L), MI.1.IX_Daily_SR3(16.3L), MI.1.IX_Daily_Total(16.3L)
+    ENDJLOOP
+  endif
+ENDRUN

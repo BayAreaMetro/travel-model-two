@@ -206,7 +206,7 @@ public class UsualWorkSchoolLocationChoiceModel
         workerDcSizeObj = new DestChoiceSize(propertyMap, workSegmentIndexNameMap,
                 workSegmentNameIndexMap, workerSizeTerms, maxShadowPriceIterations);
 
-        int[][] originLocationsByHomeMgra = householdDataManager.getWorkersByHomeMgra(occupValueIndexMap);
+        double[][] originLocationsByHomeMgra = householdDataManager.getWorkersByHomeMgra(occupValueIndexMap);
 
         // balance the size variables
         workerDcSizeObj.balanceSizeVariables(originLocationsByHomeMgra);
@@ -312,10 +312,10 @@ public class UsualWorkSchoolLocationChoiceModel
 
             // sum the chosen destinations by purpose, dest zone and subzone for
             // shadow pricing adjustment
-            int[][] finalModeledDestChoiceLocationsByDestMgra = householdDataManager
+            double[][] finalModeledDestChoiceLocationsByDestMgra = householdDataManager
                     .getWorkToursByDestMgra(occupValueIndexMap);
 
-            int[] numChosenDests = new int[workSegmentNameIndexMap.size()];
+            double[] numChosenDests = new double[workSegmentNameIndexMap.size()];
 
             for (int i = 0; i < numChosenDests.length; i++)
             {
@@ -333,7 +333,7 @@ public class UsualWorkSchoolLocationChoiceModel
             for (int i = 0; i < numChosenDests.length; i++)
             {
                 String segmentString = workSegmentIndexNameMap.get(i);
-                logger.info(String.format("\t%-8d%-15s = %10d", i + 1, segmentString,
+                logger.info(String.format("\t%-8d%-15s = %10f", i + 1, segmentString,
                         numChosenDests[i]));
                 total += numChosenDests[i];
             }
@@ -386,7 +386,7 @@ public class UsualWorkSchoolLocationChoiceModel
         householdDataManager.setSchoolDistrictMappings( schoolSegmentNameIndexMap, aggAcc.getMgraGsDistrict(), aggAcc.getMgraHsDistrict(),
                 aggAcc.getGsDistrictIndexMap(), aggAcc.getHsDistrictIndexMap() );
                 
-        int[][] originLocationsByHomeMgra = householdDataManager.getStudentsByHomeMgra();
+        double[][] originLocationsByHomeMgra = householdDataManager.getStudentsByHomeMgra();
 
         // balance the size variables
         schoolDcSizeObj.balanceSizeVariables(originLocationsByHomeMgra);
@@ -490,9 +490,9 @@ public class UsualWorkSchoolLocationChoiceModel
 
             // sum the chosen destinations by purpose, dest zone and subzone for
             // shadow pricing adjustment
-            int[][] finalModeledDestChoiceLocationsByDestMgra = householdDataManager.getSchoolToursByDestMgra();
+            double[][] finalModeledDestChoiceLocationsByDestMgra = householdDataManager.getSchoolToursByDestMgra();
 
-            int[] numChosenDests = new int[schoolSegmentIndexNameMap.size()];
+            double[] numChosenDests = new double[schoolSegmentIndexNameMap.size()];
 
             for (int i = 0; i < numChosenDests.length; i++)
             {
@@ -506,7 +506,7 @@ public class UsualWorkSchoolLocationChoiceModel
             for (int i = 0; i < numChosenDests.length; i++)
             {
                 String segmentString = schoolSegmentIndexNameMap.get(i);
-                logger.info(String.format("\t%-8d%-20s = %10d", i + 1, segmentString, numChosenDests[i]));
+                logger.info(String.format("\t%-8d%-20s = %10f", i + 1, segmentString, numChosenDests[i]));
                 total += numChosenDests[i];
             }
             logger.info(String.format("\t%-8s%-20s = %10.0f", "total", "", total));

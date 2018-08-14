@@ -180,6 +180,26 @@ LOOP PERIOD = 1,5
             MW[55][J] = NA
             MW[56][J] = NA
           ENDIF
+          
+          ;if skimset 3 doesnt have both local and premium, make it NA
+          if(MW[50][J]==0 | (MW[51][J]+MW[52][J]+MW[53][J]+MW[54][J]+MW[55][J])==0)
+            MW[41][J] = NA
+            MW[42][J] = NA
+            MW[43][J] = NA
+            MW[44][J] = NA
+            MW[45][J] = NA
+            MW[46][J] = NA
+            MW[47][J] = NA
+            MW[48][J] = NA
+            MW[49][J] = NA
+            MW[50][J] = NA
+            MW[51][J] = NA
+            MW[52][J] = NA
+            MW[53][J] = NA
+            MW[54][J] = NA
+            MW[55][J] = NA
+            MW[56][J] = NA
+			   ENDIF
 
         ENDJLOOP
         

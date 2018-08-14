@@ -10,6 +10,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.log4j.Logger;
+import com.pb.common.datafile.TableDataSet;
+import com.pb.common.datafile.CSVFileReader;
+
 import com.pb.mtctm2.abm.ctramp.CtrampApplication;
 
 public class NodeZoneMapping {
@@ -33,29 +37,29 @@ public class NodeZoneMapping {
 	}
 	
 	private void loadNodeSequenceData(Path sequenceFile) {
-		//hard coded the structure of the file, but it has no headers so we have to
-		try (BufferedReader reader = new BufferedReader(new FileReader(sequenceFile.toFile()))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				line = line.trim();
-				if (line.length() == 0)
-					continue;
-				String[] s = line.trim().split(",");
-				int original = Integer.parseInt(s[0]);
-				outer: for (int i = 1; i < s.length; i++) {
-					int zone = Integer.parseInt(s[i]);
-					if (zone > 0) {
-						switch (i) {
-							case 1 : originalToSequenceTaz.put(original,zone); break outer;
-							case 2 : originalToSequenceMaz.put(original,zone); break outer;
-							case 3 : originalToSequenceTap.put(original,zone); break outer;						
-						}
-					}
-				}
+		try {
+			CSVFileReader csvReader = new CSVFileReader();
+			TableDataSet nodeSeqTable = csvReader.readFile(sequenceFile.toFile());
+
+			int[] nodeIds = nodeSeqTable.getColumnAsInt("N");
+			int[] tazs    = nodeSeqTable.getColumnAsInt("TAZSEQ");
+			int[] mazs    = nodeSeqTable.getColumnAsInt("MAZSEQ");
+			int[] taps    = nodeSeqTable.getColumnAsInt("TAPSEQ");
+
+			System.out.println("tazs length= " + tazs.length);
+			for(int i=0; i<nodeIds.length; i++) {
+				if (tazs[i] > 0) { originalToSequenceTaz.put(nodeIds[i], tazs[i]); }
+				if (mazs[i] > 0) { originalToSequenceMaz.put(nodeIds[i], mazs[i]); }
+				if (taps[i] > 0) { originalToSequenceTap.put(nodeIds[i], taps[i]); }
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+			System.out.println("tazs size= " + originalToSequenceTaz.size());
+			System.out.println("mazs size= " + originalToSequenceMaz.size());
+			System.out.println("taps size= " + originalToSequenceTap.size());
+			System.out.println("taz for node 200700: " + originalToSequenceTaz.get(200700));
+
+        } catch (IOException e) {
+        	throw new RuntimeException();
+        }
 	}
 
 	private Map<Integer,Integer> reverseMap(Map<Integer,Integer> map) {

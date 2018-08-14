@@ -27,6 +27,7 @@ ENDRUN
 
 ;run script to add area type to network links
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\codeLinkAreaType.py .
+IF (RETURNCODE > 0) abort
 
 ;read in link data with area type and calculate capclass
 RUN PGM=NETWORK

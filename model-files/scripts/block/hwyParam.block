@@ -1,9 +1,9 @@
 
-AUTOOPCOST    = 17.90     ; year 2000 cents per mile
-TRUCKOPCOST   = 32.50     ; year 2000 cents per mile
-VOT           = 15.0      ; year 2000 dollars per hour
-TRUCKVOT      = 30.0      ; year 2000 dollars per hour
+AUTOOPCOST    = 17.23     ; year 2010 cents per mile; make sure this is consistent with mtctm2.properties
+TRUCKOPCOST   = 31.28     ; year 2010 cents per mile
+VOT           = 18.93     ; year 2010 dollars per hour  (or 15.00 2000 dollars per hour)
+TRUCKVOT      = 37.87     ; year 2010 dollars per hour  (or 30.00 2000 dollars per hour)
 SR2COSTSHARE  = 1.75      ; scales toll cost for SR2 occupancy
 SR3COSTSHARE  = 2.50      ; scales toll cost for SR3+ occupancy
 TRKPCE        = 2.0       ; passenger car equivalent for combo trucks
-FIRSTVALUE    = 11	  ; first value toll has a TOLL code of 11
+FIRSTVALUE    = 11	      ; first value toll has a TOLL code of 11

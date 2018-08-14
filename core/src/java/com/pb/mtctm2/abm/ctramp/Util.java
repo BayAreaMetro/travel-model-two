@@ -42,6 +42,14 @@ public class Util implements Serializable {
         return array;
     }
 
+    public static float[] getFloatArrayFromPropertyMap(HashMap<String, String> rbMap, String key) {
+        String[] values = getStringValueFromPropertyMap(rbMap,key).split(",");
+        float[] array = new float[values.length];
+        for (int i = 0; i < array.length; i++)
+        	array[i] = Float.parseFloat(values[i]);
+        return array;
+    }
+
     /**
      * 
      * @param cumProbabilities cumulative probabilities array
