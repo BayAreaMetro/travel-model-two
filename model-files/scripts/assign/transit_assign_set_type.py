@@ -1,6 +1,6 @@
 '''
 Python Script to build a Cube Voyager block script that determines
-whether the transit assignment will be run with or without assignment.
+whether the transit assignment will be run with or without crowding during assignment.
 
 If the program cannot find the key/value pairs in the properties file, the
 program will generate a code block with crowding disabled.
