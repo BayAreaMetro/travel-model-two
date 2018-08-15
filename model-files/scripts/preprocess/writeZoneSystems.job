@@ -26,7 +26,7 @@ ext_selector = '(N < 1000000) & (N > 900000)'
 
 ;build the zone sequences and export to a new network
 RUN PGM=NETWORK
-    NETI = "hwy\mtc_final_network.net"
+    NETI = "hwy\mtc_final_network_base.net"
  
     PHASE = NODEMERGE
         IF (@taz_selector@)
@@ -34,14 +34,16 @@ RUN PGM=NETWORK
         ELSEIF (@maz_selector@)
             _j = _j + 1 
         ELSEIF (@tap_selector@)
-            _k = _k + 1 
+            _k = _k + 1
+        ELSEIF (@ext_selector@)
+            _l = _l + 1
         ENDIF
     ENDPHASE
 	
 	ZONECOUNT=_i
 	
-	;there are 21 external stations
-	ZONES_PLUS_EXT=(_i+21)
+	;there are _l external stations
+	ZONES_PLUS_EXT=(_i+_l)
 	MAZCOUNT=_j
 	TAPCOUNT=_k
 	
@@ -63,9 +65,8 @@ RUN PGM=MATRIX
 
     ZONES=1
     FILEO PRINTO[1] = "zoneSystem.bat"
-    PRINT LIST="::This batch file is created by ctramp/scripts/preprocess/writeZoneSystems.job"
-    PRINT LIST=""
-	  PRINT LIST="SET TAZ_COUNT=" @NETWORK.ZONECOUNT@(L) PRINTO=1
+    PRINT LIST=":: This batch file is created by ctramp/scripts/preprocess/writeZoneSystems.job" PRINTO=1
+    PRINT LIST="SET TAZ_COUNT=" @NETWORK.ZONECOUNT@(L) PRINTO=1
     PRINT LIST="SET TAZ_EXTS_COUNT=" @NETWORK.ZONES_PLUS_EXT@(L) PRINTO=1
     PRINT LIST="SET TAP_COUNT=" @NETWORK.TAPCOUNT@(L) PRINTO=1
 	PRINT LIST="SET MAZ_COUNT=" @NETWORK.MAZCOUNT@(L) PRINTO=1
