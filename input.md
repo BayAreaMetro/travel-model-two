@@ -191,6 +191,7 @@ The following transit modes are defined based on the [Open511](https://511.org/d
 | GG | Golden Gate Transit | 87 | Express Bus | |
 | GG | Golden Gate Transit | 70 | Local bus | |
 | HB | Alameda Harbor Bay Ferry | 100 | Ferry service | |
+| MA | [Marin Transit](https://marintransit.org/) | | | |
 | MS | Stanford Marguerite Shuttle | 13 | Local bus | |
 | PE | Petaluma Transit | 68 | Local bus | |
 | RV | Rio Vista Delta Breeze | 52 | Local bus | |
