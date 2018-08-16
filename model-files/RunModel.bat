@@ -1,4 +1,10 @@
-rem @ECHO OFF
+@echo on
+
+:: set RUNTYPE=DISTRIBUTED or LOCAL
+set RUNTYPE=LOCAL
+:: set ENVTYPE=MTC or RSG
+set ENVTYPE=MTC
+
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 :: RunModel.bat
 ::
@@ -11,6 +17,15 @@ rem @ECHO OFF
 :: RunModel.bat > model_run_out.txt 2>&1
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+:: Step 0: Copy over CTRAMP from %GITHUB_DIR%
+if not exist CTRAMP (
+  mkdir CTRAMP\model
+  mkdir CTRAMP\runtime
+  mkdir CTRAMP\scripts
+  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\model"       CTRAMP\model
+  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\runtime"     CTRAMP\runtime
+  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\scripts"     CTRAMP\scripts
+)
 :: ------------------------------------------------------------------------------------------------------
 ::
 :: Step 1:  Set the necessary path and other computer/environment-specific variables
@@ -40,6 +55,7 @@ SET SAMPLERATE_ITERATION5=1.0
 
 :: Set the model run year
 SET MODEL_YEAR=2015
+SET AV_SCENARIO=0
 
 :: Scripts base directory
 SET BASE_SCRIPTS=CTRAMP\scripts
