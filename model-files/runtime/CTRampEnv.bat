@@ -5,7 +5,6 @@
 ::   CUBE_PATH: location of the Cube executable from Citilabs
 :: PYTHON_PATH: location of the Python executable
 ::     RUNTIME: location of the main JAR file
-::  GITHUB_DIR: location of the github travel-model-two repo
 
 IF %ENVTYPE%==RSG (
   set "JAVA_PATH=C:\Program Files\Java\jre1.8.0_131"
@@ -13,7 +12,6 @@ IF %ENVTYPE%==RSG (
   set "CUBE_PATH=C:\Program Files (x86)\Citilabs\Cube"
   set "CUBE_DLL_PATH=C:\Program Files\Citilabs\VoyagerFileAPI"
   set "PYTHON_PATH=C:\Program Files\anaconda2"
-  set "GITHUB_DIR=C:\Users\mtcpb\Documents\GitHub\travel-model-two"
 )
 IF %ENVTYPE%==MTC (
   set "JAVA_PATH=C:\Program Files\Java\jdk1.8.0_181"
@@ -21,7 +19,6 @@ IF %ENVTYPE%==MTC (
   set "CUBE_PATH=C:\Program Files (x86)\Citilabs\Cube"
   set "CUBE_DLL_PATH=C:\Program Files\Citilabs\VoyagerFileAPI"
   set "PYTHON_PATH=C:\Python27"
-  set "GITHUB_DIR=C:\Users\mtcpb\Documents\GitHub\travel-model-two"
 )
 
 set RUNTIME=CTRAMP/runtime
@@ -49,14 +46,14 @@ SET HOST_IP_ADDRESS=%IPADDRESS%
 
 set HHMGR_IP=192.168.1.206
 
-:: Machine running matrix data manager
-SET MATRIX_SERVER=\\%MTC02%
+:: Machine running matrix data manager. Set to localhost if running on this machine.
+SET MATRIX_SERVER=localhost
 SET MATRIX_SERVER_BASE_DIR=\\model2-a\Model2a-Share\Projects_TM2\%SCEN%
 SET MATRIX_SERVER_ABSOLUTE_BASE_DIR=X:\Projects_TM2\%SCEN%
 SET MATRIX_SERVER_JAVA_PATH=%JAVA_PATH%
 
-:: Machine running household data manager
-SET HH_SERVER=\\%MTC02%
+:: Machine running household data manager. Set to localhost if running on this machine.
+SET HH_SERVER=localhost
 SET HH_SERVER_BASE_DIR=\\model2-a\Model2a-Share\Projects_TM2\%SCEN%
 SET HH_SERVER_ABSOLUTE_BASE_DIR=X:\Projects_TM2\%SCEN%
 SET HH_SERVER_JAVA_PATH=%JAVA_PATH%
