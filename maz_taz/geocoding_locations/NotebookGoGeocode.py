@@ -20,18 +20,20 @@ input_csv_file       = working_directory + "\\" + input_file_name
 
 assert(target_geography in ["tm1_taz1454","tm2_maz_v1","tm2_maz_v2_2"])
 
+# this is the spatial reference for the input x,y points
+spatial_ref          = "GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]]"
+
 if target_geography == "tm1_taz1454":
-    spatial_ref      = "GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]]"
     geodatabase      = "CSV_TAZ.gdb"
     maz_feature_name = "TAZs_DD"
 elif target_geography == "tm2_maz_v1":
-    spatial_ref      = "GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]]"
     geodatabase      = "mtctm2zonesv10.gdb"
     maz_feature_name = "mazs"
-else:
-    raise NotImplementedError
+elif target_geography == "tm2_maz_v2_2":
+    geodatabase      = "mtctm2zonesv2_2.gdb"
+    maz_feature_name = "mazs_TM2_v2_2"
 
-# Travel Model One Steps
+# define layer names
 print("Step b:  Geo-coding to {} Geographies ...".format(target_geography))
 xy_event_layer_name  = "EventLyr"
 xy_event_feature     = working_directory + geodatabase + "\\" + xy_event_layer_name
