@@ -1,6 +1,6 @@
 import arcpy
 import pandas
-	
+
 print("Step 0:   Processing " + input_file_name + " ...")
 
 # overwrite existing files
@@ -37,25 +37,23 @@ arcpy.SpatialJoin_analysis(xy_event_feature, maz_feature, spatial_join_feature, 
 print("Step 2c:  Geo-coded points to TAZ boundaries ...")
 
 # write data out to a csv
-field_names = [f.name for f in arcpy.ListFields(spatial_join_feature) if f.type <> 'Geometry']
+field_names = [f.name for f in arcpy.ListFields(spatial_join_feature) if f.type != 'Geometry']
 with open (csv_output_all,'w') as f:
     f.write(','.join(field_names)+'\n')
     with arcpy.da.SearchCursor(spatial_join_feature, field_names) as cursor:
-	for row in cursor:
-	    f.write(','.join([("\"" + str(r) + "\"") for r in row])+'\n')
+        for row in cursor:
+            f.write(','.join([("\"" + str(r) + "\"") for r in row])+'\n')
 print("Step 2d:  Write to " + csv_output_all + " ...")
 
 # read/write the information I need
 data_frame = pandas.read_csv(csv_output_all)
-data_frame = data_frame.convert_objects(convert_numeric = True)
 
 for i, column in enumerate(data_frame.columns):
-     if column not in keep_fields:
-	 del data_frame[column]
-
-data_frame.to_csv(csv_output_custom, header = True, index = False)
+    if column not in keep_fields:
+        del data_frame[column]
 
 print("Step 2e:  Write to " + csv_output_custom + " ...")
 
+data_frame.to_csv(csv_output_custom, header = True, index = False, float_format="%.7f")
 
 print ("Finished:  OnBoardGeocoding for " + input_file_name + ".\n\n")
