@@ -20,6 +20,7 @@ set ENVTYPE=MTC
 
 :: Step 0: Copy over CTRAMP from %GITHUB_DIR%
 if not exist CTRAMP (
+  set "GITHUB_DIR=C:\Users\mtcpb\Documents\GitHub\travel-model-two"
   mkdir CTRAMP\model
   mkdir CTRAMP\runtime
   mkdir CTRAMP\scripts
