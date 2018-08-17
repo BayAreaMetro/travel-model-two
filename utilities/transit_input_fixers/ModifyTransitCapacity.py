@@ -18,43 +18,33 @@ trn_net = Wrangler.TransitNetwork(champVersion=4.3, basenetworkpath=TRN_NETFILE,
 
 
 # read the excel file with vehicle type information
-# df = pd.read_excel('File.xlsx', sheetname='Sheet1')
-# df = pandas.read_excel('Line and vehicle type_be.xlsx', sheetname='Sheet1')
-VehicleType_df = pandas.read_excel(r"M:\\Development\\Travel Model Two\\Supply\\Transit\\Network_QA\\Line and vehicle type_be.xlsx", sheetname='transit_input_summary')
+VehicleType_df = pandas.read_excel(r"M:\\Development\\Travel Model Two\\Supply\\Transit\\Network_QA\\Line and vehicle type_be.xlsx", sheet_name='transit_input_summary')
 
-
-# Use a loop to iterate over the list:
-# for i in VehicleType_df.index:
-#    print(VehicleType_df['Sepal width'][i])
-
-# for line in trn_net:
-#    for node_idx in range(len(line.n)):
-#    for i in VehicleType_df.index:
-#        if line.name = VehicleType_df['Line_name'][i]:
-#            line['VEHICLETYPE'] = VehicleType_df['Vehicle Type'][i]
 
 for line in trn_net:
     for i in VehicleType_df.index:
 
-#        if VehicleType_df['Line_name'][i]==line.name:
-
         line_name_excel = str(VehicleType_df['Line_name'][i])
         line_name_linefile = str(line.name)
-            # drop the "u" at the beginning of the string
-    #        line_name_string = line_name_string [1:]
-        print("Processing:", i, line_name_excel, line_name_linefile)
-    #            if line.name == VehicleType_df['Line_name'][i]:
-        if line_name_linefile == line_name_excel:
-            line['VEHICLETYPE'] = VehicleType_df['Vehicle Type'][i]
-            print(i, line.name, VehicleType_df['Line_name'][i], VehicleType_df['Vehicle Type'][i])
 
-			# if the vehicle type is blank, then assume it is a standard bus			
-        if  str(line['VEHICLETYPE']) =="nan":
-            line['VEHICLETYPE'] = 1
-				
-            break
-        else:
-            continue 
+        print("Processing:", i, "Line name excel ", line_name_excel, "Line name in line file ", line_name_linefile)
+
+        if line_name_linefile == line_name_excel:
+
+	    # if the vehicle type is blank, then assume it is a standard bus
+            if  str(VehicleType_df['Vehicle Type'][i]) =="nan":
+
+                line['VEHICLETYPE'] = 1
+                print("Changed:",i, "Line name excel-", line.name, "Line name in line file-", VehicleType_df['Line_name'][i], "Vehicle type-", line['VEHICLETYPE'])
+
+                break
+
+            else:
+
+                line['VEHICLETYPE'] = int(VehicleType_df['Vehicle Type'][i])
+                print("Changed:",i, "Line name excel-", line.name, "Line name in line file-", VehicleType_df['Line_name'][i], "Vehicle type-", line['VEHICLETYPE'])
+
+                continue
 
 
 trn_net.write(path=".", name="transitLines", writeEmptyFiles=False, suppressValidation=True)
