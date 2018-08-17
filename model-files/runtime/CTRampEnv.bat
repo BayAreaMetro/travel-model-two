@@ -5,10 +5,6 @@
 ::   CUBE_PATH: location of the Cube executable from Citilabs
 :: PYTHON_PATH: location of the Python executable
 ::     RUNTIME: location of the main JAR file
-<<<<<<< HEAD
-=======
-::  GITHUB_DIR: location of the github travel-model-two repo
->>>>>>> Create ENVTYPE for RSG/MTC
 
 IF %ENVTYPE%==RSG (
   set "JAVA_PATH=C:\Program Files\Java\jre1.8.0_131"
@@ -16,10 +12,6 @@ IF %ENVTYPE%==RSG (
   set "CUBE_PATH=C:\Program Files (x86)\Citilabs\Cube"
   set "CUBE_DLL_PATH=C:\Program Files\Citilabs\VoyagerFileAPI"
   set "PYTHON_PATH=C:\Program Files\anaconda2"
-<<<<<<< HEAD
-=======
-  set "GITHUB_DIR=C:\Users\mtcpb\Documents\GitHub\travel-model-two"
->>>>>>> Create ENVTYPE for RSG/MTC
 )
 IF %ENVTYPE%==MTC (
   set "JAVA_PATH=C:\Program Files\Java\jdk1.8.0_181"
@@ -27,10 +19,6 @@ IF %ENVTYPE%==MTC (
   set "CUBE_PATH=C:\Program Files (x86)\Citilabs\Cube"
   set "CUBE_DLL_PATH=C:\Program Files\Citilabs\VoyagerFileAPI"
   set "PYTHON_PATH=C:\Python27"
-<<<<<<< HEAD
-=======
-  set "GITHUB_DIR=C:\Users\mtcpb\Documents\GitHub\travel-model-two"
->>>>>>> Create ENVTYPE for RSG/MTC
 )
 
 set RUNTIME=CTRAMP/runtime
