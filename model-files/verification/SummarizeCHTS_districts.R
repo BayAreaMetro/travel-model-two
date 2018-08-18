@@ -47,15 +47,18 @@ library(data.table)
 if (Sys.getenv("USERNAME") == "lzorn") {
   WD                   <- "M:/Data/HomeInterview/2010/Analysis/Calibration Targets"
   USERPROFILE          <- gsub("\\\\","/", Sys.getenv("USERPROFILE"))
-  BOX_TM2              <- file.path(USERPROFILE, "Box/Modeling and Surveys/Development/Travel Model Two Development")
-  CHTS_raw_Dir         <- file.path(BOX_TM2, "Observed Data", "RSG_CHTS", "standardized_data_redacted_PII")
-  Survey_Dir           <- file.path(BOX_TM2, "Observed Data", "RSG_CHTS", "CHTS")
-  SkimDir              <- file.path(BOX_TM2, "Observed Data", "RSG_CHTS")
-  Survey_Processed_Dir <- file.path(BOX_TM2, "Observed Data", "CHTS Processing", "MTC Processed Dataset", "MTC_Processed_2.17.2015")
-  geogXWalkDir         <- file.path(BOX_TM2, "Observed Data", "CHTS Processing", "Trip End Geocodes maz_v1_0")
+  BOX_TM2              <- file.path(USERPROFILE, "Box", "Modeling and Surveys", "Development", "Travel Model Two Development")
+  CHTS_raw_Dir         <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS", "standardized_data_redacted_PII")
+  Survey_Dir           <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS", "CHTS")
+  SkimDir              <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS")
+  Survey_Processed_Dir <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "MTC Processed Dataset", "MTC_Processed_2.17.2015")
+  geogXWalkDir         <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "Trip End Geocodes maz_v1_0")
+  mazDataDir           <- file.path(BOX_TM2, "Model Inputs",    "2015", "landuse")
   districtDef          <- file.path(BOX_TM2, "Model Geography", "Zones v1.0", "taz_superdistrictv1.csv")
-  mazDataDir           <- file.path(BOX_TM2, "Model Inputs/2015_revised_mazs/landuse")
 } else {
+  USERPROFILE          <- gsub("\\\\","/", Sys.getenv("USERPROFILE"))
+  BOX_TM2              <- file.path(USERPROFILE, "Box", "Travel Model Two Development")
+  
   WD                   <- "E:/projects/clients/mtc/data/CHTS_Summaries"
   CHTS_raw_Dir         <- "E:/projects/clients/mtc/data/fromNREL/standardized_data_redacted_PII"
   Survey_Dir           <- "E:/projects/clients/mtc/data/CHTS"
@@ -63,6 +66,7 @@ if (Sys.getenv("USERNAME") == "lzorn") {
   SkimDir              <- "E:/projects/clients/mtc/data/Skim2010"
   geogXWalkDir         <- "E:/projects/clients/mtc/data/Trip End Geocodes"
   mazDataDir           <- "E:/projects/clients/mtc/2015_calibration/input/landuse"
+  districtDef          <- file.path(BOX_TM2, "Model Geography", "Zones v1.0", "taz_superdistrictv1.csv")
 }
 
 ## Read Data
