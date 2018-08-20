@@ -35,16 +35,19 @@ for line in trn_net:
             if  str(VehicleType_df['Vehicle Type'][i]) =="nan":
 
                 line['VEHICLETYPE'] = 1
-                print("Changed:",i, "Line name excel-", line.name, "Line name in line file-", VehicleType_df['Line_name'][i], "Vehicle type-", line['VEHICLETYPE'])
-
-                break
 
             else:
 
                 line['VEHICLETYPE'] = int(VehicleType_df['Vehicle Type'][i])
-                print("Changed:",i, "Line name excel-", line.name, "Line name in line file-", VehicleType_df['Line_name'][i], "Vehicle type-", line['VEHICLETYPE'])
 
-                continue
+        
+            print("Changed:",i, "Line name excel-", line.name, "Line name in line file-", VehicleType_df['Line_name'][i], "Vehicle type-", line['VEHICLETYPE'])
+            break
+
+
+        else:
+
+            continue
 
 
 trn_net.write(path=".", name="transitLines", writeEmptyFiles=False, suppressValidation=True)
