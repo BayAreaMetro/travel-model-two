@@ -42,19 +42,30 @@ library(data.table)
 
 ## User Inputs
 ###############
+# one of "maz_v1_0" or "maz_v2_2"
+geography = "maz_v1_0"
 
 # Directories
 if (Sys.getenv("USERNAME") == "lzorn") {
-  WD                   <- "M:/Data/HomeInterview/2010/Analysis/Calibration Targets"
+  # this is the output directory
+  WD                   <- file.path("M:/Data/HomeInterview/2010/Analysis/Calibration Targets", geography)
+
   USERPROFILE          <- gsub("\\\\","/", Sys.getenv("USERPROFILE"))
   BOX_TM2              <- file.path(USERPROFILE, "Box", "Modeling and Surveys", "Development", "Travel Model Two Development")
   CHTS_raw_Dir         <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS", "standardized_data_redacted_PII")
   Survey_Dir           <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS", "CHTS")
-  SkimDir              <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS")
   Survey_Processed_Dir <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "MTC Processed Dataset", "MTC_Processed_2.17.2015")
-  geogXWalkDir         <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "Trip End Geocodes maz_v1_0")
-  mazDataDir           <- file.path(BOX_TM2, "Model Inputs",    "2015", "landuse")
-  districtDef          <- file.path(BOX_TM2, "Model Geography", "Zones v1.0", "taz_superdistrictv1.csv")
+  if (geography == "maz_v1_0") {
+    SkimDir            <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS")
+    geogXWalkDir       <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "Trip End Geocodes maz_v1_0")
+    mazDataDir         <- file.path(BOX_TM2, "Model Inputs",    "2015", "landuse")
+    districtDef        <- file.path(BOX_TM2, "Model Geography", "Zones v1.0", "taz_superdistrictv1.csv")
+  } else if (geography == "maz_v2_2") {
+    SkimDir            <- file.path(BOX_TM2, "Model Geography", "Zones v2.2")
+    geogXWalkDir       <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "Trip End Geocodes maz_v2_2")
+    mazDataDir         <- file.path(BOX_TM2, "Model Inputs",    "2015_revised_mazs", "landuse")
+    districtDef        <- file.path(BOX_TM2, "Model Geography", "Zones v2.2", "sd22_from_tazV2_2.csv")
+  }
 } else {
   USERPROFILE          <- gsub("\\\\","/", Sys.getenv("USERPROFILE"))
   BOX_TM2              <- file.path(USERPROFILE, "Box", "Travel Model Two Development")
@@ -188,7 +199,7 @@ jtours$finalweight <- hh$finalweight[match(jtours$HH_ID, hh$SAMPN)]
 
 ### copy location info [first remove existing location fields]
 # copy the sequential version of MAZs/TAZs [MAZ instead of MAZ_ORIGINAL]
-hh$HHMAZ <- hhloc$MAZ_V10[match(hh$SAMPN, hhloc$SAMPN)]
+hh$HHMAZ <- hhloc$MAZ[match(hh$SAMPN, hhloc$SAMPN)]
 hh$HHMAZ <- xwalk$MAZ[match(hh$HHMAZ, xwalk$MAZ_ORIGINAL)]
 #manual fixing of home TAZ
 hh$HHMAZ[hh$SAMPN==1692707] <- 24082
@@ -198,30 +209,30 @@ hh$HHTAZ_NONSEQ <- xwalk$TAZ_ORIGINAL[match(hh$HHMAZ, xwalk$MAZ)] # keep nonsequ
 hh$HHMAZ[is.na(hh$HHMAZ)] <- 0
 hh$HHTAZ[is.na(hh$HHTAZ)] <- 0
 
-per$WMAZ <- wkloc$MAZ_V10[match(paste(per$SAMPN, per$PERNO, sep = "-"), paste(wkloc$SAMPN, wkloc$PERNO, sep = "-"))]
+per$WMAZ <- wkloc$MAZ[match(paste(per$SAMPN, per$PERNO, sep = "-"), paste(wkloc$SAMPN, wkloc$PERNO, sep = "-"))]
 per$WMAZ <- xwalk$MAZ[match(per$WMAZ, xwalk$MAZ_ORIGINAL)]
 per$WTAZ <- xwalk$TAZ[match(per$WMAZ, xwalk$MAZ)]
 per$WTAZ_NONSEQ <- xwalk$TAZ_ORIGINAL[match(per$WMAZ, xwalk$MAZ)]
 per$WMAZ[is.na(per$WMAZ)] <- 0
 per$WTAZ[is.na(per$WTAZ)] <- 0
 
-per$SMAZ <- scloc$MAZ_V10[match(paste(per$SAMPN, per$PERNO, sep = "-"), paste(scloc$SAMPN, scloc$PERNO, sep = "-"))]
+per$SMAZ <- scloc$MAZ[match(paste(per$SAMPN, per$PERNO, sep = "-"), paste(scloc$SAMPN, scloc$PERNO, sep = "-"))]
 per$SMAZ_NONSEQ <- per$SMAZ # keep nonsequential
 per$SMAZ <- xwalk$MAZ[match(per$SMAZ, xwalk$MAZ_ORIGINAL)]
 per$STAZ <- xwalk$TAZ[match(per$SMAZ, xwalk$MAZ)]
 per$SMAZ[is.na(per$SMAZ)] <- 0
 per$STAZ[is.na(per$STAZ)] <- 0
 
-trips$ORIG_MAZ <- plloc$MAZ_V10[match(paste(trips$HH_ID, trips$PER_ID, trips$ORIG_PLACENO, sep = "-"), 
-                                      paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
+trips$ORIG_MAZ <- plloc$MAZ[match(paste(trips$HH_ID, trips$PER_ID, trips$ORIG_PLACENO, sep = "-"), 
+                                  paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
 trips$ORIG_MAZ <- xwalk$MAZ[match(trips$ORIG_MAZ, xwalk$MAZ_ORIGINAL)]
 trips$ORIG_TAZ <- xwalk$TAZ[match(trips$ORIG_MAZ, xwalk$MAZ)]
 trips$ORIG_TAZ_NONSEQ <- xwalk$TAZ_ORIGINAL[match(trips$ORIG_MAZ, xwalk$MAZ)] # keep nonsequential
 trips$ORIG_MAZ[is.na(trips$ORIG_MAZ)] <- 0
 trips$ORIG_TAZ[is.na(trips$ORIG_TAZ)] <- 0
 
-trips$DEST_MAZ <- plloc$MAZ_V10[match(paste(trips$HH_ID, trips$PER_ID, trips$DEST_PLACENO, sep = "-"), 
-                                      paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
+trips$DEST_MAZ <- plloc$MAZ[match(paste(trips$HH_ID, trips$PER_ID, trips$DEST_PLACENO, sep = "-"), 
+                                  paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
 trips$DEST_MAZ <- xwalk$MAZ[match(trips$DEST_MAZ, xwalk$MAZ_ORIGINAL)]
 trips$DEST_TAZ <- xwalk$TAZ[match(trips$DEST_MAZ, xwalk$MAZ)]
 trips$DEST_TAZ_NONSEQ <- xwalk$TAZ_ORIGINAL[match(trips$DEST_MAZ, xwalk$MAZ)] # keep nonsequential
@@ -234,15 +245,15 @@ trips$OCOUNTY[is.na(trips$OCOUNTY)] <- "Missing"
 trips$DCOUNTY[is.na(trips$DCOUNTY)] <- "Missing"
 
 
-tours$ORIG_MAZ <- plloc$MAZ_V10[match(paste(tours$HH_ID, tours$PER_ID, tours$ORIG_PLACENO, sep = "-"), 
-                                      paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
+tours$ORIG_MAZ <- plloc$MAZ[match(paste(tours$HH_ID, tours$PER_ID, tours$ORIG_PLACENO, sep = "-"), 
+                                  paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
 tours$ORIG_MAZ_NONSEQ <- tours$ORIG_MAZ # keep nonsequential
 tours$ORIG_MAZ <- xwalk$MAZ[match(tours$ORIG_MAZ, xwalk$MAZ_ORIGINAL)]
 tours$ORIG_TAZ <- xwalk$TAZ[match(tours$ORIG_MAZ, xwalk$MAZ)]
 tours$ORIG_MAZ[is.na(tours$ORIG_MAZ)] <- 0
 tours$ORIG_TAZ[is.na(tours$ORIG_TAZ)] <- 0
 
-tours$DEST_MAZ <- plloc$MAZ_V10[match(paste(tours$HH_ID, tours$PER_ID, tours$DEST_PLACENO, sep = "-"), 
+tours$DEST_MAZ <- plloc$MAZ[match(paste(tours$HH_ID, tours$PER_ID, tours$DEST_PLACENO, sep = "-"), 
                                       paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
 tours$DEST_MAZ_NONSEQ <- tours$DEST_MAZ # keep nonsequential
 tours$DEST_MAZ <- xwalk$MAZ[match(tours$DEST_MAZ, xwalk$MAZ_ORIGINAL)]
