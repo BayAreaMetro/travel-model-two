@@ -47,9 +47,9 @@ public class DeadheadModel {
     private HashMap<Integer,VehicleTrip> TaxiTrips = null; //for now key off rownumber*10 + (1 if indiv,2 if joint) from input file
     private HashMap<Long,HashMap<Integer,VehicleTrip>> PrivateAVTrips = null; //extra dimension is household ID
 */
-    private ArrayList<VehicleTrip> TNCTrips = null;
-    private ArrayList<VehicleTrip> TaxiTrips = null;
-    private HashMap<Long,ArrayList<VehicleTrip>> PrivateAVTrips = null; //extra dimension is household ID
+    private ArrayList<Trip> TNCTrips = null;
+    private ArrayList<Trip> TaxiTrips = null;
+    private HashMap<Long,ArrayList<Trip>> PrivateAVTrips = null; //extra dimension is household ID
    
     private static final String DirectoryProperty = "Project.Directory";
     private static final String IndivTripDataFileProperty = "Results.IndivTripDataFile";
@@ -103,9 +103,9 @@ public class DeadheadModel {
         TaxiTrips = new HashMap<Integer,VehicleTrip>();
         PrivateAVTrips = new HashMap<Long,HashMap<Integer,VehicleTrip>>();
          */
-        TNCTrips = new ArrayList<VehicleTrip>();
-        TaxiTrips = new ArrayList<VehicleTrip>();
-        PrivateAVTrips = new HashMap<Long,ArrayList<VehicleTrip>>();
+        TNCTrips = new ArrayList<Trip>();
+        TaxiTrips = new ArrayList<Trip>();
+        PrivateAVTrips = new HashMap<Long,ArrayList<Trip>>();
 
 
 	}
@@ -143,10 +143,6 @@ public class DeadheadModel {
 	 */
 	public void readTripList(TableDataSet inputTripTableData, boolean jointTripData){
 		
-         int tableIndex=1;
-         if (jointTripData)
-        	 tableIndex=2;
-         
          for(int row = 1; row <= inputTripTableData.getRowCount();++row){
         	
            	long hhid = (long) inputTripTableData.getValueAt(row,"hh_id");	
@@ -166,33 +162,28 @@ public class DeadheadModel {
         	
             //put the vehicle trip in one of the hashmaps
         	if(modelStructure.getTripModeIsTNC(mode)){
-        		VehicleTrip trip = new VehicleTrip(hhid,personNumber,tourid,stopid,inbound,oMaz,dMaz,depPeriod,depTime,sRate,mode);
+        		Trip trip = new Trip(hhid,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,0,0,0);
         		//TNCTrips.put(row*10+tableIndex,trip);
         		TNCTrips.add(trip);
         	} else if(modelStructure.getTripModeIsTaxi(mode)){
-        		VehicleTrip trip = new VehicleTrip(hhid,personNumber,tourid,stopid,inbound,oMaz,dMaz,depPeriod,depTime,sRate,mode);
+        		Trip trip = new Trip(hhid,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,0,0,0);
         		//TaxiTrips.put(row*10+tableIndex,trip);
         		TaxiTrips.add(trip);
-        	} else if(avAvailable==1){
-        		VehicleTrip trip = new VehicleTrip(hhid,personNumber,tourid,stopid,inbound,oMaz,dMaz,depPeriod,depTime,sRate,mode);
+        	} else if((avAvailable==1) && modelStructure.getTripModeIsSovOrHov(mode)){
+        		Trip trip = new Trip(hhid,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,0,0,0);
         		if(PrivateAVTrips.containsKey(hhid)==false){
         			//PrivateAVTrips.put(hhid,new HashMap<Integer,VehicleTrip>());
-        			PrivateAVTrips.put(hhid,new ArrayList<VehicleTrip>());
+        			PrivateAVTrips.put(hhid,new ArrayList<Trip>());
         		}
         		
         		// HashMap<Integer,VehicleTrip> hhAVMap = PrivateAVTrips.get(hhid);
         		// hhAVMap.put(row*10+tableIndex,trip);
         		// PrivateAVTrips.put(hhid,hhAVMap);
-        		ArrayList<VehicleTrip> hhAVList = PrivateAVTrips.get(hhid);
+        		ArrayList<Trip> hhAVList = PrivateAVTrips.get(hhid);
         		hhAVList.add(trip);
         	}
-
-
         }
-        
-        
-        
-	}
+ 	}
 	
 	public void generateVehicles(){
 		
