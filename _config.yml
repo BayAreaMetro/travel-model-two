@@ -34,6 +34,7 @@ pages_list:
   Guide: 'guide/'
   Input: 'input/'
   Output: 'output/'
+  Network Building: 'netbuild/'
   Process: 'process/'
   Geographies: 'geographies/'
   Papers: 'papers/'
