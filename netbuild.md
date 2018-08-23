@@ -118,7 +118,7 @@ Step 2: “cd” into the directory for the scenario. This is where the specific
 
 Step 3: run the DOS commands  below
 
---
+```
 REM Set the path DOS environment variable and python path
 set PATH= %PATH%;C:\Python27
 set PYTHONPATH=%PYTHONPATH%;C:\Python27
@@ -133,8 +133,7 @@ set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_st
 REM run network wrangler
 REM cd into the folder where the specification file (network_test_specification.py) is stored, if you haven't
 python C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py network_test_specification.py
-	
---
+```
 
 Users will be asked about pre-requisite, co-requisite and conflicting projects. In most MTC applications, just answer “y”for yes  to these.
 
