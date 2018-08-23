@@ -15,6 +15,8 @@ CONTENTS
 
 ## Setting it up for the first time
 
+
+### Software requirements
 Before using network wrangler, you’ll need to:
 
 •	install Cube 6.4.4 or newer (http://www.citilabs.com). Cube is a proprietary software and a license will be required.
@@ -24,6 +26,43 @@ Before using network wrangler, you’ll need to:
 •	install various python modules that network wrangler uses. (For most current python users, the required modules are xlrd, simpleparse, and numpy. If you are using python 3, you may need win32 as well. If additional module is needed for your specific set up, you’ll get error messages on screen to indicating which python module is needed.
 
 •	 install Git (https://git-scm.com/downloads)
+
+### Importing Wrangler
+
+The next step is to test if you can import Wrangler. Open a command window, and type in the following DOS commands:
+
+Step 1: Set the path to python. You’ll need to do this for two environment variables and you’ll need to know where your python.exe is installed. For example, if your python.exe is installed in C:\Python27, type the commands as below. If your python.exe is installed elsewhere, replace C:\Python27 with your path.
+
+set PATH= %PATH%;C:\Python27
+set PYTHONPATH=%PYTHONPATH%;C:\Python27
+
+Step 2: Make sure Cube Voyager is on the path. Again, you’ll need to know where Cube Voyager (runtpp.exe) is installed. Below is an example command assuming runtpp.exe is installed in C:\Program Files (x86)\Citilabs\CubeVoyager. Adjust the command according to the location of your runtpp.exe.
+
+set PATH= %PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
+
+Step 3: Point the pythonpath to NetworkWrangler. You’ll need to do this at two levels:
+
+set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\
+set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static
+
+Step 4: Open up the python interpreter by type in
+Python
+
+(After you type in “python” and hit enter, the command window should display a message about the version of your python. You should also see that the command line start with >>> instead of >. See example below.)
+
+Python 2.7.14 (v2.7.14:84471935ed, Sep 16 2017, 20:25:58) [MSC v.1500 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+
+Step 5: Import NetworkWrangler. Type:
+
+Import Wrangler
+
+(Note that this importing command is case sensitive – it only works if you type Wrangler with W in caps. After you type in the command, if the command window displays the following messages, it means you have successfully imported NetworkWrangler.)
+
+('Importing ', 'C:\\Users\\ftsang\\Documents\\GitHub\\NetworkWrangler\\_static\\dataTable.pyc')
+('Importing ', 'C:\\Users\\ftsang\\Documents\\GitHub\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
+>>>
 
 ---
 
