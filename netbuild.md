@@ -45,7 +45,8 @@ Step 3: Point the pythonpath to NetworkWrangler. You’ll need to do this at two
 **C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\
 C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static**
 
-Step 4: Open up the python interpreter by typing in
+Step 4: Open up the python interpreter by typing in:
+
 **C:\>Python**
 
 (After you type in “python” and hit enter, the command window should display a message about the version of your python. You should also see that the command line start with >>> instead of >. See example below.)
