@@ -46,12 +46,16 @@ C:\>set PATH= %PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
 
 Step 3: Point the pythonpath to NetworkWrangler. You’ll need to do this at two levels:
 
-**C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\
-C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static**
+```
+C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\
+C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static
+```
 
 Step 4: Open up the python interpreter by typing in:
 
-**C:\>Python**
+```
+C:\>Python
+```
 
 (After you type in “python” and hit enter, the command window should display a message about the version of your python. You should also see that the command line start with >>> instead of >. See example below.)
 
@@ -61,7 +65,9 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 Step 5: Import NetworkWrangler. Type:
 
-**>>>Import Wrangler**
+```
+>>>Import Wrangler
+```
 
 (Note that this importing command is case sensitive – it only works if you type Wrangler with W in caps. After you type in the command, if the command window displays the following messages, it means you have successfully imported NetworkWrangler.)
 
