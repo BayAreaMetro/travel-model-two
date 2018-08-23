@@ -146,9 +146,9 @@ public class DeadheadModel {
          for(int row = 1; row <= inputTripTableData.getRowCount();++row){
         	
            	long hhid = (long) inputTripTableData.getValueAt(row,"hh_id");	
-           	int personNumber=-1;
+           	long personNumber=-1;
            	if(jointTripData==false)
-           		personNumber = (int) inputTripTableData.getValueAt(row,"person_num");
+           		personNumber = (long) inputTripTableData.getValueAt(row,"person_num");
         	int tourid = (int) inputTripTableData.getValueAt(row,"tour_id");
         	int stopid = (int) inputTripTableData.getValueAt(row,"stop_id");
         	int inbound = (int)inputTripTableData.getValueAt(row,"inbound");

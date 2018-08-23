@@ -7,7 +7,7 @@ package com.pb.mtctm2.abm.maas;
  */
 class Trip implements Comparable{
    	long hhid;		
-	int personNumber;
+	long personNumber;
 	int tourid;
 	int stopid;
 	int inbound;
@@ -25,7 +25,7 @@ class Trip implements Comparable{
 	int set;
 	
 	
-	public Trip(long hhid,int personNumber, int tourid,int stopid,int inbound,int joint,int originMaz, int destinationMaz, int departPeriod, float departTime, float sampleRate, int mode, int boardingTap, int alightingTap, int set){
+	public Trip(long hhid,long personNumber, int tourid,int stopid,int inbound,int joint,int originMaz, int destinationMaz, int departPeriod, float departTime, float sampleRate, int mode, int boardingTap, int alightingTap, int set){
        	this.hhid = hhid;		
     	this.personNumber = personNumber;
     	this.tourid = tourid;
@@ -54,11 +54,11 @@ class Trip implements Comparable{
 		this.hhid = hhid;
 	}
 
-	public int getPersonNumber() {
+	public long getPersonNumber() {
 		return personNumber;
 	}
 
-	public void setPersonNumber(int personNumber) {
+	public void setPersonNumber(long personNumber) {
 		this.personNumber = personNumber;
 	}
 

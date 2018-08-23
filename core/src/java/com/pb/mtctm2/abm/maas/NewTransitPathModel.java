@@ -22,6 +22,7 @@ import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.ModelStructure;
+import com.pb.mtctm2.abm.ctramp.Person;
 import com.pb.mtctm2.abm.ctramp.TazDataManager;
 import com.pb.mtctm2.abm.ctramp.TransitDriveAccessDMU;
 import com.pb.mtctm2.abm.ctramp.TransitWalkAccessDMU;
@@ -50,7 +51,10 @@ public class NewTransitPathModel{
     private ModelStructure modelStructure;
     private ArrayList<Trip> transitTrips;
     private double[] endTimeMinutes; // the period end time in number of minutes past 3 AM , starting in period 1 (index 1)
-
+    private HashMap<Long,Float> valueOfTimeByPersonNumber;
+    private HashMap<Long,Float> valueOfTimeByHhId; // the maximum VOT for all persons in the household
+    private HashMap<Long,Integer> personTypeByPersonNumber;
+    
     //for tracing
     private boolean seek;
     private ArrayList<Long> traceHHIds;
@@ -58,6 +62,7 @@ public class NewTransitPathModel{
     private static final String DirectoryProperty = "Project.Directory";
     private static final String IndivTripDataFileProperty = "Results.IndivTripDataFile";
     private static final String JointTripDataFileProperty = "Results.JointTripDataFile";
+    private static final String PersonDataFileProperty = "Results.PersonDataFile";
     private static final String ModelSeedProperty = "Model.Random.Seed";
     private static final String SeekProperty = "Seek";
     private static final String TraceHouseholdList = "Debug.Trace.HouseholdIdList";
@@ -101,7 +106,11 @@ public class NewTransitPathModel{
         int seed = Util.getIntegerValueFromPropertyMap(propertyMap, ModelSeedProperty);
         random = new MersenneTwister(seed);
 
+        //initialize containers
         transitTrips = new ArrayList<Trip>();
+        valueOfTimeByPersonNumber = new HashMap<Long,Float>();
+        valueOfTimeByHhId =  new HashMap<Long,Float>();
+        personTypeByPersonNumber =  new HashMap<Long,Integer>();
         
         //set up the trace
         seek = new Boolean(Util.getStringValueFromPropertyMap(propertyMap, SeekProperty));
@@ -118,7 +127,7 @@ public class NewTransitPathModel{
 	 * Read the input individual and joint trip files. This function calls the method
 	 * @readTripList for each table.
 	 */
-	public void readInputTrips(){
+	public void readInputFiles(){
 		
         String directory = Util.getStringValueFromPropertyMap(propertyMap, DirectoryProperty);
         String indivTripFile = directory
@@ -128,7 +137,9 @@ public class NewTransitPathModel{
                 + Util.getStringValueFromPropertyMap(propertyMap, JointTripDataFileProperty);
         jointTripFile = insertIterationNumber(jointTripFile,iteration);
 
-         
+        String personFile = directory
+                + Util.getStringValueFromPropertyMap(propertyMap, PersonDataFileProperty); 
+        
         //start with individual trips
         TableDataSet indivTripDataSet = readTableData(indivTripFile);
         readTripList(indivTripDataSet, false);
@@ -136,6 +147,9 @@ public class NewTransitPathModel{
         //now read joint trip data
         TableDataSet jointTripDataSet = readTableData(jointTripFile);
         readTripList(jointTripDataSet, true);
+        
+        //read person data
+        TableDataSet personData = readTableData(personFile);
         
 	}
 
@@ -145,14 +159,15 @@ public class NewTransitPathModel{
 	private void run(){
 		
 		TableDataSet mgraData = mgraManager.getMgraTableDataSet();
-		TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
-    	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
     	double[][] bestTaps = null;
 		boolean debug = false;
 		
 		//iterate through data and calculate
 		for(Trip trip : transitTrips ){
-		
+			
+			TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
+	    	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
+
 			long hhid = trip.getHhid();
 			int originMaz = trip.getOriginMaz();
 			int destinationMaz = trip.getDestinationMaz();
@@ -162,6 +177,12 @@ public class NewTransitPathModel{
 			int inbound = trip.getInbound();
 			int period = trip.getDepartPeriod();
 			int joint = trip.getJoint();
+			
+			//get the value of time for this person (or hh if joint tour)
+			long personNumber = trip.getPersonNumber();
+			float valueOfTime = (joint == 1) ? valueOfTimeByHhId.get(hhid) : valueOfTimeByPersonNumber.get(personNumber);
+			
+			int personType = personTypeByPersonNumber.get(personNumber);
 			
 			if(traceHHIds.contains(hhid))
 				debug = true;
@@ -178,16 +199,15 @@ public class NewTransitPathModel{
 
 			bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, accessEgressMode, originMaz, destinationMaz, period, debug, logger, odDistance);
 			
-
 	        //set person specific variables and re-calculate best tap pair utilities
 	    	walkDmu.setApplicationType(bestPathCalculator.APP_TYPE_TRIPMC);
 	    	walkDmu.setTourCategoryIsJoint(joint);
-	 //   	walkDmu.setPersonType(joint==1 ? walkDmu.personType : tripMcDmuObject.getPersonType());
-	 //   	walkDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
+	    	walkDmu.setPersonType(joint==1 ? walkDmu.getPersonType() : personType);
+	    	walkDmu.setValueOfTime(valueOfTime);
 	    	driveDmu.setApplicationType(bestPathCalculator.APP_TYPE_TRIPMC);
 	    	driveDmu.setTourCategoryIsJoint(joint);
-	  //  	driveDmu.setPersonType(joint==1 ? driveDmu.personType : tripMcDmuObject.getPersonType());
-	   // 	driveDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
+	     	driveDmu.setPersonType(joint==1 ? driveDmu.getPersonType() : personType);
+	     	driveDmu.setValueOfTime(valueOfTime);
 
 			
 			
@@ -199,6 +219,29 @@ public class NewTransitPathModel{
 		}
 	}
 	
+
+	public void readPersonData(TableDataSet personData){
+		
+        for(int row = 1; row<=personData.getRowCount();++row){
+        	long hhid = (long) personData.getValueAt(row, "hh_id");
+        	long personNumber = (long) personData.getValueAt(row,"person_num");
+        	float valueOfTime = personData.getValueAt(row,"value_of_time");
+        	String personTypeString = personData.getStringValueAt(row,"type");
+        	int personType = getPersonType(personTypeString);
+        	
+        	valueOfTimeByPersonNumber.put(personNumber, valueOfTime);
+        	
+        	if(valueOfTimeByHhId.containsKey(hhid)){
+        		float existingVOTForHH = valueOfTimeByHhId.get(hhid);
+        		if(valueOfTime>existingVOTForHH)
+        			valueOfTimeByHhId.put(hhid,valueOfTime);
+        	}else{
+    			valueOfTimeByHhId.put(hhid,valueOfTime);
+        	}
+        }
+
+	}
+
 	/**
 	 * Read the trip list in the TableDataSet. 
 	 * 
@@ -210,9 +253,9 @@ public class NewTransitPathModel{
          for(int row = 1; row <= inputTripTableData.getRowCount();++row){
         	
            	long hhid = (long) inputTripTableData.getValueAt(row,"hh_id");	
-           	int personNumber=-1;
+           	long personNumber=-1;
            	if(jointTripData==false)
-           		personNumber = (int) inputTripTableData.getValueAt(row,"person_num");
+           		personNumber = (long) inputTripTableData.getValueAt(row,"person_num");
         	int tourid = (int) inputTripTableData.getValueAt(row,"tour_id");
         	int stopid = (int) inputTripTableData.getValueAt(row,"stop_id");
         	int inbound = (int)inputTripTableData.getValueAt(row,"inbound");
@@ -233,7 +276,25 @@ public class NewTransitPathModel{
         	} 
         }
  	}
-
+	
+	/**
+	 * Calculate person type value based on string.
+	 * @param personTypeString
+	 * @return
+	 */
+	private int getPersonType(String personTypeString){
+		
+		for(int i =0;i<Person.personTypeNameArray.length;++i){
+			
+			if(personTypeString.compareTo(Person.personTypeNameArray[i])==0)
+				return i;
+			
+		}
+	   
+		//should never be here
+		return -1;
+		
+	}
 	  private void startMatrixServer(HashMap<String, String> properties) {
 	        String serverAddress = (String) properties.get("RunModel.MatrixServerAddress");
 	        int serverPort = new Integer((String) properties.get("RunModel.MatrixServerPort"));
@@ -270,6 +331,7 @@ public class NewTransitPathModel{
 			return time;
 		}
 
+	    
 		/** 
 		 * A simple helper function to insert the iteration number into the file name.
 		 * 
