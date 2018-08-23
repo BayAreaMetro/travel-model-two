@@ -33,20 +33,20 @@ The next step is to test if you can import Wrangler. Open a command window, and 
 
 Step 1: Set the path to python. You’ll need to do this for two environment variables and you’ll need to know where your python.exe is installed. For example, if your python.exe is installed in C:\Python27, type the commands as below. If your python.exe is installed elsewhere, replace C:\Python27 with your path.
 
-set PATH= %PATH%;C:\Python27
-set PYTHONPATH=%PYTHONPATH%;C:\Python27
+**C:\>set PATH= %PATH%;C:\Python27**
+**C:\>set PYTHONPATH=%PYTHONPATH%;C:\Python27**
 
 Step 2: Make sure Cube Voyager is on the path. Again, you’ll need to know where Cube Voyager (runtpp.exe) is installed. Below is an example command assuming runtpp.exe is installed in C:\Program Files (x86)\Citilabs\CubeVoyager. Adjust the command according to the location of your runtpp.exe.
 
-set PATH= %PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
+**C:\>set PATH= %PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager**
 
 Step 3: Point the pythonpath to NetworkWrangler. You’ll need to do this at two levels:
 
-set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\
-set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static
+**set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\**
+**set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static**
 
 Step 4: Open up the python interpreter by type in
-Python
+C:\>Python
 
 (After you type in “python” and hit enter, the command window should display a message about the version of your python. You should also see that the command line start with >>> instead of >. See example below.)
 
@@ -56,7 +56,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 Step 5: Import NetworkWrangler. Type:
 
-Import Wrangler
+**>>>Import Wrangler**
 
 (Note that this importing command is case sensitive – it only works if you type Wrangler with W in caps. After you type in the command, if the command window displays the following messages, it means you have successfully imported NetworkWrangler.)
 
