@@ -64,7 +64,7 @@ Import Wrangler
 ('Importing ', 'C:\\Users\\ftsang\\Documents\\GitHub\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
 >>>
 
-[Flavia to add a bit more on pip install here]
+(Flavia to add a bit more on pip install here)
 ---
 
 ## Coding a project
