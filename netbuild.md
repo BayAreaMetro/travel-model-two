@@ -66,6 +66,8 @@ Step 5: Import NetworkWrangler. Type:
 >>>
 
 (Flavia to add a bit more on pip install here)
+
+
 ---
 
 ## Coding a project
