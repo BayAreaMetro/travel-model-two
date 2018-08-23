@@ -43,7 +43,6 @@ Step 2: Make sure Cube Voyager is on the path. Again, you’ll need to know wher
 Step 3: Point the pythonpath to NetworkWrangler. You’ll need to do this at two levels:
 
 **set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\**
-
 **set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static**
 
 Step 4: Open up the python interpreter by type in
