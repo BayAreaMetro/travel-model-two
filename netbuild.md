@@ -9,7 +9,7 @@ title: Network Building Guide
 CONTENTS
 
 1. [Setting it up for the first time](#Setting-it-up-for-the-first-time)
-1. [Running](#Running-Wrangler)
+1. [Coding a project](#Coding-a-project)
 
 ---
 
@@ -27,7 +27,7 @@ Before using network wrangler, you’ll need to:
 
 ---
 
-## Running Wrangler
+## Coding a project
 
 ### Specifying the network changes
 Step 1: Create a new directory for the set of network changes in here: M:\Application\Model Two\NetworkProjects. (This location is hard-coded in the script build_network_mtc.py)
