@@ -3,20 +3,21 @@ layout: page
 title: Network Building Guide
 ---
 
-# Set up
+# Network Building Guide
 
 ---
 CONTENTS
 
-1. 
+1. [Set up](#Setting-it-up-for-the-first-time)
+1. [Input File List](#input-file-list)
 
 ---
 
-# Setting it up for the first time
+## Setting it up for the first time
 
 Before using network wrangler, you’ll need to:
 
-•	install Cube 6.4.4 or newer (http://www.citilabs.com). Note that Cube is a proprietary software and a license will be required.
+•	install Cube 6.4.4 or newer (http://www.citilabs.com). Cube is a proprietary software and a license will be required.
 
 •	clone network wrangler from GitHub (https://github.com/BayAreaMetro/NetworkWrangler). When it's cloned, you should see this python script in your local GitHub directory: C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py
 
