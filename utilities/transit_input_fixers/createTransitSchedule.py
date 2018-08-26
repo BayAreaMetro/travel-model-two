@@ -1,4 +1,4 @@
-import collections,datetime,math,numpy,os,pandas,re,sys
+import argparse, collections,datetime,math,numpy,os,pandas,re,sys
 import Wrangler
 
 import Levenshtein
@@ -11,11 +11,39 @@ Create transit schedule from spreadsheet or gtfs.
 """
 
 USERNAME     = os.environ["USERNAME"]
-LOG_FILENAME = "createTransitSchedule.log"
+LOG_FILENAME = "createTransitSchedule_{}.log"
 TM2_INPUTS   = os.path.join(r"C:\\Users", USERNAME, "Box\\Modeling and Surveys\\Development\\Travel Model Two Development\\Model Inputs")
 TRN_NETFILE  = os.path.join(TM2_INPUTS,"2015_revised_mazs","trn")
 TRN_LABELFILE= os.path.join(TM2_INPUTS,"TM2 Transit Nodes.csv")
-SCHEDULE_XLS = r"M:\\Data\\Transit\\Schedules\\Caltrain\\Caltrain.xlsx"
+
+OPERATOR_SET_DICT = {
+    "Caltrain_NB":{
+        "schedule_file": r"M:\\Data\\Transit\\Schedules\\Caltrain\\Caltrain.xlsx",
+        "sheet_name"   : "2015 Northbound",
+        "existing_re"  : "^CT_NORTH",
+        "lin_prefix"   : "CT_NB",
+        "winner_label" : "agg_avg_09",
+        # line attributes
+        "MODE"         : 130,
+        "OPERATOR"     : 17,
+        "USERA1"       : "\"Caltrain\"",
+        "USERA2"       : "\"Commuter rail\"",
+        "VEHICLETYPE"  : 50
+    },
+    "Caltrain_SB":{
+        "schedule_file": r"M:\\Data\\Transit\\Schedules\\Caltrain\\Caltrain.xlsx",
+        "sheet_name"   : "2015 Southbound",
+        "existing_re"  : "^CT_SOUTH",
+        "lin_prefix"   : "CT_SB",
+        "winner_label" : "agg_avg_12",
+        # line attributes
+        "MODE"         : 130,
+        "OPERATOR"     : 17,
+        "USERA1"       : "\"Caltrain\"",
+        "USERA2"       : "\"Commuter rail\"",
+        "VEHICLETYPE"  : 50
+    },
+}
 
 TIME_PERIODS = pandas.DataFrame([{"time_period":"EA", "duration":3.0, "freq_index":0},
                                  {"time_period":"AM", "duration":4.0, "freq_index":1},
@@ -67,7 +95,7 @@ def calculateScheduleBoardAlightHeadways(schedule_df, station_key_df):
                                    on      ="Trip Number",
                                    suffixes=["_board","_alight"])
     # Gotta alight after boarding
-    board_alight_df = board_alight_df.loc[board_alight_df.time_alight > board_alight_df.time_board]
+    board_alight_df = board_alight_df.loc[board_alight_df["Station Num_alight"] > board_alight_df["Station Num_board"]]
 
     # Assign a time period for the board/alight pair
     board_alight_df["board_hour" ] = board_alight_df["time_board"].dt.hour
@@ -202,7 +230,7 @@ def calculateTransitNetworkBoardAlightHeadways(trn_network, station_key_df, sche
 
     return combined_headway_df, ret_dict
 
-def createNetworkForSchedule(schedule_df, station_key_df, trips_df, schedule_headways_df):
+def createNetworkForSchedule(operator_set, schedule_df, station_key_df, trips_df, schedule_headways_df):
     """
     Quick attempt to create a network for the given schedule.
 
@@ -277,38 +305,46 @@ def createNetworkForSchedule(schedule_df, station_key_df, trips_df, schedule_hea
     combined_headway_all_df = schedule_headways_df
     summary_dict_list = []
     for nc in range(5,13):
-        label = "spectral_{}".format(nc)
+        label = "spectral_{:02d}".format(nc)
         clusterTrips_Spectral(trips_df, all_stops, n_clusters= nc)
-        trn_net, single_trip_type_pct = tripClusterToNetwork(schedule_df, station_key_df, trips_df)
+        trn_net, single_trip_type_pct = tripClusterToNetwork(operator_set, schedule_df, station_key_df, trips_df)
         combined_headway_all_df, summary_dict = calculateTransitNetworkBoardAlightHeadways(trn_net, station_key_df,
                                                                                            combined_headway_all_df, any_re, label=label)
         summary_dict["label"] = label
         summary_dict["single_trip_type_pct"] = single_trip_type_pct
         summary_dict_list.append(summary_dict)
 
+        # write if it's the winning label
+        if ("winner_label" in OPERATOR_SET_DICT[operator_set]) and (label == OPERATOR_SET_DICT[operator_set]["winner_label"]):
+            trn_net.write(name=operator_set, writeEmptyFiles=False, suppressQuery=False, suppressValidation=True)
+
     for nc in range(5,13):
-        label = "agg_complete_{}".format(nc)
+        label = "agg_complete_{:02d}".format(nc)
         clusterTrips_Agglomerative(trips_df, all_stops, n_clusters= nc, linkage="complete")
-        trn_net, single_trip_type_pct = tripClusterToNetwork(schedule_df, station_key_df, trips_df)
+        trn_net, single_trip_type_pct = tripClusterToNetwork(operator_set, schedule_df, station_key_df, trips_df)
         combined_headway_all_df, summary_dict = calculateTransitNetworkBoardAlightHeadways(trn_net, station_key_df,
                                                                                         combined_headway_all_df, any_re, label=label)
         summary_dict["label"] = label
         summary_dict["single_trip_type_pct"] = single_trip_type_pct
         summary_dict_list.append(summary_dict)
+
+        # write if it's the winning label
+        if ("winner_label" in OPERATOR_SET_DICT[operator_set]) and (label == OPERATOR_SET_DICT[operator_set]["winner_label"]):
+            trn_net.write(name=operator_set, writeEmptyFiles=False, suppressQuery=False, suppressValidation=True)
 
     for nc in range(5,13):
-        label = "agg_avg_{}".format(nc)
+        label = "agg_avg_{:02d}".format(nc)
         clusterTrips_Agglomerative(trips_df, all_stops, n_clusters= nc, linkage="average")
-        trn_net, single_trip_type_pct = tripClusterToNetwork(schedule_df, station_key_df, trips_df)
+        trn_net, single_trip_type_pct = tripClusterToNetwork(operator_set, schedule_df, station_key_df, trips_df)
         combined_headway_all_df, summary_dict = calculateTransitNetworkBoardAlightHeadways(trn_net, station_key_df,
                                                                                         combined_headway_all_df, any_re, label=label)
         summary_dict["label"] = label
         summary_dict["single_trip_type_pct"] = single_trip_type_pct
         summary_dict_list.append(summary_dict)
 
-        # CHOOSE agg_avg_9 for Caltrain Northbound
-        if nc == 9:
-            trn_net.write(name="Caltrain_NB", writeEmptyFiles=False, suppressQuery=False, suppressValidation=True)
+        # write if it's the winning label
+        if ("winner_label" in OPERATOR_SET_DICT[operator_set]) and (label == OPERATOR_SET_DICT[operator_set]["winner_label"]):
+            trn_net.write(name=operator_set, writeEmptyFiles=False, suppressQuery=False, suppressValidation=True)
 
     summary_df = pandas.DataFrame(summary_dict_list)
     Wrangler.WranglerLogger.debug("summary\n{}".format(summary_df))
@@ -441,23 +477,10 @@ def clusterTrips_Agglomerative(trips_df, trip_series, n_clusters, linkage):
 
     return trips_df
 
-def tripClusterToNetwork(schedule_df, station_key_df, trips_df):
+def tripClusterToNetwork(operator_set, schedule_df, station_key_df, trips_df):
     """
     Returns a Wrangler.TransitNetwork of the given schedule, stations and trips,
     plus a single (float) metric: percent of lines containing a single Trip Type
-    TODO:
-      NAME="CT_NORTHBOUr"
-      MODE=130,
-      ONEWAY=T,
-      OPERATOR=17,
-      SHORTNAME="F",
-      USERA1="Caltrain",
-      USERA2="Commuter rail",
-      USERA3="T",
-      USERA4="T",
-      VEHICLETYPE=50,
-      XYSPEED=15,
-
     """
     trn_net = Wrangler.TransitNetwork(modelType = Wrangler.Network.MODEL_TYPE_TM2,
                                       modelVersion = 1.0, networkName="Caltrain")
@@ -481,7 +504,7 @@ def tripClusterToNetwork(schedule_df, station_key_df, trips_df):
         # Figure out frequency for each time period - create  time_period -> trip count dictionary
         trip_count = cluster_trips_df.groupby("time_period").size().to_dict()
 
-        trn_line = Wrangler.TransitLine(name="CT_NB_{}".format(cluster_id))
+        trn_line = Wrangler.TransitLine(name="{}_{:02d}".format(OPERATOR_SET_DICT[operator_set]["lin_prefix"], cluster_id))
 
         time_period_list = TIME_PERIODS.to_dict(orient="records")
         for tp_rec in time_period_list:
@@ -491,6 +514,12 @@ def tripClusterToNetwork(schedule_df, station_key_df, trips_df):
             else:
                 frequency = 0
             trn_line.attr["HEADWAY[{}]".format(tp_rec["freq_index"]+1)] = frequency
+
+        # add the other lin attributes
+        for lin_attr_name in ["MODE", "OPERATOR", "USERA1", "USERA2", "VEHICLETYPE"]:
+            trn_line.attr[lin_attr_name] = OPERATOR_SET_DICT[operator_set][lin_attr_name]
+
+        trn_line.attr["MODE"] = OPERATOR_SET_DICT[operator_set]["MODE"]
         Wrangler.WranglerLogger.debug(trn_line)
 
         # use the first most common stop pattern
@@ -499,7 +528,7 @@ def tripClusterToNetwork(schedule_df, station_key_df, trips_df):
         trip_number  = cluster_all_stops_grouped.get_group(stop_pattern).iloc[0]["Trip Number"]
         trip_type    = cluster_all_stops_grouped.get_group(stop_pattern).iloc[0]["Trip Type"]
         type_counts[trip_type] += 1
-        trn_line.name = "CT_NB_{}{}".format(trip_type, type_counts[trip_type])
+        trn_line.name = "{}_{}{:02d}".format(OPERATOR_SET_DICT[operator_set]["lin_prefix"], trip_type, type_counts[trip_type])
         Wrangler.WranglerLogger.debug("{} Using stop pattern: [{}] and trip number {}".format(
                                         trn_line.name, stop_pattern, trip_number))
 
@@ -532,7 +561,12 @@ def tripClusterToNetwork(schedule_df, station_key_df, trips_df):
 
 
 if __name__ == '__main__':
-    Wrangler.setupLogging(LOG_FILENAME, LOG_FILENAME.replace("info","debug"))
+    parser = argparse.ArgumentParser(description=USAGE, formatter_class=argparse.RawDescriptionHelpFormatter,)
+    parser.add_argument("operator_set", help="Operator and operator subset", choices=OPERATOR_SET_DICT.keys())
+    args = parser.parse_args()
+
+    log_filename = LOG_FILENAME.format(args.operator_set)
+    Wrangler.setupLogging(log_filename, log_filename.replace("info","debug"))
     pandas.options.display.width = 300
     pandas.options.display.max_rows = 1000
     numpy.random.seed(seed=32)
@@ -541,14 +575,18 @@ if __name__ == '__main__':
     # skip the first two rows - they should have source and some sort of table name
 
     # for simplicity -- read the node/number first
-    station_key_df = pandas.read_excel(SCHEDULE_XLS, usecols=[0,1], skiprows=4,
+    station_key_df = pandas.read_excel(OPERATOR_SET_DICT[args.operator_set]["schedule_file"],
+                                       sheet_name=OPERATOR_SET_DICT[args.operator_set]["sheet_name"],
+                                       usecols=[0,1], skiprows=4,
                                        header=None, names=["Station Node", "Station Name"])
     station_key_df["Station Num"] = station_key_df.index + 1
     station_key_df["Station Num"] = station_key_df["Station Num"].astype(str).str.zfill(2)
     Wrangler.WranglerLogger.debug("Station Key:\n{}".format(station_key_df.head()))
 
     # now read the schedule with just the station name which we'll use as the index column
-    schedule_df = pandas.read_excel(SCHEDULE_XLS, header=[2,3], usecols="B:ZZ", index_col=0)
+    schedule_df = pandas.read_excel(OPERATOR_SET_DICT[args.operator_set]["schedule_file"],
+                                    sheet_name=OPERATOR_SET_DICT[args.operator_set]["sheet_name"],
+                                    header=[2,3], usecols="B:ZZ", index_col=0)
     # keep trip Number, Type and drop multiindex for simplicity
     trips_df = schedule_df.columns.to_frame().reset_index(drop=True)
     schedule_df.columns = schedule_df.columns.droplevel(0)
@@ -558,22 +596,24 @@ if __name__ == '__main__':
     for column in list(schedule_df.columns):
         schedule_df[column] = pandas.to_datetime(schedule_df[column], format="%H:%M:%S")
 
-    Wrangler.WranglerLogger.debug("Read schedules from {}\n{}".format(SCHEDULE_XLS, schedule_df.head(10)))
+    Wrangler.WranglerLogger.debug("Read schedules from {}\n{}".format(OPERATOR_SET_DICT[args.operator_set]["schedule_file"],
+                                  schedule_df.head(10)))
     # Wrangler.WranglerLogger.debug("Schedule index: {}".format(schedule_df.index))
 
     schedule_headways_df, schedule_board_alight_df = calculateScheduleBoardAlightHeadways(schedule_df, station_key_df)
 
-    combined_headway_all_df, summary_df = createNetworkForSchedule(schedule_df, station_key_df, trips_df, schedule_headways_df)
+    combined_headway_all_df, summary_df = createNetworkForSchedule(args.operator_set, schedule_df, station_key_df, trips_df, schedule_headways_df)
 
     # read the PT transit network line file
     trn_net = Wrangler.TransitNetwork(modelType=Wrangler.Network.MODEL_TYPE_TM2, modelVersion=1.0,
                                       basenetworkpath=TRN_NETFILE, isTiered=True, networkName="transitLines")
     # read the transit stop labels
-    caltrain_nb_re = re.compile("^CT_NORTH")
-    combined_headway_all_df, summary_dict = calculateTransitNetworkBoardAlightHeadways(trn_net, station_key_df, combined_headway_all_df, caltrain_nb_re, label="existing")
+    operator_set_re = re.compile(OPERATOR_SET_DICT[args.operator_set]["existing_re"])
+    combined_headway_all_df, summary_dict = calculateTransitNetworkBoardAlightHeadways(trn_net, station_key_df, combined_headway_all_df,
+                                                                                       operator_set_re, label="existing")
     summary_dict["label"] = "existing"
     summary_df = summary_df.append(summary_dict, ignore_index=True)
-    summary_df.to_csv("Caltrain_summaries.csv", header=True, index=False)
+    summary_df.to_csv("{}_summaries.csv".format(args.operator_set), header=True, index=False)
 
     # merge and write them all
-    combined_headway_all_df.to_csv("Caltrain_headways.csv", header=True, index=False)
+    combined_headway_all_df.to_csv("{}_headways.csv".format(args.operator_set), header=True, index=False)
