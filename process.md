@@ -283,7 +283,7 @@ title: Modeling Process
 * Configuration:
     1. [`mtctm2.properties`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties) is the primary configuration file for all models
 
-### [Accessibilities](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/accessibilites/BuildAccessibilities.java)
+### [Accessibilities](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/accessibilities/BuildAccessibilities.java)
 Summary: All accessibility measures for are calculated at the MAZ level. The auto travel times and cost are TAZ-based and the size variables are MAZ-based. This necessitates that auto accessibilities be calculated at the MAZ level.
 
 * UEC: [Accessibilities.xls](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls)
