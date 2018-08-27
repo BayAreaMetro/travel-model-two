@@ -23,7 +23,7 @@ Before using network wrangler, you’ll need to:
 
 •	clone network wrangler from GitHub (https://github.com/BayAreaMetro/NetworkWrangler). When it's cloned, you should see this python script in your local GitHub directory: C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py
 
-•	install various python modules that network wrangler uses. (For most current python users, the required modules are xlrd, simpleparse, and numpy. If you are using python 3, you may need win32 as well. If additional modules are needed for your specific set up, when you import NetworkWranger for the first time you’ll get error messages on screen to indicating which python module is needed.
+•	install various python modules that network wrangler uses. (For most current python users, the required modules are xlrd, simpleparse, and numpy. If you are using python 3, you may need win32 as well. If additional modules are needed for your specific set up, when you import NetworkWranger for the first time you’ll get error messages on screen to indicating which python module is needed.)
 
 •	 install Git (https://git-scm.com/downloads)
 
@@ -59,9 +59,11 @@ C:\>Python
 
 (After you type in “python” and hit enter, the command window should display a message about the version of your python. You should also see that the command line start with >>> instead of >. See example below.)
 
+```
 Python 2.7.14 (v2.7.14:84471935ed, Sep 16 2017, 20:25:58) [MSC v.1500 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
 >>>
+```
 
 Step 5: Import NetworkWrangler. Type:
 
@@ -71,9 +73,11 @@ Step 5: Import NetworkWrangler. Type:
 
 (Note that this importing command is case sensitive – it only works if you type Wrangler with W in caps. After you type in the command, if the command window displays the following messages, it means you have successfully imported NetworkWrangler.)
 
+```
 ('Importing ', 'C:\\Users\\ftsang\\Documents\\GitHub\\NetworkWrangler\\_static\\dataTable.pyc')
 ('Importing ', 'C:\\Users\\ftsang\\Documents\\GitHub\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
 >>>
+```
 
 (Flavia to add a bit more on pip install here)
 
