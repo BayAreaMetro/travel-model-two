@@ -283,14 +283,18 @@ title: Modeling Process
 * Configuration:
     1. [`mtctm2.properties`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties) is the primary configuration file for all models
 
-### Accessibilities
+### [Accessibilities](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/accessibilites/BuildAccessibilities.java)
 Summary: All accessibility measures for are calculated at the MAZ level. The auto travel times and cost are TAZ-based and the size variables are MAZ-based. This necessitates that auto accessibilities be calculated at the MAZ level.
+
+* UEC: [Accessibilities.xls](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls)
+* Output: ```acc.output.file = /ctramp_output/accessibilities.csv```
 
 ### [PreAutoOwnership](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdAutoOwnershipModel.java)
 
 This step selects the preliminary auto ownership level for the household, based upon household demographic variables, household ‘4D’ variables, and destination-choice accessibility terms created in the *Accessibilities* sub-model (see above). This auto ownership level is used to create mode choice logsums for workers and students in the household, which are then used to select work and school locations in model **UsualWorkAndSchoolLocationChoice**. The auto ownership model is re-run (*AutoOwnership*) in order to select the actual auto ownership for the household, but this subsequent version is informed by the work and school locations chosen by the **UsualWorkAndSchoolLocationChoice** model. All other variables and coefficients are held constant between the two models, except for alternativespecific constants.
 
 * Logfile: *event-ao.log*
+* Output: ```read.pre.ao.filename = /ctramp_output/aoResults_pre.csv```
 
 ### [WorkFromHomeChoice](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MandatoryDestChoiceModel.java#L496)
 
