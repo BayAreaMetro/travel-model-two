@@ -31,7 +31,7 @@ Before using network wrangler, you’ll need to:
 
 The next step is to test if you can import Wrangler. Open a command window, and type in the following DOS commands:
 
-Step 1: Add Python to your system's environmental variables. You’ll need to do this for two environment variables (PATH and PYTHONPATH) and you’ll need to know where your python.exe is installed. For example, if your python.exe is installed in C:\Python27, type the commands as below. If your python.exe is installed elsewhere, replace C:\Python27 with your path.
+Step 1: Add Python to your system's environmental variables (PATH and PYTHONPATH). To do so, you’ll need to know where your python.exe is installed. For example, if your python.exe is installed in C:\Python27, type the commands as below. If your python.exe is installed elsewhere, replace C:\Python27 with your python.exe location.
 
 ```
 C:\>set PATH= %PATH%;C:\Python27
