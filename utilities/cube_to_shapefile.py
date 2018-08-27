@@ -118,6 +118,7 @@ if __name__ == '__main__':
     parser.add_argument("netfile",  metavar="network.net", nargs=1, help="Cube input roadway network file")
     parser.add_argument("--linefile", metavar="transit.lin", nargs=1, help="Cube input transit line file", required=False)
     parser.add_argument("--by_operator", action="store_true", help="Split transit lines by operator")
+    parser.add_argument("--join_link_nntime", action="store_true", help="Join links based on NNTIME")
     parser.add_argument("--trn_stop_info", metavar="transit_stops.csv", help="CSV with extra transit stop information")
     args = parser.parse_args()
     # print(args)
@@ -186,15 +187,16 @@ if __name__ == '__main__':
                                    "HEADWAY_EA", "HEADWAY_AM", "HEADWAY_MD", "HEADWAY_PM", "HEADWAY_EV",
                                    "MODE", "MODE_TYPE", "OPERATOR_T", "VEHICLETYP", "OPERATOR"])
 
-        # create the lines shapefile
+        # create the links shapefile
         arcpy.CreateFeatureclass_management(WORKING_DIR, TRN_LINKS_SHPFILE.format(operator_file), "POLYLINE")
         arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "NAME",    "TEXT", field_length=25)
         arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "A",       "LONG")
         arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "B",       "LONG")
         arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "SEQ",     "SHORT")
+        arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "NNTIME",  "FLOAT", field_precision=7, field_scale=2)
 
         link_cursor[operator_file] = arcpy.da.InsertCursor(TRN_LINKS_SHPFILE.format(operator_file),
-                                                           ["NAME", "SHAPE@", "A", "B", "SEQ"])
+                                                           ["NAME", "SHAPE@", "A", "B", "SEQ", "NNTIME"])
 
         # create the stops shapefile
         arcpy.CreateFeatureclass_management(WORKING_DIR, TRN_STOPS_SHPFILE.format(operator_file), "POINT")
@@ -261,6 +263,14 @@ if __name__ == '__main__':
             n = abs(int(node.num))
             station = stops_to_station[n] if n in stops_to_station else ""
             is_stop = 1 if node.isStop() else 0
+            nntime = -999
+            if "NNTIME" in node.attr: nntime = float(node.attr["NNTIME"])
+
+            # From NNTIME documentation:
+            # NODES=1,2,3,4, NNTIME=10, NODES=5,6,7, NNTIME=15
+            # Sets the time from node 1 to node 4 to ten minutes,
+            # and sets the time from node 4 to node 7 to fifteen minutes.
+
             # print(node.num, n, node.attr, node.stop)
             point = arcpy.Point( nodes_x[n], nodes_y[n] )
 
@@ -271,16 +281,29 @@ if __name__ == '__main__':
             # add to line array
             line_point_array.add(point)
 
+            # and link array
             link_point_array.add(point)
-            if link_point_array.count > 1:
+
+            # if join_link_nntime, add polyline only when NNTIME is set
+            if ((args.join_link_nntime == False) and (link_point_array.count > 1)) or \
+               ((args.join_link_nntime == True ) and (nntime > 0)):
                 plink_shape = arcpy.Polyline(link_point_array)
                 link_cursor[operator_file].insertRow([line.name, plink_shape,
-                                                      last_n, n, seq])
+                                                      last_n, n, seq, nntime])
                 link_count += 1
-                link_point_array.remove(0)
+                link_point_array.removeAll()
+                link_point_array.add(point)
 
             last_n = n
             seq += 1
+
+        # one last link if necessary
+        if link_point_array.count > 1:
+            plink_shape = arcpy.Polyline(link_point_array)
+            link_cursor[operator_file].insertRow([line.name, plink_shape,
+                                                  last_n, n, seq, nntime])
+            link_count += 1
+            link_point_array.removeAll()
 
         pline_shape = arcpy.Polyline(line_point_array)
         line_cursor[operator_file].insertRow([line.name, pline_shape,

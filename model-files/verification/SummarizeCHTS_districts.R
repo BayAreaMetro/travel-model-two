@@ -1,8 +1,6 @@
 #######################################################
 ### Script for summarizing CHTS
 ### Author: Binny M Paul, binny.paul@rsginc.com
-### Oct 2017
-### Copy of OHAS processing script
 #######################################################
 
 #-------------------------------------------------------------------------------
@@ -44,52 +42,78 @@ library(data.table)
 
 ## User Inputs
 ###############
+# one of "maz_v1_0" or "maz_v2_2"
+geography = "maz_v1_0"
 
 # Directories
-WD                   <- "E:/projects/clients/mtc/data/CHTS_Summaries"
-CHTS_raw_Dir         <- "E:/projects/clients/mtc/data/fromNREL/standardized_data_redacted_PII"
-Survey_Dir           <- "E:/projects/clients/mtc/data/CHTS"
-Survey_Processed_Dir <- "E:/projects/clients/mtc/data/CHTS_processed"
-SkimDir              <- "E:/projects/clients/mtc/data/Skim2010"
-geogXWalkDir         <- "E:/projects/clients/mtc/data/Trip End Geocodes"
-CensusACS_Dir        <- "E:/projects/clients/mtc/data/Census/ACS_5YearEstimates"
-mazDataDir           <- "E:/projects/clients/mtc/2015_calibration/input/landuse"
+if (Sys.getenv("USERNAME") == "lzorn") {
+  # this is the output directory
+  WD                   <- file.path("M:/Data/HomeInterview/2010/Analysis/Calibration Targets", geography)
+
+  USERPROFILE          <- gsub("\\\\","/", Sys.getenv("USERPROFILE"))
+  BOX_TM2              <- file.path(USERPROFILE, "Box", "Modeling and Surveys", "Development", "Travel Model Two Development")
+  CHTS_raw_Dir         <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS", "standardized_data_redacted_PII")
+  Survey_Dir           <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS", "CHTS")
+  Survey_Processed_Dir <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "MTC Processed Dataset", "MTC_Processed_2.17.2015")
+  if (geography == "maz_v1_0") {
+    SkimDir            <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS")
+    geogXWalkDir       <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "Trip End Geocodes maz_v1_0")
+    mazDataDir         <- file.path(BOX_TM2, "Model Inputs",    "2015", "landuse")
+    districtDef        <- file.path(BOX_TM2, "Model Geography", "Zones v1.0", "taz_superdistrictv1.csv")
+  } else if (geography == "maz_v2_2") {
+    SkimDir            <- file.path(BOX_TM2, "Model Geography", "Zones v2.2")
+    geogXWalkDir       <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "Trip End Geocodes maz_v2_2")
+    mazDataDir         <- file.path(BOX_TM2, "Model Inputs",    "2015_revised_mazs", "landuse")
+    districtDef        <- file.path(BOX_TM2, "Model Geography", "Zones v2.2", "sd22_from_tazV2_2.csv")
+  }
+} else {
+  USERPROFILE          <- gsub("\\\\","/", Sys.getenv("USERPROFILE"))
+  BOX_TM2              <- file.path(USERPROFILE, "Box", "Travel Model Two Development")
+  
+  WD                   <- "E:/projects/clients/mtc/data/CHTS_Summaries"
+  CHTS_raw_Dir         <- "E:/projects/clients/mtc/data/fromNREL/standardized_data_redacted_PII"
+  Survey_Dir           <- "E:/projects/clients/mtc/data/CHTS"
+  Survey_Processed_Dir <- "E:/projects/clients/mtc/data/CHTS_processed"
+  SkimDir              <- "E:/projects/clients/mtc/data/Skim2010"
+  geogXWalkDir         <- "E:/projects/clients/mtc/data/Trip End Geocodes"
+  mazDataDir           <- "E:/projects/clients/mtc/2015_calibration/input/landuse"
+  districtDef          <- file.path(BOX_TM2, "Model Geography", "Zones v1.0", "taz_superdistrictv1.csv")
+}
 
 ## Read Data
-xwalk                <- read.csv(paste(geogXWalkDir, "geographicCWalk.csv", sep = "/"), as.is = T)
-hh                   <- read.table(paste(Survey_Dir, "chts_hrecx_abmxfer.dat", sep = "/"), header = T)
+xwalk                <- read.csv(file.path(geogXWalkDir, "geographicCWalk.csv"     ), as.is = T)
+hh                   <- read.table(file.path(Survey_Dir, "chts_hrecx_abmxfer.dat"  ), header = T)
 #hh_raw              <- read.csv(paste(CHTS_raw_Dir, "survey_households.csv", sep = "/"), as.is = T)
-per                  <- read.table(paste(Survey_Dir, "chts_precx_abmxfer.dat", sep = "/"), header = T)
-per_raw              <- read.csv(paste(CHTS_raw_Dir, "survey_person.csv", sep = "/"), as.is = T)
-place_raw            <- read.csv(paste(CHTS_raw_Dir, "survey_place.csv", sep = "/"), as.is = T)
-mazData              <- read.csv(paste(mazDataDir, "maz_data_withDensity.csv", sep = "/"), as.is = T)
+per                  <- read.table(file.path(Survey_Dir, "chts_precx_abmxfer.dat"  ), header = T)
+per_raw              <- read.csv(file.path(CHTS_raw_Dir, "survey_person.csv"       ), as.is = T)
+place_raw            <- read.csv(file.path(CHTS_raw_Dir, "survey_place.csv"        ), as.is = T)
+mazData              <- read.csv(file.path(mazDataDir,   "maz_data.csv"            ), as.is = T)
 
-xwalk_SDist          <- read.csv(paste(geogXWalkDir, "geographicCWalk_SDist.csv", sep = "/"), as.is = T) # change by Khademul
-mazData_SDist        <- read.csv(paste(mazDataDir, "maz_data_withDensity_SDist.csv", sep = "/"), as.is = T) # change by Khademul
+xwalk_SDist          <- read.csv(districtDef)
 
-processedPerson      <- read.csv(paste(Survey_Processed_Dir, "persons.csv", sep = "/"), as.is = T)
-proc_hh              <- read.csv(paste(Survey_Processed_Dir, "households.csv", sep = "/"), as.is = T)
-tours                <- read.csv(paste(Survey_Processed_Dir, "tours.csv", sep = "/"), as.is = T)
-trips                <- read.csv(paste(Survey_Processed_Dir, "trips.csv", sep = "/"), as.is = T)
-jutrips              <- read.csv(paste(Survey_Processed_Dir, "unique_joint_ultrips.csv", sep = "/"), as.is = T)
-jtours               <- read.csv(paste(Survey_Processed_Dir, "unique_joint_tours.csv", sep = "/"), as.is = T)
+processedPerson      <- read.csv(file.path(Survey_Processed_Dir, "persons.csv"             ), as.is = T)
+proc_hh              <- read.csv(file.path(Survey_Processed_Dir, "households.csv"          ), as.is = T)
+tours                <- read.csv(file.path(Survey_Processed_Dir, "tours.csv"               ), as.is = T)
+trips                <- read.csv(file.path(Survey_Processed_Dir, "trips.csv"               ), as.is = T)
+jutrips              <- read.csv(file.path(Survey_Processed_Dir, "unique_joint_ultrips.csv"), as.is = T)
+jtours               <- read.csv(file.path(Survey_Processed_Dir, "unique_joint_tours.csv"  ), as.is = T)
 
-hhloc                <- read.csv(paste(geogXWalkDir, "CHTS1213hhLoc.csv", sep = "/"), as.is = T)
-plloc                <- read.csv(paste(geogXWalkDir, "CHTS1213placeLoc.csv", sep = "/"), as.is = T)
-scloc                <- read.csv(paste(geogXWalkDir, "CHTS1213schlLoc.csv", sep = "/"), as.is = T)
-wkloc                <- read.csv(paste(geogXWalkDir, "CHTS1213workLoc.csv", sep = "/"), as.is = T)
+hhloc                <- read.csv(file.path(geogXWalkDir, "CHTS1213hhLoc.csv"   ), as.is = T)
+plloc                <- read.csv(file.path(geogXWalkDir, "CHTS1213placeLoc.csv"), as.is = T)
+scloc                <- read.csv(file.path(geogXWalkDir, "CHTS1213schlLoc.csv" ), as.is = T)
+wkloc                <- read.csv(file.path(geogXWalkDir, "CHTS1213workLoc.csv" ), as.is = T)
 
 # subset weights [re-weighted, excludes records collected during summer months]
-hhweights_sub        <- read.csv(paste(Survey_Processed_Dir, "households_SUBSET.csv", sep = "/"), as.is = T)
-perweights_sub       <- read.csv(paste(Survey_Processed_Dir, "persons_SUBSET.csv", sep = "/"), as.is = T)
+hhweights_sub        <- read.csv(file.path(Survey_Processed_Dir, "..", "households_SUBSET.csv"), as.is = T)
+perweights_sub       <- read.csv(file.path(Survey_Processed_Dir, "..", "persons_SUBSET.csv"   ), as.is = T)
 
 # skims
-DST_SKM   <- fread(paste(SkimDir, "SOV_DIST_MD_HWYSKM.csv", sep = "/"), stringsAsFactors = F, header = T)
+DST_SKM   <- fread(file.path(SkimDir, "SOV_DIST_MD_HWYSKM.csv"), stringsAsFactors = F, header = T)
 DST_SKM   <- melt(DST_SKM, id = c("DISTDA"))
 colnames(DST_SKM) <- c("o", "d", "dist")
 
 districtList         <- sort(unique(xwalk$COUNTYNAME))
-SuperdistrictList    <- sort(unique(xwalk_SDist$SDISTNAME)) # change by Khademul
+SuperdistrictList    <- sort(unique(xwalk_SDist$district_name))
 
 # Define other variables
 pertypeCodes <- data.frame(code = c(1,2,3,4,5,6,7,8,"All"), 
@@ -101,21 +125,21 @@ pertypeCodes <- data.frame(code = c(1,2,3,4,5,6,7,8,"All"),
 setwd(WD)
 
 ### keep only weekday records
-proc_hh$DOW <- hh$hhdow[match(proc_hh$HH_ID, hh$hhno)]
+proc_hh$DOW         <- hh$hhdow[match(proc_hh$HH_ID, hh$hhno)]
 processedPerson$DOW <- proc_hh$DOW[match(processedPerson$HH_ID, proc_hh$HH_ID)]
-tours$DOW <- proc_hh$DOW[match(tours$HH_ID, proc_hh$HH_ID)]
-trips$DOW <- proc_hh$DOW[match(trips$HH_ID, proc_hh$HH_ID)]
-jutrips$DOW <- proc_hh$DOW[match(jutrips$HH_ID, proc_hh$HH_ID)]
-jtours$DOW <- proc_hh$DOW[match(jtours$HH_ID, proc_hh$HH_ID)]
+tours$DOW           <- proc_hh$DOW[match(tours$HH_ID,           proc_hh$HH_ID)]
+trips$DOW           <- proc_hh$DOW[match(trips$HH_ID,           proc_hh$HH_ID)]
+jutrips$DOW         <- proc_hh$DOW[match(jutrips$HH_ID,         proc_hh$HH_ID)]
+jtours$DOW          <- proc_hh$DOW[match(jtours$HH_ID,          proc_hh$HH_ID)]
 
-proc_hh <- proc_hh[proc_hh$DOW<=5,]
-processedPerson <- processedPerson[processedPerson$DOW<=5,]
-tours <- tours[tours$DOW<=5,]
-trips <- trips[trips$DOW<=5,]
-jutrips <- jutrips[jutrips$DOW<=5,]
-jtours <- jtours[jtours$DOW<=5,]
-hhweights_sub <- hhweights_sub[hhweights_sub$WEEKEND==0,]
-perweights_sub <- perweights_sub[perweights_sub$WEEKEND==0,]
+proc_hh             <- proc_hh[proc_hh$DOW<=5,]
+processedPerson     <- processedPerson[processedPerson$DOW<=5,]
+tours               <- tours[tours$DOW<=5,]
+trips               <- trips[trips$DOW<=5,]
+jutrips             <- jutrips[jutrips$DOW<=5,]
+jtours              <- jtours[jtours$DOW<=5,]
+hhweights_sub       <- hhweights_sub[hhweights_sub$WEEKEND==0,]
+perweights_sub      <- perweights_sub[perweights_sub$WEEKEND==0,]
 
 ### rename fields in raw CHTS files
 names(hh)[names(hh)=="hhno"]   <- 'SAMPN'
@@ -160,7 +184,7 @@ jtours <- jtours[jtours$HH_ID %in% hhweights_sub$HH_ID,]
 
 
 ### copy weights from subset_weights file
-hh$finalweight <- hhweights_sub$HHWEIGHT_SUB[match(hh$SAMPN, hhweights_sub$HH_ID)]
+hh$finalweight  <- hhweights_sub$HHWEIGHT_SUB[match(hh$SAMPN, hhweights_sub$HH_ID)]
 per$finalweight <- perweights_sub$PERWEIGHT_SUB[match(per$SAMPN*100+per$PERNO, perweights_sub$HH_ID*100+perweights_sub$PER_ID)]
 hh$finalweight[is.na(hh$finalweight)] <- 0
 per$finalweight[is.na(per$finalweight)] <- 0
@@ -175,38 +199,43 @@ jtours$finalweight <- hh$finalweight[match(jtours$HH_ID, hh$SAMPN)]
 
 ### copy location info [first remove existing location fields]
 # copy the sequential version of MAZs/TAZs [MAZ instead of MAZ_ORIGINAL]
-hh$HHMAZ <- hhloc$MAZ_V10[match(hh$SAMPN, hhloc$SAMPN)]
+hh$HHMAZ <- hhloc$MAZ[match(hh$SAMPN, hhloc$SAMPN)]
 hh$HHMAZ <- xwalk$MAZ[match(hh$HHMAZ, xwalk$MAZ_ORIGINAL)]
 #manual fixing of home TAZ
 hh$HHMAZ[hh$SAMPN==1692707] <- 24082
 hh$HHMAZ[hh$SAMPN==1913749] <- 24257
 hh$HHTAZ <- xwalk$TAZ[match(hh$HHMAZ, xwalk$MAZ)]
+hh$HHTAZ_NONSEQ <- xwalk$TAZ_ORIGINAL[match(hh$HHMAZ, xwalk$MAZ)] # keep nonsequential
 hh$HHMAZ[is.na(hh$HHMAZ)] <- 0
 hh$HHTAZ[is.na(hh$HHTAZ)] <- 0
 
-per$WMAZ <- wkloc$MAZ_V10[match(paste(per$SAMPN, per$PERNO, sep = "-"), paste(wkloc$SAMPN, wkloc$PERNO, sep = "-"))]
+per$WMAZ <- wkloc$MAZ[match(paste(per$SAMPN, per$PERNO, sep = "-"), paste(wkloc$SAMPN, wkloc$PERNO, sep = "-"))]
 per$WMAZ <- xwalk$MAZ[match(per$WMAZ, xwalk$MAZ_ORIGINAL)]
 per$WTAZ <- xwalk$TAZ[match(per$WMAZ, xwalk$MAZ)]
+per$WTAZ_NONSEQ <- xwalk$TAZ_ORIGINAL[match(per$WMAZ, xwalk$MAZ)]
 per$WMAZ[is.na(per$WMAZ)] <- 0
 per$WTAZ[is.na(per$WTAZ)] <- 0
 
-per$SMAZ <- scloc$MAZ_V10[match(paste(per$SAMPN, per$PERNO, sep = "-"), paste(scloc$SAMPN, scloc$PERNO, sep = "-"))]
+per$SMAZ <- scloc$MAZ[match(paste(per$SAMPN, per$PERNO, sep = "-"), paste(scloc$SAMPN, scloc$PERNO, sep = "-"))]
+per$SMAZ_NONSEQ <- per$SMAZ # keep nonsequential
 per$SMAZ <- xwalk$MAZ[match(per$SMAZ, xwalk$MAZ_ORIGINAL)]
 per$STAZ <- xwalk$TAZ[match(per$SMAZ, xwalk$MAZ)]
 per$SMAZ[is.na(per$SMAZ)] <- 0
 per$STAZ[is.na(per$STAZ)] <- 0
 
-trips$ORIG_MAZ <- plloc$MAZ_V10[match(paste(trips$HH_ID, trips$PER_ID, trips$ORIG_PLACENO, sep = "-"), 
-                                      paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
+trips$ORIG_MAZ <- plloc$MAZ[match(paste(trips$HH_ID, trips$PER_ID, trips$ORIG_PLACENO, sep = "-"), 
+                                  paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
 trips$ORIG_MAZ <- xwalk$MAZ[match(trips$ORIG_MAZ, xwalk$MAZ_ORIGINAL)]
 trips$ORIG_TAZ <- xwalk$TAZ[match(trips$ORIG_MAZ, xwalk$MAZ)]
+trips$ORIG_TAZ_NONSEQ <- xwalk$TAZ_ORIGINAL[match(trips$ORIG_MAZ, xwalk$MAZ)] # keep nonsequential
 trips$ORIG_MAZ[is.na(trips$ORIG_MAZ)] <- 0
 trips$ORIG_TAZ[is.na(trips$ORIG_TAZ)] <- 0
 
-trips$DEST_MAZ <- plloc$MAZ_V10[match(paste(trips$HH_ID, trips$PER_ID, trips$DEST_PLACENO, sep = "-"), 
-                                      paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
+trips$DEST_MAZ <- plloc$MAZ[match(paste(trips$HH_ID, trips$PER_ID, trips$DEST_PLACENO, sep = "-"), 
+                                  paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
 trips$DEST_MAZ <- xwalk$MAZ[match(trips$DEST_MAZ, xwalk$MAZ_ORIGINAL)]
 trips$DEST_TAZ <- xwalk$TAZ[match(trips$DEST_MAZ, xwalk$MAZ)]
+trips$DEST_TAZ_NONSEQ <- xwalk$TAZ_ORIGINAL[match(trips$DEST_MAZ, xwalk$MAZ)] # keep nonsequential
 trips$DEST_MAZ[is.na(trips$DEST_MAZ)] <- 0
 trips$DEST_TAZ[is.na(trips$DEST_TAZ)] <- 0
 
@@ -216,15 +245,17 @@ trips$OCOUNTY[is.na(trips$OCOUNTY)] <- "Missing"
 trips$DCOUNTY[is.na(trips$DCOUNTY)] <- "Missing"
 
 
-tours$ORIG_MAZ <- plloc$MAZ_V10[match(paste(tours$HH_ID, tours$PER_ID, tours$ORIG_PLACENO, sep = "-"), 
-                                      paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
+tours$ORIG_MAZ <- plloc$MAZ[match(paste(tours$HH_ID, tours$PER_ID, tours$ORIG_PLACENO, sep = "-"), 
+                                  paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
+tours$ORIG_MAZ_NONSEQ <- tours$ORIG_MAZ # keep nonsequential
 tours$ORIG_MAZ <- xwalk$MAZ[match(tours$ORIG_MAZ, xwalk$MAZ_ORIGINAL)]
 tours$ORIG_TAZ <- xwalk$TAZ[match(tours$ORIG_MAZ, xwalk$MAZ)]
 tours$ORIG_MAZ[is.na(tours$ORIG_MAZ)] <- 0
 tours$ORIG_TAZ[is.na(tours$ORIG_TAZ)] <- 0
 
-tours$DEST_MAZ <- plloc$MAZ_V10[match(paste(tours$HH_ID, tours$PER_ID, tours$DEST_PLACENO, sep = "-"), 
+tours$DEST_MAZ <- plloc$MAZ[match(paste(tours$HH_ID, tours$PER_ID, tours$DEST_PLACENO, sep = "-"), 
                                       paste(plloc$SAMPN, plloc$PERNO, plloc$PLANO, sep = "-"))]
+tours$DEST_MAZ_NONSEQ <- tours$DEST_MAZ # keep nonsequential
 tours$DEST_MAZ <- xwalk$MAZ[match(tours$DEST_MAZ, xwalk$MAZ_ORIGINAL)]
 tours$DEST_TAZ <- xwalk$TAZ[match(tours$DEST_MAZ, xwalk$MAZ)]
 tours$DEST_MAZ[is.na(tours$DEST_MAZ)] <- 0
@@ -251,16 +282,16 @@ hh$ADULTS <- adults$freq[match(hh$SAMPN, adults$SAMPN)]
 hh$ADULTS[is.na(hh$ADULTS)] <- 0
 
 # define Districts - County for MTC
-hh$HDISTRICT <- xwalk$COUNTYNAME[match(hh$HHMAZ, xwalk$MAZ)]
-hh$HDISTRICT_S <- xwalk_SDist$SDISTNAME[match(hh$HHMAZ, xwalk$MAZ)] # change by Khademul
+hh$HDISTRICT   <- xwalk$COUNTYNAME[match(hh$HHMAZ, xwalk$MAZ)]
+hh$HDISTRICT_S <- xwalk_SDist$district_name[match(hh$HHTAZ_NONSEQ, xwalk_SDist$TAZ_ORIGINAL)]
 
 per$PERTYPE <- processedPerson$PERSONTYPE[match(per$SAMPN*100+per$PERNO, processedPerson$HHID*100+processedPerson$PERID)]
 per$HHTAZ <- hh$HHTAZ[match(per$SAMPN, hh$SAMPN)]
 per$HDISTRICT <- hh$HDISTRICT[match(per$SAMPN, hh$SAMPN)]
 per$WDISTRICT <- xwalk$COUNTYNAME[match(per$WMAZ, xwalk$MAZ)]
 
-per$HDISTRICT_S <- hh$HDISTRICT_S[match(per$SAMPN, hh$SAMPN)] # change by Khademul
-per$WDISTRICT_S <- xwalk_SDist$SDISTNAME[match(per$WMAZ, xwalk$MAZ)] # change by Khademul
+per$HDISTRICT_S <- hh$HDISTRICT_S[match(per$SAMPN, hh$SAMPN)]
+per$WDISTRICT_S <- xwalk_SDist$district_name[match(per$WTAZ_NONSEQ, xwalk_SDist$TAZ_ORIGINAL)]
 
 
 ##-------Compute Summary Statistics-------
@@ -268,11 +299,11 @@ per$WDISTRICT_S <- xwalk_SDist$SDISTNAME[match(per$WMAZ, xwalk$MAZ)] # change by
 
 # Auto ownership
 autoOwnership <- count(hh[!is.na(hh$HHVEH),], c("HHVEH"), "finalweight")
-write.csv(autoOwnership, "autoOwnership.csv", row.names = TRUE)
+write.csv(autoOwnership, "autoOwnership.csv", row.names = FALSE)
 
 # Persons by person type
 pertypeDistbn <- count(per[!is.na(per$PERTYPE),], c("PERTYPE"), "finalweight")
-write.csv(pertypeDistbn, "pertypeDistbn.csv", row.names = TRUE)
+write.csv(pertypeDistbn, "pertypeDistbn.csv", row.names = FALSE)
 
 # Mandatory DC
 # emp_loc_type - 1:fixed, 2:WFH, 3: varies
@@ -2244,23 +2275,26 @@ names(trips_flow_total)[names(trips_flow_total) == "V1"] <- "count"
 trips_flow <- rbind(trips_flow, trips_flow_total[,c("OCOUNTY", "DCOUNTY", "trip_mode", "tour_purpose", "count")])
 
 
-write.table(trips_flow, paste(WD,"trips_flow.csv", sep = "//"), sep = ",", row.names = F)
+write.table(trips_flow, file.path(WD,"trips_flow.csv"), sep = ",", row.names = F)
 
 
-### County-County trip flow by Tour Purpose and Trip Mode (added by khademul)
-sample_xwalk <- xwalk_SDist[,c("TAZ", "SDISTNAME")]
-sample_xwalk <- unique(sample_xwalk[, 1:2])
-sample_xwalk$ORIG_TAZ <- sample_xwalk$TAZ
-sample_xwalk$DEST_TAZ <- sample_xwalk$TAZ
-sample_xwalk$TAZ <- NULL
-sample_xwalk_ORIG <- sample_xwalk[,c("ORIG_TAZ", "SDISTNAME")]
-names(sample_xwalk_ORIG)[names(sample_xwalk_ORIG) == "SDISTNAME"] <- "OSDIST"
-sample_xwalk_DEST <- sample_xwalk[,c("DEST_TAZ", "SDISTNAME")]
-names(sample_xwalk_DEST)[names(sample_xwalk_DEST) == "SDISTNAME"] <- "DSDIST"
+### County-County trip flow by Tour Purpose and Trip Mode
 
-trips_sample_S <- merge(x = trips, y = sample_xwalk_ORIG, by = "ORIG_TAZ", all.x = TRUE)
-trips_sample_S <- merge(x = trips_sample_S, y = sample_xwalk_DEST, by = "DEST_TAZ", all.x = TRUE)
+# left join trips to origin taz for origin superdistrict, destination taz for destination superdistrict
+trips_sample_S <- merge(x     = trips,
+                        y     = xwalk_SDist,
+                        by.x  = "ORIG_TAZ_NONSEQ",
+                        by.y  = "TAZ_ORIGINAL",
+                        all.x = TRUE)
+setnames(trips_sample_S, old=c("district_name"), new=c("OSDIST"))
+trips_sample_S <- merge(x     = trips_sample_S, 
+                        y     = xwalk_SDist, 
+                        by.x  = "DEST_TAZ_NONSEQ", 
+                        by.y  = "TAZ_ORIGINAL", all.x = TRUE)
+setnames(trips_sample_S, old=c("district_name"), new=c("DSDIST"))
+levels(trips_sample_S$OSDIST) <- c(levels(trips_sample_S$OSDIST), "Missing")
 trips_sample_S$OSDIST[is.na(trips_sample_S$OSDIST)] <- "Missing"
+levels(trips_sample_S$DSDIST) <- c(levels(trips_sample_S$DSDIST), "Missing")
 trips_sample_S$DSDIST[is.na(trips_sample_S$DSDIST)] <- "Missing"
 
 trips_sample_S <- trips_sample_S[,c("OSDIST", "DSDIST", "TRIPMODE", "TOURPURP", "SUBTOUR", "finalweight")]
