@@ -172,11 +172,7 @@ write.table(tollcost_df, file=(Out_toll_file), sep = ",", row.names=FALSE, col.n
 
 
 # questions:
-# how come some of the revenue is na
-# how come some of the transaction is non fastrak
-
-# is using fastrak only the right approach
-# is using cost per vehicle the right approach (how to take into account of people who do not travel the full length)
-# multiply by full length as a comparison, also check trends across time period
+# how come some of the revenue values show up as na? (it looks like some of these are fastrak user traveling at peak hours)
+# how come some of the transaction is non fastrak (is using fastrak only the right approach. probably yes)
 
 
