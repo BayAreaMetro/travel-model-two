@@ -7,11 +7,13 @@ package com.pb.mtctm2.abm.maas;
  */
 class Trip implements Comparable{
    	long hhid;		
-	long personNumber;
+	long personId;
+	int personNumber;
 	int tourid;
 	int stopid;
 	int inbound;
 	int joint;
+	int numberParticipants;
 
 	int originMaz;
 	int destinationMaz;
@@ -23,10 +25,18 @@ class Trip implements Comparable{
 	int boardingTap;
 	int alightingTap;
 	int set;
+	String tourPurpose;
+	String originPurpose;
+	String destinationPurpose;
+	float distance;
+	int parkingMaz;
+	int avAvailable;
+	int tourMode;
 	
 	
-	public Trip(long hhid,long personNumber, int tourid,int stopid,int inbound,int joint,int originMaz, int destinationMaz, int departPeriod, float departTime, float sampleRate, int mode, int boardingTap, int alightingTap, int set){
+	public Trip(long hhid,long personId,int personNumber, int tourid,int stopid,int inbound,int joint,int originMaz, int destinationMaz, int departPeriod, float departTime, float sampleRate, int mode, int boardingTap, int alightingTap, int set){
        	this.hhid = hhid;		
+       	this.personId = personId;
     	this.personNumber = personNumber;
     	this.tourid = tourid;
     	this.stopid =  stopid;
@@ -54,11 +64,19 @@ class Trip implements Comparable{
 		this.hhid = hhid;
 	}
 
-	public long getPersonNumber() {
+	public long getPersonId() {
+		return personId;
+	}
+
+	public void setPersonId(long personId) {
+		this.personId = personId;
+	}
+
+	public int getPersonNumber() {
 		return personNumber;
 	}
 
-	public void setPersonNumber(long personNumber) {
+	public void setPersonNumber(int personNumber) {
 		this.personNumber = personNumber;
 	}
 
@@ -172,6 +190,70 @@ class Trip implements Comparable{
 
 	public void setSet(int set) {
 		this.set = set;
+	}
+
+	public String getTourPurpose() {
+		return tourPurpose;
+	}
+
+	public void setTourPurpose(String tourPurpose) {
+		this.tourPurpose = tourPurpose;
+	}
+
+	public String getOriginPurpose() {
+		return originPurpose;
+	}
+
+	public void setOriginPurpose(String originPurpose) {
+		this.originPurpose = originPurpose;
+	}
+
+	public String getDestinationPurpose() {
+		return destinationPurpose;
+	}
+
+	public void setDestinationPurpose(String destinationPurpose) {
+		this.destinationPurpose = destinationPurpose;
+	}
+
+	public float getDistance() {
+		return distance;
+	}
+
+	public void setDistance(float distance) {
+		this.distance = distance;
+	}
+
+	public int getParkingMaz() {
+		return parkingMaz;
+	}
+
+	public void setParkingMaz(int parkingMaz) {
+		this.parkingMaz = parkingMaz;
+	}
+
+	public int getAvAvailable() {
+		return avAvailable;
+	}
+
+	public void setAvAvailable(int avAvailable) {
+		this.avAvailable = avAvailable;
+	}
+
+	public int getNumberParticipants() {
+		return numberParticipants;
+	}
+
+	public void setNumberParticipants(int numberParticipants) {
+		this.numberParticipants = numberParticipants;
+	}
+
+	public int getTourMode() {
+		return tourMode;
+	}
+
+	public void setTourMode(int tourMode) {
+		this.tourMode = tourMode;
 	}
 
 	/**

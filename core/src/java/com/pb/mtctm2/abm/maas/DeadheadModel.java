@@ -146,10 +146,13 @@ public class DeadheadModel {
          for(int row = 1; row <= inputTripTableData.getRowCount();++row){
         	
            	long hhid = (long) inputTripTableData.getValueAt(row,"hh_id");	
-           	long personNumber=-1;
-           	if(jointTripData==false)
-           		personNumber = (long) inputTripTableData.getValueAt(row,"person_num");
-        	int tourid = (int) inputTripTableData.getValueAt(row,"tour_id");
+           	int personNumber=-1;
+           	long personId=-1;
+           	if(jointTripData==false){
+           		personId = (long) inputTripTableData.getValueAt(row,"person_id");
+           		personNumber = (int) inputTripTableData.getValueAt(row,"person_num");
+           	}
+           	int tourid = (int) inputTripTableData.getValueAt(row,"tour_id");
         	int stopid = (int) inputTripTableData.getValueAt(row,"stop_id");
         	int inbound = (int)inputTripTableData.getValueAt(row,"inbound");
          	int oMaz = (int) inputTripTableData.getValueAt(row,"orig_mgra");
@@ -162,15 +165,15 @@ public class DeadheadModel {
         	
             //put the vehicle trip in one of the hashmaps
         	if(modelStructure.getTripModeIsTNC(mode)){
-        		Trip trip = new Trip(hhid,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,0,0,0);
+        		Trip trip = new Trip(hhid,personId,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,0,0,0);
         		//TNCTrips.put(row*10+tableIndex,trip);
         		TNCTrips.add(trip);
         	} else if(modelStructure.getTripModeIsTaxi(mode)){
-        		Trip trip = new Trip(hhid,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,0,0,0);
+        		Trip trip = new Trip(hhid,personId,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,0,0,0);
         		//TaxiTrips.put(row*10+tableIndex,trip);
         		TaxiTrips.add(trip);
         	} else if((avAvailable==1) && modelStructure.getTripModeIsSovOrHov(mode)){
-        		Trip trip = new Trip(hhid,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,0,0,0);
+        		Trip trip = new Trip(hhid,personId,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,0,0,0);
         		if(PrivateAVTrips.containsKey(hhid)==false){
         			//PrivateAVTrips.put(hhid,new HashMap<Integer,VehicleTrip>());
         			PrivateAVTrips.put(hhid,new ArrayList<Trip>());

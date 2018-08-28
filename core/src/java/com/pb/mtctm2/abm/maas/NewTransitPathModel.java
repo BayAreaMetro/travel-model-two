@@ -1,25 +1,34 @@
 package com.pb.mtctm2.abm.maas;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import com.pb.common.calculator.IndexValues;
 import com.pb.common.calculator.MatrixDataManager;
 import com.pb.common.calculator.MatrixDataServerIf;
 import com.pb.common.datafile.OLD_CSVFileReader;
 import com.pb.common.datafile.TableDataSet;
 import com.pb.common.math.MersenneTwister;
+import com.pb.common.newmodel.UtilityExpressionCalculator;
+import com.pb.common.util.ResourceUtil;
 import com.pb.mtctm2.abm.accessibilities.AutoTazSkimsCalculator;
 import com.pb.mtctm2.abm.accessibilities.BestTransitPathCalculator;
 import com.pb.mtctm2.abm.accessibilities.DriveTransitWalkSkimsCalculator;
 import com.pb.mtctm2.abm.accessibilities.WalkTransitDriveSkimsCalculator;
 import com.pb.mtctm2.abm.accessibilities.WalkTransitWalkSkimsCalculator;
 import com.pb.mtctm2.abm.application.SandagModelStructure;
+import com.pb.mtctm2.abm.ctramp.CtrampApplication;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
+import com.pb.mtctm2.abm.ctramp.McLogsumsCalculator;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.ModelStructure;
 import com.pb.mtctm2.abm.ctramp.Person;
@@ -27,6 +36,7 @@ import com.pb.mtctm2.abm.ctramp.TazDataManager;
 import com.pb.mtctm2.abm.ctramp.TransitDriveAccessDMU;
 import com.pb.mtctm2.abm.ctramp.TransitWalkAccessDMU;
 import com.pb.mtctm2.abm.ctramp.Util;
+import com.pb.mtctm2.abm.survey.OutputTapPairs;
 
 /**
  * This class chooses a new transit path for transit trips whose chosen TAP pair
@@ -54,6 +64,12 @@ public class NewTransitPathModel{
     private HashMap<Long,Float> valueOfTimeByPersonNumber;
     private HashMap<Long,Float> valueOfTimeByHhId; // the maximum VOT for all persons in the household
     private HashMap<Long,Integer> personTypeByPersonNumber;
+    private int tripsWithNoTransitPath;
+    private UtilityExpressionCalculator identifyTripToResimulateUEC;
+    private IndexValues                   index;
+	ResimulateTransitPathDMU resimulateDMU;
+    private PrintWriter outputIndivTripWriter;
+    private PrintWriter outputJointTripWriter;
     
     //for tracing
     private boolean seek;
@@ -66,6 +82,12 @@ public class NewTransitPathModel{
     private static final String ModelSeedProperty = "Model.Random.Seed";
     private static final String SeekProperty = "Seek";
     private static final String TraceHouseholdList = "Debug.Trace.HouseholdIdList";
+    private static final String ResimulateTransitPathUECProperty = "ResimulateTransitPath.uec.file";
+    private static final String ResimulateTransitPathDataPageProperty = "ResimulateTransitPath.data.page";
+    private static final String ResimulateTransitPathIdentifyPageProperty = "ResimulateTransitPath.identifyTripToResimulate.page";
+    private static final String ResimulateTransitPathIndividualOutputFileProperty = "ResimulateTransitPath.results.IndivTripDataFile";
+    private static final String ResimulateTransitPathJointOutputFileProperty = "ResimulateTransitPath.results.JointTripDataFile";
+    
 
     /**
      * Create a New Transit Path Model.
@@ -121,6 +143,19 @@ public class NewTransitPathModel{
         		traceHHIds.add(new Long(hhid));
         	}
 		}
+        
+        //set up the UEC for determining whether to re-simulate the transit path choice
+        String uecPath = Util.getStringValueFromPropertyMap(propertyMap,CtrampApplication.PROPERTIES_UEC_PATH);
+        String uecFileName = Paths.get(uecPath,propertyMap.get(ResimulateTransitPathUECProperty)).toString();
+        int dataPage = Util.getIntegerValueFromPropertyMap(propertyMap,
+        		ResimulateTransitPathDataPageProperty);
+        int identifyPage = Util.getIntegerValueFromPropertyMap(propertyMap,
+        		ResimulateTransitPathIdentifyPageProperty);
+        File uecFile = new File(uecFileName);
+        resimulateDMU = new ResimulateTransitPathDMU();
+        identifyTripToResimulateUEC = new UtilityExpressionCalculator(uecFile, identifyPage, dataPage, propertyMap, resimulateDMU);
+        index         = new IndexValues();
+
 	}
 	
 	/**
@@ -150,7 +185,22 @@ public class NewTransitPathModel{
         
         //read person data
         TableDataSet personData = readTableData(personFile);
+        readPersonData(personData);
         
+        // create output files
+        String outIndivTripFileName = directory
+                + Util.getStringValueFromPropertyMap(propertyMap, ResimulateTransitPathIndividualOutputFileProperty);
+        outIndivTripFileName = insertIterationNumber(outIndivTripFileName,iteration);
+        String outJointTripFileName = directory
+                + Util.getStringValueFromPropertyMap(propertyMap, ResimulateTransitPathJointOutputFileProperty);
+        outJointTripFileName = insertIterationNumber(outJointTripFileName,iteration);
+
+        outputIndivTripWriter = createOutputFile(outIndivTripFileName);
+        outputJointTripWriter = createOutputFile(outJointTripFileName);
+        
+        writeIndividualTripFileHeader(outputIndivTripWriter);
+        writeJointTripFileHeader(outputJointTripWriter);
+      
 	}
 
 	/**
@@ -158,15 +208,24 @@ public class NewTransitPathModel{
 	 */
 	private void run(){
 		
-		TableDataSet mgraData = mgraManager.getMgraTableDataSet();
-    	double[][] bestTaps = null;
-		boolean debug = false;
-		
-		//iterate through data and calculate
+			
+		//iterate through data and calculate transit path, write results
 		for(Trip trip : transitTrips ){
+			
+			//skip trip if doesn't need to be resimulated
+			if(resimulateTransitTrip(trip)== false){
+				if(trip.getJoint()==0)
+					writeTrip(trip,outputIndivTripWriter);
+				else
+					writeTrip(trip,outputJointTripWriter);
+				
+				continue;
+			}
+				
 			
 			TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
 	    	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
+	    	double[][] bestTaps = null;
 
 			long hhid = trip.getHhid();
 			int originMaz = trip.getOriginMaz();
@@ -184,21 +243,31 @@ public class NewTransitPathModel{
 			
 			int personType = personTypeByPersonNumber.get(personNumber);
 			
+	    	boolean debug = false;
 			if(traceHHIds.contains(hhid))
 				debug = true;
 			
 			float odDistance  = (float) tazDistanceCalculator.getTazToTazDistance(ModelStructure.AM_SKIM_PERIOD_INDEX, originTaz, destinationTaz);
 		
-			int accessEgressMode = -1;
-			if(modelStructure.getTripModeIsWalkTransit(mode))
-				accessEgressMode=bestPathCalculator.WTW;
-			else if (inbound==0)
-				accessEgressMode = bestPathCalculator.DTW;
-			else 
-				accessEgressMode = bestPathCalculator.WTD;
 
-			bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, accessEgressMode, originMaz, destinationMaz, period, debug, logger, odDistance);
+			if(modelStructure.getTripModeIsWalkTransit(mode))
+				bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.WTW, originMaz, destinationMaz, period, debug, logger, odDistance);
+			else
+				if(inbound==0)
+					bestTaps =  bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.DTW, originMaz, destinationMaz, period, debug, logger, odDistance);
+				else
+					bestTaps =  bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.WTD, originMaz, destinationMaz, period, debug, logger, odDistance);
 			
+			//if no best taps for the trip, log the error and move on to the next record
+			if(bestTaps==null){
+				++tripsWithNoTransitPath;
+				long hh_id = trip.getHhid();
+				long per_num = trip.getPersonNumber();
+				int tour = trip.getTourid();
+				int stop = trip.getStopid();
+				logger.error("Transit trip with no transit path. HHID: "+hh_id+" PERID "+per_num+" TOUR "+tour+" INBOUND "+inbound+" STOP "+stop);
+				continue;
+			}
 	        //set person specific variables and re-calculate best tap pair utilities
 	    	walkDmu.setApplicationType(bestPathCalculator.APP_TYPE_TRIPMC);
 	    	walkDmu.setTourCategoryIsJoint(joint);
@@ -208,18 +277,45 @@ public class NewTransitPathModel{
 	    	driveDmu.setTourCategoryIsJoint(joint);
 	     	driveDmu.setPersonType(joint==1 ? driveDmu.getPersonType() : personType);
 	     	driveDmu.setValueOfTime(valueOfTime);
+			
+	     	//recalculate utilities for best walk and drive paths for person attributes
+			if(modelStructure.getTripModeIsWalkTransit(mode))
+				bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.WTW, originMaz, destinationMaz, period, debug, logger, odDistance);
+			else{
+				if(inbound==0)
+					bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.DTW, originMaz, destinationMaz, period, debug, logger, odDistance);
+				else
+					bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.WTD, originMaz, destinationMaz, period, debug, logger, odDistance);
+			}
+			
+			float rnum = (float) random.nextDouble();
+			int pathIndex = bestPathCalculator.chooseTripPath(rnum, bestTaps, debug, logger);
+			int boardTap = (int) bestTaps[pathIndex][0];
+			int alightTap = (int)  bestTaps[pathIndex][1];
+			int set = (int)  bestTaps[pathIndex][2];
+       	
+			trip.setBoardingTap(boardTap);
+			trip.setAlightingTap(alightTap);
+			trip.setSet(set);
+			
+			//write results
+			if(trip.getJoint()==0)
+				writeTrip(trip,outputIndivTripWriter);
+			else
+				writeTrip(trip,outputJointTripWriter);
 
-			
-			
-			
-			
-			
-			double[] bestUtilities = bestPathCalculator.getBestUtilities();
-			
 		}
+		logger.info("There are "+tripsWithNoTransitPath+" transit trips with no valid transit path");
+		outputIndivTripWriter.close();
+		outputJointTripWriter.close();
 	}
 	
+	
 
+	/**
+	 * Read the person data file and store required data in hashmaps
+	 * @param personData
+	 */
 	public void readPersonData(TableDataSet personData){
 		
         for(int row = 1; row<=personData.getRowCount();++row){
@@ -228,9 +324,9 @@ public class NewTransitPathModel{
         	float valueOfTime = personData.getValueAt(row,"value_of_time");
         	String personTypeString = personData.getStringValueAt(row,"type");
         	int personType = getPersonType(personTypeString);
-        	
+           	personTypeByPersonNumber.put(personNumber, personType);
+                  	
         	valueOfTimeByPersonNumber.put(personNumber, valueOfTime);
-        	
         	if(valueOfTimeByHhId.containsKey(hhid)){
         		float existingVOTForHH = valueOfTimeByHhId.get(hhid);
         		if(valueOfTime>existingVOTForHH)
@@ -253,9 +349,13 @@ public class NewTransitPathModel{
          for(int row = 1; row <= inputTripTableData.getRowCount();++row){
         	
            	long hhid = (long) inputTripTableData.getValueAt(row,"hh_id");	
-           	long personNumber=-1;
-           	if(jointTripData==false)
-           		personNumber = (long) inputTripTableData.getValueAt(row,"person_num");
+           	long personId=-1;
+           	int personNumber=-1;
+           	if(jointTripData==false){
+           		personId = (long) inputTripTableData.getValueAt(row,"person_id");
+           		personNumber = (int) inputTripTableData.getValueAt(row,"person_num");
+           		
+           	}
         	int tourid = (int) inputTripTableData.getValueAt(row,"tour_id");
         	int stopid = (int) inputTripTableData.getValueAt(row,"stop_id");
         	int inbound = (int)inputTripTableData.getValueAt(row,"inbound");
@@ -268,10 +368,25 @@ public class NewTransitPathModel{
             int avAvailable = (int) inputTripTableData.getValueAt(row,"avAvailable");  	
         	int boardingTap = (int) inputTripTableData.getValueAt(row,"trip_board_tap");  
         	int alightingTap = (int) inputTripTableData.getValueAt(row,"trip_alight_tap");  
+        	String tour_purpose	= inputTripTableData.getStringValueAt(row, "tour_purpose");
+        	String orig_purpose	= inputTripTableData.getStringValueAt(row, "orig_purpose");
+        	String dest_purpose = inputTripTableData.getStringValueAt(row, "dest_purpose");
+        	float distance = inputTripTableData.getValueAt(row,"trip_dist");
+        	int num_participants = (int) inputTripTableData.getValueAt(row,"num_participants");
+        	int tour_mode = (int)inputTripTableData.getValueAt(row,"tour_mode");
+        	
         	int set = (int)inputTripTableData.getValueAt(row,"set"); 
         	
            if(modelStructure.getTripModeIsTransit(mode)){
-        		Trip trip = new Trip(hhid,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,boardingTap,alightingTap,set);
+        		Trip trip = new Trip(hhid,personId,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,boardingTap,alightingTap,set);
+        		trip.setAvAvailable(avAvailable);
+        		trip.setTourPurpose(tour_purpose);
+        		trip.setOriginPurpose(orig_purpose);
+        		trip.setDestinationPurpose(dest_purpose);
+        		trip.setDistance(distance);
+        		trip.setNumberParticipants(num_participants);
+        		trip.setTourMode(tour_mode);
+        		
         		transitTrips.add(trip);
         	} 
         }
@@ -295,7 +410,13 @@ public class NewTransitPathModel{
 		return -1;
 		
 	}
-	  private void startMatrixServer(HashMap<String, String> properties) {
+	
+	/** 
+	 * Start a new matrix server connection.
+	 * 
+	 * @param properties
+	 */
+	private void startMatrixServer(HashMap<String, String> properties) {
 	        String serverAddress = (String) properties.get("RunModel.MatrixServerAddress");
 	        int serverPort = new Integer((String) properties.get("RunModel.MatrixServerPort"));
 	        logger.info("connecting to matrix server " + serverAddress + ":" + serverPort);
@@ -331,7 +452,32 @@ public class NewTransitPathModel{
 			return time;
 		}
 
-	    
+	    /**
+	     * Determine whether to resimulate transit trip.
+	     * 
+	     */
+		public boolean resimulateTransitTrip(Trip trip){
+			
+				
+			resimulateDMU.setOriginMaz(trip.getOriginMaz());
+			resimulateDMU.setDestinationMaz(trip.getDestinationMaz());
+			resimulateDMU.setBoardingTap(trip.getBoardingTap());
+			resimulateDMU.setAlightingTap(trip.getAlightingTap());
+			resimulateDMU.setSet(trip.getSet());
+			resimulateDMU.setDepartPeriod(trip.getDepartPeriod());
+		        
+			// set up the index and dmu objects
+		    index.setOriginZone(trip.getBoardingTap());
+		    index.setDestZone(trip.getAlightingTap());
+		       
+		    // solve
+		    float util = (float)identifyTripToResimulateUEC.solve(index, resimulateDMU, null)[0];  
+		    if(util>0)
+		    	return true;
+			return false;
+		}
+		
+		
 		/** 
 		 * A simple helper function to insert the iteration number into the file name.
 		 * 
@@ -366,6 +512,143 @@ public class NewTransitPathModel{
 	        logger.info("End reading the data in file " + inputFile);
 	        
 	        return tableDataSet;
+		}
+		
+		/**
+		 * Create the output file and write a header record.
+		 */
+		private PrintWriter createOutputFile(String outputFile){
+	        
+			logger.info("Creating file " + outputFile);
+			PrintWriter outWriter = null;
+			
+			try
+	        {
+	            outWriter = new PrintWriter(new BufferedWriter(new FileWriter(outputFile)));
+	        } catch (IOException e)
+	        {
+	            logger.fatal("Could not open file " + outputFile + " for writing\n");
+	            throw new RuntimeException();
+	        }
+	        
+	        return outWriter;
+
+		}
+		
+		/**
+		 * Write a header record for individual trip records.
+		 * 
+		 * @param printWriter
+		 */
+		private void writeIndividualTripFileHeader(PrintWriter printWriter){
+			
+			
+	        String headerString = new String(
+			"hh_id,person_id,person_num,tour_id,stop_id,inbound,tour_purpose,orig_purpose,dest_purpose,orig_mgra,dest_mgra,trip_dist,"+
+	        "parking_mgra,stop_period,trip_mode,trip_board_tap,trip_alight_tap,tour_mode,set,sampleRate,avAvailable");
+
+	        printWriter.println(headerString);
+
+		}
+		/**
+		 * Write a header record for joint trip records.
+		 * 
+		 * @param printWriter
+		 */
+		private void writeJointTripFileHeader(PrintWriter printWriter){
+			
+			
+	        String headerString = new String(
+			"hh_id,tour_id,stop_id,inbound,tour_purpose,orig_purpose,dest_purpose,orig_mgra,dest_mgra,trip_dist,parking_mgra,stop_period,"
+			+"trip_mode,num_participants,trip_board_tap,trip_alight_tap,tour_mode,set,sampleRate,avAvailable");
+
+	        printWriter.println(headerString);
+
+		}
+		
+		/**
+		 * Write the trip to the PrintWriter and flush the file.
+		 * @param trip
+		 * @param writer
+		 */
+		private void writeTrip(Trip trip, PrintWriter writer){
+			
+			String outputRecord= new String(trip.getHhid() + ",");
+			
+			if(trip.getJoint()==0){
+				outputRecord = outputRecord + new String(trip.getPersonId() + "," + trip.getPersonNumber() + ",");
+			}
+		
+			outputRecord = outputRecord + new String(
+					trip.getTourid() 
+					+ trip.getStopid()
+					+ trip.getInbound()
+					+ trip.getTourPurpose()
+					+ trip.getOriginPurpose()
+					+ trip.getDestinationPurpose()
+					+ trip.getOriginMaz()
+					+ trip.getDestinationMaz()
+					+ trip.getDistance()
+					+ trip.getParkingMaz()
+					+ trip.getDepartPeriod()
+					+ trip.getMode());
+			
+			if(trip.getJoint()==1){
+				outputRecord = outputRecord + new String(trip.getNumberParticipants()+",");
+			}
+			
+			outputRecord = outputRecord + new String(
+					trip.getBoardingTap() + ","
+					+ trip.getAlightingTap() + ","
+					+ trip.getTourMode() + ","
+					+ trip.getSet() + ","
+					+ trip.getSampleRate() + ","
+					+ trip.getAvAvailable() 
+					);
+			writer.println(outputRecord);
+			writer.flush();
+		}
+		
+		/**
+		 * Main run method
+		 * @param args
+		 */
+		public static void main(String[] args) {
+
+	        String propertiesFile = null;
+	        HashMap<String, String> pMap;
+
+	        logger.info(String.format("Resimulate Transit Path Program using CT-RAMP version ",
+	                CtrampApplication.VERSION));
+
+	        logger.info(String.format("Resimulating transit paths for transit trips in congested Tap-pairs"));
+
+	        int iteration=0;
+	        
+	        if (args.length == 0)
+	        {
+	            logger.error(String
+	                    .format("no properties file base name (without .properties extension) was specified as an argument."));
+	            return;
+	        } else {
+	        	propertiesFile = args[0];
+
+		        for (int i = 1; i < args.length; ++i)
+		        {
+		            if (args[i].equalsIgnoreCase("-iteration"))
+		            {
+		                iteration = Integer.valueOf(args[i + 1]);
+		            }
+		           
+		        }
+	        }
+	        
+	        pMap = ResourceUtil.getResourceBundleAsHashMap(propertiesFile);
+	        NewTransitPathModel transitPathModel = new NewTransitPathModel(pMap, iteration);
+	        transitPathModel.readInputFiles();
+	        transitPathModel.run();
+
+	    
 		}
 
 }
