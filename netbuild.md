@@ -23,14 +23,14 @@ CONTENTS
 ### Software requirements
 Before using NetworkWrangler (or Wrangler for short), you’ll need to:
 
-•	install Python if you haven't.  NetworkWrangler is designed to work with both Python 2 and Python 3 - either installion would be fine.
+•	install Python if you haven't.  NetworkWrangler is designed to work with both Python 2 and Python 3 - either installation would be fine.
 
 •	install Cube 6.4.4 or newer (http://www.citilabs.com). Cube is proprietary software and a license will be required.
 
 •	clone NetworkWrangler from GitHub (https://github.com/BayAreaMetro/NetworkWrangler). When it's cloned, you should see this python script in your local GitHub directory. For example, on a typical Windows installation for the user ftsang, the path would be:
  C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py " C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py
 
-•	install various python modules that NetworkWrangler uses. (For most current python users, the required modules are xlrd, simpleparse, and numpy. If you are using python 3, you may need win32 as well. If additional modules are needed for your specific set up, when you import NetworkWrangler for the first time you’ll get error messages on screen indicating which python module is needed.)
+•	install various python modules that NetworkWrangler uses. (For most current python users, the required modules are xlrd, simpleparse, and numpy. In the command window, type "pip install xlrd", "pip install simpleparse" and "pip install numpy" to install these modules. If you are using python 3, you may need win32 as well. If additional modules are needed for your specific set up, when you import NetworkWrangler for the first time you’ll get error messages on screen indicating which python module is needed.)
 
 •	 install Git (https://git-scm.com/downloads)
 
