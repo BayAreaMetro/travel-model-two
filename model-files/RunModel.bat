@@ -255,8 +255,13 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
-runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
+runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
 if ERRORLEVEL 2 goto done
+
+if not exist skims\transit_skims_AM_SET1.TPP (
+  runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
+  if ERRORLEVEL 2 goto done
+)
 
 runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
 if ERRORLEVEL 2 goto done

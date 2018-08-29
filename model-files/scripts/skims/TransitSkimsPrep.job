@@ -90,8 +90,78 @@
 SKIM_MATRICES = '%BASE_SCRIPTS%\block\skim_matrices.block'
 SKIM_MATRIX_DEF = '%BASE_SCRIPTS%\block\skim_matrix_definitions.block'
 
-;start cluster nodes - one for each skim set and time period
-*Cluster.exe MTC_TRANSKIM 1-5 start exit
+;first, build transit drive access skims
+;export highway skims as csv files
+*Cluster.exe MTC_HWYSKIM 1-5 start exit
+
+loop period = 1,5
+   
+   if (period = 1)   
+      token_period = 'EA'
+   elseif (period = 2)   
+      token_period = 'AM'
+   elseif (period = 3)   
+      token_period = 'MD'
+   elseif (period = 4)   
+      token_period = 'PM'
+   elseif (period = 5)   
+      token_period = 'EV'
+   endif
+
+   ; do each time of day as a separate process
+   DistributeMultistep processid = 'MTC_HWYSKIM', processNum = @period@
+       
+        RUN PGM=MATRIX 
+            FILEI MATI = skims\HWYSKM@token_period@_taz.tpp
+            FILEO MATO = skims\DA_@token_period@_taz_time.csv FORMAT=TXT DELIMITER=',' MO=1-3 PATTERN=IJM:V NAME=TIMEDA,DISTDA,BTOLLDA
+            MW[1] = MI.1.TIMEDA
+            MW[2] = MI.1.DISTDA
+            MW[3] = MI.1.BTOLLDA
+        ENDRUN
+        
+    EndDistributeMultistep
+ENDLOOP
+
+Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM3.script.end, MTC_HWYSKIM4.script.end, MTC_HWYSKIM5.script.end, 
+           printfiles = merge, deldistribfiles = t, CheckReturnCode = t
+
+*Cluster.exe MTC_HWYSKIM 1-5 close exit
+
+;export taps connectors from network
+RUN PGM=NETWORK
+    NETI = hwy\mtc_final_network_with_tolls.net
+    LINKO = hwy\mtc_final_network_tap_links.csv FORMAT=SDF DELIMITER=',' INCLUDE=A,B
+    NODEO = hwy\mtc_final_network_tap_nodes.csv FORMAT=SDF DELIMITER=',' INCLUDE=N,MODE
+    
+    PHASE = NODEMERGE
+        IF ((N < 900000) & (N % 100000 > 90000))
+            ;keep
+        ELSE
+            DELETE
+        ENDIF
+    ENDPHASE
+  
+    PHASE = LINKMERGE
+        IF (CNTYPE='TAP' && (A < 900000 | B < 1000000)) ;drop split links
+            ;keep
+        ELSE
+            DELETE
+        ENDIF
+    ENDPHASE
+ENDRUN
+
+;call python program to build transit drive access skims
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
+IF (RETURNCODE > 0) abort
+;*del skims\DA_*_taz_time.csv
+
+; run script used to help consolidate taps
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\tap_lines.py
+IF (RETURNCODE > 0) abort
+
+;rebuild transit line file with new numbers
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_new_transit_line.py "trn\transitLines.lin" "trn\transitLines_new_nodes.lin" "hwy\mtc_transit_network_tap_to_node.txt"
+IF (RETURNCODE > 0) abort
 
 ;now build transit times based on congested times from loaded network
 ;loop over time period
@@ -109,86 +179,70 @@ LOOP PERIOD = 1,5
     ELSEIF (PERIOD = 5)   
         TOKEN_PERIOD = 'EV'
     ENDIF
+    
+   ;convert transit network node numbers to originals
+    RUN PGM=NETWORK
+      NETI = hwy\mtc_transit_network_@TOKEN_PERIOD@.net
+      NETO = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE.net
+      
+      PHASE = INPUT FILEI=NI.1
+      
+           N = OLD_NODE
+           
+      ENDPHASE
+      
+      PHASE = INPUT FILEI=LI.1
+        A = OLD_A
+        B = OLD_B
+      ENDPHASE
 
+      
+    ENDRUN
+    
+    ;convert loaded auto network node numbers to originals
+    RUN PGM=NETWORK
+      NETI = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ.net
+      LINKO = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ_ORIGNODE.CSV, FORMAT=SDF DELIMITER=',' INCLUDE=OLD_A,OLD_B,CTIM
+      
+     ENDRUN
+      
+    ; merge congested times and calculate transit time  
+    RUN PGM=NETWORK
+      NETI = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE.net
+      LINKI[2] = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ_ORIGNODE.CSV,VAR=A,B,CTIM
+      NETO = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE_CONG.net
+      
+      MERGE RECORD = FALSE ; only keep transit network links
+     
+      PHASE = LINKMERGE
+         
+          CTIM = li.2.CTIM
+          IF (CTIM>0 & (li.1.FT=1|li.1.FT=2))
+            TRANTIME = CTIM    ; same as auto time for freeways
+          ELSEIF (CTIM>0)
+            TRANTIME = CTIM + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))    ; TIME + 5 stops/mile * 20 secs/stop
+        ENDIF
 
-        ; do each time of day and SKIMSET as a separate process
-        DistributeMultistep processid = 'MTC_TRANSKIM', processNum = PERIOD
-            ;make a copy of the network so that we don't walk all over each other
-            *copy hwy\mtc_transit_network_@TOKEN_PERIOD@_CONG.net trn\mtc_transit_network_@TOKEN_PERIOD@.net
-            
+      ENDPHASE
+    ENDRUN 
 
-            ;next, build actual transit skims
-            RUN PGM = PUBLIC TRANSPORT PRNFILE="TRANSIT_SKIM_@TOKEN_PERIOD@.prn"
-                FILEI NETI = "trn\mtc_transit_network_@TOKEN_PERIOD@.net"
-                FILEI LINEI[1] = "trn\transitLines_new_nodes.lin"
-                FILEI SYSTEMI = "trn\transitSystem.PTS"
-                FILEI FACTORI[1] = "trn\transitFactors_SET1.fac"
-                FILEI FACTORI[2] = "trn\transitFactors_SET2.fac"
-                FILEI FACTORI[3] = "trn\transitFactors_SET3.fac"
-                
-                FILEI FAREMATI[1] = "trn\fareMatrix.txt"
-                FILEI FAREI= "trn\fares.far"
-                
-                FILEO NETO = "trn\mtc_transit_network_@TOKEN_PERIOD@_with_transit.net" 
-                
-                READ FILE = @SKIM_MATRICES@
-                
-                FILEO LINEO = "trn\mtc_transit_lines_@TOKEN_PERIOD@_with_transit.lin"
-                FILEO NTLEGO = "trn\mtc_transit_ntlegs_@TOKEN_PERIOD@_with_transit.ntl"
+    ; recode network with new node numbers  
+    RUN PGM=NETWORK
+      NETI = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE_CONG.net
+      NETO = hwy\mtc_transit_network_@TOKEN_PERIOD@_CONG.net
+      
+      PHASE = INPUT FILEI=NI.1
+      
+        N = NEW_NODE
+           
+      ENDPHASE
+      
+      PHASE = INPUT FILEI=LI.1
+        A = A_NEW_NODE
+        B = B_NEW_NODE
+      ENDPHASE
 
-                ; These files are gigantic and writing many simultaneously cause PT to fail
-                ; with the message: F(801): (EnumRoutes) Failure writing to output routes file.
-                ; We cannot comment them out, however, since 
-                ; "The statement ROUTEO[x] invokes the route-enumeration process for user class x." (!!)
-                FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET1_with_transit.rte"
-                FILEO ROUTEO[2] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET2_with_transit.rte"
-                FILEO ROUTEO[3] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET3_with_transit.rte"
-
-                FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_with_transit.rpt"
-                
-                PARAMETERS HDWAYPERIOD=@PERIOD@
-                PARAMETERS NOROUTEERRS=17000000
-                PARAMETERS TRANTIME=LI.TRANTIME
-                PARAMETERS MAPSCALE=5280
-
-                PROCESS PHASE=LINKREAD
-                    LW.TRANTIME = LI.TRANTIME
-                    LW.DISTANCE = LI.FEET/5280
-                ENDPROCESS
-                
-                PHASE=DATAPREP
-                    ;access/egress links
-                    GENERATE,       
-                        NTLEGMODE=991,
-                        INCLUDELINK=(LI.NTL_MODE=1),
-                        COST=LI.WALKTIME,
-                        MAXCOST=999*500,
-                        ONEWAY=T
-                    ;transfer links
-                    GENERATE,
-                        NTLEGMODE=992,       
-                        INCLUDELINK=(LI.NTL_MODE=2),
-                        COST=LI.WALKTIME,
-                        MAXCOST=999*500,
-                        DIRECTLINK = 3,
-                        FROMNODE=1-10000000,
-                        TONODE=1-10000000    
-                ENDPHASE
-                
-                READ FILE = @SKIM_MATRIX_DEF@
-
-            ENDRUN
-
-            ;clean up
-            *del trn\mtc_transit_network_@TOKEN_PERIOD@.net
-
-        EndDistributeMultistep
-    ENDIF
+      
+    ENDRUN
     
 ENDLOOP
-
-Wait4Files files = MTC_TRANSKIM1.script.end, MTC_TRANSKIM2.script.end, MTC_TRANSKIM3.script.end, MTC_TRANSKIM4.script.end, MTC_TRANSKIM5.script.end,
-           printfiles = merge, deldistribfiles = t, CheckReturnCode = t
-
-;stop cluster nodes
-*Cluster.exe MTC_TRANSKIM 1-5 close exit
