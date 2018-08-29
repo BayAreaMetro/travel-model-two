@@ -162,7 +162,7 @@ IF (RETURNCODE > 0) abort
 IF (RETURNCODE > 0) abort
 
 ;start cluster nodes - one for each skim set and time period
-*Cluster.exe MTC_TRANSKIM 1-15 start exit
+*Cluster.exe MTC_TRANSKIM 1-5 start exit
 
 ;now build transit times based on congested times from loaded network
 ;loop over time period
@@ -246,132 +246,84 @@ LOOP PERIOD = 1,5
       
     ENDRUN
     
+    ; do each time of day and SKIMSET as a separate process
+    DistributeMultistep processid = 'MTC_TRANSKIM', processNum = PERIOD
+        ;make a copy of the network so that we don't walk all over each other
+        *copy hwy\mtc_transit_network_@TOKEN_PERIOD@_CONG.net trn\mtc_transit_network_@TOKEN_PERIOD@.net
+        
+
+        ;next, build actual transit skims
+        RUN PGM = PUBLIC TRANSPORT
+            FILEI NETI = "trn\mtc_transit_network_@TOKEN_PERIOD@.net"
+            FILEI LINEI[1] = "trn\transitLines_new_nodes.lin"
+            FILEI SYSTEMI = "trn\transitSystem.PTS"
+            FILEI FACTORI[1] = "trn\transitFactors_SET1.fac"
+            FILEI FACTORI[2] = "trn\transitFactors_SET2.fac"
+            FILEI FACTORI[3] = "trn\transitFactors_SET3.fac"
+            
+            FILEI FAREMATI[1] = "trn\fareMatrix.txt"
+            FILEI FAREI= "trn\fares.far"
+            
+            FILEO NETO = "trn\mtc_transit_network_@TOKEN_PERIOD@_with_transit.net" 
+            
+            READ FILE = @SKIM_MATRICES@
+            
+            FILEO LINEO = "trn\mtc_transit_lines_@TOKEN_PERIOD@_with_transit.lin"
+            FILEO NTLEGO = "trn\mtc_transit_ntlegs_@TOKEN_PERIOD@_with_transit.ntl"
+
+            ; These files are gigantic and writing many simultaneously cause PT to fail
+            ; with the message: F(801): (EnumRoutes) Failure writing to output routes file.
+            ; We cannot comment them out, however, since 
+            ; "The statement ROUTEO[x] invokes the route-enumeration process for user class x." (!!)
+            FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET1_with_transit.rte"
+            FILEO ROUTEO[2] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET2_with_transit.rte"
+            FILEO ROUTEO[3] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET3_with_transit.rte"
+
+            FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_with_transit.rpt"
+            
+            PARAMETERS HDWAYPERIOD=@PERIOD@
+            PARAMETERS NOROUTEERRS=17000000
+            PARAMETERS TRANTIME=LI.TRANTIME
+            PARAMETERS MAPSCALE=5280
+
+            PROCESS PHASE=LINKREAD
+                LW.TRANTIME = LI.TRANTIME
+                LW.DISTANCE = LI.FEET/5280
+            ENDPROCESS
+            
+            PHASE=DATAPREP
+                ;access/egress links
+                GENERATE,       
+                    NTLEGMODE=991,
+                    INCLUDELINK=(LI.NTL_MODE=1),
+                    COST=LI.WALKTIME,
+                    MAXCOST=999*500,
+                    ONEWAY=T
+                ;transfer links
+                GENERATE,
+                    NTLEGMODE=992,       
+                    INCLUDELINK=(LI.NTL_MODE=2),
+                    COST=LI.WALKTIME,
+                    MAXCOST=999*500,
+                    DIRECTLINK = 3,
+                    FROMNODE=1-10000000,
+                    TONODE=1-10000000    
+            ENDPHASE
+            
+            READ FILE = @SKIM_MATRIX_DEF@
+
+        ENDRUN
+
+        ;clean up
+        *del trn\mtc_transit_network_@TOKEN_PERIOD@.net
+
+    EndDistributeMultistep
 
     
-    LOOP SKIMSET = 1,3
-
-        ; specify SKIMSET specific stuff
-        SKIMSET_NAME = 'SET' + STR(SKIMSET,1,0)
-        counter = 3*(PERIOD - 1) + SKIMSET
-
-        ; do each time of day and SKIMSET as a separate process
-        DistributeMultistep processid = 'MTC_TRANSKIM', processNum = counter
-            ;make a copy of the network so that we don't walk all over each other
-            *copy hwy\mtc_transit_network_@TOKEN_PERIOD@_CONG.net trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net
-            
-
-            ;next, build actual transit skims
-            RUN PGM = PUBLIC TRANSPORT
-                FILEI NETI = "trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net"
-                FILEI LINEI[1] = "trn\transitLines_new_nodes.lin"
-                FILEI SYSTEMI = "trn\transitSystem.PTS"
-                FILEI FACTORI[1] = "trn\transitFactors_@SKIMSET_NAME@.fac"
-                
-                FILEI FAREMATI[1] = "trn\fareMatrix.txt"
-                FILEI FAREI= "trn\fares.far"
-                
-                FILEO NETO = "trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.net" 
-                FILEO MATO[1] = "skims\transit_skims_@TOKEN_PERIOD@_@SKIMSET_NAME@.TPP",
-                                 MO=2-17, 
-                                 NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,
-                                        LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
-                FILEO LINEO = "trn\mtc_transit_lines_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.lin"
-                FILEO NTLEGO = "trn\mtc_transit_ntlegs_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.ntl"
-
-                ; These files are gigantic and writing many simultaneously cause PT to fail
-                ; with the message: F(801): (EnumRoutes) Failure writing to output routes file.
-                ; We cannot comment them out, however, since 
-                ; "The statement ROUTEO[x] invokes the route-enumeration process for user class x." (!!)
-                FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.rte"
-
-                FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_@SKIMSET_NAME@_with_transit.rpt"
-                
-                PARAMETERS HDWAYPERIOD=@PERIOD@
-                PARAMETERS NOROUTEERRS=17000000
-                PARAMETERS TRANTIME=LI.TRANTIME
-                PARAMETERS MAPSCALE=5280
-
-                PROCESS PHASE=LINKREAD
-                    LW.TRANTIME = LI.TRANTIME
-                    LW.DISTANCE = LI.FEET/5280
-                ENDPROCESS
-                
-                PHASE=DATAPREP
-                    ;access/egress links
-                    GENERATE,       
-                        NTLEGMODE=991,
-                        INCLUDELINK=(LI.NTL_MODE=1),
-                        COST=LI.WALKTIME,
-                        MAXCOST=999*500,
-                        ONEWAY=T
-                    ;transfer links
-                    GENERATE,
-                        NTLEGMODE=992,       
-                        INCLUDELINK=(LI.NTL_MODE=2),
-                        COST=LI.WALKTIME,
-                        MAXCOST=999*500,
-                        DIRECTLINK = 3,
-                        FROMNODE=1-10000000,
-                        TONODE=1-10000000    
-                ENDPHASE
-
-                ;SKIMIJ loops over IJ pairs. Skims are saved in working matrices in this phase
-                PHASE=SKIMIJ
-                    MW[2] = COMPCOST(0)
-                    MW[3] = IWAITA(0)
-                    MW[4] = XWAITA(0)
-                    MW[5] = XFERPENA(0,ALLMODES)
-                    MW[6] = BRDPEN(0,ALLMODES)
-                    MW[7] = BRDINGS(0,ALLMODES)
-                    MW[8] = FAREA(0,ALLMODES)
-                    MW[9] = TIMEA(0,992)            ;transfer wait time
-                    MW[10] = TIMEA(0,991)           ;access/egress wait time
-                    MW[11] = TIMEA(0,1,-79)         ;Local Bus
-                    MW[12] = TIMEA(0,80,-99)        ;Express Bus
-                    MW[13] = TIMEA(0,100,-109)      ;Ferry 
-                    MW[14] = TIMEA(0,110,-119)      ;Light Rail
-                    MW[15] = TIMEA(0,120,-129)      ;Heavy Rail
-                    MW[16] = TIMEA(0,130,-139)      ;Commuter Rail
-                    MW[17] = 0
-
-                ENDPHASE
-                
-                ;set best mode matrix; hierarchy is implied
-                ;CR > HR > LR > FERRY > EB > LB :: 6 > 5 > 4 > 3 > 2 > 1
-                PHASE=MATO
-                    JLOOP
-                        IF (MW[7] > 0)
-                            MW[7] = MW[7] - 1
-                        ENDIF
-                        IF (MW[16] > 0)
-                            MW[17] = 6
-                        ELSEIF (MW[15] > 0)
-                            MW[17] = 5
-                        ELSEIF (MW[14] > 0)
-                            MW[17] = 4
-                        ELSEIF (MW[13] > 0)
-                            MW[17] = 3
-                        ELSEIF (MW[12] > 0)
-                            MW[17] = 2
-                        ELSEIF (MW[11] > 0)
-                            MW[17] = 1
-                        ENDIF
-                    ENDJLOOP
-                ENDPHASE
-            ENDRUN
-
-            ;clean up
-            *del trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net
-
-        EndDistributeMultistep
-
-    ENDLOOP
 ENDLOOP
 
 Wait4Files files = MTC_TRANSKIM1.script.end, MTC_TRANSKIM2.script.end, MTC_TRANSKIM3.script.end, MTC_TRANSKIM4.script.end, MTC_TRANSKIM5.script.end,
-                   MTC_TRANSKIM6.script.end, MTC_TRANSKIM7.script.end, MTC_TRANSKIM8.script.end, MTC_TRANSKIM9.script.end, MTC_TRANSKIM10.script.end,
-                   MTC_TRANSKIM11.script.end, MTC_TRANSKIM12.script.end, MTC_TRANSKIM13.script.end, MTC_TRANSKIM14.script.end, MTC_TRANSKIM15.script.end,
            printfiles = merge, deldistribfiles = t, CheckReturnCode = t
 
 ;stop cluster nodes
-*Cluster.exe MTC_TRANSKIM 1-15 close exit
+*Cluster.exe MTC_TRANSKIM 1-5 close exit
