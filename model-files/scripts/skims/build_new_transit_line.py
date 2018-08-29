@@ -75,6 +75,7 @@ for temp_line in open(line_file):
         for str_n in line[i].strip().split(','):
             # strip whitespace
             str_n = str_n.strip()
+            if str_n=="": continue
             # print("str_n={}".format(str_n))
 
             if str_n.lstrip('-').isdigit():
