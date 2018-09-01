@@ -21,7 +21,7 @@ set JPPF_LIB=%JAR_LOCATION%\lib\JPPF-2.5-admin-ui\lib\*
 set LIB_JAR_PATH=%JPPF_LIB%;%JAR_LOCATION%\lib\sandagLib\*;%JAR_LOCATION%\lib\jxlLib\*;%JAR_LOCATION%\lib\ssjLib\*;%JAR_LOCATION%\lib\cmfLib\*;%JAR_LOCATION%\lib\log4jLib\*
 
 rem ### Define the CLASSPATH environment variable for the classpath needed in this model run.
-set CLASSPATH=%CONFIG%;%RUNTIME%;%LIB_JAR_PATH%;%JAR_LOCATION%\*
+set CLASSPATH=%JAR_LOCATION%\common-base.jar;%JAR_LOCATION%\mtctm2.jar;%CONFIG%;%RUNTIME%;%LIB_JAR_PATH%
 
 IF %RUNTYPE%==LOCAL (
   echo ### Run ABM LOCAL

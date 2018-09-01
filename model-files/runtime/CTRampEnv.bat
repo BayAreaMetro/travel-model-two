@@ -15,7 +15,7 @@ IF %ENVTYPE%==RSG (
 )
 IF %ENVTYPE%==MTC (
   set "JAVA_PATH=C:\Program Files\Java\jdk1.8.0_181"
-  set "TPP_PATH=C:\Program Files\Citilabs\CubeVoyager"
+  set "TPP_PATH=C:\Program Files\Citilabs\CubeVoyager;C:\Program Files (x86)\Citilabs\CubeVoyager"
   set "CUBE_PATH=C:\Program Files (x86)\Citilabs\Cube"
   set "CUBE_DLL_PATH=C:\Program Files\Citilabs\VoyagerFileAPI"
   set "PYTHON_PATH=C:\Python27"
