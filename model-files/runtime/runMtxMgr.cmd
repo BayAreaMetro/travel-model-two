@@ -27,7 +27,7 @@ set JPPF_LIB=%JAR_LOCATION%\lib\JPPF-2.5-admin-ui\lib\*
 set LIB_JAR_PATH=%JPPF_LIB%;%JAR_LOCATION%\lib\sandagLib\*;%JAR_LOCATION%\lib\cmfLib\*;%JAR_LOCATION%\lib\log4jLib\*
 
 rem ### Define the CLASSPATH environment variable for the classpath needed in this model run.
-set CLASSPATH=%CONFIG%;%RUNTIME%;%LIB_JAR_PATH%;%JAR_LOCATION%\*;%JAR_LOCATION%\*
+set CLASSPATH=%JAR_LOCATION%\common-base.jar;%JAR_LOCATION%\mtctm2.jar;%CONFIG%;%RUNTIME%;%LIB_JAR_PATH%
 
 ECHO ***calling: "%JAVA_PATH%\bin\java" -Dname=p%HOST_MATRIX_PORT% -Xmx64g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_mtx.xml com.pb.mtctm2.abm.ctramp.MatrixDataServer -hostname %HOST_IP_ADDRESS% -port %HOST_MATRIX_PORT%
 START "Matrix Manager" "%JAVA_PATH%\bin\java" -Dname=p%HOST_MATRIX_PORT% -Xmx64g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_mtx.xml com.pb.mtctm2.abm.ctramp.MatrixDataServer -hostname %HOST_IP_ADDRESS% -port %HOST_MATRIX_PORT%

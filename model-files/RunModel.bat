@@ -20,7 +20,7 @@ set ENVTYPE=MTC
 
 :: Step 0: Copy over CTRAMP from %GITHUB_DIR%
 if not exist CTRAMP (
-  set "GITHUB_DIR=C:\Users\mtcpb\Documents\GitHub\travel-model-two"
+  set GITHUB_DIR=C:\Users\mtcpb\Documents\GitHub\travel-model-two
   mkdir CTRAMP\model
   mkdir CTRAMP\runtime
   mkdir CTRAMP\scripts
@@ -63,7 +63,7 @@ SET AV_SCENARIO=0
 SET BASE_SCRIPTS=CTRAMP\scripts
 
 :: Add these variables to the PATH environment variable, moving the current path to the back of the list
-set PATH=C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUBE_PATH%;%CUBE_DLL_PATH%;%PYTHON_PATH%
+set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUBE_PATH%;%CUBE_DLL_PATH%;%PYTHON_PATH%
 
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
