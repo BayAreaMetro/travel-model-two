@@ -65,6 +65,7 @@ public class NewTransitPathModel{
     private HashMap<Long,Float> valueOfTimeByHhId; // the maximum VOT for all persons in the household
     private HashMap<Long,Integer> personTypeByPersonNumber;
     private int tripsWithNoTransitPath;
+    private int resimulatedTransitTrips;
     private UtilityExpressionCalculator identifyTripToResimulateUEC;
     private IndexValues                   index;
 	ResimulateTransitPathDMU resimulateDMU;
@@ -140,7 +141,7 @@ public class NewTransitPathModel{
         traceHHIds = new ArrayList<Long>();
         if(hhids.length>0){
         	for(String hhid:hhids){
-        		traceHHIds.add(new Long(hhid));
+        		traceHHIds.add(new Long(hhid.replace(" ","")));
         	}
 		}
         
@@ -174,7 +175,8 @@ public class NewTransitPathModel{
 
         String personFile = directory
                 + Util.getStringValueFromPropertyMap(propertyMap, PersonDataFileProperty); 
-        
+        personFile = insertIterationNumber(personFile,iteration);
+       
         //start with individual trips
         TableDataSet indivTripDataSet = readTableData(indivTripFile);
         readTripList(indivTripDataSet, false);
@@ -222,6 +224,7 @@ public class NewTransitPathModel{
 				continue;
 			}
 				
+			++resimulatedTransitTrips;
 			
 			TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
 	    	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
@@ -237,6 +240,8 @@ public class NewTransitPathModel{
 			int period = trip.getDepartPeriod();
 			int joint = trip.getJoint();
 			
+			int todPeriod = ModelStructure.getSkimPeriodIndex(period);
+			
 			//get the value of time for this person (or hh if joint tour)
 			long personNumber = trip.getPersonNumber();
 			float valueOfTime = (joint == 1) ? valueOfTimeByHhId.get(hhid) : valueOfTimeByPersonNumber.get(personNumber);
@@ -251,12 +256,12 @@ public class NewTransitPathModel{
 		
 
 			if(modelStructure.getTripModeIsWalkTransit(mode))
-				bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.WTW, originMaz, destinationMaz, period, debug, logger, odDistance);
+				bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.WTW, originMaz, destinationMaz, todPeriod, debug, logger, odDistance);
 			else
 				if(inbound==0)
-					bestTaps =  bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.DTW, originMaz, destinationMaz, period, debug, logger, odDistance);
+					bestTaps =  bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.DTW, originMaz, destinationMaz, todPeriod, debug, logger, odDistance);
 				else
-					bestTaps =  bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.WTD, originMaz, destinationMaz, period, debug, logger, odDistance);
+					bestTaps =  bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.WTD, originMaz, destinationMaz, todPeriod, debug, logger, odDistance);
 			
 			//if no best taps for the trip, log the error and move on to the next record
 			if(bestTaps==null){
@@ -280,12 +285,12 @@ public class NewTransitPathModel{
 			
 	     	//recalculate utilities for best walk and drive paths for person attributes
 			if(modelStructure.getTripModeIsWalkTransit(mode))
-				bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.WTW, originMaz, destinationMaz, period, debug, logger, odDistance);
+				bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.WTW, originMaz, destinationMaz, todPeriod, debug, logger, odDistance);
 			else{
 				if(inbound==0)
-					bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.DTW, originMaz, destinationMaz, period, debug, logger, odDistance);
+					bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.DTW, originMaz, destinationMaz, todPeriod, debug, logger, odDistance);
 				else
-					bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.WTD, originMaz, destinationMaz, period, debug, logger, odDistance);
+					bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.WTD, originMaz, destinationMaz, todPeriod, debug, logger, odDistance);
 			}
 			
 			float rnum = (float) random.nextDouble();
@@ -305,7 +310,10 @@ public class NewTransitPathModel{
 				writeTrip(trip,outputJointTripWriter);
 
 		}
-		logger.info("There are "+tripsWithNoTransitPath+" transit trips with no valid transit path");
+		if(tripsWithNoTransitPath>0)
+			logger.info("There are "+tripsWithNoTransitPath+" transit trips with no valid transit path");
+		
+		logger.info("Resimulated "+resimulatedTransitTrips+" transit trips");
 		outputIndivTripWriter.close();
 		outputJointTripWriter.close();
 	}
@@ -372,12 +380,16 @@ public class NewTransitPathModel{
         	String orig_purpose	= inputTripTableData.getStringValueAt(row, "orig_purpose");
         	String dest_purpose = inputTripTableData.getStringValueAt(row, "dest_purpose");
         	float distance = inputTripTableData.getValueAt(row,"trip_dist");
-        	int num_participants = (int) inputTripTableData.getValueAt(row,"num_participants");
+        	
+        	int num_participants=-1;
+        	if(jointTripData){
+        		num_participants = (int) inputTripTableData.getValueAt(row,"num_participants");
+        	}
         	int tour_mode = (int)inputTripTableData.getValueAt(row,"tour_mode");
         	
         	int set = (int)inputTripTableData.getValueAt(row,"set"); 
         	
-           if(modelStructure.getTripModeIsTransit(mode)){
+            if(modelStructure.getTripModeIsTransit(mode)){
         		Trip trip = new Trip(hhid,personId,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,boardingTap,alightingTap,set);
         		trip.setAvAvailable(avAvailable);
         		trip.setTourPurpose(tour_purpose);
@@ -386,7 +398,8 @@ public class NewTransitPathModel{
         		trip.setDistance(distance);
         		trip.setNumberParticipants(num_participants);
         		trip.setTourMode(tour_mode);
-        		
+        		if(num_participants>-1)
+        			trip.setJoint(1);
         		transitTrips.add(trip);
         	} 
         }
@@ -458,13 +471,14 @@ public class NewTransitPathModel{
 	     */
 		public boolean resimulateTransitTrip(Trip trip){
 			
-				
+			int todPeriod = ModelStructure.getSkimPeriodIndex(trip.getDepartPeriod());
+
 			resimulateDMU.setOriginMaz(trip.getOriginMaz());
 			resimulateDMU.setDestinationMaz(trip.getDestinationMaz());
 			resimulateDMU.setBoardingTap(trip.getBoardingTap());
 			resimulateDMU.setAlightingTap(trip.getAlightingTap());
 			resimulateDMU.setSet(trip.getSet());
-			resimulateDMU.setDepartPeriod(trip.getDepartPeriod());
+			resimulateDMU.setTOD(todPeriod);
 		        
 			// set up the index and dmu objects
 		    index.setOriginZone(trip.getBoardingTap());
@@ -580,18 +594,18 @@ public class NewTransitPathModel{
 			}
 		
 			outputRecord = outputRecord + new String(
-					trip.getTourid() 
-					+ trip.getStopid()
-					+ trip.getInbound()
-					+ trip.getTourPurpose()
-					+ trip.getOriginPurpose()
-					+ trip.getDestinationPurpose()
-					+ trip.getOriginMaz()
-					+ trip.getDestinationMaz()
-					+ trip.getDistance()
-					+ trip.getParkingMaz()
-					+ trip.getDepartPeriod()
-					+ trip.getMode());
+					trip.getTourid() + ","
+					+ trip.getStopid() + ","
+					+ trip.getInbound() + ","
+					+ trip.getTourPurpose() + ","
+					+ trip.getOriginPurpose() + ","
+					+ trip.getDestinationPurpose() + ","
+					+ trip.getOriginMaz() + ","
+					+ trip.getDestinationMaz() + ","
+					+ trip.getDistance() + ","
+					+ trip.getParkingMaz() + ","
+					+ trip.getDepartPeriod() + ","
+					+ trip.getMode() + ",");
 			
 			if(trip.getJoint()==1){
 				outputRecord = outputRecord + new String(trip.getNumberParticipants()+",");

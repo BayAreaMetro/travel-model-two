@@ -25,7 +25,7 @@ public class ResimulateTransitPathDMU
     private int boardingTap;
     private int alightingTap;
     private int set;
-    private int departPeriod;
+    private int tod;
 
     public ResimulateTransitPathDMU()
     {
@@ -41,7 +41,7 @@ public class ResimulateTransitPathDMU
         methodIndexMap.put("getBoardingTap", 2);
         methodIndexMap.put("getAlightingTap", 3);
         methodIndexMap.put("getSet", 4);
-        methodIndexMap.put("getDepartPeriod", 5);
+        methodIndexMap.put("getTOD", 5);
 
     }
 
@@ -61,7 +61,7 @@ public class ResimulateTransitPathDMU
             case 4:
                 return getSet();
             case 5:
-                return getDepartPeriod();
+                return getTOD();
 
             default:
                 logger.error("method number = " + variableIndex + " not found");
@@ -135,12 +135,12 @@ public class ResimulateTransitPathDMU
 		this.set = set;
 	}
 
-	public int getDepartPeriod() {
-		return departPeriod;
+	public int getTOD() {
+		return tod;
 	}
 
-	public void setDepartPeriod(int departPeriod) {
-		this.departPeriod = departPeriod;
+	public void setTOD(int tod) {
+		this.tod = tod;
 	}
 
 }
