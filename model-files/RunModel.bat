@@ -228,6 +228,27 @@ ROBOCOPY trn %HH_SERVER_BASE_DIR%\trn tapLines.csv /NDL /NFL
 
 :itercnt
 
+:: ------------------------------------------------------------------------------------------------------
+::
+:: Step 6:  Build the highway and transit skims
+::
+:: ------------------------------------------------------------------------------------------------------
+
+:: Build the initial highway and transit skims
+runtpp %BASE_SCRIPTS%\skims\HwySkims.job
+if ERRORLEVEL 2 goto done
+
+runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
+if ERRORLEVEL 2 goto done
+
+runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
+if ERRORLEVEL 2 goto done
+
+runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
+if ERRORLEVEL 2 goto done
+
+runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
+if ERRORLEVEL 2 goto done
 
 
 ::Step X: Main model iteration setup
@@ -240,54 +261,6 @@ IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
 IF %ITERATION% EQU 4 SET SAMPLERATE=%SAMPLERATE_ITERATION4%
 IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
 ECHO ****MODEL ITERATION %ITERATION% (SAMPLE RATE %SAMPLERATE%)****
-
-:: ------------------------------------------------------------------------------------------------------
-::
-:: Step 6:  Build the highway and transit skims
-::
-:: ------------------------------------------------------------------------------------------------------
-
-
-:: Build the highway and transit skims
-runtpp %BASE_SCRIPTS%\skims\HwySkims.job
-if ERRORLEVEL 2 goto done
-
-runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
-if ERRORLEVEL 2 goto done
-
-runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
-if ERRORLEVEL 2 goto done
-
-
-:: If this is first iteration, run the transit skimming procedure
-if %ITERATION% EQU 1 goto TransitSkim
-
-:: if this is not first iteration, check if the necessary skim
-:: files exist. If they do not, run TransitSkimming
-SET transit_asgn_classes=1 2 3
-SET tod=EA AM MD PM EV
-
-FOR %%s IN (%transit_asgn_classes%) DO (
-  FOR %%t in (%tod%) DO (
-    IF NOT EXIST "skims\transit_skims_%%t_SET%%s.TPP" (
-      goto TransitSkim
-    )
-  )
-)
-
-:: If the code hits this line, all of the skims exist already, 
-:: and it is greater than first iteration. This means that 
-:: the code can drop through to the skim adjustment procedures.
-goto SkimAdjustment
-
-
-:TransitSkim
-runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
-if ERRORLEVEL 2 goto done
-
-:SkimAdjustment
-runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
-if ERRORLEVEL 2 goto done
 
 :: Copy skims and other related files to remote machine
 ROBOCOPY skims %HH_SERVER_BASE_DIR%\skims *.tpp drive_maz_taz_tap.csv /NDL /NFL
@@ -413,14 +386,31 @@ if ERRORLEVEL 2 goto done
 runtpp CTRAMP\scripts\assign\MergeNetworks.job
 if ERRORLEVEL 2 goto done
 
-:: Create the block file that controls whether the crowding functions are called during transit assignment.
-"%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
+:: If another iteration is to be run, run hwy and transit
+:: assignment. Reskim networks, and get everything prepped
+:: for the next iteration.
+IF %ITERATION% LSS %MAX_ITERATION% (
+  runtpp %BASE_SCRIPTS%\skims\HwySkims.job
+  if ERRORLEVEL 2 goto done
 
-:: Run Transit Assignment
-runtpp CTRAMP\scripts\assign\TransitAssign.job
-if ERRORLEVEL 2 goto done
+  runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
+  if ERRORLEVEL 2 goto done
 
-IF %ITERATION% LSS %MAX_ITERATION% GOTO iteration_start
+  runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
+  if ERRORLEVEL 2 goto done
+
+  :: Create the block file that controls whether the crowding functions are called during transit assignment.
+  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
+
+  :: Run Transit Assignment
+  runtpp CTRAMP\scripts\assign\TransitAssign.job
+  if ERRORLEVEL 2 goto done
+  
+  runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
+  if ERRORLEVEL 2 goto done
+  
+  GOTO iteration_start
+)
 
 :: ------------------------------------------------------------------------------------------------------
 ::
