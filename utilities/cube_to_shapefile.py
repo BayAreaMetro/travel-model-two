@@ -131,7 +131,7 @@ if __name__ == '__main__':
     script_env["LINK_OUTFILE"] = LINK_SHPFILE
 
     # run the script to do the work
-    runCubeScript(WORKING_DIR, os.path.join(CODE_DIR, "export_network.job"), script_env)
+    # runCubeScript(WORKING_DIR, os.path.join(CODE_DIR, "export_network.job"), script_env)
     print("Wrote network node file to {}".format(NODE_SHPFILE))
     print("Wrote network link file to {}".format(LINK_SHPFILE))
 
@@ -140,6 +140,7 @@ if __name__ == '__main__':
     arcpy.env.workspace = WORKING_DIR
 
     # define the spatial reference
+    # http://spatialreference.org/ref/esri/nad-1983-stateplane-california-vi-fips-0406-feet/
     sr = arcpy.SpatialReference(102646)
     arcpy.DefineProjection_management(NODE_SHPFILE, sr)
     arcpy.DefineProjection_management(LINK_SHPFILE, sr)
@@ -180,8 +181,9 @@ if __name__ == '__main__':
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "MODE",       "SHORT")
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "MODE_TYPE",  "TEXT", field_length=15)
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "OPERATOR_T", "TEXT", field_length=40)
-        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "VEHICLETYP","SHORT")
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "VEHICLETYP", "SHORT")
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "OPERATOR",   "SHORT")
+        arcpy.DefineProjection_management(TRN_LINES_SHPFILE.format(operator_file), sr)
 
         line_cursor[operator_file] = arcpy.da.InsertCursor(TRN_LINES_SHPFILE.format(operator_file), ["NAME", "SHAPE@",
                                    "HEADWAY_EA", "HEADWAY_AM", "HEADWAY_MD", "HEADWAY_PM", "HEADWAY_EV",
@@ -189,14 +191,17 @@ if __name__ == '__main__':
 
         # create the links shapefile
         arcpy.CreateFeatureclass_management(WORKING_DIR, TRN_LINKS_SHPFILE.format(operator_file), "POLYLINE")
-        arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "NAME",    "TEXT", field_length=25)
-        arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "A",       "LONG")
-        arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "B",       "LONG")
+        arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "NAME",     "TEXT", field_length=25)
+        arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "A",        "LONG")
+        arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "B",        "LONG")
+        arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "A_STATION","TEXT", field_length=40)
+        arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "B_STATION","TEXT", field_length=40)
         arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "SEQ",     "SHORT")
         arcpy.AddField_management(TRN_LINKS_SHPFILE.format(operator_file), "NNTIME",  "FLOAT", field_precision=7, field_scale=2)
+        arcpy.DefineProjection_management(TRN_LINKS_SHPFILE.format(operator_file), sr)
 
         link_cursor[operator_file] = arcpy.da.InsertCursor(TRN_LINKS_SHPFILE.format(operator_file),
-                                                           ["NAME", "SHAPE@", "A", "B", "SEQ", "NNTIME"])
+                                                           ["NAME", "SHAPE@", "A", "B", "A_STATION","B_STATION", "SEQ", "NNTIME"])
 
         # create the stops shapefile
         arcpy.CreateFeatureclass_management(WORKING_DIR, TRN_STOPS_SHPFILE.format(operator_file), "POINT")
@@ -205,16 +210,21 @@ if __name__ == '__main__':
         arcpy.AddField_management(TRN_STOPS_SHPFILE.format(operator_file), "N",        "LONG")
         arcpy.AddField_management(TRN_STOPS_SHPFILE.format(operator_file), "SEQ",      "SHORT")
         arcpy.AddField_management(TRN_STOPS_SHPFILE.format(operator_file), "IS_STOP",  "SHORT")
+        # from node attributes http://bayareametro.github.io/travel-model-two/input/#node-attributes
+        # PNR attributes are for TAPs so not included here
+        arcpy.AddField_management(TRN_STOPS_SHPFILE.format(operator_file), "FAREZONE",  "SHORT")
+        arcpy.DefineProjection_management(TRN_STOPS_SHPFILE.format(operator_file), sr)
 
         stop_cursor[operator_file] = arcpy.da.InsertCursor(TRN_STOPS_SHPFILE.format(operator_file),
-                                                           ["NAME", "SHAPE@", "STATION", "N", "SEQ", "IS_STOP"])
+                                                           ["NAME", "SHAPE@", "STATION", "N", "SEQ", "IS_STOP", "FAREZONE"])
     # print(operator_to_file)
 
     # read the node points
     nodes_array = arcpy.da.TableToNumPyArray(in_table="{}.DBF".format(NODE_SHPFILE[:-4]),
-                                             field_names=["N","X","Y"])
-    nodes_x =  dict(zip(nodes_array["N"].tolist(), nodes_array["X"].tolist()))
-    nodes_y =  dict(zip(nodes_array["N"].tolist(), nodes_array["Y"].tolist()))
+                                             field_names=["N","X","Y","FAREZONE"])
+    node_dicts = {}
+    for node_field in ["X","Y","FAREZONE"]:
+        node_dicts[node_field] = dict(zip(nodes_array["N"].tolist(), nodes_array[node_field].tolist()))
 
     # read the stop information, if there is any
     stops_to_station = {}
@@ -240,9 +250,10 @@ if __name__ == '__main__':
 
         line_point_array = arcpy.Array()
         link_point_array = arcpy.Array()
-        last_n = -1
-        seq    = 1
-        op_txt = line.attr['USERA1'].strip('\""')
+        last_n           = -1
+        last_station     = ""
+        seq              = 1
+        op_txt           = line.attr['USERA1'].strip('\""')
 
         if not args.by_operator:
             operator_file = ""
@@ -272,10 +283,10 @@ if __name__ == '__main__':
             # and sets the time from node 4 to node 7 to fifteen minutes.
 
             # print(node.num, n, node.attr, node.stop)
-            point = arcpy.Point( nodes_x[n], nodes_y[n] )
+            point = arcpy.Point( node_dicts["X"][n], node_dicts["Y"][n] )
 
             # start at 0 for stops
-            stop_cursor[operator_file].insertRow([line.name, point, station, n, seq-0, is_stop])
+            stop_cursor[operator_file].insertRow([line.name, point, station, n, seq-0, is_stop, node_dicts["FAREZONE"][n]])
             stop_count += 1
 
             # add to line array
@@ -289,19 +300,20 @@ if __name__ == '__main__':
                ((args.join_link_nntime == True ) and (nntime > 0)):
                 plink_shape = arcpy.Polyline(link_point_array)
                 link_cursor[operator_file].insertRow([line.name, plink_shape,
-                                                      last_n, n, seq, nntime])
+                                                      last_n, n, last_station, station, seq, nntime])
                 link_count += 1
                 link_point_array.removeAll()
                 link_point_array.add(point)
 
             last_n = n
+            last_station = station
             seq += 1
 
         # one last link if necessary
         if link_point_array.count > 1:
             plink_shape = arcpy.Polyline(link_point_array)
             link_cursor[operator_file].insertRow([line.name, plink_shape,
-                                                  last_n, n, seq, nntime])
+                                                  last_n, n, last_station, station, seq, nntime])
             link_count += 1
             link_point_array.removeAll()
 
