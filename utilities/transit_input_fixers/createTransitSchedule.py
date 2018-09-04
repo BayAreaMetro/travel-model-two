@@ -9,6 +9,16 @@ USAGE = """
 
 Create transit schedule from spreadsheet or gtfs.
 
+Specify an operator set -- currently support Caltrain_NB, Caltrain_SB and SonomaCounty.
+
+For Caltrain, the schedule is read from a spreadsheet since this is a typical representation of the Caltrain schedule.
+The lines are then clustered based on their stop pattern and those are converted into Local/Limited/Baby Bullet lines.
+
+For SonomaCounty, the route alignment is pulled from the existing network coding.  For each route/direction, the existing
+network coding doesn't indicate which direction it's for, so that needs to be configured for bi-directional routes.  The
+longest (most stops) coding is assumed to be the prototype line, and it's renamed for legibility according to configuration,
+and the frequencies are set according the the gtfs frequencies for the route/direction.
+
 """
 
 USERNAME     = os.environ["USERNAME"]
@@ -222,24 +232,27 @@ def gtfsToSchedule(operator_set, feed, existing_trn_net):
             # 15740  5969406           NaN             NaN  12009733              4            
             # 15741  5969406           NaN             NaN  12009802              5            
 
+
             # start with the longest lines and work backwards
             trip_lengths_df = trip_stop_times_df[["trip_id","stop_sequence"]].groupby(["trip_id"]).agg("count").reset_index()
             trip_lengths_df.sort_values(by="stop_sequence", ascending=False, inplace=True)
             Wrangler.WranglerLogger.info("trip lengths:\n{}".format(trip_lengths_df))
 
-            # try to construct a single stop sequence for all trips
-            trip_ids_by_len  = trip_lengths_df["trip_id"].tolist()
-            stop_sequence_df = pandas.DataFrame()
-            try:
-                for trip_id in trip_ids_by_len:
-                    stop_sequence_df = addTripStopsToStopSequence(stop_sequence_df, trip_id, trip_stop_times_df.loc[trip_stop_times_df["trip_id"]==trip_id])
-
-                Wrangler.WranglerLogger.debug("Final stop sequence:\n{}".format(stop_sequence_df))
-
-            except RuntimeError as error:
-                Wrangler.WranglerLogger.warn("Problem creating unified stop sequence for trips")
-                Wrangler.WranglerLogger.warn(error)
+            # disabling this for now since transit route variations tend to be too complicated for this to work :(
+            if False:
+                # try to construct a single stop sequence for all trips
+                trip_ids_by_len  = trip_lengths_df["trip_id"].tolist()
                 stop_sequence_df = pandas.DataFrame()
+                try:
+                    for trip_id in trip_ids_by_len:
+                        stop_sequence_df = addTripStopsToStopSequence(stop_sequence_df, trip_id, trip_stop_times_df.loc[trip_stop_times_df["trip_id"]==trip_id])
+
+                    Wrangler.WranglerLogger.debug("Final stop sequence:\n{}".format(stop_sequence_df))
+
+                except RuntimeError as error:
+                    Wrangler.WranglerLogger.warn("Problem creating unified stop sequence for trips")
+                    Wrangler.WranglerLogger.warn(error)
+                    stop_sequence_df = pandas.DataFrame()
 
             # if we have no existing network lines to base this route on, continue
             # (we didn't continue earlier to get info on the gtfs lines being dropped)
@@ -731,6 +744,8 @@ def tripClusterToNetwork(operator_set, schedule_df, station_key_df, trips_df):
     trn_net.program = Wrangler.TransitParser.PROGRAM_PT
     type_counts = collections.Counter()
 
+    trn_line_dict = {}
+
     # iterate through clusters
     lines_with_single_trip_type = 0
     for cluster_id in sorted(trips_df["cluster"].unique().tolist()):
@@ -795,12 +810,16 @@ def tripClusterToNetwork(operator_set, schedule_df, station_key_df, trips_df):
         for stop_rec in trip_schedule_df.to_dict(orient="records"):
             # print(stop_rec)
             stop_node = Wrangler.Node(int(stop_rec["Station Node"]))
-            if stop_rec["link_time"]:
+            if "link_time" in stop_rec and not math.isnan(stop_rec["link_time"].total_seconds()):
                 stop_node.attr["NNTIME"] = stop_rec["link_time"].total_seconds()/60.0
             stop_node.comment = "  ; " + stop_rec["Station Name"]
             trn_line.n.append(stop_node)
 
-        trn_net.lines.append(trn_line)
+        trn_line_dict[trn_line.name] = trn_line
+
+    # add the lines in alpha order
+    for line_name in sorted(trn_line_dict.keys()):
+        trn_net.lines.append(trn_line_dict[line_name])
 
     # return it
     single_trip_type_pct = float(lines_with_single_trip_type)/float(len(trn_net.lines))
