@@ -183,7 +183,6 @@ LOOP PERIOD = 1,5
             *del trn\mtc_transit_network_@TOKEN_PERIOD@.net
 
         EndDistributeMultistep
-    ENDIF
     
 ENDLOOP
 
