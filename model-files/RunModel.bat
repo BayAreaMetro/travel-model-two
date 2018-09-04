@@ -258,11 +258,34 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
 if ERRORLEVEL 2 goto done
 
-if not exist skims\transit_skims_AM_SET1.TPP (
-  runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
-  if ERRORLEVEL 2 goto done
+
+:: If this is first iteration, run the transit skimming procedure
+if %ITERATION% EQU 1 goto TransitSkim
+
+:: if this is not first iteration, check if the necessary skim
+:: files exist. If they do not, run TransitSkimming
+SET transit_asgn_classes=1 2 3
+SET tod=EA AM MD PM EV
+
+FOR %%s IN (%transit_asgn_classes%) DO (
+  FOR %%t in (%tod%) DO (
+    IF NOT EXIST "skims\transit_skims_%%t_SET%%s.TPP" (
+      goto TransitSkim
+    )
+  )
 )
 
+:: If the code hits this line, all of the skims exist already, 
+:: and it is greater than first iteration. This means that 
+:: the code can drop through to the skim adjustment procedures.
+goto SkimAdjustment
+
+
+:TransitSkim
+runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
+if ERRORLEVEL 2 goto done
+
+:SkimAdjustment
 runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
 if ERRORLEVEL 2 goto done
 
