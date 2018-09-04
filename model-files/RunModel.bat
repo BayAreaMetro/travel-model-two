@@ -413,8 +413,6 @@ if ERRORLEVEL 2 goto done
 runtpp CTRAMP\scripts\assign\MergeNetworks.job
 if ERRORLEVEL 2 goto done
 
-IF %ITERATION% LSS %MAX_ITERATION% GOTO iteration_start
-
 :: Create the block file that controls whether the crowding functions are called during transit assignment.
 "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
 
@@ -422,6 +420,7 @@ IF %ITERATION% LSS %MAX_ITERATION% GOTO iteration_start
 runtpp CTRAMP\scripts\assign\TransitAssign.job
 if ERRORLEVEL 2 goto done
 
+IF %ITERATION% LSS %MAX_ITERATION% GOTO iteration_start
 
 :: ------------------------------------------------------------------------------------------------------
 ::
