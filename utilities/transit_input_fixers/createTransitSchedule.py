@@ -31,7 +31,7 @@ OPERATOR_SET_DICT = {
     "Caltrain_NB":{
         "schedule_file": r"M:\\Data\\Transit\\Schedules\\Caltrain\\Caltrain.xlsx",
         "sheet_name"   : "2015 Northbound",
-        "existing_re"  : "^CT_NORTH",
+        "existing_re"  : "^CT_N",
         "lin_prefix"   : "CT_NB",
         "winner_label" : "agg_avg_09",
         # line attributes
@@ -44,7 +44,7 @@ OPERATOR_SET_DICT = {
     "Caltrain_SB":{
         "schedule_file": r"M:\\Data\\Transit\\Schedules\\Caltrain\\Caltrain.xlsx",
         "sheet_name"   : "2015 Southbound",
-        "existing_re"  : "^CT_SOUTH",
+        "existing_re"  : "^CT_S",
         "lin_prefix"   : "CT_SB",
         "winner_label" : "agg_avg_12",
         # line attributes
@@ -797,19 +797,34 @@ def tripClusterToNetwork(operator_set, schedule_df, station_key_df, trips_df):
         # get Station Num
         trip_schedule_df = pandas.merge(left=trip_schedule_df, right=station_key_df, how="left")
         # drop non-stops
-        trip_schedule_df = trip_schedule_df.loc[ pandas.notnull(trip_schedule_df["stop_time"])]
+        trip_stops_df = trip_schedule_df.loc[ pandas.notnull(trip_schedule_df["stop_time"])]
         # set prev stop time
-        trip_schedule_df["prev_stop_time"] = trip_schedule_df["stop_time"].shift(1)
-        trip_schedule_df["link_time"] = trip_schedule_df["stop_time"] - trip_schedule_df["prev_stop_time"]
-        trip_schedule_df.loc[ trip_schedule_df["link_time"] < pandas.to_timedelta("0 seconds"), "link_time"] = trip_schedule_df["link_time"] + pandas.to_timedelta("1 day")
-        neg_link_time_df = trip_schedule_df.loc[ trip_schedule_df["link_time"] < pandas.to_timedelta("0 seconds") ]
+        trip_stops_df["prev_stop_time"] = trip_stops_df["stop_time"].shift(1)
+        trip_stops_df["link_time"] = trip_stops_df["stop_time"] - trip_stops_df["prev_stop_time"]
+        trip_stops_df.loc[ trip_stops_df["link_time"] < pandas.to_timedelta("0 seconds"), "link_time"] = trip_stops_df["link_time"] + pandas.to_timedelta("1 day")
+        neg_link_time_df = trip_stops_df.loc[ trip_stops_df["link_time"] < pandas.to_timedelta("0 seconds") ]
         if len(neg_link_time_df) > 0:
             Wrangler.WranglerLogger.fatal("negative link times:\n{}".format(neg_link_time_df))
             sys.exit(2)
 
+        first_station_num = trip_stops_df.iloc[0]["Station Num"]
+        last_station_num  = trip_stops_df.iloc[-1]["Station Num"]
+        # Wrangler.WranglerLogger.debug("first_station_num: {}  last_station_num: {}".format(first_station_num, last_station_num))
+
+        # put the link times back into trip_schedule_df and trim to first/last stations
+        trip_schedule_df = pandas.merge(left=trip_schedule_df, right=trip_stops_df[["Station Num","link_time"]], how="left")
+        trip_schedule_df = trip_schedule_df.loc[ trip_schedule_df["Station Num"] >= first_station_num ]
+        trip_schedule_df = trip_schedule_df.loc[ trip_schedule_df["Station Num"] <=  last_station_num ]
+        # Wrangler.WranglerLogger.debug("trip_schedule_df:\n{}".format(trip_schedule_df))
+
         for stop_rec in trip_schedule_df.to_dict(orient="records"):
             # print(stop_rec)
             stop_node = Wrangler.Node(int(stop_rec["Station Node"]))
+
+            # no stop_time means not a stop
+            if "stop_time" not in stop_rec or pandas.isnull(stop_rec["stop_time"]):
+                stop_node.setStop(False)
+
             if "link_time" in stop_rec and not math.isnan(stop_rec["link_time"].total_seconds()):
                 stop_node.attr["NNTIME"] = stop_rec["link_time"].total_seconds()/60.0
             stop_node.comment = "  ; " + stop_rec["Station Name"]
