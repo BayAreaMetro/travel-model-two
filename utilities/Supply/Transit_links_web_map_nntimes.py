@@ -12,6 +12,7 @@ INFILE_LOCATION = r"M:\Development\Travel Model Two\Supply\Transit\Network_QA\Cu
 # it is needed so that different versions of the same operator's web map can be saved on ArcGIS online
 VERSION_INDICATOR = ""
 
+# operators with no grade-separated transit lines are commented out below
 TRN_OPERATORS = collections.OrderedDict([
     # filename_append       # list of operator text
     ("other" ,              []),
@@ -47,12 +48,20 @@ for operator_file in operator_files:
 
     arcpy.DefineProjection_management(operator_layer, sr)
 
-	# simplify the name of each layer
+
+
+    # simplify the name of each layer
     for m in aprx.listMaps():
         for lyr in m.listLayers():
             if lyr.name == "network_trn_links_" + operator_file:
                 print("Layer " + lyr.name + " is renamed to " + operator_file + VERSION_INDICATOR)
                 lyr.name = operator_file + VERSION_INDICATOR
+
+                nntime_file = "C:\\Users\\ftsang\\Documents\\ArcGIS\\projects\\NetworkQA_nntimes_codedev\\" + operator_file + VERSION_INDICATOR + "_nntime.shp"
+                arcpy.management.SelectLayerByAttribute(operator_file + VERSION_INDICATOR, "NEW_SELECTION", "NNTIME <> -999", None)
+                arcpy.management.CopyFeatures(operator_file + VERSION_INDICATOR, nntime_file, None, None, None, None)
+
+                m.removeLayer(lyr)
 
 
 # save the ArcGIS project
