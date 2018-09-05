@@ -200,13 +200,16 @@ if __name__ == '__main__':
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "VEHICLETYP", "SHORT")
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "VTYPE_NAME", "TEXT", field_length=40)
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "SEATCAP",    "SHORT")
-        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "CRUSHCAP",    "SHORT")
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "CRUSHCAP",   "SHORT")
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "OPERATOR",   "SHORT")
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "FARESTRUCT", "TEXT", field_length=12)
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "IBOARDFARE", "FLOAT")
         arcpy.DefineProjection_management(TRN_LINES_SHPFILE.format(operator_file), sr)
 
         line_cursor[operator_file] = arcpy.da.InsertCursor(TRN_LINES_SHPFILE.format(operator_file), ["NAME", "SHAPE@",
                                    "HEADWAY_EA", "HEADWAY_AM", "HEADWAY_MD", "HEADWAY_PM", "HEADWAY_EV",
-                                   "MODE", "MODE_TYPE", "OPERATOR_T", "VEHICLETYP", "VTYPE_NAME", "SEATCAP", "CRUSHCAP", "OPERATOR"])
+                                   "MODE", "MODE_TYPE", "OPERATOR_T", "VEHICLETYP", "VTYPE_NAME", "SEATCAP", "CRUSHCAP",
+                                   "OPERATOR", "FARESTRUCT", "IBOARDFARE"])
 
         # create the links shapefile
         arcpy.CreateFeatureclass_management(WORKING_DIR, TRN_LINKS_SHPFILE.format(operator_file), "POLYLINE")
@@ -342,12 +345,20 @@ if __name__ == '__main__':
         vtype_name = ""
         seatcap    = 0
         crushcap   = 0
-
         if vtype_num in trn_net.ptsystem.vehicleTypes:
             vtype_dict = trn_net.ptsystem.vehicleTypes[vtype_num]
             if "NAME"     in vtype_dict: vtype_name = vtype_dict["NAME"].strip('"')
             if "SEATCAP"  in vtype_dict: seatcap    = int(vtype_dict["SEATCAP"])
             if "CRUSHCAP" in vtype_dict: crushcap   = int(vtype_dict["CRUSHCAP"])
+
+        farestruct = ""
+        iboardfare = 0
+        # in TM2, fare lookup is mode-based
+        mode_num = int(line.attr['MODE'])
+        if mode_num in trn_net.faresystems:
+            faresystem = trn_net.faresystems[mode_num]
+            if "STRUCTURE"  in faresystem: farestruct = faresystem["STRUCTURE"]
+            if farestruct.upper()=="FLAT" and "IBOARDFARE" in faresystem: iboardfare = float(faresystem["IBOARDFARE"])
 
         pline_shape = arcpy.Polyline(line_point_array)
         line_cursor[operator_file].insertRow([line.name, pline_shape,
@@ -361,7 +372,8 @@ if __name__ == '__main__':
                                               op_txt, # operator
                                               line.attr['VEHICLETYPE'],
                                               vtype_name, seatcap, crushcap,
-                                              line.attr['OPERATOR']
+                                              line.attr['OPERATOR'],
+                                              farestruct, iboardfare
                                             ])
         line_count += 1
 
