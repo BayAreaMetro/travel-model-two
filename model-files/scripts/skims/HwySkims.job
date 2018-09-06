@@ -10,15 +10,15 @@
 ;
 ; The skims are based on the shortest generalized cost path; the generalized cost calculation makes the following
 ; assumptions:
-;    (a) the automobile operating cost is 14.2 cents ($2000) per mile, which is based on a state-wide agreed 
+;    (a) the automobile operating cost is 14.2 cents (2010 dollars) per mile, which is based on a state-wide agreed 
 ;        upon approach (use EMFAC's implied fleetwide MPG combined with an agreed upon gas price);
-;    (b) the truck operating cost is 28.4 cents ($2000) per mile, which is assumed to be two times the
+;    (b) the truck operating cost is 28.4 cents (2010 dollars) per mile, which is assumed to be two times the
 ;        passenger vehicle operating cost;
-;    (c) the assumed personal vehicle value of time is $15 per hour ($2000); a value of time is needed to 
+;    (c) the assumed personal vehicle value of time is $15 per hour (2010 dollars); a value of time is needed to 
 ;           determine if the value toll path is reasonable and one should lean towards a high value, which will 
 ;           create a pay path, thus allowing the mode choice model the opportunity to evaluate it -- Vovsha 
 ;           recommends a value of time in the $6 to $22 ($2008) per hour range, which we are in;
-;    (d) the assumed commercial vehicle value of time is $30 per hour ($2000) -- Vovsha recommends $30 per hour
+;    (d) the assumed commercial vehicle value of time is $30 per hour (2010 dollars) -- Vovsha recommends $30 per hour
 ;           ($2008) for light trucks and $60 per hour ($2008) for heavy trucks, we are in this range and, again,
 ;           the value of time is only used to create reasonable pay paths;
 ;    (e) shared ride 2 vehicles share tolls, but not evenly, as some vehicles will contain two members from the
@@ -117,7 +117,7 @@
 ;        (28) Large (four-plus axle) truck value toll path, value toll (year 2000 cents), TOLLVTOLLLRG;
 ;                                     
 ;
-; Notes:  (1)  Output matrices are in miles, minutes, and cents ($2000) and are stored as real values;
+; Notes:  (1)  Output matrices are in miles, minutes, and cents (2010 dollars) and are stored as real values;
 ;         (2)  Intrazonal distance/time is one half the distance/time to the nearest neighbor;
 ;         (3)  Intrazonal bridge and value tolls are assumed to be zero
 ;

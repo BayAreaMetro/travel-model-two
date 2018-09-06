@@ -4,3 +4,5 @@ core/release/
 /bin/
 *.log
 *.bak
+*.exe
+model-files/runtime/config/pskill.exe
