@@ -1502,4 +1502,22 @@ public class BestTransitPathCalculator implements Serializable
     }
 
 
+
+	public float getNestingCoefficient() {
+		return nestingCoefficient;
+	}
+
+
+
+	public void setNestingCoefficient(float nestingCoefficient) {
+		this.nestingCoefficient = nestingCoefficient;
+	}
+
+
+
+	public UtilityExpressionCalculator getTapToTapUEC() {
+		return tapToTapUEC;
+	}
+
+
 }

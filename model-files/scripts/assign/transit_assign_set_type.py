@@ -79,9 +79,11 @@ skims = {
 
 with open(output_file, 'w') as f:
     if crowding_config['enabled']:
-        f.write(crowding_line + '\n')
+        f.write(crowding_line)
         if crowding_config['advanced']:
-            f.write(crowd_convergence + '\n')
+            f.write(',\n' + crowd_convergence + '\n')
+        else:
+		    f.write('\n')
     
     f.write('\nPHASE=SKIMIJ\n')
     for idx, skim in skims.iteritems():

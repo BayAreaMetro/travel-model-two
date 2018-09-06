@@ -41,6 +41,11 @@ public class Util implements Serializable {
         	array[i] = Integer.parseInt(values[i]);
         return array;
     }
+    
+    public static String[] getStringArrayFromPropertyMap(HashMap<String, String> rbMap, String key) {
+        String[] values = getStringValueFromPropertyMap(rbMap,key).split(",");
+        return values;
+    }
 
     public static float[] getFloatArrayFromPropertyMap(HashMap<String, String> rbMap, String key) {
         String[] values = getStringValueFromPropertyMap(rbMap,key).split(",");
