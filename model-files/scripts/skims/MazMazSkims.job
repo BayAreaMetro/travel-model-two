@@ -270,7 +270,7 @@ LOOP PROC_COUNT=1,9
                  ENDRUN
                  
                 ;run script
-                *"C:\Program Files (x86)\Citilabs\CubeVoyager\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
+                *Voyager.exe @SFILE@_@SKIM_COUNTY@.s /Start
                 
                 ;clean-up
                 *del @SFILE@_@SKIM_COUNTY@.s
@@ -301,6 +301,7 @@ Wait4Files Files=MTC_HWYMAZSKIM1.script.end, MTC_HWYMAZSKIM2.script.end, MTC_HWY
 *del skims\HWYSKIM_MAZMAZ_BTOLL_DA_*.txt
 
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\HWYSKIM_MAZMAZ_DIST_DA.txt 3
+IF (RETURNCODE > 0) abort
+
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\HWYSKIM_MAZMAZ_BTOLL_DA.txt 3
-
-
+IF (RETURNCODE > 0) abort

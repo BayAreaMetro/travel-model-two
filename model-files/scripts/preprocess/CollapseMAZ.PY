@@ -120,13 +120,14 @@ outDf = pd.concat(frames)
 
 outDf['MAZ_ORIGINAL'] = outDf.MAZ_ORIGINAL.astype(int)
 outDf['TAZ_ORIGINAL'] = outDf.TAZ_ORIGINAL.astype(int)
+outDf['TAZ'] = outDf.TAZ.astype(int)
 outDf = outDf.sort_values(by='MAZ_ORIGINAL', ascending=True)
 
 count = 1
 for row in outDf.iterrows():
     count+=1
 outDf['MAZ'] = (range(1, count, 1))
-outDf['TAZ'] = 0
+# outDf['TAZ'] = 0
 # Zero outfields to leave blank ('nonObs" fields)
 for field in nonObs:
     outDf[field] = 0

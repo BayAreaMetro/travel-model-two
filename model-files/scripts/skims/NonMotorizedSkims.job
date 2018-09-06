@@ -305,3 +305,6 @@ IF (RETURNCODE > 0) abort
 
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_tap_tap.txt 3
 IF (RETURNCODE > 0) abort
+
+; clean up generated scripts
+*del SP_BIKE_MAZ_MAZ_?.s SP_BIKE_MAZ_TAP_?.s SP_BIKE_TAZ_TAZ_?.s SP_PED_MAZ_MAZ_?.s SP_PED_MAZ_TAP_?.s SP_PED_TAP_TAP_?.s
