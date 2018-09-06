@@ -1,4 +1,5 @@
-# This script takes 15 shapefiles generated from Cube_to_shapefile.py as input and add them to a .aprx
+# This script takes shapefiles generated from Cube_to_shapefile.py as input and add them to a .aprx
+# Only operators with grade-separated transit lines are included
 
 # The script is to be run within ArcGIS Pro's python window
 # User will need top start a blank ArcGIS project (a .aprx file), open a basemap, and copy the following code in the Python window
@@ -6,7 +7,8 @@
 import arcpy
 import collections
 
-INFILE_LOCATION = r"M:\Development\Travel Model Two\Supply\Transit\Network_QA\Cube_to_shapefile"
+INFILE_LOCATION = r"M:\Development\Travel Model Two\Supply\Transit\Network_QA\Cube_to_shapefile_Sep2018RMWG\trn_links_join_nntime"
+OUTFILE_LOCATION = "C:\\Users\\ftsang\\Documents\\ArcGIS\\projects\\NetworkQA_nntimes_codedev3\\"
 
 # the version indicator will appear as a suffix of the map layer
 # it is needed so that different versions of the same operator's web map can be saved on ArcGIS online
@@ -50,17 +52,21 @@ for operator_file in operator_files:
 
 
 
-    # simplify the name of each layer
+    # loop through each layer
     for m in aprx.listMaps():
         for lyr in m.listLayers():
             if lyr.name == "network_trn_links_" + operator_file:
-                print("Layer " + lyr.name + " is renamed to " + operator_file + VERSION_INDICATOR)
-                lyr.name = operator_file + VERSION_INDICATOR
 
-                nntime_file = "C:\\Users\\ftsang\\Documents\\ArcGIS\\projects\\NetworkQA_nntimes_codedev\\" + operator_file + VERSION_INDICATOR + "_nntime.shp"
+                # simplify the name of each layer
+                lyr.name = operator_file + VERSION_INDICATOR
+                print("Layer " + lyr.name + " is renamed to " + operator_file + VERSION_INDICATOR)
+
+                # select records that have NNTIME not equal to -999 and save them as a new shape file
+                nntime_file = OUTFILE_LOCATION + operator_file + VERSION_INDICATOR + "_nntime.shp"
                 arcpy.management.SelectLayerByAttribute(operator_file + VERSION_INDICATOR, "NEW_SELECTION", "NNTIME <> -999", None)
                 arcpy.management.CopyFeatures(operator_file + VERSION_INDICATOR, nntime_file, None, None, None, None)
 
+                # remove the original layers that have all the records
                 m.removeLayer(lyr)
 
 
@@ -70,4 +76,7 @@ aprx.save()
 # manually update the coordinate system of the map to WGS 84
 # see the instructions for "Set the coordinate system from a layer" in:
 # http://pro.arcgis.com/en/pro-app/help/mapping/properties/specify-a-coordinate-system.htm
-# then manaully publish it as a web map
+# this is done manually as it seems it is not possible to modify the spatial reference of a map/map frame using arcpy
+# see: https://community.esri.com/ideas/12767-allow-arcpymp-to-modify-spatial-reference-property-of-mapmapframe
+
+# finally manaully publish it as a web map
