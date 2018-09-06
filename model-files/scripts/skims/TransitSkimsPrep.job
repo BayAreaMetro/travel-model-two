@@ -58,7 +58,7 @@
 ;        (6) An original node->new node correspondence file
 ;
 ; Output: (1) A (csv) drive-access matrix linking TAZ->TAP, as well as the intermediate MAZ for the path.
-;         (2) A 15 table transit skim for each of the five time periods by skim-mode, containing the following information:
+;         (2) A 15 table transit skim for each of the five time periods by skim-set, containing the following information:
 ;             (a) The generalized cost for the path
 ;             (b) The initial wait time, in minutes
 ;             (c) The transfer wait time, in minutes
@@ -69,27 +69,99 @@
 ;             (h) The transfer walk time
 ;             (i) The access/egress walk time
 ;             (j) The local bus time
-;             (k) The ferry time 
-;             (l) The express bus time 
+;             (k) The express bus time 
+;             (l) The ferry time 
 ;             (m) The light rail time 
 ;             (n) The commuter rail time 
 ;             (o) The "highest" mode used 
 ;
 ; version:  Travel Model Zed
-; authors:  crf (2013 08)
+; authors:  crf (2013 08) ; bts 06/11/14
+;
 ;
 ; Updated to include transit system file for defining wait curves. Removed ferry (mode 104) from skim set 1 and included it 
 ; in SET2 and 3. Updated parameters in transit factor files. Also, build_walk_transfer_bypass_links.py file now sets distances 
-; on walk transfer legs to euclidean distance 
+; on walk transfer legs to eucledian distance 
 ; author: sn(11/7/2014)
+; Updated to export ferry times as a separate matrix and to account for ferry as a distinct mode in BEST_MODE matrix.
+; author: sn(5/5/2015)
 ; ----------------------------------------------------------------------------------------------------------------
 
-CROWDING_SKIM_BLOCK = '%BASE_SCRIPTS%\block\transit_assign_type.block'
 SKIM_MATRICES = '%BASE_SCRIPTS%\block\skim_matrices.block'
 SKIM_MATRIX_DEF = '%BASE_SCRIPTS%\block\skim_matrix_definitions.block'
 
-;start cluster nodes - one for each skim set and time period
-*Cluster.exe MTC_TRANASN 1-5 start exit
+;first, build transit drive access skims
+;export highway skims as csv files
+*Cluster.exe MTC_HWYSKIM 1-5 start exit
+
+loop period = 1,5
+   
+   if (period = 1)   
+      token_period = 'EA'
+   elseif (period = 2)   
+      token_period = 'AM'
+   elseif (period = 3)   
+      token_period = 'MD'
+   elseif (period = 4)   
+      token_period = 'PM'
+   elseif (period = 5)   
+      token_period = 'EV'
+   endif
+
+   ; do each time of day as a separate process
+   DistributeMultistep processid = 'MTC_HWYSKIM', processNum = @period@
+       
+        RUN PGM=MATRIX 
+            FILEI MATI = skims\HWYSKM@token_period@_taz.tpp
+            FILEO MATO = skims\DA_@token_period@_taz_time.csv FORMAT=TXT DELIMITER=',' MO=1-3 PATTERN=IJM:V NAME=TIMEDA,DISTDA,BTOLLDA
+            MW[1] = MI.1.TIMEDA
+            MW[2] = MI.1.DISTDA
+            MW[3] = MI.1.BTOLLDA
+        ENDRUN
+        
+    EndDistributeMultistep
+ENDLOOP
+
+Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM3.script.end, MTC_HWYSKIM4.script.end, MTC_HWYSKIM5.script.end, 
+           printfiles = merge, deldistribfiles = t, CheckReturnCode = t
+
+*Cluster.exe MTC_HWYSKIM 1-5 close exit
+
+;export taps connectors from network
+RUN PGM=NETWORK
+    NETI = hwy\mtc_final_network_with_tolls.net
+    LINKO = hwy\mtc_final_network_tap_links.csv FORMAT=SDF DELIMITER=',' INCLUDE=A,B
+    NODEO = hwy\mtc_final_network_tap_nodes.csv FORMAT=SDF DELIMITER=',' INCLUDE=N,MODE
+    
+    PHASE = NODEMERGE
+        IF ((N < 900000) & (N % 100000 > 90000))
+            ;keep
+        ELSE
+            DELETE
+        ENDIF
+    ENDPHASE
+  
+    PHASE = LINKMERGE
+        IF (CNTYPE='TAP' && (A < 900000 | B < 1000000)) ;drop split links
+            ;keep
+        ELSE
+            DELETE
+        ENDIF
+    ENDPHASE
+ENDRUN
+
+;call python program to build transit drive access skims
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
+IF (RETURNCODE > 0) abort
+;*del skims\DA_*_taz_time.csv
+
+; run script used to help consolidate taps
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\tap_lines.py
+IF (RETURNCODE > 0) abort
+
+;rebuild transit line file with new numbers
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_new_transit_line.py "trn\transitLines.lin" "trn\transitLines_new_nodes.lin" "hwy\mtc_transit_network_tap_to_node.txt"
+IF (RETURNCODE > 0) abort
 
 ;now build transit times based on congested times from loaded network
 ;loop over time period
@@ -98,113 +170,79 @@ LOOP PERIOD = 1,5
     ; a two letter token is used for each time period
     IF (PERIOD = 1)   
         TOKEN_PERIOD = 'EA' 
-        PERIOD_DURATION = 180
     ELSEIF (PERIOD = 2)   
         TOKEN_PERIOD = 'AM' 
-        PERIOD_DURATION = 240
     ELSEIF (PERIOD = 3)   
         TOKEN_PERIOD = 'MD' 
-        PERIOD_DURATION = 300
     ELSEIF (PERIOD = 4)   
         TOKEN_PERIOD = 'PM'
-        PERIOD_DURATION = 240
     ELSEIF (PERIOD = 5)   
         TOKEN_PERIOD = 'EV'
-        PERIOD_DURATION = 480
     ENDIF
     
-    counter = PERIOD
-        
-    ; do each time of day and mode as a separate process
-    DistributeMultistep processid = 'MTC_TRANASN', processNum = counter
-        ;make a copy of the network so that we don't walk all over each other
-        *copy hwy\mtc_transit_network_@TOKEN_PERIOD@.net trn\mtc_transit_network_@TOKEN_PERIOD@.net
+   ;convert transit network node numbers to originals
+    RUN PGM=NETWORK
+      NETI = hwy\mtc_transit_network_@TOKEN_PERIOD@.net
+      NETO = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE.net
+      
+      PHASE = INPUT FILEI=NI.1
+      
+           N = OLD_NODE
+           
+      ENDPHASE
+      
+      PHASE = INPUT FILEI=LI.1
+        A = OLD_A
+        B = OLD_B
+      ENDPHASE
 
-        ;next, assign trips
-        RUN PGM = PUBLIC TRANSPORT PRNFILE="TRANSIT_ASSIGN.prn"
-            FILEI NETI = "trn\mtc_transit_network_@TOKEN_PERIOD@.net"
-            FILEI LINEI[1] = "trn\transitLines_new_nodes.lin"
-            FILEI SYSTEMI = "trn\transitSystem.PTS"
-            FILEI FACTORI[1] = "trn\transitFactors_SET1.fac"
-            FILEI FACTORI[2] = "trn\transitFactors_SET2.fac"
-            FILEI FACTORI[3] = "trn\transitFactors_SET3.fac"
-            
-            FILEI FAREMATI[1] = "trn\fareMatrix.txt"
-            FILEI FAREI= "trn\fares.far"
-            
-            FILEI MATI[1] = "ctramp_output\TAP_Demand_set1_@TOKEN_PERIOD@.mat"
-            FILEI MATI[2] = "ctramp_output\TAP_Demand_set2_@TOKEN_PERIOD@.mat"
-            FILEI MATI[3] = "ctramp_output\TAP_Demand_set3_@TOKEN_PERIOD@.mat"
-            
-            FILEO NETO = "trn\mtc_transit_network_@TOKEN_PERIOD@_with_transit_assign.net"
-            
-                 ; These files are gigantic and writing many simultaneously cause PT to fail
-                ; with the message: F(801): (EnumRoutes) Failure writing to output routes file.
-                ; We cannot comment them out, however, since 
-                ; "The statement ROUTEO[x] invokes the route-enumeration process for user class x." (!!)
-            FILEO ROUTEO[1] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET1_with_transit_assign.rte"
-            FILEO ROUTEO[2] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET2_with_transit_assign.rte"
-            FILEO ROUTEO[3] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET3_with_transit_assign.rte"
-            
-            READ FILE = @SKIM_MATRICES@
-            
-            FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_with_transit_assign.rpt"
-            ;
-            ; The stop2stop file is for BART station-station boardings. It writes a dbf file of boardings 
-            : by station pair for the listed station nodes. Note that node numbers change for each network
-            ; due to changes in node sequencing. The list below is specific to the version of the 2015
-            ; network used for calibration\validation. TODO: automate process for creating node list.
-            ;
-            ;FILEO STOP2STOPO = "trn\mtc_stop2stop_@TOKEN_PERIOD@.dbf", ACCUMULATE=FIRSTLASTBYMODE, MODES=120, NODES=1083175,1083190,1083193,1083233,1083275,1083398,1083401,1083492,1129772,1129773,1129776,1129777,1129778,1129786,1314178,1338535,1338536,1338537,1338540,1338543,1338545,1338546,1338547,1338549,1338552,1338553,1338554,1338555,1338557,1338559,1338561,1338563,1338564,1338565,1338566,1419864,1419865,1419866,1419867,1419868,1419869,1419870,1419872,1419873,1419874
-            
-            PARAMETERS HDWAYPERIOD=@PERIOD@
-            PARAMETERS NOROUTEERRS=17000000
-            PARAMETERS TRANTIME=LI.TRANTIME
-            PARAMETERS MAPSCALE=5280
-            PARAMETERS USERCLASSES=1,2,3
-                            
-            PROCESS PHASE=LINKREAD
-                LW.TRANTIME = LI.TRANTIME
-                LW.DISTANCE = LI.FEET/5280
-            ENDPROCESS
-            
-            PHASE=DATAPREP
-                ;access/egress links
-                GENERATE,       
-                    NTLEGMODE=991,
-                    INCLUDELINK=(LI.NTL_MODE=1),
-                    COST=LI.WALKTIME,
-                    MAXCOST=999*500,
-                    ONEWAY=T
-                ;transfer links
-                GENERATE,
-                    NTLEGMODE=992,       
-                    INCLUDELINK=(LI.NTL_MODE=2),
-                    COST=LI.WALKTIME,
-                    MAXCOST=999*500,
-                    DIRECTLINK = 3,
-                    FROMNODE=1-10000000,
-                    TONODE=1-10000000
-            ENDPHASE
-            
-            PARAMETERS TRIPSIJ[1] = MI.1.1 + MI.1.2 + MI.1.3 ;WLK, PNR, KNR
-            PARAMETERS TRIPSIJ[2] = MI.2.1 + MI.2.2 + MI.2.3 ;WLK, PNR, KNR
-            PARAMETERS TRIPSIJ[3] = MI.3.1 + MI.3.2 + MI.3.3 ;WLK, PNR, KNR
-            
-            REPORT LINES=T, SORT=MODE, LINEVOLS=T, STOPSONLY=T, SKIP0=T
-            
-			READ FILE = @CROWDING_SKIM_BLOCK@
-            
-            READ FILE = @SKIM_MATRIX_DEF@
-			
-        ENDRUN
+      
+    ENDRUN
+    
+    ;convert loaded auto network node numbers to originals
+    RUN PGM=NETWORK
+      NETI = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ.net
+      LINKO = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ_ORIGNODE.CSV, FORMAT=SDF DELIMITER=',' INCLUDE=OLD_A,OLD_B,CTIM
+      
+     ENDRUN
+      
+    ; merge congested times and calculate transit time  
+    RUN PGM=NETWORK
+      NETI = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE.net
+      LINKI[2] = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ_ORIGNODE.CSV,VAR=A,B,CTIM
+      NETO = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE_CONG.net
+      
+      MERGE RECORD = FALSE ; only keep transit network links
+     
+      PHASE = LINKMERGE
+         
+          CTIM = li.2.CTIM
+          IF (CTIM>0 & (li.1.FT=1|li.1.FT=2))
+            TRANTIME = CTIM    ; same as auto time for freeways
+          ELSEIF (CTIM>0)
+            TRANTIME = CTIM + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))    ; TIME + 5 stops/mile * 20 secs/stop
+        ENDIF
 
-    EndDistributeMultistep
+      ENDPHASE
+    ENDRUN 
 
+    ; recode network with new node numbers  
+    RUN PGM=NETWORK
+      NETI = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE_CONG.net
+      NETO = hwy\mtc_transit_network_@TOKEN_PERIOD@_CONG.net
+      
+      PHASE = INPUT FILEI=NI.1
+      
+        N = NEW_NODE
+           
+      ENDPHASE
+      
+      PHASE = INPUT FILEI=LI.1
+        A = A_NEW_NODE
+        B = B_NEW_NODE
+      ENDPHASE
+
+      
+    ENDRUN
+    
 ENDLOOP
-
-Wait4Files files = MTC_TRANASN1.script.end, MTC_TRANASN2.script.end, MTC_TRANASN3.script.end, MTC_TRANASN4.script.end, MTC_TRANASN5.script.end,
-                   printfiles = merge, deldistribfiles = t, CheckReturnCode = t
-
-;stop cluster nodes
-*Cluster.exe MTC_TRANASN 1-5 close exit
