@@ -26,54 +26,24 @@ Before using NetworkWrangler (or Wrangler for short), you’ll need to:
 * Install Python if you haven't.  NetworkWrangler is designed to work with both Python 2 and Python 3 - either installation would be fine.
 *	Install Cube 6.4.4 or newer (http://www.citilabs.com). Cube is proprietary software and a license will be required.
 *	Clone NetworkWrangler from GitHub (https://github.com/BayAreaMetro/NetworkWrangler). When it's cloned, you should see this python script in your local GitHub directory. For example, on a typical Windows installation for the user ftsang, the path would be: `C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py`
-*	Install various python modules that NetworkWrangler uses. (For most current python users, the required modules are xlrd, simpleparse, and numpy. In the command window, type `pip install xlrd`, `pip install simpleparse` and `pip install numpy` to install these modules. If you are using python 3, you may need pywin32 as well. If additional modules are needed for your specific set up, when you import NetworkWrangler for the first time you’ll get error messages on screen indicating which python module is needed.)  You'll know this is complete when you can run python from the command line and then import Wrangler from the python command line:
-``` dosbatch
-C:\temp>echo This is the windows command line
-This is the windows command line
-
-C:\temp>echo %PATH%
-C:\Python27;C:\Python27\Scripts;[..other paths hidden..]
-
-C:\temp>echo Note that the location of python is in my path.
-Note that the location of python is in my path.
-
-C:\temp>echo %PYTHONPATH%
-C:\Users\lzorn\Documents\NetworkWrangler;C:\Users\lzorn\Documents\NetworkWrangler\_static
-
-C:\temp>echo Note that the location of NetworkWrangler (and its subdir _static) is in my PYTHONPATH.  This is so python knows where to look for the module when I instruct it to import.
-Note that the location of NetworkWrangler (and its subdir _static) is in my PYTHONPATH.  This is so python knows where to look for the module when I instruct it to import.
-
-C:\temp>python
-Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
-Type "help", "copyright", "credits" or "license" for more information.
->>> print("This is the python command line so print is a python function.")
-This is the python command line so print is a python function.
->>> import Wrangler
-('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\_static\\dataTable.pyc')
-('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
->>> print("That's what Network Wrangler prints when it is successful")
-That's what Network Wrangler prints when it is successful
->>> quit()
-
-C:\temp>
-```
+*	Install various python modules that NetworkWrangler uses. (For most current python users, the required modules are xlrd, simpleparse, and numpy. In the command window, type `pip install xlrd`, `pip install simpleparse` and `pip install numpy` to install these modules. If you are using python 3, you may need pywin32 as well. If additional modules are needed for your specific set up, when you import NetworkWrangler for the first time you’ll get error messages on screen indicating which python module is needed.)  You'll know this is complete when you can run python from the command line and then import Wrangler from the python command line as described below, in the next section.
 * Install Git (https://git-scm.com/downloads)
 
 ### Importing NetworkWrangler
 
+
 The next step is to test if you can import Wrangler. Open a command window, and type in the following DOS commands:
 
-Step 1: Add Python to your system’s environmental variables (PATH and PYTHONPATH). To do so, you’ll need to know where your python.exe is installed. For example, if your python.exe is installed in C:\Python27, type the commands as below. If your python.exe is installed elsewhere, replace C:\Python27 with your python.exe location.
+**Step 1:** Add Python to your system’s `PATH` environment variable. To do so, you’ll need to know where your python.exe is installed. For example, if your `python.exe` is installed in `C:\Python27`, type the commands as below. If your `python.exe` is installed elsewhere, replace `C:\Python27` with your `python.exe` location.  It's also helpful to include the `Scripts` subdirectory of your python installation, since that's where [`pip.exe`](https://pypi.org/project/pip/) is located, which is used for installing python modules.
 
-```
-C:\>set PATH= %PATH%;C:\Python27
-C:\>set PYTHONPATH=%PYTHONPATH%;C:\Python27
+``` dosbatch
+C:\>set PATH=%PATH%;C:\Python27;C:\Python27\Scripts
 ```
 
-Step 2: Make sure Cube Voyager is on the path. Again, you’ll need to know where Cube Voyager (runtpp.exe) is installed. Below is an example command assuming runtpp.exe is installed in C:\Program Files (x86)\Citilabs\CubeVoyager. Adjust the command according to the location of your runtpp.exe.
+**Step 2:** Make sure Cube Voyager is on the path. Again, you’ll need to know where Cube Voyager (`runtpp.exe`) is installed. Below is an example command assuming `runtpp.exe` is installed in `C:\Program Files (x86)\Citilabs\CubeVoyager`. Adjust the command according to the location of your `runtpp.exe`.
 
-```
-C:\>set PATH= %PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
+```dosbatch
+C:\>set PATH=%PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
 ```
 
 Step 3: Point the pythonpath to NetworkWrangler. You’ll need to do this at two levels (\NewtworkWrangler and \NewtworkWrangler\_static). The examples below assume that GitHub files are in the Documents folder of the user ftsang; modify the path as appropriate for your installation.
