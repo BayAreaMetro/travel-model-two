@@ -42,33 +42,31 @@ C:\>set PATH=%PATH%;C:\Python27;C:\Python27\Scripts
 
 **Step 2:** Make sure Cube Voyager is on the path. Again, you’ll need to know where Cube Voyager (`runtpp.exe`) is installed. Below is an example command assuming `runtpp.exe` is installed in `C:\Program Files (x86)\Citilabs\CubeVoyager`. Adjust the command according to the location of your `runtpp.exe`.
 
-```dosbatch
+``` dosbatch
 C:\>set PATH=%PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
 ```
 
-Step 3: Point the pythonpath to NetworkWrangler. You’ll need to do this at two levels (\NewtworkWrangler and \NewtworkWrangler\_static). The examples below assume that GitHub files are in the Documents folder of the user ftsang; modify the path as appropriate for your installation.
+**Step 3:** Set your `PYTHONPATH` environment variable to include the location of *NetworkWrangler*. You’ll need to include both the root directory, `NetworkWrangler`, as well as the `_static_` subdirectory of `NetworkWrangler`. The examples below assume that GitHub repository is cloned into `Github` in the `Documents` folder of the user ftsang; modify the path as appropriate for your installation.
 
-```
-C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\
-C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static
-```
-
-Step 4: Run the python interpreter by typing in:
-
-```
-C:\>Python
+``` dosbatch
+C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static
 ```
 
-(After you type in “Python” and hit enter, the command window should display a message about the version of your python. You should also see that the command line start with >>> instead of >. See example below.)
-
-```
-Python 2.7.14 (v2.7.14:84471935ed, Sep 16 2017, 20:25:58) [MSC v.1500 64 bit (AMD64)] on win32
+**Step 4:** Run the python interpreter by typing in `python`. After you type in “Python” and hit enter, the command window should display a message about the version of your python. You should also see that the command line start with >>> instead of >. 
+``` dosbatch
+C:\>python
+Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
->>>
+>>> print("This is a python print command")
+This is a python print command
+>>> print("Type quit() to exit the python interpreter")
+Type quit() to exit the python interpreter
+>>> quit()
+
+C:\>
 ```
 
-Step 5: Import NetworkWrangler. Type:
-
+**Step 5:** Import the NetworkWrangler module into python. Type:
 ```
 >>>Import Wrangler
 ```
