@@ -23,16 +23,41 @@ CONTENTS
 ### Software requirements
 Before using NetworkWrangler (or Wrangler for short), you’ll need to:
 
-•	install Python if you haven't.  NetworkWrangler is designed to work with both Python 2 and Python 3 - either installation would be fine.
+* Install Python if you haven't.  NetworkWrangler is designed to work with both Python 2 and Python 3 - either installation would be fine.
+*	Install Cube 6.4.4 or newer (http://www.citilabs.com). Cube is proprietary software and a license will be required.
+*	Clone NetworkWrangler from GitHub (https://github.com/BayAreaMetro/NetworkWrangler). When it's cloned, you should see this python script in your local GitHub directory. For example, on a typical Windows installation for the user ftsang, the path would be: `C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py`
+*	Install various python modules that NetworkWrangler uses. (For most current python users, the required modules are xlrd, simpleparse, and numpy. In the command window, type `pip install xlrd`, `pip install simpleparse` and `pip install numpy` to install these modules. If you are using python 3, you may need pywin32 as well. If additional modules are needed for your specific set up, when you import NetworkWrangler for the first time you’ll get error messages on screen indicating which python module is needed.)  You'll know this is complete when you can run python from the command line and then import Wrangler from the python command line:
+``` dosbatch
+C:\temp>echo This is the windows command line
+This is the windows command line
 
-•	install Cube 6.4.4 or newer (http://www.citilabs.com). Cube is proprietary software and a license will be required.
+C:\temp>echo %PATH%
+C:\Python27;C:\Python27\Scripts;[..other paths hidden..]
 
-•	clone NetworkWrangler from GitHub (https://github.com/BayAreaMetro/NetworkWrangler). When it's cloned, you should see this python script in your local GitHub directory. For example, on a typical Windows installation for the user ftsang, the path would be:
- C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py " C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py
+C:\temp>echo Note that the location of python is in my path.
+Note that the location of python is in my path.
 
-•	install various python modules that NetworkWrangler uses. (For most current python users, the required modules are xlrd, simpleparse, and numpy. In the command window, type "pip install xlrd", "pip install simpleparse" and "pip install numpy" to install these modules. If you are using python 3, you may need win32 as well. If additional modules are needed for your specific set up, when you import NetworkWrangler for the first time you’ll get error messages on screen indicating which python module is needed.)
+C:\temp>echo %PYTHONPATH%
+C:\Users\lzorn\Documents\NetworkWrangler;C:\Users\lzorn\Documents\NetworkWrangler\_static
 
-•	 install Git (https://git-scm.com/downloads)
+C:\temp>echo Note that the location of NetworkWrangler (and its subdir _static) is in my PYTHONPATH.  This is so python knows where to look for the module when I instruct it to import.
+Note that the location of NetworkWrangler (and its subdir _static) is in my PYTHONPATH.  This is so python knows where to look for the module when I instruct it to import.
+
+C:\temp>python
+Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> print("This is the python command line so print is a python function.")
+This is the python command line so print is a python function.
+>>> import Wrangler
+('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\_static\\dataTable.pyc')
+('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
+>>> print("That's what Network Wrangler prints when it is successful")
+That's what Network Wrangler prints when it is successful
+>>> quit()
+
+C:\temp>
+```
+* Install Git (https://git-scm.com/downloads)
 
 ### Importing NetworkWrangler
 
