@@ -46,6 +46,58 @@ TRN_OPERATORS = collections.OrderedDict([
     ("_other" ,              []),  # this will get filled in with operators not covered already
 ])
 
+# from transitFactors_SET*.fac
+# hardcoding this into here isn't ideal
+# todo: read fac file?
+MODE_TO_FARESYSTEM = {
+    12 : 1,
+    13 : 1,
+    20 : 2,
+    21 : 3,
+    24 : 4,
+    28 : 5,
+    30 : 6,
+    17 : 7,
+    38 : 8,
+    40 : 9,
+    42 : 10,
+    44 : 11,
+    46 : 12,
+    49 : 13,
+    52 : 14,
+    53 : 15,
+    55 : 16,
+    56 : 17,
+    58 : 18,
+    60 : 19,
+    63 : 20,
+    66 : 21,
+    68 : 22,
+    70 : 23,
+    71 : 24,
+    80 : 25,
+    81 : 26,
+    82 : 27,
+    84 : 28,
+    86 : 29,
+    87 : 30,
+    90 : 31,
+    91 : 32,
+    92 : 33,
+    93 : 34,
+    100: 35,
+    101: 36,
+    103: 37,
+    104: 38,
+    110: 39,
+    111: 40,
+    120: 41,
+    130: 42,
+    131: 43,
+    133: 44,
+    134: 45
+}
+
 def runCubeScript(workingdir, script_filename, script_env):
     """
     Run the cube script specified in the workingdir specified.
@@ -353,12 +405,16 @@ if __name__ == '__main__':
 
         farestruct = ""
         iboardfare = 0
-        # in TM2, fare lookup is mode-based
+        # TM2 mode to faresystem correspondence above
         mode_num = int(line.attr['MODE'])
-        if mode_num in trn_net.faresystems:
-            faresystem = trn_net.faresystems[mode_num]
-            if "STRUCTURE"  in faresystem: farestruct = faresystem["STRUCTURE"]
-            if farestruct.upper()=="FLAT" and "IBOARDFARE" in faresystem: iboardfare = float(faresystem["IBOARDFARE"])
+        if mode_num in MODE_TO_FARESYSTEM:
+            faresystem_num = MODE_TO_FARESYSTEM[mode_num]
+            if faresystem_num in trn_net.faresystems:
+                faresystem = trn_net.faresystems[faresystem_num]
+                if "STRUCTURE"  in faresystem: farestruct = faresystem["STRUCTURE"]
+                if farestruct.upper()=="FLAT" and "IBOARDFARE" in faresystem: iboardfare = float(faresystem["IBOARDFARE"])
+        else:
+            Wrangler.WranglerLogger.warn("No faresystem for mode {}".format(mode_num))
 
         pline_shape = arcpy.Polyline(line_point_array)
         line_cursor[operator_file].insertRow([line.name, pline_shape,
