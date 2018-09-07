@@ -59,4 +59,9 @@ for operator_file in operator_files:
 aprx.save()
 
 # manually update the coordinate system of the map to WGS 84
-# then publish web map
+# see the instructions for "Set the coordinate system from a layer" in:
+# http://pro.arcgis.com/en/pro-app/help/mapping/properties/specify-a-coordinate-system.htm
+# this is done manually as it seems it is not possible to modify the spatial reference of a map/map frame using arcpy
+# see: https://community.esri.com/ideas/12767-allow-arcpymp-to-modify-spatial-reference-property-of-mapmapframe
+
+# final step: manually publish it as a web map
