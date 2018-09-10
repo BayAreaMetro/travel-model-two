@@ -239,6 +239,8 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 |---------------|---------------|-----------|----------|
 | *MAZ_ORIGINAL* | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system) | |
 | *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  | |
+| *DistID* | District ID Number (TODO: link district map) | [TourModeChoice.xls] | District system definition |
+| *DistName* | District Name (TODO: link district map) | | District system definition |
 | *ACRES* | MAZ acres | [createMazDensityFile.py] | Calculated from shapefile |
 | *HH* | Total number of households | [MgraDataManager] | |
 | *POP* | Total population | [MgraDataManager] | |
@@ -263,8 +265,6 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 | *man_tech* | Employment in high-tech manufacturing: [NAICS] 334 | [Accessibilities] |
 | *natres* | Employment in mining and resource extraction: [NAICS] 21 | [Accessibilities] |
 | *prof* | Employment in professional and technical services: [NAICS] 54 | [Accessibilities] |
-| *prof_comp* | ? | is this used? |
-| *prof_rd* | ? | is this used? |
 | *ret_loc* | Employment in local-serving retail: [NAICS] 444130, 444190, 444210, 444220, 445110, 445120, 445210, 445220, 445230, 445291, 445292, 445299, 445310, 446110, 446120, 446130, 446191, 446199, 447110, 447190, 448110, 448120, 448130, 448140, 448150, 448190, 448210, 448310, 448320, 451110, 451120, 451130, 451140, 451211, 451212, 452910, 452990, 453110, 453220, 453310, 453910, 453920, 453930, 453991, 453998, 454111, 454112, 454113 | [Accessibilities] |
 | *ret_reg* | Employment in regional retail: [NAICS] 441110, 441120, 441210, 441222, 441228, 441310, 441320, 442110, 442210, 442291, 442299, 443141, 443142, 444110, 444120, 452111, 452112, 453210, 454210, 454310, 454390 | [Accessibilities] |
 | *serv_bus* | Employment in managerial services, administrative and business services: [NAICS] 55,56 | [Accessibilities] |
