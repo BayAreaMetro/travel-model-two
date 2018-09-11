@@ -293,13 +293,17 @@ Summary: All accessibility measures for are calculated at the MAZ level. The aut
 
 This step selects the preliminary auto ownership level for the household, based upon household demographic variables, household ‘4D’ variables, and destination-choice accessibility terms created in the *Accessibilities* sub-model (see above). This auto ownership level is used to create mode choice logsums for workers and students in the household, which are then used to select work and school locations in model **UsualWorkAndSchoolLocationChoice**. The auto ownership model is re-run (*AutoOwnership*) in order to select the actual auto ownership for the household, but this subsequent version is informed by the work and school locations chosen by the **UsualWorkAndSchoolLocationChoice** model. All other variables and coefficients are held constant between the two models, except for alternativespecific constants.
 
+* UEC: [AutoOwnership.xls](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/AutoOwnership.xls)
 * Logfile: *event-ao.log*
 * Output: ```read.pre.ao.filename = /ctramp_output/aoResults_pre.csv```
+* See: [HouseholdAutoOwnershipModel.java](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdAutoOwnershipModel.java)
 
 ### [WorkFromHomeChoice](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MandatoryDestChoiceModel.java#L496)
+Summary: The work from hom choice model determines whether each worker works from hom.  It is a binary logit model.
 
 * UEC: [TourDestinationChoice.xls](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/TourDestinationChoice.xls), worksheet *workfromhome*
 * Logfile: *event-tourDcMan.log*
+* See: [WorkLocationChoiceModel.java](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/WorkLocationChoiceModel.java#L459)
 
 ### [UsualWorkAndSchoolLocationChoice](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MandatoryDestChoiceModel.java#L129)
 
@@ -309,9 +313,15 @@ Since mode choice logsums are required for each destination, a two-stage procedu
   
 The application procedure utilizes an iterative shadow pricing mechanism in order to match workers to input employment totals. The shadow pricing process compares the share of workers who choose each MAZ by occupation to the relative size of the MAZ compared to all MAZ. A shadow prices is computed which scales the size of the MAZ based on the ratio of the observed share to the estimated share. The model is re-run until the estimated and observed shares are within a reasonable tolerance. The shadow prices are written to a file and can be used in subsequent model runs to cut down computational time.
 
-    * Inputs:
-    * Outputs:
-    * Logfile: `event-tourDcMan.log`
+* UEC: [TourDestinationChoice.xls](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/TourDestinationChoice.xls), worksheet *workLocation*
+* ```uwsl.soa.uec.file = DestinationChoiceAlternativeSample.xls```
+* ```work.soa.uec.file = TourDcSoaDistance.xls```
+* ```univ.soa.uec.file = TourDcSoaDistanceNoSchoolSize.xls```
+* ```hs.soa.uec.file = TourDcSoaDistanceNoSchoolSize.xls```
+* ```gs.soa.uec.file = TourDcSoaDistanceNoSchoolSize.xls```
+* ```ps.soa.uec.file = TourDcSoaDistanceNoSchoolSize.xls```
+* Logfile: `event-tourDcMan.log`
+
 
 ### [AutoOwnership](https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdAutoOwnershipModel.java)
     * Logfile: `event-ao.log`
