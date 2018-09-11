@@ -416,7 +416,7 @@ The application procedure utilizes an iterative shadow pricing mechanism in orde
     * Summary: Assigns short auto trips to highway network using MAZ centroids based on shortest paths. 
     * Input:  
       1. `hwy\avgload@token_period@.net`, TAZ output network for skimming by time period
-      2. `hwy\hwyparam.block`, highway assignment generalized cost parameters
+      2. [`hwy\hwyParam.block`](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block), highway assignment generalized cost parameters
       3. `MAZ_Demand_[MAZSET]_[EA,AM,MD,PM,EV].mat`, MAZ to MAZ auto demand for each local network
     * Output: 
       1. `maz_preload_[EA,AM,MD,PM,EV].net`, Network by time period with link attribute MAZMAZVOL for copying over to the TAZ to TAZ highway assignment    
@@ -424,10 +424,10 @@ The application procedure utilizes an iterative shadow pricing mechanism in orde
 2. [`scripts\assign\HwyAssign.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/hwyassign.job)
     * Summary: Assigns trips to highway network using TAZ centroids and equilibrium capacity restraint assignment. Uses trimmed highway network which excludes lower-functional class links to improve runtime.
     * Input: 
-      1. `block\hwyparam.block`, highway assignment generalized cost parameters
-      2. `block\SpeedCapacity_1hour.block`, speed-capacity table
-      3. `block\FreeFlowSpeed.block`, free-flow speed table
-      4. `block\SpeedFlowCurve.block`, volume-delay functions
+      1. [`block\hwyParam.block`](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block), highway assignment generalized cost parameters
+      2. [`block\SpeedCapacity_1hour.block`](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/SpeedCapacity_1hour.block), speed-capacity table
+      3. [`block\FreeFlowSpeed.block`](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/FreeFlowSpeed.block), free-flow speed table
+      4. [`block\SpeedFlowCurve.block`](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/SpeedFlowCurve.block), volume-delay functions
       5. `hwy\avgload[EA,AM,MD,PM,EV]_taz.net`, highway network for assignment
       6. `ctramp_output\TAZ_Demand_[EA,AM,MD,PM,EV].mat`, household travel demand
       7. `nonres\tripsIx[EA,AM,MD,PM,EV].tpp`, internal-external travel demand
@@ -447,10 +447,10 @@ The application procedure utilizes an iterative shadow pricing mechanism in orde
 4. [`scripts\assign\CalculateAverageSpeed.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/calculateaveragespeed.job)
     * Summary: Computes the speeds from a highway network with successively averaged roadway volumes.
     * Input: 
-      1. `block\hwyparam.block`, highway assignment generalized cost parameters
-      2. `block\SpeedCapacity_1hour.block`, speed-capacity table
-      3. `block\FreeFlowSpeed.block`, free-flow speed table
-      4. `block\SpeedFlowCurve.block`, volume-delay functions
+      1. [`block\hwyParam.block`](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block), highway assignment generalized cost parameters
+      2. [`block\SpeedCapacity_1hour.block`](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/SpeedCapacity_1hour.block), speed-capacity table
+      3. [`block\FreeFlowSpeed.block`](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/FreeFlowSpeed.block), free-flow speed table
+      4. [`block\SpeedFlowCurve.block`](https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/SpeedFlowCurve.block), volume-delay functions
       5. `hwy\msaload[EA,AM,MD,PM,EV]_taz.net`, the new MSA network with averaged volumes for all iterations including the current iteration
     * Output:
       1. `hwy\avgload[EA,AM,MD,PM,EV]_taz.net`, a highway network with congested speeds according to MSA volumes by period
