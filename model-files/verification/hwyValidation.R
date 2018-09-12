@@ -10,16 +10,26 @@ library(reshape)
 
 ### USER INPUTS
 ## Paths
-workingDir <- "E:/projects/clients/mtc"
-obsDataDir <- paste(workingDir, "data/ObservedData", sep = "\\")
-cntOutput  <- paste(workingDir, "data/ObservedData", sep = "\\")
-volumeDir  <- paste(workingDir, "Calibration_2015/Spreadsheets/HighwaySummary/081318", sep = "\\")
-volOutput  <- paste(workingDir, "Calibration_2015/Spreadsheets/HighwaySummary/081318", sep = "\\")
-
+if (Sys.getenv("USERNAME") == "lzorn") {
+  USERPROFILE     <- gsub("\\\\","/", Sys.getenv("USERPROFILE"))
+  BOX_TM2         <- file.path(USERPROFILE, "Box", "Modeling and Surveys", "Development", "Travel Model Two Development")
+  tm2CountsDir    <- file.path(BOX_TM2,     "Observed Data", "Traffic Counts")
+  BOX_SHAREDATA   <- file.path(USERPROFILE, "Box", "Modeling and Surveys", "Development", "Share Data")
+  pemsDataDir     <- file.path(BOX_SHAREDATA,     "pems-typical-weekday")
+  volumeDir       <- file.path("D:", "Projects_TM2","2015_01_lmz_03", "hwy")
+  volOutput       <- file.path(BOX_TM2, "Calibration & Validation", "Round 2", "Calibration Spreadsheets", "maz_v2_2")
+} else {
+  workingDir      <- "E:/projects/clients/mtc"
+  tm2CountsDir    <- file.path(workingDir, "data", "ObservedData")
+  pemsDataDir     <- file.path(workingDir, "data", "ObservedData")
+  cntOutput       <- file.path(workingDir, "data", "ObservedData")
+  volumeDir       <- file.path(workingDir, "Calibration_2015", "Spreadsheets", "HighwaySummary", "081318")
+  volOutput       <- file.path(workingDir, "Calibration_2015", "Spreadsheets", "HighwaySummary", "081318")
+}
 
 ### Read Files
-pems_period <- read.csv(paste(obsDataDir, "pems_period.csv", sep = "\\"), as.is = T)
-pems_xwalk  <- read.csv(paste(obsDataDir, "pems_station_to_TM2_links_crosswalk.csv", sep = "\\"), as.is = T)
+pems_period <- read.csv(file.path(pemsDataDir,  "pems_period.csv"), as.is = T)
+pems_xwalk  <- read.csv(file.path(tm2CountsDir, "pems_station_to_TM2_links_crosswalk.csv"), as.is = T)
 colnames(pems_xwalk)[colnames(pems_xwalk)=="station"] <- "pems_id"
 #pems_xwalk  <- read.csv(paste(obsDataDir, "pems_model_xwalk.csv", sep = "\\"), as.is = T)
 #pems_xwalk  <- pems_xwalk %>%
@@ -28,11 +38,11 @@ colnames(pems_xwalk)[colnames(pems_xwalk)=="station"] <- "pems_id"
 
 #volumes     <- read.csv(paste(volumeDir, "msamerge3.csv", sep = "\\"), as.is = T)
 
-vol_EA <- read.dbf(paste(volumeDir, "loadEA.dbf", sep = "\\"), as.is = T)
-vol_AM <- read.dbf(paste(volumeDir, "loadAM.dbf", sep = "\\"), as.is = T)
-vol_MD <- read.dbf(paste(volumeDir, "loadMD.dbf", sep = "\\"), as.is = T)
-vol_PM <- read.dbf(paste(volumeDir, "loadPM.dbf", sep = "\\"), as.is = T)
-vol_EV <- read.dbf(paste(volumeDir, "loadEV.dbf", sep = "\\"), as.is = T)
+vol_EA <- read.dbf(file.path(volumeDir, "loadEA.dbf"), as.is = T)
+vol_AM <- read.dbf(file.path(volumeDir, "loadAM.dbf"), as.is = T)
+vol_MD <- read.dbf(file.path(volumeDir, "loadMD.dbf"), as.is = T)
+vol_PM <- read.dbf(file.path(volumeDir, "loadPM.dbf"), as.is = T)
+vol_EV <- read.dbf(file.path(volumeDir, "loadEV.dbf"), as.is = T)
 
 #write.csv(vol_EA, paste(volumeDir, "vol_EA.csv", sep = "\\"), row.names = F)
 #write.csv(vol_AM, paste(volumeDir, "vol_AM.csv", sep = "\\"), row.names = F)
@@ -83,11 +93,11 @@ volumes$VolEV_tot <- vol_EV$VolEV_tot[match(volumes$OLD_A_B, vol_EV$OLD_A_B)]
 volumes[is.na(volumes)] <- 0
 
 #volumes <- data.frame(vol_EA, vol_AM$VolAM_tot, vol_MD$VolMD_tot, vol_PM$VolPM_tot, vol_EV$VolEV_tot)
-write.csv(volumes[volumes$PEMSID>0, ], paste(volumeDir, "total_volumes.csv", sep = "\\"), row.names = F)
+write.csv(volumes[volumes$PEMSID>0, ], file.path(volumeDir, "total_volumes.csv"), row.names = F)
   
 # subset links with valid pemsid
 #volumes_pems <- volumes[volumes$PEMSID>0, ]
-volumes     <- read.csv(paste(volumeDir, "total_volumes.csv", sep = "\\"), as.is = T)
+volumes     <- read.csv(file.path(volumeDir, "total_volumes.csv"), as.is = T)
 volumes_pems <- volumes
 
 
@@ -127,7 +137,7 @@ comparison <- comparison %>%
   filter(volume>0 & count>0)
 
 # write final output
-write.csv(comparison, paste(volOutput, "volume_vs_count.csv", sep = "\\"), row.names = F)
+write.csv(comparison, file.path(volOutput, "volume_vs_count.csv"), row.names = F)
 
 
 
