@@ -119,7 +119,7 @@ LOOP PERIOD = 1,5
         *copy hwy\mtc_transit_network_@TOKEN_PERIOD@.net trn\mtc_transit_network_@TOKEN_PERIOD@.net
 
         ;next, assign trips
-        RUN PGM = PUBLIC TRANSPORT PRNFILE="TRANSIT_ASSIGN.prn"
+        RUN PGM = PUBLIC TRANSPORT PRNFILE="TRANSIT_ASSIGN_@TOKEN_PERIOD@.prn"
             FILEI NETI = "trn\mtc_transit_network_@TOKEN_PERIOD@.net"
             FILEI LINEI[1] = "trn\transitLines_new_nodes.lin"
             FILEI SYSTEMI = "trn\transitSystem.PTS"
@@ -148,8 +148,10 @@ LOOP PERIOD = 1,5
             FILEO MATO[2] = "trn\PTSKIMS_set2_@TOKEN_PERIOD@.MAT" MO=1-12 NAME=CWDWAITA, IWAITA, XWAITA, CWDWAITP, IWAITP, XWAITP, TIMEA, CWDCOSTP, TIMEP, EXCESSDEMAND, EXCESSPROP, COMPCOST
             FILEO MATO[3] = "trn\PTSKIMS_set3_@TOKEN_PERIOD@.MAT" MO=1-12 NAME=CWDWAITA, IWAITA, XWAITA, CWDWAITP, IWAITP, XWAITP, TIMEA, CWDCOSTP, TIMEP, EXCESSDEMAND, EXCESSPROP, COMPCOST
             
-            
-            FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_with_transit_assign.rpt"
+            FILEO LINKO[1] = "trn\trn_link_@TOKEN_PERIOD@.dbf"        FORMAT=DBF BYCLASS=Y LINES=Y
+            FILEO LINKO[2] = "trn\trn_link_onoffs_@TOKEN_PERIOD@.dbf" FORMAT=DBF BYCLASS=Y LINES=Y ONOFFS=Y
+            FILEO LINEO    = "trn\trn_line_out_@TOKEN_PERIOD@.lin"
+            FILEO REPORTO  = "trn\mtc_transit_report_@TOKEN_PERIOD@_with_transit_assign.rpt"
             ;
             ; The stop2stop file is for BART station-station boardings. It writes a dbf file of boardings 
             : by station pair for the listed station nodes. Note that node numbers change for each network
