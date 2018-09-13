@@ -55,7 +55,9 @@ The table below contains brief descriptions of the input files required to execu
 ## Time Periods
 
 Time periods in Travel Model Two are consistent with Travel Model One:
+
 | **Time Period** | **Times** | **Duration** |
+|-----------------|-----------|--------------|
 | EA (early AM) | 3 am to 6 am | 3 hours |
 | AM (AM peak period) | 6 am to 10 am | 4 hours |
 | MD (midday) | 10 am to 3 pm | 5 hours |
