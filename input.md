@@ -9,6 +9,7 @@ title: Input
 CONTENTS
 
 1. [Input File List](#input-file-list)
+1. [Time Periods](#time-periods)
 1. [Roadway Network](#roadway-network)
    - [County Node Numbering System](#county-node-numbering-system)
    - [Node Attributes](#node-attributes)
@@ -50,6 +51,16 @@ The table below contains brief descriptions of the input files required to execu
 | `persons.csv` | Synthetic population person file | popsyn\ | CSV |   |
 | `transitLines.lin` | Transit lines | trn\transit_lines | [Citilabs Cube](http://citilabs.com/products/cube)| TransitNetwork  |
 | `transitFactors_MMMM.fac` | Cube Public Transport (PT) factor files by transit line haul mode MMMM | trn\transit_support | [Citilabs Cube](http://citilabs.com/products/cube) | TransitNetwork |
+
+## Time Periods
+
+Time periods in Travel Model Two are consistent with Travel Model One:
+| **Time Period** | **Times** | **Duration** |
+| EA (early AM) | 3 am to 6 am | 3 hours |
+| AM (AM peak period) | 6 am to 10 am | 4 hours |
+| MD (midday) | 10 am to 3 pm | 5 hours |
+| PM (PM peak period) | 3 pm to 7 pm | 4 hours |
+| EV (evening) | 7 pm to 3 am | 8 hours |
 
 ## Roadway Network
 
