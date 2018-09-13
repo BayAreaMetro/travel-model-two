@@ -116,9 +116,9 @@ public abstract class ModelStructure
     public static final String[] MODEL_PERIOD_LABELS = { "EA", "AM", "MD", "PM", "EV" };
 
     
-    // the upper TOD interval index for each model period (EA:1-3, AM:4-9, MD:10-22, PM:23-29, EV:30-40) 
+    // the upper TOD interval index for each model period (EA:1-3, AM:4-11, MD:12-22, PM:23-29, EV:30-40) 
     public static final int UPPER_EA = 3;
-    public static final int UPPER_AM = 9;
+    public static final int UPPER_AM = 11;
     public static final int UPPER_MD = 22;
     public static final int UPPER_PM = 29;
     
