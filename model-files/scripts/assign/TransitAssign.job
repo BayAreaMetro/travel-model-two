@@ -5,9 +5,9 @@
 ; TP+ script to compute transit skims for five time periods. The script uses the following five time periods: 
 ;
 ;    (a) early AM, 3 am to 6 am
-;    (b) AM peak period, 6 am to 9 am
-;    (c) midday, 9 am to 3:30 pm
-;    (d) PM peak period, 3:30 pm to 7 pm
+;    (b) AM peak period, 6 am to 10 am
+;    (c) midday, 10 am to 3:00 pm
+;    (d) PM peak period, 3:00 pm to 7 pm
 ;    (e) evening, 7 pm to 3 am the next day
 ;
 ; The first thing the script does is export the highway skims for each time period (as temporary csv files), so that TAZ->TAZ 
@@ -101,13 +101,13 @@ LOOP PERIOD = 1,5
         PERIOD_DURATION = 180
     ELSEIF (PERIOD = 2)   
         TOKEN_PERIOD = 'AM' 
-        PERIOD_DURATION = 180
+        PERIOD_DURATION = 240
     ELSEIF (PERIOD = 3)   
         TOKEN_PERIOD = 'MD' 
-        PERIOD_DURATION = 390
+        PERIOD_DURATION = 300
     ELSEIF (PERIOD = 4)   
         TOKEN_PERIOD = 'PM'
-        PERIOD_DURATION = 210
+        PERIOD_DURATION = 240
     ELSEIF (PERIOD = 5)   
         TOKEN_PERIOD = 'EV'
         PERIOD_DURATION = 480
