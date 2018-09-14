@@ -12,12 +12,14 @@ library(reshape)
 ## Paths
 if (Sys.getenv("USERNAME") == "lzorn") {
   USERPROFILE     <- gsub("\\\\","/", Sys.getenv("USERPROFILE"))
+  RUN_NAME        <- "2015_01_lmz_04"
+  
   BOX_TM2         <- file.path(USERPROFILE, "Box", "Modeling and Surveys", "Development", "Travel Model Two Development")
   tm2CountsDir    <- file.path(BOX_TM2,     "Observed Data", "Traffic Counts")
   BOX_SHAREDATA   <- file.path(USERPROFILE, "Box", "Modeling and Surveys", "Development", "Share Data")
   pemsDataDir     <- file.path(BOX_SHAREDATA,     "pems-typical-weekday")
-  volumeDir       <- file.path("D:", "Projects_TM2","2015_01_lmz_03", "hwy")
-  volOutput       <- file.path(BOX_TM2, "Calibration & Validation", "Round 2", "Calibration Spreadsheets", "maz_v2_2")
+  volumeDir       <- file.path("D:", "Projects_TM2", RUN_NAME, "hwy")
+  volOutput       <- file.path(BOX_TM2, "Calibration & Validation", "Round 2", "Calibration Spreadsheets", RUN_NAME)
 } else {
   workingDir      <- "E:/projects/clients/mtc"
   tm2CountsDir    <- file.path(workingDir, "data", "ObservedData")
