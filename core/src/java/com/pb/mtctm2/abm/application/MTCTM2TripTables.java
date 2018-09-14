@@ -64,8 +64,7 @@ public class MTCTM2TripTables {
     private int iteration;
 	private String directory;
 	private String matrixFileExtension = "mat";
- 	private HashMap<String,String> rbMap;
-	private MatrixDataServerIf ms;
+ 	private MatrixDataServerIf ms;
         
     private HashMap<String, Float> averageOcc3Plus;  //a HashMap of average occupancies for 3+ vehicles by tour purpose
     
@@ -727,7 +726,7 @@ public class MTCTM2TripTables {
 			
 			for(int row = 1; row< mgraDataTable.getRowCount();++row){
 				
-				int mgra = (int) mgraDataTable.getValueAt(row, "mgra");
+				int mgra = (int) mgraDataTable.getValueAt(row, "MAZ");
 				int county = (int) mgraDataTable.getValueAt(row,mgraManager.MGRA_COUNTY_FIELD_NAME);
 				
 				for(int i=0;i<countiesSet1.length;++i)
