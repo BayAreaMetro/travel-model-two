@@ -240,7 +240,8 @@ if __name__ == '__main__':
 
         # create the lines shapefile
         arcpy.CreateFeatureclass_management(WORKING_DIR, TRN_LINES_SHPFILE.format(operator_file), "POLYLINE")
-        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "NAME", "TEXT", field_length=25)
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "NAME",       "TEXT", field_length=25)
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "NAME_SET",   "TEXT", field_length=25)
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "HEADWAY_EA", "FLOAT")
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "HEADWAY_AM", "FLOAT")
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "HEADWAY_MD", "FLOAT")
@@ -256,12 +257,20 @@ if __name__ == '__main__':
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "OPERATOR",   "SHORT")
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "FARESTRUCT", "TEXT", field_length=12)
         arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "IBOARDFARE", "FLOAT")
+        # helpful additional fields
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "FIRST_N",    "LONG")
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "FIRST_NAME", "TEXT", field_length=40)
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "LAST_N",     "LONG")
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "LAST_NAME",  "TEXT", field_length=40)
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "N_OR_S",     "TEXT", field_length=3)
+        arcpy.AddField_management(TRN_LINES_SHPFILE.format(operator_file), "E_OR_W",     "TEXT", field_length=3)
         arcpy.DefineProjection_management(TRN_LINES_SHPFILE.format(operator_file), sr)
 
-        line_cursor[operator_file] = arcpy.da.InsertCursor(TRN_LINES_SHPFILE.format(operator_file), ["NAME", "SHAPE@",
+        line_cursor[operator_file] = arcpy.da.InsertCursor(TRN_LINES_SHPFILE.format(operator_file), ["NAME", "NAME_SET", "SHAPE@",
                                    "HEADWAY_EA", "HEADWAY_AM", "HEADWAY_MD", "HEADWAY_PM", "HEADWAY_EV",
                                    "MODE", "MODE_TYPE", "OPERATOR_T", "VEHICLETYP", "VTYPE_NAME", "SEATCAP", "CRUSHCAP",
-                                   "OPERATOR", "FARESTRUCT", "IBOARDFARE"])
+                                   "OPERATOR", "FARESTRUCT", "IBOARDFARE",
+                                   "FIRST_N", "FIRST_NAME", "LAST_N", "LAST_NAME", "N_OR_S", "E_OR_W"])
 
         # create the links shapefile
         arcpy.CreateFeatureclass_management(WORKING_DIR, TRN_LINKS_SHPFILE.format(operator_file), "POLYLINE")
@@ -321,8 +330,13 @@ if __name__ == '__main__':
     stop_count = 0
     total_line_count = len(trn_net.line(re.compile(".")))
 
+    line_group_pattern = re.compile(r"([A-Z0-9]+_[A-Z0-9]+)")
+
     for line in trn_net:
         # print(line)
+        # figure out the name set
+        match_obj = re.match(line_group_pattern, line.name)
+        name_set  = match_obj.group(1) if match_obj else "No match"
 
         line_point_array = arcpy.Array()
         link_point_array = arcpy.Array()
@@ -346,12 +360,27 @@ if __name__ == '__main__':
               line.name, op_txt, operator_file))
         # for attr_key in line.attr: print(attr_key, line.attr[attr_key])
 
+        # keep information about first and last nodes
+        first_n     = -1
+        first_name  = None
+        first_point = None
+        last_n      = -1
+        last_name   = None
+        last_point  = None
         for node in line.n:
             n = abs(int(node.num))
             station = stops_to_station[n] if n in stops_to_station else ""
             is_stop = 1 if node.isStop() else 0
             nntime = -999
             if "NNTIME" in node.attr: nntime = float(node.attr["NNTIME"])
+
+            if first_n < 0:
+                first_n    = n
+                first_name = station
+                first_point = (node_dicts["X"][n], node_dicts["Y"][n])
+            last_n     = n
+            last_name  = station
+            last_point = (node_dicts["X"][n], node_dicts["Y"][n])
 
             # From NNTIME documentation:
             # NODES=1,2,3,4, NNTIME=10, NODES=5,6,7, NNTIME=15
@@ -417,7 +446,8 @@ if __name__ == '__main__':
             Wrangler.WranglerLogger.warn("No faresystem for mode {}".format(mode_num))
 
         pline_shape = arcpy.Polyline(line_point_array)
-        line_cursor[operator_file].insertRow([line.name, pline_shape,
+
+        line_cursor[operator_file].insertRow([line.name, name_set, pline_shape,
                                               float(line.attr['HEADWAY[1]']),
                                               float(line.attr['HEADWAY[2]']),
                                               float(line.attr['HEADWAY[3]']),
@@ -429,7 +459,11 @@ if __name__ == '__main__':
                                               line.attr['VEHICLETYPE'],
                                               vtype_name, seatcap, crushcap,
                                               line.attr['OPERATOR'],
-                                              farestruct, iboardfare
+                                              farestruct, iboardfare,
+                                              first_n, first_name,
+                                              last_n,  last_name,
+                                              "N" if last_point[1] > first_point[1] else "S",
+                                              "E" if last_point[0] > first_point[0] else "W"
                                             ])
         line_count += 1
 
