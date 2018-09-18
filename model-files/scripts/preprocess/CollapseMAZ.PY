@@ -68,7 +68,7 @@ header = list(data)
 keyField = ["TAZ"]
 other = ["MAZ", "MAZ_ORIGINAL", "TAZ_ORIGINAL", "mall_flag"]
 avgAll = ["hparkcost", "numfreehrs", "dparkcost", "mparkcost"]
-commObs = ["ech_dist", "hch_dist", "parkarea"]
+commObs = ["ech_dist", "hch_dist", "parkarea", "CountyID", "CountyName", "DistID", "DistName"]
 #nonObs = ["TotInt", "DUDen", "EmpDen", "PopDen", "RetEmpDen", "IntDenBin", "EmpDenBin", "DuDenBin"]
 nonObs = []
 # Fill sumAll list with remaining fields

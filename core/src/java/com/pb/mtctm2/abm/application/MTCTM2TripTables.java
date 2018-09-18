@@ -64,8 +64,7 @@ public class MTCTM2TripTables {
     private int iteration;
 	private String directory;
 	private String matrixFileExtension = "mat";
- 	
-	private MatrixDataServerIf ms;
+ 	private MatrixDataServerIf ms;
         
     private HashMap<String, Float> averageOcc3Plus;  //a HashMap of average occupancies for 3+ vehicles by tour purpose
     
@@ -75,7 +74,7 @@ public class MTCTM2TripTables {
     
     public MTCTM2TripTables(String resourceBundleName, int iteration){
 
-        HashMap<String,String> rbMap = ResourceUtil.getResourceBundleAsHashMap(resourceBundleName);
+        rbMap = ResourceUtil.getResourceBundleAsHashMap(resourceBundleName);
         properties = new Properties();
         for (String key : rbMap.keySet()) 
         	properties.put(key,rbMap.get(key));
@@ -706,15 +705,52 @@ public class MTCTM2TripTables {
 		public int numSets = maxMaz.length;
 		public int autoMatOffset;
 		
+		public boolean intrazonalOnly = false;
+		
 		public MazSets() {
 			
 			//get max distance for maz to maz trips
 			maxMazAutoTripDistance = Float.parseFloat(properties.getProperty("Results.MAZAutoTripMatrix.TripMaxDistance"));
+			intrazonalOnly = Util.getBooleanValueFromPropertyMap(rbMap, "Results.MAZAutoTripMatrix.IntrazonalOnly");
+			
+			TableDataSet mgraDataTable = mgraManager.getMgraTableDataSet();
+			
+			int[] countiesSet1 = Util.getIntegerArrayFromPropertyMap(rbMap, "Results.MAZAutoTripMatrix.CountySet1");
+			int[] countiesSet2 = Util.getIntegerArrayFromPropertyMap(rbMap, "Results.MAZAutoTripMatrix.CountySet2");
+			int[] countiesSet3 = Util.getIntegerArrayFromPropertyMap(rbMap, "Results.MAZAutoTripMatrix.CountySet3");
+			
+			//figure out the max maz value in each set
+			int maxMazSet1 = 0;
+			int maxMazSet2 = 0;
+			int maxMazSet3 = 0;
+			
+			for(int row = 1; row< mgraDataTable.getRowCount();++row){
+				
+				int mgra = (int) mgraDataTable.getValueAt(row, "MAZ");
+				int county = (int) mgraDataTable.getValueAt(row,mgraManager.MGRA_COUNTY_FIELD_NAME);
+				
+				for(int i=0;i<countiesSet1.length;++i)
+					if(county == countiesSet1[i] ) //found county in set
+						if(mgra>maxMazSet1)
+							maxMazSet1=mgra;
+				
+				for(int i=0;i<countiesSet2.length;++i)
+					if(county == countiesSet2[i] ) //found county in set
+						if(mgra>maxMazSet2)
+							maxMazSet2=mgra;
+				
+				for(int i=0;i<countiesSet3.length;++i)
+					if(county == countiesSet3[i] ) //found county in set
+						if(mgra>maxMazSet3)
+							maxMazSet3=mgra;
+				
+			}
+			
 			
 			//get the near maz to maz assignment sets
-			maxMaz[0] = Integer.parseInt(properties.getProperty("Results.MAZAutoTripMatrix.MaxSeqMazSet1"));
-			maxMaz[1] = Integer.parseInt(properties.getProperty("Results.MAZAutoTripMatrix.MaxSeqMazSet2"));
-			maxMaz[2] = Integer.parseInt(properties.getProperty("Results.MAZAutoTripMatrix.MaxSeqMazSet3"));
+			maxMaz[0] = maxMazSet1;
+			maxMaz[1] = maxMazSet2;
+			maxMaz[2] = maxMazSet3;
 			
 			numZones[0] = maxMaz[0];
 			numZones[1] = maxMaz[1] - maxMaz[0];
@@ -766,12 +802,19 @@ public class MTCTM2TripTables {
 		
 		public boolean isMazSetTrip(float tripdist, int originMGRA, int destinationMGRA) {
 			
-			if((tripdist < maxMazAutoTripDistance) & (getZoneSet(originMGRA, destinationMGRA) > 0)) {
-				return(true);
-			} else {
-				return(false);
-			}
+			int oTaz = mgraManager.getTaz(originMGRA);
+			int dTaz = mgraManager.getTaz(destinationMGRA);
 			
+			boolean intrazonal = (oTaz==dTaz) ? true : false;
+			
+			
+			if(intrazonalOnly && intrazonal)
+				return true;
+			else if(((tripdist < maxMazAutoTripDistance)||intrazonal) & (getZoneSet(originMGRA, destinationMGRA) > 0))
+					return(true);
+			else 
+				return(false);
+				
 		}
 		
     }

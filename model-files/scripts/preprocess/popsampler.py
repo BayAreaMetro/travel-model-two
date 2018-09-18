@@ -82,20 +82,17 @@ def runPopSampler(tazSampleRateFileName, hhFileName, perFileName):
     
     #update ids and expand persons
     new_households['hhno_new'] = range(1,len(new_households)+1)
-    new_persons = pd.merge(persons, new_households[["HHID","hhno_new"]], left_on="HHID", right_on="HHID", )
+    new_persons = pd.merge(persons, new_households[["HHID","hhno_new", "SampleRate"]], left_on="HHID", right_on="HHID", )
     new_households['HHID'] = new_households['hhno_new'].astype(np.int32)
     new_persons['HHID'] = new_persons['hhno_new'].astype(np.int32)
     
-    new_persons = pd.merge(new_persons, sampleRates, left_on='taz', right_on='TAZ_SEQ')
-
-    #delete added fields
+       #delete added fields
     del new_households['hhno_new']
     del new_households['TAZ_SEQ']
 #    del new_households['SampleRate']
     del new_households['hhincbin']
     del new_households['hhsizebin']
     del new_persons['hhno_new']
-    del new_persons['TAZ_SEQ']
 	
 	#sort data
     new_households.sort_values('HHID', ascending=True, inplace=True)

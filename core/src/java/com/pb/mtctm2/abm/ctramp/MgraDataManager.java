@@ -70,6 +70,7 @@ public final class MgraDataManager
     private static final String         MGRA_ADULT_SCHOOL_ENROLLMENT_FIELD_NAME          = "AdultSchEnrl";
     private static final String         MGRA_GRADE_SCHOOL_DISTRICT_FIELD_NAME            = "ech_dist";
     private static final String         MGRA_HIGH_SCHOOL_DISTRICT_FIELD_NAME             = "hch_dist";
+    public static final String         MGRA_COUNTY_FIELD_NAME                           = "CountyID";
 
     private static final String PROPERTIES_PARKING_COST_OUTPUT_FILE = "mgra.avg.cost.output.file";
     
@@ -146,6 +147,8 @@ public final class MgraDataManager
     private int[]                       mstallsoth;
     private int[]                       mstallssam;
     private float[]                     mparkcost;
+    
+    private int[] 					 	countyId;
     
     private TableDataSet tapLinesTable;
     private HashMap<Integer,String> taplines;
