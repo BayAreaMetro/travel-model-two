@@ -252,6 +252,8 @@ Transit fares are modeled in Cube's Public Transport (PT) program as follows:
 |---------------|---------------|-----------|----------|
 | *MAZ_ORIGINAL* | Original micro zone number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system) | |
 | *TAZ_ORIGINAL* | Original TAZ number. It's original because these will get renumbered during the model run assuming [the node numbering conventions](#county-node-numbering-system)  | |
+| *CountyID* | County ID Number | MAZAutoTripMatrix via [MgraDataManager] | |
+| *CountyName* | County name string | | |
 | *DistID* | District ID Number (TODO: link district map) | [TourModeChoice.xls] | District system definition |
 | *DistName* | District Name (TODO: link district map) | | District system definition |
 | *ACRES* | MAZ acres | [createMazDensityFile.py] | Calculated from shapefile |
