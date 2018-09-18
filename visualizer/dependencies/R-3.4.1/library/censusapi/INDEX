@@ -1,8 +1,0 @@
-fips                    List of state fips codes - 50 states plus DC
-getCensus               Retrieve Census data from a given API
-listCensusApis          Get dataset metadata on all available APIs as a
-                        data frame
-listCensusMetadata      Get variable or geography metadata for a given
-                        API as a data frame
-makeVarlist             Use variable metadata to find variables
-                        containing a given string.

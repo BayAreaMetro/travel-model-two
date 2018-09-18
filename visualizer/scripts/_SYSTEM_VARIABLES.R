@@ -1,5 +1,6 @@
 ### Paths
 SYSTEM_APP_PATH       <- WORKING_DIR
+SYSTEM_APP_PATH       <- gsub("\\\\","/", SYSTEM_APP_PATH)
 SYSTEM_DATA_PATH      <- file.path(SYSTEM_APP_PATH, "data")
 SYSTEM_SHP_PATH       <- file.path(SYSTEM_DATA_PATH, "SHP")
 SYSTEM_TEMPLATES_PATH <- file.path(SYSTEM_APP_PATH, "templates")

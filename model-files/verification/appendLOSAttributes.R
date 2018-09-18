@@ -6,7 +6,8 @@ Example: Rscript.exe --vanilla --verbose appendLOSAttributes.R --transitonly 1 X
 This example adds XFERS and BEST_MODE to the end of tour and trip files, and only writes out transit tours/trips
 
 Input:  ctramp_output/[indiv,joint][Trip,Tour]Data_[ITER].csv
-Output: ctramp_output/[indiv,joint][Trip,Tour]Data_transitwLOS_[ITER].csv
+Output: skims/transit_skims_[EA,AM,MD,PM,EV]_SET[1-3].omx
+        ctramp_output/[indiv,joint][Trip,Tour]Data_transitwLOS_[ITER].csv
 "
 USAGE_epilog <- "Initial revision by Dora Wu @ WSP USA Inc 11-22-2017"
 USAGE <- gsub("\n", " ", USAGE)
