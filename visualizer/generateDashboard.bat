@@ -7,35 +7,41 @@
 :: # 2. User should also specify the name of the base and build scenario if the 
 :: #    base/build scenario is specified as "HTS", scenario names are replaced 
 :: #    with appropriate Census sources names wherever applicable
+:: # 3. Run this script from this directory. e.g. .\generateDashboard.bat
+:: #    Dashboard and error files will be in subdir "outputs"
+:: ## TODO Document caveats for CHTS/Survey and tripModeProfile_vis.csv, tmodeProfile_vis.csv
 :: ############################################################################
 @ECHO off
 SET WORKING_DIR=%~dp0
 
 :: User Inputs
 :: ###########
-::SET BASE_SUMMARY_DIR=E:\projects\clients\mtc\data\CHTS_Summaries
-SET BASE_SUMMARY_DIR=E:\projects\clients\mtc\ModelOutput\102317_2010_R1\ABM_Summaries
-SET BUILD_SUMMARY_DIR=E:\projects\clients\mtc\ModelOutput\102317\ABM_Summaries
-SET OUTPUT_HTML_NAME=MTC_Dashboard_2010_R1_vs_R2_6Dec17
+SET BASE_SUMMARY_DIR=M:\Data\HomeInterview\2010\Analysis\Calibration Targets\maz_v2_2
+SET BUILD_SUMMARY_DIR=C:\Users\lzorn\Box\Modeling and Surveys\Development\Travel Model Two Development\Calibration and Validation\Round 2\Calibration Spreadsheets\2015_01_lmz_04\ABM Summaries
+SET OUTPUT_HTML_NAME=MTC_Dashboard_CHTS_vs_2015_01_lmz_04
 
-SET BASE_SCENARIO_NAME=2010_R1
-SET BUILD_SCENARIO_NAME=2010_R2
+SET BASE_SCENARIO_NAME=CHTS
+SET BUILD_SCENARIO_NAME=2015_01_lmz_04
 :: for survey base legend names are different [Yes/No]
-SET IS_BASE_SURVEY=No
+SET IS_BASE_SURVEY=Yes
 
-SET BASE_SAMPLE_RATE=0.2
-SET BUILD_SAMPLE_RATE=1.0
+SET BASE_SAMPLE_RATE=1.0
+SET BUILD_SAMPLE_RATE=0.2
 
-SET SHP_FILE_NAME=tazs.shp
+:: in data/SHP
+SET SHP_FILE_NAME=tazs_TM2_v2_2.shp
+
+if not exist outputs (mkdir outputs)
+if not exist runtime (mkdir runtime)
 
 :: Set up dependencies
 :: ###################
-SET R_SCRIPT=%~dp0\dependencies\R-3.4.1\bin\Rscript
-SET R_LIBRARY=%~dp0\dependencies\R-3.4.1\library
+SET R_SCRIPT=C:\Program Files\R\R-3.5.1\bin\x64\Rscript
+:: Use standard R environment variables to tell R where to find libraries (R_LIBS, R_LIBS_USER, etc)
 :: Set PANDOC path
-SET RSTUDIO_PANDOC=%~dp0\dependencies\Pandoc
+SET RSTUDIO_PANDOC=C:\Program Files (x86)\Pandoc
 :: Parameters file 
-SET PARAMETERS_FILE=%~dp0\runtime\parameters.csv
+SET PARAMETERS_FILE=runtime\parameters.csv
 
 ECHO Key,Value > %PARAMETERS_FILE%
 ECHO WORKING_DIR,%WORKING_DIR% >> %PARAMETERS_FILE%
@@ -53,7 +59,7 @@ ECHO IS_BASE_SURVEY,%IS_BASE_SURVEY% >> %PARAMETERS_FILE%
 :: Call the master R script
 :: ########################
 ECHO %startTime%%Time%: Running R script to generate visualizer...
-%R_SCRIPT% scripts\Master.R %PARAMETERS_FILE%
+"%R_SCRIPT%" scripts\Master.R %PARAMETERS_FILE%
 IF %ERRORLEVEL% EQU 11 (
    ECHO File missing error. Check error file in outputs.
    EXIT /b %errorlevel%

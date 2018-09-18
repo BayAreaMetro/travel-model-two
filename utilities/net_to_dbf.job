@@ -1,0 +1,8 @@
+; export network
+;
+run PGM=NETWORK
+
+  filei neti[1] = "%NET%.net"
+  fileo linko   = "%NET%.dbf" FORMAT=DBF
+
+endrun

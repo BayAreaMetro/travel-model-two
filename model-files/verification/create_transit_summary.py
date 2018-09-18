@@ -1,79 +1,149 @@
-import os,sys
+USAGE = """
+Read transit assignment link output by time period and creates a few summaries.
 
-infile = r'..\logs\TPPL1096.PRN'
-line_file = r'..\trn\mtc_transit_lines_AM_LOCAL_BUS_with_transit.lin'
-outfile = r'transit_summary.csv'
+  1) trn_boards_all_timeperiods.csv is really the raw assignment link output but
+     all time periods consolidated into one file columns:
+     A, B, MODE, OPERATOR, NAME, LONGNAME, LINKSEQ,
+     DIST_EA, TIME_EA, HEADWAY_1_EA, VOL_EA, ONA_EA, OFFB_EA,
+     DIST_AM, TIME_AM, HEADWAY_2_AM, VOL_AM, ONA_AM, OFFB_AM,
+     DIST_MD, TIME_MD, HEADWAY_2_MD, VOL_MD, ONA_MD, OFFB_MD,
+     DIST_PM, TIME_PM, HEADWAY_2_PM, VOL_PM, ONA_PM, OFFB_PM,
+     DIST_EV, TIME_EV, HEADWAY_2_EV, VOL_EV, ONA_EV, OFFB_EV
 
-headways = {}
-with open(line_file) as f:
-    inside = False
-    name = None
-    for line in f:
-        line = line.strip()
-        if len(line) == 0:
-            continue
-        line = line.split()
-        if line[0] == 'LINE':
-            inside = True
-        if inside:
-            for entry in line:
-                if entry.find('NAME=') == 0:
-                    name = entry.split('=')[1].replace('"','')
-                    headways[name] = ['0','0','0','0','0','0']
-                if entry.find('HEADWAY') == 0:
-                    ent = 1
-                    if entry.find('HEADWAY[') == 0:
-                        ent = int(entry[8])
-                    headways[name][ent] = entry.split('=')[1]
-                if entry.find('N=') == 0:
-                    inside = False
-                    name = None
+  2) trn_boards_lines.csv is the links aggregated to lines.  columns:
+     MODE, OPERATOR, NAME, LONGNAME,
+     DIST_EA, TIME_EA, HEADWAY_1_EA, VOL_EA, ONA_EA, OFFB_EA,
+     DIST_AM, TIME_AM, HEADWAY_2_AM, VOL_AM, ONA_AM, OFFB_AM,
+     DIST_MD, TIME_MD, HEADWAY_2_MD, VOL_MD, ONA_MD, OFFB_MD,
+     DIST_PM, TIME_PM, HEADWAY_2_PM, VOL_PM, ONA_PM, OFFB_PM,
+     DIST_EV, TIME_EV, HEADWAY_2_EV, VOL_EV, ONA_EV, OFFB_EV
 
-counter = 0
-with open(outfile,'wb') as of:
-    of.write(','.join(['Name','Mode','Op','Stp','Cr','Distance','Time','Pass','PassDist','PassHr','GenMode','TrueGenMode','TimePeriod','Headway']) + os.linesep)
-    with open(infile) as f:
-        ind = -1
-        last_mode = None
-        for line in f:
-            line = line.strip()
-            if (ind == -1) and (line.find('REPORT LINES ') == 0):
-                ind = 1
-                mode = line.replace('REPORT LINES  UserClass=','')
-                if mode != last_mode:
-                    counter += 1
-                last_mode = mode
-            elif (ind == 1) and (line[0] == '-'):
-                ind = 2
-            elif (ind == 2):
-                if line.find('-') == 0:
-                    ind = -1
-                    continue
-                if line.find('Page ') > -1:
-                    line = line.split('Page ')[0]
-                    ind = -1
-                line = line.replace(',','').replace('--','-').replace('-','0').split()
-                tp = 0
-                if counter % 4 == 0:
-                    tp = counter / 4
-                    tgm = 'PREMIUM'
-                elif counter % 2 == 0:
-                    tp = (counter + 2) / 4
-                    tgm = 'LOCAL'
-                else:
-                    tp = 0
-                    tgm = 'NA'
-                if tp == 0:
-                    tpn = 'NA'
-                    tp = 1
-                elif tp == 1:
-                    tpn = 'EA'
-                elif tp == 2:
-                    tpn = 'AM'
-                elif tp == 3:
-                    tpn = 'MD'
-                elif tp == 4:
-                    tpn = 'PM'
-                elif tp == 5:
-                    tpn = 'EV'
-                of.write(','.join(line + [mode,tgm,tpn,headways[line[0]][tp]]) + os.linesep)
+  3) trn_boards_modes.csv is the lines aggregated to modes.  columns:
+     OPERATOR, MODE,
+     DIST_EA, TIME_EA, ONA_EA, OFFB_EA, VOL_EA,
+     DIST_AM, TIME_AM, ONA_AM, OFFB_AM, VOL_AM,
+     DIST_MD, TIME_MD, ONA_MD, OFFB_MD, VOL_MD,
+     DIST_PM, TIME_PM, ONA_PM, OFFB_PM, VOL_PM,
+     DIST_EV, TIME_EV, ONA_EV, OFFB_EV, VOL_EV
+
+"""
+
+import argparse,collections,os,sys
+import simpledbf
+import numpy,pandas
+
+TIME_PERIODS = collections.OrderedDict([ # time period to duration
+    ("EA", 3.0),
+    ("AM", 4.0),
+    ("MD", 5.0),
+    ("PM", 4.0),
+    ("EV", 8.0)])
+KEY_COLS     = ["A","B","LINKSEQ","MODE","OPERATOR","NAME","LONGNAME"]
+RAW_OUTFILE  = "trn_boards_all_timeperiods.csv"
+LINE_OUTFILE = "trn_boards_lines.csv"
+MODE_OUTIFLE = "trn_boards_modes.csv"
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description=USAGE, formatter_class=argparse.RawDescriptionHelpFormatter,)
+    parser.add_argument("trn_dir", help="Location of transit assignment files (trn_link_onoffs_[EA,AM,MD,PM,EV].dbf")
+    parser.add_argument("--byclass",  action="store_true", help="Include user class outputs (VOL, ONA, OFFB)")
+    args = parser.parse_args()
+
+    all_linko_df = pandas.DataFrame()
+    for time_period in TIME_PERIODS.keys():
+
+        linko_file = os.path.join(args.trn_dir, "trn_link_onoffs_{}.dbf".format(time_period))
+        linko_dbf  = simpledbf.Dbf5(linko_file)
+        linko_df   = linko_dbf.to_dataframe()
+
+        print("Read {} lines from {}".format(len(linko_df), linko_file))
+
+        # for now, we want boardings so
+        # filter down to just transit links (no access/egress)
+        linko_df = linko_df.loc[ linko_df.MODE < 900 ]
+        # and those with positive ONA
+        linko_df = linko_df.loc[ linko_df.ONA > 0 ]
+        print("Filtered to {} transit links with boardings".format(len(linko_df)))
+
+        # drop columns starting with REV
+        colnames = list(linko_df.columns)
+        rev_colnames = [colname for colname in colnames if colname[:4]=="REV_"]
+        linko_df.drop(labels=rev_colnames, axis="columns", inplace=True)
+        # as well as OFFA and ONB since ONA and OFFB are sufficient
+        offa_onb_colnames = [colname for colname in colnames if colname[:4]=="OFFA" or colname[:3]=="ONB"]
+        linko_df.drop(labels=offa_onb_colnames, axis="columns", inplace=True)
+        # and STOPA, STOPB since neither are useful right now
+        linko_df.drop(labels=["STOPA","STOPB"], axis="columns", inplace=True)
+
+        # drop userclass
+        if not args.byclass:
+            class_colnames = ["VOL_1","ONA_1","OFFB_1",
+                              "VOL_2","ONA_2","OFFB_2",
+                              "VOL_3","ONA_3","OFFB_3"]
+            linko_df.drop(labels=class_colnames, axis="columns", inplace=True)
+
+        # rename columns that aren't key columns
+        colnames = list(linko_df.columns)
+        rename_cols = {}
+        for colname in colnames:
+            if colname in KEY_COLS: continue
+            rename_cols[colname] = "{}_{}".format(colname, time_period)
+        linko_df.rename(columns=rename_cols, inplace=True)
+
+        # join together
+        if len(all_linko_df) == 0:
+            all_linko_df = linko_df
+        else:
+            all_linko_df = pandas.merge(left=all_linko_df, right=linko_df, how="outer")
+            print("Joined to linko for all timeperiods: {} rows".format(len(all_linko_df)))
+
+    # write the raw boardings
+    outfilepath = os.path.join(args.trn_dir, RAW_OUTFILE)
+    all_linko_df.to_csv(outfilepath, header=True, index=False)
+    print("Wrote {} links to {}".format(len(all_linko_df), outfilepath))
+    print(all_linko_df.head())
+
+    # write a line summary
+    # todo: HEADWAY isn't additive
+    all_linko_df.drop(labels=["A","B","LINKSEQ"], axis="columns", inplace=True)
+    aggregate_dict = collections.OrderedDict()
+    tp_num         = 0
+    for time_period in TIME_PERIODS.keys():
+        tp_num += 1
+        # additive
+        aggregate_dict["DIST_{}".format(time_period)] = 'sum'
+        aggregate_dict["TIME_{}".format(time_period)] = 'sum'
+        aggregate_dict[ "ONA_{}".format(time_period)] = 'sum'
+        aggregate_dict["OFFB_{}".format(time_period)] = 'sum'
+        # max
+        aggregate_dict["HEADWAY_{}_{}".format(tp_num, time_period)] = 'max'
+        aggregate_dict[       "VOL_{}".format(time_period)]         = 'max'
+        if args.byclass:
+            for setnum in [1,2,3]:
+                aggregate_dict[ "ONA_{}_{}".format(setnum,time_period)] = 'sum'
+                aggregate_dict["OFFB_{}_{}".format(setnum,time_period)] = 'sum'
+                aggregate_dict[ "VOL_{}_{}".format(setnum,time_period)] = 'max'
+
+
+    all_linko_df = all_linko_df.groupby(by=["MODE","OPERATOR","NAME","LONGNAME"]).agg(aggregate_dict).reset_index(drop=False)
+    # reorder columns
+    all_linko_df = all_linko_df[["OPERATOR","MODE","NAME","LONGNAME"] + aggregate_dict.keys()]
+    outfilepath = os.path.join(args.trn_dir, LINE_OUTFILE)
+    all_linko_df.to_csv(outfilepath, header=True, index=False)
+    print("Wrote {} lines to {}".format(len(all_linko_df), outfilepath))
+
+    # write a mode summary -- drop headways since they don't combine
+    all_linko_df.drop(labels=["NAME","LONGNAME","HEADWAY_1_EA","HEADWAY_2_AM",
+                              "HEADWAY_3_MD","HEADWAY_4_PM","HEADWAY_5_EV"], axis="columns", inplace=True)
+    all_linko_df = all_linko_df.groupby(by=["MODE","OPERATOR"]).agg(numpy.sum).reset_index(drop=False)
+    # reorder columns
+    del aggregate_dict["HEADWAY_1_EA"]
+    del aggregate_dict["HEADWAY_2_AM"]
+    del aggregate_dict["HEADWAY_3_MD"]
+    del aggregate_dict["HEADWAY_4_PM"]
+    del aggregate_dict["HEADWAY_5_EV"]
+    all_linko_df = all_linko_df[["OPERATOR","MODE"] + aggregate_dict.keys()]
+    outfilepath = os.path.join(args.trn_dir, MODE_OUTIFLE)
+    all_linko_df.to_csv(outfilepath, header=True, index=False)
+    print("Wrote {} modes to {}".format(len(all_linko_df), outfilepath))

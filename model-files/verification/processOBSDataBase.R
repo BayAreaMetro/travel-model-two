@@ -8,32 +8,57 @@ options(scipen=999)
 
 library(plyr)
 library(dplyr)
-#install.packages("reshape2")
 library(reshape)
 library(reshape2)
 
 library(data.table)
 
+# one of "maz_v1_0" or "maz_v2_2"
+# Just use maz_v1_0 since the onboard survey geocoding was done to maz v1.0
+geography = "maz_v1_0"
+
 # User Inputs
-OBS_Dir <- "E:/projects/clients/mtc/data/OBS_27Dec17"
-geogXWalkDir  <- "E:/projects/clients/mtc/data/Trip End Geocodes"
-Targets_Dir <- "E:/projects/clients/mtc/data/TransitRidershipTargets"
-outFile <- "OBS_SummaryStatistics.csv"
-SkimDir       <- "E:/projects/clients/mtc/data/Skim2015"
-mazDataDir    <- "E:/projects/clients/mtc/2015_calibration/landuse"
+if (Sys.getenv("USERNAME") == "lzorn") {
+  USERPROFILE   <- gsub("\\\\","/", Sys.getenv("USERPROFILE"))
+  BOX_DEV       <- file.path(USERPROFILE, "Box", "Modeling and Surveys", "Development")
+  BOX_TM2       <- file.path(BOX_DEV,     "Travel Model Two Development")
+  OBS_Dir       <- file.path(BOX_DEV,     "Share Data", "Onboard-Surveys", "Survey_Database_122717")
+  OBS_Anc_Dir   <- file.path(BOX_TM2,     "Observed Data", "Transit", "Onboard Survey", "Data")
+  Targets_Dir   <- file.path(BOX_TM2,     "Observed Data", "Transit", "Scaled Transit Ridership Targets")
+  OutDir        <- file.path(BOX_TM2,     "Observed Data", "Transit", "Onboard Survey", paste0("CalibrationSummaries_", geography))
+  if (geography == "maz_v1_0") {
+    geogXWalkDir  <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "Trip End Geocodes maz_v1_0")
+    districtDef   <- file.path(BOX_TM2, "Model Geography", "Zones v1.0", "maz_superdistrictv1.csv")
+    SkimDir       <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS")
+    mazDataDir    <- file.path(BOX_TM2, "Model Inputs",    "2015", "landuse")
+  } else if (geography == "maz_v2_2") {
+    geogXWalkDir  <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "Trip End Geocodes maz_v2_2")
+    districtDef   <- file.path(BOX_TM2, "Model Geography", "Zones v2.2", "sd22_from_tazV2_2.csv")
+    SkimDir       <- file.path(BOX_TM2, "Model Geography", "Zones v2.2")
+    mazDataDir    <- file.path(BOX_TM2, "Model Inputs",    "2015_revised_mazs", "landuse")
+  }
+} else {
+  OBS_Dir       <- "E:/projects/clients/mtc/data/OBS_27Dec17"
+  OBS_Anc_Dir   <- OBS_Dir
+  OutDir        <- file.path(OBS_Dir, "Reports")
+  geogXWalkDir  <- "E:/projects/clients/mtc/data/Trip End Geocodes"
+  Targets_Dir   <- "E:/projects/clients/mtc/data/TransitRidershipTargets"
+  outFile       <- "OBS_SummaryStatistics.csv"
+  SkimDir       <- "E:/projects/clients/mtc/data/Skim2015"
+  mazDataDir    <- "E:/projects/clients/mtc/2015_calibration/landuse"
+}
 
+load(file.path(OBS_Dir,     "survey.rdata"))
+load(file.path(OBS_Anc_Dir, "ancillary_variables.rdata"))
+xwalk              <- read.csv(file.path(geogXWalkDir, "geographicCWalk.csv"      ), as.is = T)
+xwalk_SDist        <- read.csv(districtDef, as.is = T)
 
-load(paste(OBS_Dir, "survey.rdata", sep = "/"))
-load(paste(OBS_Dir, "ancillary_variables.rdata", sep = "/"))
-xwalk              <- read.csv(paste(geogXWalkDir, "geographicCWalk.csv", sep = "/"), as.is = T)
-xwalk_SDist        <- read.csv(paste(geogXWalkDir, "geographicCWalk_SDist.csv", sep = "/"), as.is = T) # change by Khademul
-
-DST_SKM   <- fread(paste(SkimDir, "SOV_DIST_MD_HWYSKM.csv", sep = "/"), stringsAsFactors = F, header = T)
+DST_SKM   <- fread(file.path(SkimDir, "SOV_DIST_MD_HWYSKM.csv"), stringsAsFactors = F, header = T)
 DST_SKM   <- melt(DST_SKM, id = c("DISTDA"))
 colnames(DST_SKM) <- c("o", "d", "dist")
 
-mazData   <- read.csv(paste(mazDataDir, "maz_data_withDensity.csv", sep = "/"), as.is = T)
-mazData$COUNTY <- xwalk$COUNTYNAME[match(mazData$MAZ, xwalk$MAZ)]
+mazData   <- read.csv(file.path(mazDataDir, "maz_data.csv"), as.is = T)
+mazData$COUNTY <- xwalk$COUNTYNAME[match(mazData$MAZ_ORIGINAL, xwalk$MAZ_ORIGINAL)]
 
 # consider only weekday records
 OBS <- survey[!(survey$day_of_the_week %in% c("SATURDAY", "SUNDAY")),]
@@ -41,6 +66,8 @@ OBS_ancillary <- ancillary_df
 remove(survey)
 remove(ancillary_df)
 
+summary(OBS$orig_taz)
+summary(OBS$dest_taz)
 
 # Process data for calibration targets preparation
 OBS$work_before <- OBS_ancillary$at_work_prior_to_orig_purp[match(OBS$Unique_ID, OBS_ancillary$Unique_ID)]
@@ -267,7 +294,7 @@ obs_operator_totals <- data.frame(obs_operator_totals)
 colnames(obs_operator_totals) <- c("operator", "boardWeight")
 
 # Read in target boardings for 2015
-boarding_targets <- read.csv(paste(Targets_Dir, "transitRidershipTargets2015.csv", sep = "/"), header = TRUE, stringsAsFactors = FALSE)
+boarding_targets <- read.csv(file.path(Targets_Dir, "transitRidershipTargets2015.csv"), header = TRUE, stringsAsFactors = FALSE)
 target_operator_totals <- aggregate(boarding_targets$targets2015, by = list(operator = boarding_targets$operator), sum)
 target_operator_totals <- data.frame(target_operator_totals)
 colnames(target_operator_totals) <- c("operator", "targetBoardings")
@@ -302,7 +329,7 @@ unified_collapsed <- merge(x=unified_collapsed, y=obs_operator_brdngs, by="opera
 unified_collapsed$shares_trips <- unified_collapsed$tripWeight_2015/unified_collapsed$op_totTrips
 unified_collapsed$shares_brdngs <- unified_collapsed$boardWeight_2015/unified_collapsed$op_totBrdngs
 
-write.csv(unified_collapsed, paste(OBS_Dir, "Reports//unified_collapsed.csv", sep = "//"), row.names = FALSE)
+write.csv(unified_collapsed, file.path(OutDir, "unified_collapsed.csv"), row.names = FALSE)
 
 # Copy technology from target boardings
 unified_collapsed <- merge(x=unified_collapsed, y=boarding_targets[boarding_targets$surveyed==1,c("operator","technology")], by="operator", all.x = TRUE)
@@ -322,7 +349,7 @@ unified_collapsed_technology <- merge(x=unified_collapsed_technology, y=obs_tech
 unified_collapsed_technology$shares_trips <- unified_collapsed_technology$tripWeight_2015/unified_collapsed_technology$op_totTrips
 unified_collapsed_technology$shares_brdngs <- unified_collapsed_technology$boardWeight_2015/unified_collapsed_technology$op_totBrdngs
 
-write.csv(unified_collapsed_technology, paste(OBS_Dir, "Reports//unified_collapsed_technology.csv", sep = "//"), row.names = FALSE)
+write.csv(unified_collapsed_technology, file.path(OutDir, "unified_collapsed_technology.csv"), row.names = FALSE)
 
 #Remaining total boardings by technology to be distributed
 other_operators <- aggregate(boarding_targets$targets2015[boarding_targets$surveyed==0], by = list(tech = boarding_targets$technology[boarding_targets$surveyed==0]), sum)
@@ -391,10 +418,10 @@ all_collapsed_technology$technology[all_collapsed_technology$operator=="Other_EB
 all_collapsed_technology$technology[all_collapsed_technology$operator=="Other_LB"] <- "LB"
 all_collapsed_technology <- aggregate(cbind(tripWeight_2015)~technology+tourPurpose+accessMode+autoSuff, data = all_collapsed_technology, sum)
 
-write.csv(all_collapsed_operators, paste(OBS_Dir, "Reports\\transit_trip_targets_operators.csv", sep = "/"), row.names = FALSE)
-write.csv(all_collapsed_technology, paste(OBS_Dir, "Reports\\transit_trip_targets_technology.csv", sep = "/"), row.names = FALSE)
+write.csv(all_collapsed_operators, file.path(OutDir, "transit_trip_targets_operators.csv"), row.names = FALSE)
+write.csv(all_collapsed_technology, file.path(OutDir, "transit_trip_targets_technology.csv"), row.names = FALSE)
 
-#write.csv(trips, paste(OBS_Dir,"transitTripSummary_OBS.csv", sep = ""), row.names = FALSE)
+#write.csv(trips, file.path(OutDir,"transitTripSummary_OBS.csv"), row.names = FALSE)
 
 
 ## Compute summary statistics
@@ -574,8 +601,8 @@ OBS$BEST_MODE[OBS$usedCR==1] <- "CR"
 OBS$OCOUNTY <- xwalk$COUNTYNAME[match(OBS$orig_maz, xwalk$MAZ_ORIGINAL)]
 OBS$DCOUNTY <- xwalk$COUNTYNAME[match(OBS$dest_maz, xwalk$MAZ_ORIGINAL)]
 
-OBS$ODISTRICT <- xwalk_SDist$SDISTNAME[match(OBS$orig_maz, xwalk_SDist$MAZ_ORIGINAL)]
-OBS$DDISTRICT <- xwalk_SDist$SDISTNAME[match(OBS$dest_maz, xwalk_SDist$MAZ_ORIGINAL)]
+OBS$ODISTRICT <- xwalk_SDist$district_name[match(OBS$orig_maz, xwalk_SDist$MAZ_ORIGINAL)]
+OBS$DDISTRICT <- xwalk_SDist$district_name[match(OBS$dest_maz, xwalk_SDist$MAZ_ORIGINAL)]
 
 OBS$OTAZ <- xwalk$TAZ[match(OBS$orig_maz, xwalk$MAZ_ORIGINAL)]
 OBS$DTAZ <- xwalk$TAZ[match(OBS$dest_maz, xwalk$MAZ_ORIGINAL)]
@@ -608,51 +635,51 @@ percentPNR <- sum(OBS$trip_weight2015[OBS$accessType=='pnr' & OBS$dest_park==1 &
   sum(OBS$trip_weight2015[OBS$accessType=='pnr' & !is.na(OBS$dest_maz)]) * 100
 cat("Percent of PNR trips to parking constraint zones", percentPNR)
 
-write.table("percentPNR", paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",")
-write.table(percentPNR, paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
+write.table("percentPNR", file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",")
+write.table(percentPNR,   file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
 
 #  setType X accessType
 set_access <- xtabs(trip_weight2015~setType+accessType, data = OBS)
 
-write.table("set_access", paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
-write.table(set_access, paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
+write.table("set_access", file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
+write.table(set_access,   file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
 
 #  Transfers X setType
 transfer_set <- xtabs(trip_weight2015~nTransfers+setType, data = OBS)
-write.table("transfer_set", paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
-write.table(transfer_set, paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
+write.table("transfer_set", file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
+write.table(transfer_set,   file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
 
 ## Calculate transfer rates by period, accessType and setType
 transfer_data <- aggregate(cbind(board_weight2015, trip_weight2015)~period, data = OBS, sum, na.rm = TRUE)
 transfer_data <- transfer_data %>%
   mutate(transfer_rate = board_weight2015/trip_weight2015) 
-write.table("transfer_period", paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
-write.table(transfer_data, paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
+write.table("transfer_period", file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
+write.table(transfer_data,     file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
 
 
 transfer_data <- aggregate(cbind(board_weight2015, trip_weight2015)~accessType, data = OBS, sum, na.rm = TRUE)
 transfer_data <- transfer_data %>%
   mutate(transfer_rate = board_weight2015/trip_weight2015) 
-write.table("transfer_accessType", paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
-write.table(transfer_data, paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
+write.table("transfer_accessType", file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
+write.table(transfer_data,         file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
 
 
 transfer_data <- aggregate(cbind(board_weight2015, trip_weight2015)~setType, data = OBS, sum, na.rm = TRUE)
 transfer_data <- transfer_data %>%
   mutate(transfer_rate = board_weight2015/trip_weight2015) 
-write.table("transfer_setType", paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
-write.table(transfer_data, paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
+write.table("transfer_setType", file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
+write.table(transfer_data,      file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
 
 #  Transfers X accessType
 transfer_set <- xtabs(trip_weight2015~nTransfers+accessType, data = OBS)
-write.table("transfer_set", paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
-write.table(transfer_set, paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
+write.table("transfer_set", file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
+write.table(transfer_set,   file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
 
 transfer_data <- aggregate(cbind(board_weight2015, trip_weight2015)~accessType + setType, data = OBS, sum, na.rm = TRUE)
 transfer_data <- transfer_data %>%
   mutate(transfer_rate = board_weight2015/trip_weight2015) 
-write.table("transfer_accessType_setType", paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
-write.table(transfer_data, paste(OBS_Dir, "Reports\\OBS_TransitSummaries.csv", sep = "/"), sep = ",", append = T)
+write.table("transfer_accessType_setType", file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
+write.table(transfer_data,                 file.path(OutDir, "OBS_TransitSummaries.csv"), sep = ",", append = T)
 
 
 ## TLFD by access mode
@@ -670,7 +697,7 @@ tlfd_transit$Total <- rowSums(tlfd_transit[,!colnames(tlfd_transit) %in% c("dist
 tlfd_transit_df <- merge(x = distBinCat, y = tlfd_transit, by = "distbin", all.x = TRUE)
 tlfd_transit_df[is.na(tlfd_transit_df)] <- 0
 
-write.csv(tlfd_transit_df, paste(OBS_Dir, "Reports\\transitTLFD.csv", sep = "/"), row.names = F)
+write.csv(tlfd_transit_df, file.path(OutDir, "transitTLFD.csv"), row.names = F)
 
 # compute TLFDs by 10ths of mile
 tlfd_transit <- ddply(OBS[!is.na(OBS$distbin10),c("accessType", "distbin10", "trip_weight2015")], c("accessType", "distbin10"), summarise, transit = sum(trip_weight2015))
@@ -679,7 +706,7 @@ tlfd_transit$Total <- rowSums(tlfd_transit[,!colnames(tlfd_transit) %in% c("dist
 tlfd_transit_df <- merge(x = distBinCat10, y = tlfd_transit, by = "distbin10", all.x = TRUE)
 tlfd_transit_df[is.na(tlfd_transit_df)] <- 0
 
-write.csv(tlfd_transit_df, paste(OBS_Dir, "Reports\\transitTLFD10.csv", sep = "/"), row.names = F)
+write.csv(tlfd_transit_df, file.path(OutDir, "transitTLFD10.csv"), row.names = F)
 
 
 ## Create County-County transit trips summary
@@ -703,11 +730,11 @@ names(trips_transit_summary_total)[names(trips_transit_summary_total) == "V1"] <
 trips_transit_summary <- rbind(trips_transit_summary, trips_transit_summary_total[,c("OCOUNTY", "DCOUNTY", "accessType", "tourtype", "count")])
 
 
-write.table(trips_transit_summary, paste(OBS_Dir, "Reports\\trips_transit_summary.csv", sep = "/"), sep = ",", row.names = F)
+write.table(trips_transit_summary, file.path(OutDir, "trips_transit_summary.csv"), sep = ",", row.names = F)
 
 
 ## Create SuperDistrict - SuperDistrict transit trips summary
-# filter records with missing origin/destinaiton information
+# filter records with missing origin/destination information
 trips_transit <- OBS[OBS$agg_tour_purp>0,]
 trips_transit <- trips_transit[!is.na(trips_transit$ODISTRICT) & !is.na(trips_transit$DDISTRICT), ]
 
@@ -727,7 +754,7 @@ names(trips_transit_summary_total)[names(trips_transit_summary_total) == "V1"] <
 trips_transit_summary <- rbind(trips_transit_summary, trips_transit_summary_total[,c("ODISTRICT", "DDISTRICT", "accessType", "tourtype", "count")])
 
 
-write.table(trips_transit_summary, paste(OBS_Dir, "Reports\\trips_transit_summary_SDist.csv", sep = "/"), sep = ",", row.names = F)
+write.table(trips_transit_summary, file.path(OutDir, "trips_transit_summary_SDist.csv"), sep = ",", row.names = F)
 
 
 ### District to District FLows by Line Haul Mode ###
@@ -756,7 +783,7 @@ trips_transit_summary_best_total$access_mode <- "Total"
 names(trips_transit_summary_best_total)[names(trips_transit_summary_best_total) == "V1"] <- "count"
 trips_transit_summary_best <- rbind(trips_transit_summary_best, trips_transit_summary_best_total[,c("OSDIST", "DSDIST", "access_mode", "BEST_MODE", "count")])
 
-write.table(trips_transit_summary_best, paste(OBS_Dir,"Reports\\trips_transit_summary_best_S.csv", sep = "//"), sep = ",", row.names = F)
+write.table(trips_transit_summary_best, file.path(OutDir,"trips_transit_summary_best_S.csv"), sep = ",", row.names = F)
 
 # used mode summary
 
@@ -794,7 +821,7 @@ trips_transit_summary_used <- rbind(trips_transit_summary_used, trips_transit_su
 
 trips_transit_summary_used <- trips_transit_summary_used[,c("OSDIST","DSDIST","access_mode","used_mode","freq")]
 
-write.table(trips_transit_summary_used, paste(OBS_Dir,"Reports\\trips_transit_summary_used_S.csv", sep = "//"), sep = ",", row.names = F)
+write.table(trips_transit_summary_used, file.path(OutDir,"trips_transit_summary_used_S.csv"), sep = ",", row.names = F)
 
 
 

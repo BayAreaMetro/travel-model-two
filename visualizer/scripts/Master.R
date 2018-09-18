@@ -13,7 +13,6 @@
 ### Read Command Line Arguments
 args                <- commandArgs(trailingOnly = TRUE)
 Parameters_File     <- args[1]
-#Parameters_File <- "E:/projects/clients/mtc/MTC_Visualizer/runtime/parameters.csv"
 
 ### Read parameters from Parameters_File
 parameters          <- read.csv(Parameters_File, header = TRUE)
@@ -31,11 +30,12 @@ IS_BASE_SURVEY      <- trimws(paste(parameters$Value[parameters$Key=="IS_BASE_SU
 
 ### Initialization
 # Load global variables
-.libPaths(R_LIBRARY)
 source(paste(WORKING_DIR, "scripts/_SYSTEM_VARIABLES.R", sep = "/"))
 
 ### Copy summary CSVs
-summaryFileList <- read.csv(paste(SYSTEM_TEMPLATES_PATH, "summaryFilesNames.csv", sep = '/'), as.is = T)
+dir.create(BASE_DATA_PATH)
+dir.create(BUILD_DATA_PATH)
+summaryFileList <- read.csv(file.path(SYSTEM_TEMPLATES_PATH, "summaryFilesNames.csv"), as.is = T)
 summaryFileList <- as.list(summaryFileList$summaryFile)
 retVal <- copyFile(summaryFileList, sourceDir = BASE_SUMMARY_DIR, targetDir = BASE_DATA_PATH)
 if(retVal) q(save = "no", status = 11)
@@ -45,7 +45,7 @@ if(retVal) q(save = "no", status = 11)
 ### Load required libraries
 SYSTEM_REPORT_PKGS <- c("DT", "flexdashboard", "leaflet", "geojsonio", "htmltools", "htmlwidgets", "kableExtra",
                         "knitr", "mapview", "plotly", "RColorBrewer", "rgdal", "rgeos", "crosstalk","treemap", "htmlTable",
-                        "rmarkdown", "scales", "stringr", "jsonlite", "pander", "ggplot2", "reshape", "raster", "dplyr")
+                        "rmarkdown", "scales", "stringr", "jsonlite", "pander", "ggplot2", "reshape", "raster", "dplyr", "yaml")
 
 lapply(SYSTEM_REPORT_PKGS, library, character.only = TRUE)
 

@@ -248,6 +248,40 @@ if ERRORLEVEL 2 goto done
 
 :itercnt
 
+:: ------------------------------------------------------------------------------------------------------
+::
+:: Step 6:  Build the highway and transit skims
+::
+:: ------------------------------------------------------------------------------------------------------
+
+:: Build the initial highway and transit skims
+runtpp %BASE_SCRIPTS%\skims\HwySkims.job
+if ERRORLEVEL 2 goto done
+
+:transitskims
+
+runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
+if ERRORLEVEL 2 goto done
+
+<<<<<<< HEAD
+:: MTC servers crash if trying to distribute more than 15 because these processes write giant files
+IF %ENVTYPE%==MTC (
+  runtpp %BASE_SCRIPTS%\skims\TransitSkims_distribute5.job
+) else (
+  runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
+)
+=======
+runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
+if ERRORLEVEL 2 goto done
+
+runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
+>>>>>>> master
+if ERRORLEVEL 2 goto done
+
+runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
+if ERRORLEVEL 2 goto done
+
+
 ::Step X: Main model iteration setup
 SET /A ITERATION=0
 :iteration_start
@@ -258,33 +292,6 @@ IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
 IF %ITERATION% EQU 4 SET SAMPLERATE=%SAMPLERATE_ITERATION4%
 IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
 ECHO ****MODEL ITERATION %ITERATION% (SAMPLE RATE %SAMPLERATE%)****
-
-:: ------------------------------------------------------------------------------------------------------
-::
-:: Step 6:  Build the highway and transit skims
-::
-:: ------------------------------------------------------------------------------------------------------
-
-:hwyskims
-:: Build the highway and transit skims
-runtpp %BASE_SCRIPTS%\skims\HwySkims.job
-if ERRORLEVEL 2 goto done
-
-:transitskims
-
-runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
-if ERRORLEVEL 2 goto done
-
-:: MTC servers crash if trying to distribute more than 15 because these processes write giant files
-IF %ENVTYPE%==MTC (
-  runtpp %BASE_SCRIPTS%\skims\TransitSkims_distribute5.job
-) else (
-  runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
-)
-if ERRORLEVEL 2 goto done
-
-runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
-if ERRORLEVEL 2 goto done
 
 :: Copy skims and other related files to remote machine
 IF NOT %HH_SERVER%==localhost (
@@ -425,15 +432,31 @@ if ERRORLEVEL 2 goto done
 runtpp CTRAMP\scripts\assign\MergeNetworks.job
 if ERRORLEVEL 2 goto done
 
-IF %ITERATION% LSS %MAX_ITERATION% GOTO iteration_start
+:: If another iteration is to be run, run hwy and transit
+:: assignment. Reskim networks, and get everything prepped
+:: for the next iteration.
+IF %ITERATION% LSS %MAX_ITERATION% (
+  runtpp %BASE_SCRIPTS%\skims\HwySkims.job
+  if ERRORLEVEL 2 goto done
 
-:: Create the block file that controls whether the crowding functions are called during transit assignment.
-"%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
+  runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
+  if ERRORLEVEL 2 goto done
 
-:: Run Transit Assignment
-runtpp CTRAMP\scripts\assign\TransitAssign.job
-if ERRORLEVEL 2 goto done
+  runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
+  if ERRORLEVEL 2 goto done
 
+  :: Create the block file that controls whether the crowding functions are called during transit assignment.
+  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
+
+  :: Run Transit Assignment
+  runtpp CTRAMP\scripts\assign\TransitAssign.job
+  if ERRORLEVEL 2 goto done
+  
+  runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
+  if ERRORLEVEL 2 goto done
+  
+  GOTO iteration_start
+)
 
 :: ------------------------------------------------------------------------------------------------------
 ::

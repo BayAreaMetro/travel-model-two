@@ -6,8 +6,8 @@
 ;
 ;    (a) early AM, 3 am to 6 am
 ;    (b) AM peak period, 6 am to 10 am
-;    (c) midday, 10 am to 3 pm
-;    (d) PM peak period, 3 pm to 7 pm
+;    (c) midday, 10 am to 3:00 pm
+;    (d) PM peak period, 3:00 pm to 7 pm
 ;    (e) evening, 7 pm to 3 am the next day
 ;
 ; The first thing the script does is export the highway skims for each time period (as temporary csv files), so that TAZ->TAZ 
@@ -85,6 +85,8 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 CROWDING_SKIM_BLOCK = '%BASE_SCRIPTS%\block\transit_assign_type.block'
+SKIM_MATRICES = '%BASE_SCRIPTS%\block\skim_matrices.block'
+SKIM_MATRIX_DEF = '%BASE_SCRIPTS%\block\skim_matrix_definitions.block'
 
 ;start cluster nodes - one for each skim set and time period
 *Cluster.exe MTC_TRANASN 1-5 start exit
@@ -144,22 +146,20 @@ LOOP PERIOD = 1,5
             FILEO ROUTEO[2] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET2_with_transit_assign.rte"
             FILEO ROUTEO[3] = "trn\mtc_transit_routes_@TOKEN_PERIOD@_SET3_with_transit_assign.rte"
             
-            FILEO MATO[1] = "trn\PTSKIMS_set1_@TOKEN_PERIOD@.MAT" MO=1-12 NAME=CWDWAITA, IWAITA, XWAITA, CWDWAITP, IWAITP, XWAITP, TIMEA, CWDCOSTP, TIMEP, EXCESSDEMAND, EXCESSPROP, COMPCOST
-            FILEO MATO[2] = "trn\PTSKIMS_set2_@TOKEN_PERIOD@.MAT" MO=1-12 NAME=CWDWAITA, IWAITA, XWAITA, CWDWAITP, IWAITP, XWAITP, TIMEA, CWDCOSTP, TIMEP, EXCESSDEMAND, EXCESSPROP, COMPCOST
-            FILEO MATO[3] = "trn\PTSKIMS_set3_@TOKEN_PERIOD@.MAT" MO=1-12 NAME=CWDWAITA, IWAITA, XWAITA, CWDWAITP, IWAITP, XWAITP, TIMEA, CWDCOSTP, TIMEP, EXCESSDEMAND, EXCESSPROP, COMPCOST
+            READ FILE = @SKIM_MATRICES@
             
+            FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_with_transit_assign.rpt"
             FILEO LINKO[1] = "trn\trn_link_@TOKEN_PERIOD@.dbf"        FORMAT=DBF BYCLASS=Y LINES=Y
             FILEO LINKO[2] = "trn\trn_link_onoffs_@TOKEN_PERIOD@.dbf" FORMAT=DBF BYCLASS=Y LINES=Y ONOFFS=Y
             FILEO LINEO    = "trn\trn_line_out_@TOKEN_PERIOD@.lin"
-            FILEO REPORTO  = "trn\mtc_transit_report_@TOKEN_PERIOD@_with_transit_assign.rpt"
+
             ;
             ; The stop2stop file is for BART station-station boardings. It writes a dbf file of boardings 
             : by station pair for the listed station nodes. Note that node numbers change for each network
             ; due to changes in node sequencing. The list below is specific to the version of the 2015
             ; network used for calibration\validation. TODO: automate process for creating node list.
             ;
-            ; FILEO STOP2STOPO = "trn\mtc_stop2stop_@TOKEN_PERIOD@.dbf", ACCUMULATE=FIRSTLASTBYMODE, MODES=120, NODES=1083175,1083190,1083193,1083233,1083275,1083398,1083401,1083492,1129772,1129773,1129776,1129777,1129778,1129786,1314178,1338535,1338536,1338537,1338540,1338543,1338545,1338546,1338547,1338549,1338552,1338553,1338554,1338555,1338557,1338559,1338561,1338563,1338564,1338565,1338566,1419864,1419865,1419866,1419867,1419868,1419869,1419870,1419872,1419873,1419874
-
+            ;FILEO STOP2STOPO = "trn\mtc_stop2stop_@TOKEN_PERIOD@.dbf", ACCUMULATE=FIRSTLASTBYMODE, MODES=120, NODES=1083175,1083190,1083193,1083233,1083275,1083398,1083401,1083492,1129772,1129773,1129776,1129777,1129778,1129786,1314178,1338535,1338536,1338537,1338540,1338543,1338545,1338546,1338547,1338549,1338552,1338553,1338554,1338555,1338557,1338559,1338561,1338563,1338564,1338565,1338566,1419864,1419865,1419866,1419867,1419868,1419869,1419870,1419872,1419873,1419874
             
             PARAMETERS HDWAYPERIOD=@PERIOD@
             PARAMETERS NOROUTEERRS=17000000
@@ -198,6 +198,8 @@ LOOP PERIOD = 1,5
             REPORT LINES=T, SORT=MODE, LINEVOLS=T, STOPSONLY=T, SKIP0=T
             
 			READ FILE = @CROWDING_SKIM_BLOCK@
+            
+            READ FILE = @SKIM_MATRIX_DEF@
 			
         ENDRUN
 

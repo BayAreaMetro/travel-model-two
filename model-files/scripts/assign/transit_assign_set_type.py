@@ -62,21 +62,6 @@ crowding_line = 'CROWDMODEL APPLY=T, ADJUSTLINK={}, ADJUSTWAIT={}, ITERATIONS=10
 )
 crowd_convergence = '    LINKDF={linkdf:.5f}, VOLDF={voldf:.5f}, WAITDF={waitdf:.5f}, RMSESTOP=T, RMSECUTOFF={converge:.10f}'.format(**crowding_config)
 
-skims = {
-    1: {'skim_arg': 'CWDWAITA(0)', 'crowding_skim': True},
-    2: {'skim_arg': 'IWAITA(0)', 'crowding_skim': False},
-    3: {'skim_arg': 'XWAITA(0)', 'crowding_skim': False},
-    4: {'skim_arg': 'CWDWAITP(0)', 'crowding_skim': True},
-    5: {'skim_arg': 'IWAITP(0)', 'crowding_skim': False},
-    6: {'skim_arg': 'XWAITP(0)', 'crowding_skim': False},
-    7: {'skim_arg': 'TIMEA(0,ALLMODES)', 'crowding_skim': False},
-    8: {'skim_arg': 'CWDCOSTP(0,ALLMODES)', 'crowding_skim': True},
-    9: {'skim_arg': 'TIMEP(0,ALLMODES)', 'crowding_skim': False},
-    10: {'skim_arg': 'EXCESSDEMAND', 'crowding_skim': True},
-    11: {'skim_arg': 'EXCESSPROP', 'crowding_skim': True},
-    12: {'skim_arg': 'COMPCOST(0)', 'crowding_skim': False},
-}
-
 with open(output_file, 'w') as f:
     if crowding_config['enabled']:
         f.write(crowding_line)
@@ -84,10 +69,3 @@ with open(output_file, 'w') as f:
             f.write(',\n' + crowd_convergence + '\n')
         else:
 		    f.write('\n')
-    
-    f.write('\nPHASE=SKIMIJ\n')
-    for idx, skim in skims.iteritems():
-        if (skim['crowding_skim'] & crowding_config['enabled']) | (not skim['crowding_skim']):
-            f.write('    MW[{}] = {}\n'.format(idx, skim['skim_arg']))
-    f.write('ENDPHASE\n')
- 

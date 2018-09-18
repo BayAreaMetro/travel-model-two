@@ -6,3 +6,4 @@ core/release/
 *.bak
 *.exe
 model-files/runtime/config/pskill.exe
+utilities/vta_expresslane_feed_saver/vta_expresslanes_2018*

@@ -15,9 +15,10 @@ geography = "maz_v2_2"
 if (Sys.getenv("USERNAME") == "lzorn") {
   USERPROFILE     <- gsub("\\\\","/", Sys.getenv("USERPROFILE"))
   BOX_TM2         <- file.path(USERPROFILE, "Box", "Modeling and Surveys", "Development", "Travel Model Two Development")
-
+  RUN_NAME        <- "2015_01_lmz_04"
+  
   # this is the output directory
-  WD              <- file.path(BOX_TM2, "Calibration & Validation","Round 2","Calibration Spreadsheets",geography,"ABM Summaries")
+  WD              <- file.path(BOX_TM2, "Calibration and Validation","Round 2","Calibration Spreadsheets",RUN_NAME,"ABM Summaries")
   if (geography == "maz_v1_0") {
     ABMOutputDir  <- file.path("model2-a","Model2A-Share", "Projects_TM2","2015_01_lmz_maz1","ctramp_output")
     tripLOSFile   <- file.path(ABMOutputDir, "indivTripData_transitwLOS_1.csv")
@@ -27,7 +28,7 @@ if (Sys.getenv("USERNAME") == "lzorn") {
     mazDataDir    <- file.path(BOX_TM2, "Model Inputs",    "2015", "landuse")
     districtDef   <- file.path(BOX_TM2, "Model Geography", "Zones v1.0", "taz_superdistrictv1.csv")
   } else if (geography == "maz_v2_2") {
-    ABMOutputDir  <- file.path("D:", "Projects_TM2","2015_01_lmz_02","ctramp_output")
+    ABMOutputDir  <- file.path("D:", "Projects_TM2",RUN_NAME,"ctramp_output")
     tripLOSFile   <- file.path(ABMOutputDir, "indivTripData_transitwLOS_1.csv")
     SkimDir       <- file.path(BOX_TM2, "Model Geography", "Zones v2.2")
     geogXWalkDir  <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "Trip End Geocodes maz_v2_2")
@@ -43,9 +44,6 @@ if (Sys.getenv("USERNAME") == "lzorn") {
   
   WD            <- "E:/projects/clients/mtc/Calibration_2015/ModelOutputs/081318/ABM_Summaries" # change by khademul
   ABMOutputDir  <- "E:/projects/clients/mtc/Calibration_2015/ModelOutputs/081318" # change by khademul
-  # WD            <- "E:/projects/clients/mtc/Calibration_2015/ModelOutputs/062118/ABM_Summaries" # change by khademul
-  # ABMOutputDir  <- "E:/projects/clients/mtc/Calibration_2015/ModelOutputs/062118" # change by khademul
-  # ABMOutputDir  <- "E:/projects/clients/mtc/2015_calibration/ctramp_output"
   tripLOSFile   <- "E:/projects/clients/mtc/2015_calibration/individual_transitTrip_wLOS.csv"
   geogXWalkDir  <- "E:/projects/clients/mtc/data/Trip End Geocodes"
   SkimDir       <- "E:/projects/clients/mtc/data/Skim2015"
@@ -56,7 +54,8 @@ if (Sys.getenv("USERNAME") == "lzorn") {
   districtDef   <- file.path(BOX_TM2, "Model Geography", "Zones v1.0", "taz_superdistrictv1.csv")
 }
 
-# LOS columns expected: XFERS, BEST_MODE, [EB,FR,LR,HR,CR]_TIME
+# LOS columns expected: XFERS, BEST_MODE, [LB,EB,FR,LR,HR,CR]_TIME
+# e.g run in the model dir: Rscript.exe --vanilla --verbose %TM2_REPO%\model-files\verification\appendLOSAttributes.R --transitonly 1 XFERS BEST_MODE LB_TIME EB_TIME FR_TIME LR_TIME HR_TIME CR_TIME
 tripsLOS           <- fread(tripLOSFile)
 
 setwd(ABMOutputDir)
@@ -158,10 +157,10 @@ hh$WORKERS <- workersHH$freq[match(hh$hh_id, workersHH$HHID)]
 
 # Auto ownership
 autoOwnership_Pre <- count(aoResults_Pre, c("HHVEH"))
-write.csv(autoOwnership_Pre, "autoOwnership_Pre.csv", row.names = TRUE)
+write.csv(autoOwnership_Pre, "autoOwnership_Pre.csv", row.names = FALSE)
 
 autoOwnership <- count(aoResults, c("HHVEH"))
-write.csv(autoOwnership, "autoOwnership.csv", row.names = TRUE)
+write.csv(autoOwnership, "autoOwnership.csv", row.names = FALSE)
 
 # Zero auto HHs by Census Tract
 hh$CTIDFP10 <- ct_xwalk$CTIDFP10[match(hh$home_mgra, ct_xwalk$MAZSEQ)]
@@ -187,7 +186,7 @@ write.csv(autoOwnershipCY, "autoOwnershipCY.csv", row.names = F)
 
 # Persons by person type
 pertypeDistbn <- count(per, c("PERTYPE"))
-write.csv(pertypeDistbn, "pertypeDistbn.csv", row.names = TRUE)
+write.csv(pertypeDistbn, "pertypeDistbn.csv", row.names = F)
 
 # 
 
@@ -2134,9 +2133,9 @@ colnames(temp) <- c("tripmode","tourmode","purpose","value","grp_var")
 write.csv(temp, "tripModeProfile_vis.csv", row.names = F)
 
 # Total number of stops, trips & tours
-cat("Total number of stops : ", nrow(stops) + sum(jstops$num_participants))
-cat("Total number of trips : ", nrow(trips) + sum(jtrips$num_participants))
-cat("Total number of tours : ", nrow(tours) + sum(unique_joint_tours$NUMBER_HH))
+cat("\n Total number of stops : ", nrow(stops) + sum(jstops$num_participants))
+cat("\n Total number of trips : ", nrow(trips) + sum(jtrips$num_participants))
+cat("\n Total number of tours : ", nrow(tours) + sum(unique_joint_tours$NUMBER_HH))
 
 
 # output total numbers in a file

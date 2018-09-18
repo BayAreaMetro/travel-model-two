@@ -640,7 +640,7 @@ p
 ```{r Gauge_WFH1}
 cat("Working from home: ", WFH_Source, " vs. ", BUILD_SCENARIO_NAME)
 
-base_df <- base_data[[which(base_csv_names=="wfh_summary_region")]]
+base_df <- base_data[[which(base_csv_names=="wfh_summary")]]
 rate <- base_df$WFH/base_df$Workers
 gauge1 <- gauge(round(rate*100, 1), min = 0, max = 100, symbol = '%', gaugeSectors(danger =  c(0,1), colors = c("Green", "Green", "Green")))
 
