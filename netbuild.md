@@ -19,22 +19,21 @@ CONTENTS
 
 ## Setting it up for the first time
 
-
 ### Software requirements
-Before using NetworkWrangler (or Wrangler for short), you’ll need to:
+To build model networks, the following software needs to be installed on your computer.
 
-* Install Python if you haven't.  NetworkWrangler is designed to work with both Python 2 and Python 3 - either installation would be fine.
-*	Install Cube 6.4.4 or newer (http://www.citilabs.com). Cube is proprietary software and a license will be required.
-*	Clone NetworkWrangler from GitHub (https://github.com/BayAreaMetro/NetworkWrangler). When it's cloned, you should see this python script in your local GitHub directory. For example, on a typical Windows installation for the user ftsang, the path would be: `C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py`
-*	Install various python modules that NetworkWrangler uses. (For most current python users, the required modules are xlrd, simpleparse, and numpy. In the command window, type `pip install xlrd`, `pip install simpleparse` and `pip install numpy` to install these modules. If you are using python 3, you may need pywin32 as well. If additional modules are needed for your specific set up, when you import NetworkWrangler for the first time you’ll get error messages on screen indicating which python module is needed.)  You'll know this is complete when you can run python from the command line and then import Wrangler from the python command line as described below, in the next section.
-* Install Git (https://git-scm.com/downloads)
+* Install [Python](https://www.python.org/downloads/) if you haven't already. [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler) should work with either Python 2 or Python 3.  You'll also need [pip](https://pypi.org/project/pip/) to help you to install python modules, but this should be [included](https://pip.pypa.io/en/stable/installing/) with Python 2 if your version is >= 2.7.9 and with Python 3 if your version >= 3.4.  We typically install the 64-bit version of python (not the 32-bit version) and install it in the root level (e.g. `C:\Python27` or `C:\Python35`). **Be sure to note where your Python is installed.**
+*	Install various python modules that NetworkWrangler uses.  For most current python users, the required modules are [xlrd](https://pypi.org/project/xlrd/), [SimpleParse](https://pypi.org/project/SimpleParse/), and [numpy](https://pypi.org/project/numpy/). If you are using python 3, you may need [pywin32](https://pypi.org/project/pywin32/) as well. If additional modules are needed for your specific set up, when you import `NetworkWrangler` for the first time, you’ll get error messages on screen indicating which python module is needed.   To install a python module, type `pip install [module_name]`; note that you'll need to have `pip.exe` in your `PATH` to do this so Windows can find `pip.exe` in order to execute it.  Setting up your `PATH` is described in more detail below.  You'll know this is complete when you can run python from the command line and then import Wrangler from the python command line as described below, in the next section.
+*	Install [Citilabs Cube 6.4.4 or newer](http://www.citilabs.com/support/downloads/). After installing when you run the application, you'll be asked where the license server is located -- there is a note in Lisa's office with this information.
+*	Clone [NetworkWrangler from GitHub](https://github.com/BayAreaMetro/NetworkWrangler) and keep track of where you cloned it.  We typically clone it into our personal `Documents` folder or `Documents\GitHub`.  For example, Flavia's installation is in `C:\Users\ftsang\Documents\GitHub\NetworkWrangler`.
+* Install [Git](https://git-scm.com/downloads).  This is related to, but not the same as the [GitHub Desktop application](https://desktop.github.com/); we'll need it because projects are coded as local git repositories (that are not on Github).  This is typically installed in `C:\Program Files\Git`.
+
 
 ### Importing NetworkWrangler
 
-
 The next step is to test if you can import Wrangler. Open a command window, and type in the following DOS commands:
 
-**Step 1:** Add Python to your system’s `PATH` environment variable. To do so, you’ll need to know where your python.exe is installed. For example, if your `python.exe` is installed in `C:\Python27`, type the commands as below. If your `python.exe` is installed elsewhere, replace `C:\Python27` with your `python.exe` location.  It's also helpful to include the `Scripts` subdirectory of your python installation, since that's where [`pip.exe`](https://pypi.org/project/pip/) is located, which is used for installing python modules.
+**Step 1:** Add the location of `python.exe` and `pip.exe` to your system's `PATH` environment variable. To do so, you’ll need to know where your `python.exe` is installed.  For example, if your `python.exe` is installed in `C:\Python27`, type the commands as below. If your `python.exe` is installed elsewhere, replace `C:\Python27` with your `python.exe` location.  It's also helpful to include the `Scripts` subdirectory of your python installation, since that's where [`pip.exe`](https://pypi.org/project/pip/) is located, which is used for installing python modules.
 
 ``` dosbatch
 C:\>set PATH=%PATH%;C:\Python27;C:\Python27\Scripts
