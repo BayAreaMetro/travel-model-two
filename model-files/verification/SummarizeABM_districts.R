@@ -18,7 +18,7 @@ if (Sys.getenv("USERNAME") == "lzorn") {
   RUN_NAME        <- "2015_01_lmz_04"
   
   # this is the output directory
-  WD              <- file.path(BOX_TM2, "Calibration & Validation","Round 2","Calibration Spreadsheets",RUN_NAME,"ABM Summaries")
+  WD              <- file.path(BOX_TM2, "Calibration and Validation","Round 2","Calibration Spreadsheets",RUN_NAME,"ABM Summaries")
   if (geography == "maz_v1_0") {
     ABMOutputDir  <- file.path("model2-a","Model2A-Share", "Projects_TM2","2015_01_lmz_maz1","ctramp_output")
     tripLOSFile   <- file.path(ABMOutputDir, "indivTripData_transitwLOS_1.csv")
@@ -157,10 +157,10 @@ hh$WORKERS <- workersHH$freq[match(hh$hh_id, workersHH$HHID)]
 
 # Auto ownership
 autoOwnership_Pre <- count(aoResults_Pre, c("HHVEH"))
-write.csv(autoOwnership_Pre, "autoOwnership_Pre.csv", row.names = TRUE)
+write.csv(autoOwnership_Pre, "autoOwnership_Pre.csv", row.names = FALSE)
 
 autoOwnership <- count(aoResults, c("HHVEH"))
-write.csv(autoOwnership, "autoOwnership.csv", row.names = TRUE)
+write.csv(autoOwnership, "autoOwnership.csv", row.names = FALSE)
 
 # Zero auto HHs by Census Tract
 hh$CTIDFP10 <- ct_xwalk$CTIDFP10[match(hh$home_mgra, ct_xwalk$MAZSEQ)]
@@ -186,7 +186,7 @@ write.csv(autoOwnershipCY, "autoOwnershipCY.csv", row.names = F)
 
 # Persons by person type
 pertypeDistbn <- count(per, c("PERTYPE"))
-write.csv(pertypeDistbn, "pertypeDistbn.csv", row.names = TRUE)
+write.csv(pertypeDistbn, "pertypeDistbn.csv", row.names = F)
 
 # 
 
