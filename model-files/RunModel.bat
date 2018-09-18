@@ -303,7 +303,7 @@ IF NOT %HH_SERVER%==localhost (
 :: Start HH Server locally or remotely
 IF %HH_SERVER%==localhost (
   rem =========== local ========================
-  call CTRAMP\runtime\runHhMgr.cmd "%JAVA_PATH%"
+  call CTRAMP\runtime\runHhMgr.cmd "%JAVA_PATH%" %HOST_IP_ADDRESS%
   echo Started household manager
 ) ELSE (
   rem =========== remote ========================
@@ -324,7 +324,7 @@ IF %HH_SERVER%==localhost (
 :: Start Matrix Server remotely or locally
 IF %MATRIX_SERVER%==localhost (
   rem =========== local ========================
-  call CTRAMP\runtime\runMtxMgr.cmd "%JAVA_PATH%"
+  call CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%JAVA_PATH%"
   echo Started matrix manager
 ) ELSE (
   rem =========== remote ========================
