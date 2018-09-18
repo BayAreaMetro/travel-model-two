@@ -263,19 +263,10 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
-<<<<<<< HEAD
-:: MTC servers crash if trying to distribute more than 15 because these processes write giant files
-IF %ENVTYPE%==MTC (
-  runtpp %BASE_SCRIPTS%\skims\TransitSkims_distribute5.job
-) else (
-  runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
-)
-=======
 runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
 if ERRORLEVEL 2 goto done
 
 runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
->>>>>>> master
 if ERRORLEVEL 2 goto done
 
 runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
