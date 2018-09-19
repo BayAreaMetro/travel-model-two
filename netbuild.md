@@ -33,25 +33,42 @@ To build model networks, the following software needs to be installed on your co
 
 The next step is to test if you can import Wrangler. Open a command window, and type in the following DOS commands:
 
-**Step 1:** Add the location of `python.exe` and `pip.exe` to your system's `PATH` environment variable. To do so, you’ll need to know where your `python.exe` is installed.  For example, if your `python.exe` is installed in `C:\Python27`, type the commands as below. If your `python.exe` is installed elsewhere, replace `C:\Python27` with your `python.exe` location.  It's also helpful to include the `Scripts` subdirectory of your python installation, since that's where [`pip.exe`](https://pypi.org/project/pip/) is located, which is used for installing python modules.
+#### Stop 0: Open a Command Prompt window.
+
+To open a command prompt window, open `cmd.exe`, which comes with Windows.  
+
+I suggest right clicking the top bar of the window and selecting *Properties*, and updating the fonts and colors of the window since the defaults are hideous and hard to read.  *Lucida Console* is a much easier font to read.  You can also change the *Screen Buffer Size* (the Height will control how many lines you can scroll back and see as you do you work, so I usually make this large: 5000) and the *Window Size* here.  Changes you make here will be applied to subsequent command prompt windows you open, so these customizations will last.  See also: [How to make the command prompt look & work better](https://www.digitalcitizen.life/how-customize-command-prompt)
+
+#### Step 1: Add the location of `python.exe` and `pip.exe` to your system's `PATH` environment variable.
+
+To do so, you’ll need to know where your `python.exe` is installed.  For example, if your `python.exe` is installed in `C:\Python27`, type the command as below into your command prompt. If your `python.exe` is installed elsewhere, replace `C:\Python27` with your `python.exe` location.  It's also helpful to include the `Scripts` subdirectory of your python installation, since that's where [`pip.exe`](https://pypi.org/project/pip/) is located, which is used for installing python modules.
 
 ``` dosbatch
 C:\>set PATH=%PATH%;C:\Python27;C:\Python27\Scripts
 ```
 
-**Step 2:** Make sure Cube Voyager is on the path. Again, you’ll need to know where Cube Voyager (`runtpp.exe`) is installed. Below is an example command assuming `runtpp.exe` is installed in `C:\Program Files (x86)\Citilabs\CubeVoyager`. Adjust the command according to the location of your `runtpp.exe`.
+#### Step 2: Add the location of Citilabs Cube's `RUNTPP.EXE` to your system's `PATH` environment variable.
+
+Again, you’ll need to know where Cube's `RUNTPP.EXE` is installed. Below is an example command assuming `RUNTPP.EXE` is installed in `C:\Program Files (x86)\Citilabs\CubeVoyager`. Adjust the command according to the location of your `RUNTPP.EXE`.
 
 ``` dosbatch
 C:\>set PATH=%PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
 ```
 
-**Step 3:** Set your `PYTHONPATH` environment variable to include the location of *NetworkWrangler*. You’ll need to include both the root directory, `NetworkWrangler`, as well as the `_static_` subdirectory of `NetworkWrangler`. The examples below assume that GitHub repository is cloned into `Github` in the `Documents` folder of the user ftsang; modify the path as appropriate for your installation.
+#### Step 3: Add the location of *NetworkWrangler* to your system's `PYTHONPATH` environment variable.
+
+This is because *NetworkWrangler* serves as a python module but it's not installed in the typical location (since it's our own custom python code rather than a module that has been released to the [Python Package Index](https://pypi.org/). You’ll need to include both the root directory, `NetworkWrangler`, as well as the `_static_` subdirectory of `NetworkWrangler`. The examples below assume that GitHub repository is cloned into `C:\Users\ftsang\Documents\GitHub`; modify the path as appropriate for your installation of *NetworkWrangler*.
 
 ``` dosbatch
 C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static
 ```
 
-**Step 4:** Run the python interpreter by typing in `python`. After you type in “Python” and hit enter, the command window should display a message about the version of your python. You should also see that the command line start with >>> instead of >. 
+### Step 4: Run the python interpreter in a command prompt window.
+
+In your command prompt windows, when you run the command of `python`, you'll enter into the *python interpreter*.  This means that subsequent commands are interpretted as lines of Python rather than as Windows DOS commands.  When you enter into the *python interpreter*, the command window should display a message about the version of your python and the prompt will change to be `>>>` instead of `[your current working directory]>`.
+
+To exit the python interpreter, type the python command, `quit()`.
+
 ``` dosbatch
 C:\>python
 Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
