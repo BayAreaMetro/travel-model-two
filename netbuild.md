@@ -234,6 +234,10 @@ C:\Users\lzorn\Documents\NetworkWrangler\scripts>dir Test_Scenario_network*
                1 Dir(s)  104,662,265,856 bytes free
 ```
 
+### Congratulations!  This is the checkpoint for our **NetworkWrangler Workshop Part 2**!
+
+![Woot](https://media.giphy.com/media/JzvALW6b4Plss/giphy.gif)
+
 ## Coding a project
 
 ### Specifying the network changes
