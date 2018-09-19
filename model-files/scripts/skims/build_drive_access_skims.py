@@ -45,8 +45,7 @@ block_dir = sys.argv[2]
 PERIOD_TOKEN = '@PERIOD@'
 id_mode_map = {1:'LOCAL_BUS',
                2:'EXPRESS_BUS',
-               #3:'FERRY_SERVICE',
-               3:'LIGHT_RAIL',
+               3:'FERRY_SERVICE',
                4:'LIGHT_RAIL',
                5:'HEAVY_RAIL',
                6:'COMMUTER_RAIL'}
@@ -217,8 +216,7 @@ for temp_line in open(transit_line_file):
                 
 id_mode_map = {1:'LOCAL_BUS',
                2:'EXPRESS_BUS',
-               #3:'FERRY_SERVICE',
-               3:'LIGHT_RAIL',
+               3:'FERRY_SERVICE',
                4:'LIGHT_RAIL',
                5:'HEAVY_RAIL',
                6:'COMMUTER_RAIL'}
