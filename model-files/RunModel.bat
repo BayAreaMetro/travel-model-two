@@ -159,6 +159,7 @@ if ERRORLEVEL 2 goto done
 IF ERRORLEVEL 1 goto done
 
 IF %SELECT_COUNTY% GTR 0 (
+  copy INPUT\popsyn\          popsyn\    /Y
   :: Renumber the household file MAZs
   "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\RenumberHHFileMAZs.PY popsyn\households.csv landuse\maz_data.csv %SELECT_COUNTY%
 
