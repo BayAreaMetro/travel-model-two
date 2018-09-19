@@ -5,7 +5,7 @@ title: Network Building Guide
 
 # Network Building Guide
 
-This is step-to-step guide for Travel Model Two users who want to build or modify the roadway and transit networks using the tool [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler).
+This is step-by-step guide for Travel Model Two users who want to build or modify the roadway and transit networks using the tool [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler).
 
 These instructions are written assuming installation on Windows (tested on Windows 10).
 
