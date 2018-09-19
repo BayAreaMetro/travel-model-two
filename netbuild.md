@@ -94,7 +94,7 @@ C:\>
 While in the python interpreter, try to import NetworkWrangler.  A successful import will look like the following.
 
 ``` dosbatch
-C:\Users\lzorn\Documents\NetworkWrangler\scripts>python
+C:\>python
 Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import Wrangler
@@ -106,7 +106,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 The most likely type of error you'll get here is an import error if a module required to *NetworkWrangler* fails to load.  For example, if the required module, *xlrd*, is not installed, it'll look like this:
 
 ``` dosbatch
-C:\Users\lzorn\Documents\NetworkWrangler\scripts>python
+C:\>python
 Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import Wrangler
@@ -123,7 +123,7 @@ ImportError: No module named xlrd
 To resolve, quit the python interpreter and install the missing python module using *pip*.  Then try again:
 
 ``` dosbatch
-C:\Users\lzorn\Documents\NetworkWrangler\scripts>python
+C:\>python
 Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import Wrangler
@@ -136,14 +136,14 @@ Traceback (most recent call last):
 ImportError: No module named xlrd
 >>> quit()
 
-C:\Users\lzorn\Documents\NetworkWrangler\scripts>pip install xlrd
+C:\>pip install xlrd
 Collecting xlrd
   Downloading https://files.pythonhosted.org/packages/07/e6/e95c4eec6221bfd8528bcc4ea252a850bffcc4be88ebc367e23a1a84b0bb/xlrd-1.1.0-py2.py3-none-any.whl (108kB)
     100% |UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU| 112kB 656kB/s
 Installing collected packages: xlrd
 Successfully installed xlrd-1.1.0
 
-C:\Users\lzorn\Documents\NetworkWrangler\scripts>python
+C:\>python
 Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import Wrangler
