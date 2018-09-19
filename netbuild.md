@@ -116,7 +116,7 @@ ImportError: No module named xlrd
 >>>
 ```
 
-To resolve, quit the python interpretter and install the missing python module using pip.  Then try again:
+To resolve, quit the python interpreter and install the missing python module using *pip*.  Then try again:
 
 ``` dosbatch
 C:\Users\lzorn\Documents\NetworkWrangler\scripts>python
