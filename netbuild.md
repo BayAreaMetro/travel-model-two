@@ -179,7 +179,7 @@ To build a Futures network series, run:
 C:\Users\lzorn\Documents\NetworkWrangler\scripts>python build_network_mtc_futures.py net_spec_futures_round1.py CleanAndGreen
 ('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\_static\\dataTable.pyc')
 ('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
-Network Specification: build_network_mtc.py
+Network Specification: build_network_mtc_futures.py
 WranglerLogger: DEBUG    Using tier network C:\Users\lzorn\Box\Modeling and Surveys\Development\Travel Model Two Development\Model Inputs\2015_revised_mazs\hwy\FREEFLOW.net
 WranglerLogger: DEBUG    convertLineData: PROGRAM: PT
 
