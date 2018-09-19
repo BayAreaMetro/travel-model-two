@@ -166,7 +166,7 @@ C:\Users\lzorn\Documents\NetworkWrangler\scripts>
 
 ### Futures Network
 
-The futures network script and configuration exists to build the networks for each of the [three Horizon futures](https://mtc.ca.gov/sites/default/files/Horizon-Futures_Shortlist.pdf).  The network building script is [build_network_mtc_futures.py][build_network_mtc_futures.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc_futures.py) and its configuration is [net_spec_futures_round1.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_futures_round1.py).
+The futures network script and configuration exists to build the networks for each of the [three Horizon futures](https://mtc.ca.gov/sites/default/files/Horizon-Futures_Shortlist.pdf).  The network building script is [build_network_mtc_futures.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc_futures.py) and its configuration is [net_spec_futures_round1.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_futures_round1.py).
 
 In order to use the script, you will need to set the `PIVOT_DIR` (which is the base network dir) to point to the location of the 2015 base network inputs which should be available via Box Drive.  For example, the location of my inputs are [committed into the network config](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_futures_round1.py#L14), but yours may vary depending on which directory is at your top Box level.
 ```python
