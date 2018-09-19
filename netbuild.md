@@ -48,7 +48,7 @@ I suggest right clicking the top bar of the window and selecting *Properties*, a
 
 This is so that Windows will know where Python is when you try to run it. To do so, you’ll need to know where your `python.exe` is installed.  For example, if your `python.exe` is installed in `C:\Python27`, type the command as below into your command prompt. If your `python.exe` is installed elsewhere, replace `C:\Python27` with your `python.exe` location.  It's also helpful to include the `Scripts` subdirectory of your python installation, since that's where [`pip.exe`](https://pypi.org/project/pip/) is located, which is used for installing python modules.
 
-``` dosbatch
+```dosbatch
 C:\>set PATH=%PATH%;C:\Python27;C:\Python27\Scripts
 ```
 
@@ -56,7 +56,7 @@ C:\>set PATH=%PATH%;C:\Python27;C:\Python27\Scripts
 
 This is so that Windows will know where this executable is when *NetworkWrangler* tries to run it in order to build networks.  Again, you’ll need to know where Cube's `RUNTPP.EXE` is installed. Below is an example command assuming `RUNTPP.EXE` is installed in `C:\Program Files (x86)\Citilabs\CubeVoyager`. Adjust the command according to the location of your `RUNTPP.EXE`.
 
-``` dosbatch
+```dosbatch
 C:\>set PATH=%PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
 ```
 
@@ -64,7 +64,7 @@ C:\>set PATH=%PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
 
 This is required so python will know where *NetworkWrangler* is so that it can be imported.  This is necessary for this module but not modules installed by *pip* because *NetworkWrangler* is not installed in the typical location for standard python modules (since it's our own custom python code rather than a module that has been released to the [Python Package Index](https://pypi.org/)). You’ll need to include both the root directory, `NetworkWrangler`, as well as the `_static_` subdirectory of `NetworkWrangler`. The examples below assume that GitHub repository is cloned into `C:\Users\ftsang\Documents\GitHub`; modify the path as appropriate for your installation of *NetworkWrangler*.
 
-``` dosbatch
+```dosbatch
 C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static
 ```
 
@@ -76,7 +76,7 @@ To exit the python interpreter, type the python command, `quit()`.
 
 **Note that python, unlike Windows DOS, is case-sensitive.**
 
-``` dosbatch
+```dosbatch
 C:\>python
 Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
@@ -93,7 +93,7 @@ C:\>
 
 While in the python interpreter, try to import NetworkWrangler.  A successful import will look like the following.
 
-``` dosbatch
+```dosbatch
 C:\>python
 Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
@@ -105,7 +105,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 The most likely type of error you'll get here is an import error if a module required to *NetworkWrangler* fails to load.  For example, if the required module, *xlrd*, is not installed, it'll look like this:
 
-``` dosbatch
+```dosbatch
 C:\>python
 Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
@@ -122,7 +122,7 @@ ImportError: No module named xlrd
 
 To resolve, quit the python interpreter and install the missing python module using *pip*.  Then try again:
 
-``` dosbatch
+```dosbatch
 C:\>python
 Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
@@ -158,7 +158,7 @@ Now that we can import *NetworkWrangler*, it's time to build a network!
 
 There are two network building scripts and they each have their own configuration.  The following documentation assumes you'll use your local [NetworkWrangler\scripts](https://github.com/BayAreaMetro/NetworkWrangler/tree/master/scripts) as your working directory, so navigate there in the command prompt:
 
-``` dosbatch
+```dosbatch
 C:\>cd Users\lzorn\Documents\NetworkWrangler\scripts
 
 C:\Users\lzorn\Documents\NetworkWrangler\scripts>
@@ -169,13 +169,13 @@ C:\Users\lzorn\Documents\NetworkWrangler\scripts>
 The futures network script and configuration exists to build the networks for each of the [three Horizon futures](https://mtc.ca.gov/sites/default/files/Horizon-Futures_Shortlist.pdf).  The network building script is [build_network_mtc_futures.py][build_network_mtc_futures.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc_futures.py) and its configuration is [net_spec_futures_round1.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_futures_round1.py).
 
 In order to use the script, you will need to set the `PIVOT_DIR` (which is the base network dir) to point to the location of the 2015 base network inputs which should be available via Box Drive.  For example, the location of my inputs are [committed into the network config](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_futures_round1.py#L14), but yours may vary depending on which directory is at your top Box level.
-``` python
+```python
 PIVOT_DIR = os.path.join(os.environ["USERPROFILE"], "Box","Modeling and Surveys","Development","Travel Model Two Development","Model Inputs","2015_revised_mazs")
 ```
 
 To build a Futures network series, run:
 
-``` dosbatch
+```dosbatch
 C:\Users\lzorn\Documents\NetworkWrangler\scripts>python build_network_mtc_futures.py net_spec_futures_round1.py CleanAndGreen
 ('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\_static\\dataTable.pyc')
 ('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
@@ -207,11 +207,11 @@ This creates the 2015 network (really just a copy of the base) and the 2045 netw
 
 The test network script and configuration are very similar, but they exist as a convenience to test the project coding that you're working on.  As the network projects get coded and the Futures network configuration becomes more filled out, building a full network series for each future will become slower.  To make project coding easier, the test network script and configuration exist to build a bare-bones network so you can add only the project you're working on (and it's required projects, if any) for testing.
 
-The network building script is [build_network_mtc.py][build_network_mtc.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc.py) and its configuration is [net_spec_test.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_test.py).
+The network building script is [build_network_mtc.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc.py) and its configuration is [net_spec_test.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_test.py).
 
 Similar to above, in order to use the script, you will need to set the [`PIVOT_DIR` location](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_test.py#L18) to point to the location of the 2015 base network inputs which should be available via Box Drive. 
 
-``` dosbatch
+```dosbatch
 C:\Users\lzorn\Documents\NetworkWrangler\scripts>python build_network_mtc.py net_spec_test.py
 ('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\_static\\dataTable.pyc')
 ('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
