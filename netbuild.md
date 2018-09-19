@@ -5,7 +5,7 @@ title: Network Building Guide
 
 # Network Building Guide
 
-This is step-to-step guide for Travel Model Two users who want to build or modify the roadway and transit networks using the tool NetworkWrangler.
+This is step-to-step guide for Travel Model Two users who want to build or modify the roadway and transit networks using the tool [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler).
 
 These instructions are written assuming installation on Windows (tested on Windows 10).
 
@@ -13,6 +13,7 @@ These instructions are written assuming installation on Windows (tested on Windo
 CONTENTS
 
 1. [Setting it up for the first time](#Setting-it-up-for-the-first-time)
+  1. [Software requirements](#software-requirements)
 1. [Coding a project](#Coding-a-project)
 
 ---
@@ -22,14 +23,14 @@ CONTENTS
 ### Software requirements
 To build model networks, the following software needs to be installed on your computer.
 
-* Install [Python](https://www.python.org/downloads/) if you haven't already. [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler) should work with either Python 2 or Python 3.  You'll also need [pip](https://pypi.org/project/pip/) to help you to install python modules, but this should be [included](https://pip.pypa.io/en/stable/installing/) with Python 2 if your version is >= 2.7.9 and with Python 3 if your version >= 3.4.  We typically install the 64-bit version of python (not the 32-bit version) and install it in the root level (e.g. `C:\Python27` or `C:\Python35`). **Be sure to note where your Python is installed.**
+* Install [Python](https://www.python.org/downloads/) if you haven't already. [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler) should work with either Python 2 or Python 3.  You'll also need [pip](https://pypi.org/project/pip/) to help you to install python modules, but this should be [included](https://pip.pypa.io/en/stable/installing/) with Python 2 if your version is >= 2.7.9 and with Python 3 if your version >= 3.4.  We typically install the 64-bit version of python (not the 32-bit version) and install it in the root level (e.g. `C:\Python27` or `C:\Python35`). **Be sure to note where your Python is installed.**   Python is a fairly easy language to learn and there are some nice tutorials for Python online ([Python 2 tutorial](https://docs.python.org/2/tutorial/), [Python 3 tutorial](https://docs.python.org/3/tutorial/)) if you're unfamiliar with it.
 *	Install various python modules that NetworkWrangler uses.  For most current python users, the required modules are [xlrd](https://pypi.org/project/xlrd/), [SimpleParse](https://pypi.org/project/SimpleParse/), and [numpy](https://pypi.org/project/numpy/). If you are using python 3, you may need [pywin32](https://pypi.org/project/pywin32/) as well. If additional modules are needed for your specific set up, when you import `NetworkWrangler` for the first time, you’ll get error messages on screen indicating which python module is needed.   To install a python module, type `pip install [module_name]`; note that you'll need to have `pip.exe` in your `PATH` to do this so Windows can find `pip.exe` in order to execute it.  Setting up your `PATH` is described in more detail below.  You'll know this is complete when you can run python from the command line and then import Wrangler from the python command line as described below, in the next section.
 *	Install [Citilabs Cube 6.4.4 or newer](http://www.citilabs.com/support/downloads/). After installing when you run the application, you'll be asked where the license server is located -- there is a note in Lisa's office with this information.  Cube is typically installed in `C:\Program Files (x86)\Citilabs`, and `RUNTPP.EXE` is typically found in `C:\Program Files (x86)\Citilabs\CubeVoyager`.
 *	Clone [NetworkWrangler from GitHub](https://github.com/BayAreaMetro/NetworkWrangler) and keep track of where you cloned it.  We typically clone it into our personal `Documents` folder or `Documents\GitHub`.  For example, Flavia's installation is in `C:\Users\ftsang\Documents\GitHub\NetworkWrangler`.
 * Install [Git](https://git-scm.com/downloads).  This is related to, but not the same as the [GitHub Desktop application](https://desktop.github.com/); we'll need it because projects are coded as local git repositories (that are not on Github).  This is typically installed in `C:\Program Files\Git`.
 
 
-### Importing NetworkWrangler
+### Using the command line, python interpreter, and the NetworkWrangler Python module
 
 The next step is to test if you can import Wrangler. Open a command window, and type in the following DOS commands:
 
@@ -41,7 +42,7 @@ I suggest right clicking the top bar of the window and selecting *Properties*, a
 
 #### Step 1: Add the location of `python.exe` and `pip.exe` to your system's `PATH` environment variable.
 
-To do so, you’ll need to know where your `python.exe` is installed.  For example, if your `python.exe` is installed in `C:\Python27`, type the command as below into your command prompt. If your `python.exe` is installed elsewhere, replace `C:\Python27` with your `python.exe` location.  It's also helpful to include the `Scripts` subdirectory of your python installation, since that's where [`pip.exe`](https://pypi.org/project/pip/) is located, which is used for installing python modules.
+This is so that Windows will know where Python is when you try to run it. To do so, you’ll need to know where your `python.exe` is installed.  For example, if your `python.exe` is installed in `C:\Python27`, type the command as below into your command prompt. If your `python.exe` is installed elsewhere, replace `C:\Python27` with your `python.exe` location.  It's also helpful to include the `Scripts` subdirectory of your python installation, since that's where [`pip.exe`](https://pypi.org/project/pip/) is located, which is used for installing python modules.
 
 ``` dosbatch
 C:\>set PATH=%PATH%;C:\Python27;C:\Python27\Scripts
@@ -49,7 +50,7 @@ C:\>set PATH=%PATH%;C:\Python27;C:\Python27\Scripts
 
 #### Step 2: Add the location of Citilabs Cube's `RUNTPP.EXE` to your system's `PATH` environment variable.
 
-Again, you’ll need to know where Cube's `RUNTPP.EXE` is installed. Below is an example command assuming `RUNTPP.EXE` is installed in `C:\Program Files (x86)\Citilabs\CubeVoyager`. Adjust the command according to the location of your `RUNTPP.EXE`.
+This is so that Windows will know where this executable is when *NetworkWrangler* tries to run it in order to build networks.  Again, you’ll need to know where Cube's `RUNTPP.EXE` is installed. Below is an example command assuming `RUNTPP.EXE` is installed in `C:\Program Files (x86)\Citilabs\CubeVoyager`. Adjust the command according to the location of your `RUNTPP.EXE`.
 
 ``` dosbatch
 C:\>set PATH=%PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
@@ -57,17 +58,19 @@ C:\>set PATH=%PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
 
 #### Step 3: Add the location of *NetworkWrangler* to your system's `PYTHONPATH` environment variable.
 
-This is because *NetworkWrangler* serves as a python module but it's not installed in the typical location (since it's our own custom python code rather than a module that has been released to the [Python Package Index](https://pypi.org/). You’ll need to include both the root directory, `NetworkWrangler`, as well as the `_static_` subdirectory of `NetworkWrangler`. The examples below assume that GitHub repository is cloned into `C:\Users\ftsang\Documents\GitHub`; modify the path as appropriate for your installation of *NetworkWrangler*.
+This is required so python will know where *NetworkWrangler* is so that it can be imported.  This is necessary for this module but not modules installed by *pip* because *NetworkWrangler* is not installed in the typical location for standard python modules (since it's our own custom python code rather than a module that has been released to the [Python Package Index](https://pypi.org/)). You’ll need to include both the root directory, `NetworkWrangler`, as well as the `_static_` subdirectory of `NetworkWrangler`. The examples below assume that GitHub repository is cloned into `C:\Users\ftsang\Documents\GitHub`; modify the path as appropriate for your installation of *NetworkWrangler*.
 
 ``` dosbatch
 C:\>set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static
 ```
 
-### Step 4: Run the python interpreter in a command prompt window.
+### Step 4: Run the python interpreter
 
-In your command prompt windows, when you run the command of `python`, you'll enter into the *python interpreter*.  This means that subsequent commands are interpretted as lines of Python rather than as Windows DOS commands.  When you enter into the *python interpreter*, the command window should display a message about the version of your python and the prompt will change to be `>>>` instead of `[your current working directory]>`.
+In your command prompt window, when you run the command of `python`, you'll enter into the *python interpreter*.  This means that subsequent commands are interpretted as lines of Python rather than as Windows DOS commands.  When you enter into the *python interpreter*, the command window should display a message about the version of your python and the prompt will change to be `>>>` instead of `[your current working directory]>`.
 
 To exit the python interpreter, type the python command, `quit()`.
+
+**Note that python, unlike Windows DOS, is case-sensitive.**
 
 ``` dosbatch
 C:\>python
@@ -82,23 +85,72 @@ Type quit() to exit the python interpreter
 C:\>
 ```
 
-**Step 5:** Import the NetworkWrangler module into python. Type:
-```
->>>Import Wrangler
-```
+### Step 5: Import the NetworkWrangler module into python.
 
-(Note that this importing command is case sensitive – it only works if you type Wrangler with W in caps. After you type in the command, if the command window displays the following messages, it means you have successfully imported NetworkWrangler. Note that your file paths will be different.)
+While in the python interpreter, try to import NetworkWrangler.  A successful import will look like the following.
 
-```
-('Importing ', 'C:\\Users\\ftsang\\Documents\\GitHub\\NetworkWrangler\\_static\\dataTable.pyc')
-('Importing ', 'C:\\Users\\ftsang\\Documents\\GitHub\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
+``` dosbatch
+C:\Users\lzorn\Documents\NetworkWrangler\scripts>python
+Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import Wrangler
+('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\_static\\dataTable.pyc')
+('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
 >>>
 ```
 
-(Flavia to add a bit more on pip install here)
+The most likely type of error you'll get here is an import error if a module required to *NetworkWrangler* fails to load.  For example, if the required module, *xlrd*, is not installed, it'll look like this:
+
+``` dosbatch
+C:\Users\lzorn\Documents\NetworkWrangler\scripts>python
+Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import Wrangler
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\lzorn\Documents\NetworkWrangler\Wrangler\__init__.py", line 9, in <module>
+    from .TransitAssignmentData import TransitAssignmentData ##
+  File "C:\Users\lzorn\Documents\NetworkWrangler\Wrangler\TransitAssignmentData.py", line 5, in <module>
+    import csv,os,logging,string,sys,xlrd
+ImportError: No module named xlrd
+>>>
+```
+
+To resolve, quit the python interpretter and install the missing python module using pip.  Then try again:
+
+``` dosbatch
+C:\Users\lzorn\Documents\NetworkWrangler\scripts>python
+Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import Wrangler
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\lzorn\Documents\NetworkWrangler\Wrangler\__init__.py", line 9, in <module>
+    from .TransitAssignmentData import TransitAssignmentData ##
+  File "C:\Users\lzorn\Documents\NetworkWrangler\Wrangler\TransitAssignmentData.py", line 5, in <module>
+    import csv,os,logging,string,sys,xlrd
+ImportError: No module named xlrd
+>>> quit()
+
+C:\Users\lzorn\Documents\NetworkWrangler\scripts>pip install xlrd
+Collecting xlrd
+  Downloading https://files.pythonhosted.org/packages/07/e6/e95c4eec6221bfd8528bcc4ea252a850bffcc4be88ebc367e23a1a84b0bb/xlrd-1.1.0-py2.py3-none-any.whl (108kB)
+    100% |UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU| 112kB 656kB/s
+Installing collected packages: xlrd
+Successfully installed xlrd-1.1.0
+
+C:\Users\lzorn\Documents\NetworkWrangler\scripts>python
+Python 2.7.8 (default, Jun 30 2014, 16:08:48) [MSC v.1500 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import Wrangler
+('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\_static\\dataTable.pyc')
+('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
+>>>
+```
+
+### Step 6: Build a network!
 
 
----
 
 ## Coding a project
 
