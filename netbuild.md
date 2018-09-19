@@ -179,6 +179,10 @@ To build a Futures network series, run:
 C:\Users\lzorn\Documents\NetworkWrangler\scripts>python build_network_mtc_futures.py net_spec_futures_round1.py CleanAndGreen
 ('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\_static\\dataTable.pyc')
 ('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
+Network Specification: build_network_mtc.py
+WranglerLogger: DEBUG    Using tier network C:\Users\lzorn\Box\Modeling and Surveys\Development\Travel Model Two Development\Model Inputs\2015_revised_mazs\hwy\FREEFLOW.net
+WranglerLogger: DEBUG    convertLineData: PROGRAM: PT
+
 [lots of output omitted]
 
 WranglerLogger: DEBUG    Successfully completed running C:\Users\lzorn\Documents\NetworkWrangler\scripts\scratch\build_network_mtc_futures.py
@@ -197,14 +201,38 @@ C:\Users\lzorn\Documents\NetworkWrangler\scripts>dir CleanAndGreen
                4 Dir(s)  104,776,904,704 bytes free
 ```
 
-This creates the 2015 network (really just a copy of the base) and the 2045 network, which has 1 foot of Sea Level Rise.  As we create projects, those will get added based on the project's opening year, and more intermediate year networks will get created; the script does not create an intermediate year network unless a project has been applied.
-
+This creates the 2015 network (really just a copy of the base) and the 2045 network, which has 1 foot of Sea Level Rise.  As we create projects, those will get added to the [network configuration's `NETWORK_PROJECTS`](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_futures_round1.py#L29) based on the project's opening year, and more intermediate year networks will get created; the script does not create an intermediate year network unless a project has been applied.
 
 ### Test Network
 
-The test network script and configuration exists to test 
+The test network script and configuration are very similar, but they exist as a convenience to test the project coding that you're working on.  As the network projects get coded and the Futures network configuration becomes more filled out, building a full network series for each future will become slower.  To make project coding easier, the test network script and configuration exist to build a bare-bones network so you can add only the project you're working on (and it's required projects, if any) for testing.
 
+The network building script is [build_network_mtc.py][build_network_mtc.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc.py) and its configuration is [net_spec_test.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_test.py).
 
+Similar to above, in order to use the script, you will need to set the [`PIVOT_DIR` location](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_test.py#L18) to point to the location of the 2015 base network inputs which should be available via Box Drive. 
+
+``` dosbatch
+C:\Users\lzorn\Documents\NetworkWrangler\scripts>python build_network_mtc.py net_spec_test.py
+('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\_static\\dataTable.pyc')
+('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
+Network Specification: build_network_mtc.py
+WranglerLogger: DEBUG    Using tier network C:\Users\lzorn\Box\Modeling and Surveys\Development\Travel Model Two Development\Model Inputs\2015_revised_mazs\hwy\FREEFLOW.net
+WranglerLogger: DEBUG    convertLineData: PROGRAM: PT
+
+[lots of output omitted]
+
+WranglerLogger: DEBUG    Successfully completed running C:\Users\lzorn\Documents\NetworkWrangler\scripts\scratch\build_network_mtc.py
+
+C:\Users\lzorn\Documents\NetworkWrangler\scripts>dir Test_Scenario_network*
+ Volume in drive C has no label.
+ Volume Serial Number is E89B-14C9
+
+ Directory of C:\Users\lzorn\Documents\NetworkWrangler\scripts
+
+08/22/2018  03:32 PM    <DIR>          Test_Scenario_network_2020
+               0 File(s)              0 bytes
+               1 Dir(s)  104,662,265,856 bytes free
+```
 
 ## Coding a project
 
