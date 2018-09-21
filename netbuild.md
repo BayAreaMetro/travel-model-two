@@ -5,7 +5,7 @@ title: Network Building Guide
 
 # Network Building Guide
 
-This is step-by-step guide for Travel Model Two users who want to build or modify the roadway and transit networks using the tool [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler).
+This is a step-by-step guide for Travel Model Two users who want to build or modify the roadway and transit networks using the tool [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler).
 
 These instructions are written assuming installation on Windows (tested on Windows 10).
 
@@ -25,13 +25,12 @@ CONTENTS
 ### Software requirements
 To build model networks, the following software needs to be installed on your computer.
 
-* Install [Python](https://www.python.org/downloads/) if you haven't already. [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler) should work with either Python 2 or Python 3.  You'll also need [pip](https://pypi.org/project/pip/) to help you to install python modules, but this should be [included](https://pip.pypa.io/en/stable/installing/) with Python 2 if your version is >= 2.7.9 and with Python 3 if your version >= 3.4.  We typically install the 64-bit version of python (not the 32-bit version) and install it in the root level (e.g. `C:\Python27` or `C:\Python35`). **Be sure to note where your Python is installed.**   Python is a fairly easy language to learn and there are some nice tutorials for Python online ([Python 2 tutorial](https://docs.python.org/2/tutorial/), [Python 3 tutorial](https://docs.python.org/3/tutorial/)) if you're unfamiliar with it.
-*	Install various python modules that NetworkWrangler uses.  For most current python users, the required modules are [xlrd](https://pypi.org/project/xlrd/), [SimpleParse](https://pypi.org/project/SimpleParse/), and [numpy](https://pypi.org/project/numpy/). If you are using python 3, you may need [pywin32](https://pypi.org/project/pywin32/) as well. If additional modules are needed for your specific set up, when you import `NetworkWrangler` for the first time, you’ll get error messages on screen indicating which python module is needed.   To install a python module, type `pip install [module_name]`; note that you'll need to have `pip.exe` in your `PATH` to do this so Windows can find `pip.exe` in order to execute it.  Setting up your `PATH` is described in more detail below.  You'll know this is complete when you can run python from the command line and then import Wrangler from the python command line as described below, in the next section.
-*	Install [Citilabs Cube 6.4.4 or newer](http://www.citilabs.com/support/downloads/). After installing when you run the application, you'll be asked where the license server is located -- there is a note in Lisa's office with this information.  Cube is typically installed in `C:\Program Files (x86)\Citilabs`, and `RUNTPP.EXE` is typically found in `C:\Program Files (x86)\Citilabs\CubeVoyager`.
-* Install [Github Desktop](https://desktop.github.com/).  You can use this for the next step, cloning *NetworkWrangler* from Github, and also for committing changes to the *NetworkWrangler* network configuration back to github.
-*	Clone [NetworkWrangler from Github](https://github.com/BayAreaMetro/NetworkWrangler) and keep track of where you cloned it.  We typically clone it into our personal `Documents` folder or `Documents\GitHub`.  For example, Flavia's installation is in `C:\Users\ftsang\Documents\GitHub\NetworkWrangler`.
-* Install [Git](https://git-scm.com/downloads).  This is related to, but not the same as the [GitHub Desktop application](https://desktop.github.com/); we'll need it because projects are coded as local git repositories (that are not on Github).  This is typically installed in `C:\Program Files\Git`.
-* Install [Box Drive](https://www.box.com/resources/downloads/drive).  This is because our 2015 base networks are in Box and using Box Drive ensures you're testing with the most recent versions.  If you don't have access to the [2015 base network inputs here](https://mtcdrive.box.com/s/qbkhr1y6gedifou5i84nm41frtrsco5k), contact a member of the modeling team.  Take note of where Box Drive syncs this folder to your local disk since you'll need that to [Build a network](#build-a-network) below.
+* **Install [Python](https://www.python.org/downloads/)** if you don't already have it. [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler) should work with either Python 2 or Python 3.  You'll also need [pip](https://pypi.org/project/pip/) to help you to install python modules, but this should be [included](https://pip.pypa.io/en/stable/installing/) with Python 2 if your version is >= 2.7.9 and with Python 3 if your version >= 3.4.  We typically install the 64-bit version of python (not the 32-bit version) and install it in the root level (e.g. `C:\Python27` or `C:\Python35`). **Be sure to note where your Python is installed.**   Python is a fairly easy language to learn and there are some nice tutorials for Python online ([Python 2 tutorial](https://docs.python.org/2/tutorial/), [Python 3 tutorial](https://docs.python.org/3/tutorial/)) if you're unfamiliar with it.
+*	**Install [Citilabs Cube 6.4.4 or newer](http://www.citilabs.com/support/downloads/).** After installing when you run the application, you'll be asked where the license server is located -- there is a note in Lisa's office with this information.  Cube is typically installed in `C:\Program Files (x86)\Citilabs`, and `RUNTPP.EXE` is typically found in `C:\Program Files (x86)\Citilabs\CubeVoyager`.
+* **Install [Github Desktop](https://desktop.github.com/).**  You can use this for the next step, cloning *NetworkWrangler* from Github, and also for committing changes to the *NetworkWrangler* network configuration back to github.
+* **Clone [NetworkWrangler from Github](https://github.com/BayAreaMetro/NetworkWrangler)** and keep track of where you cloned it.  We typically clone it into our personal `Documents` folder or `Documents\GitHub`.  For example, Flavia's installation is in `C:\Users\ftsang\Documents\GitHub\NetworkWrangler`.
+* **Install [Git](https://git-scm.com/downloads).**  This is related to, but not the same as the [GitHub Desktop application](https://desktop.github.com/); we'll need it because projects are coded as local git repositories (that are not on Github).  This is typically installed in `C:\Program Files\Git`.
+* **Install [Box Drive](https://www.box.com/resources/downloads/drive).**  This is because our 2015 base networks are in Box and using Box Drive ensures you're testing with the most recent versions.  If you don't have access to the [2015 base network inputs here](https://mtcdrive.box.com/s/qbkhr1y6gedifou5i84nm41frtrsco5k), contact a member of the modeling team.  Take note of where Box Drive syncs this folder to your local disk since you'll need that to [Build a network](#build-a-network) below.
 
 
 ### Using the command line, python interpreter, and the NetworkWrangler Python module
@@ -151,6 +150,12 @@ Type "help", "copyright", "credits" or "license" for more information.
 ('Importing ', 'C:\\Users\\lzorn\\Documents\\NetworkWrangler\\Wrangler\\TransitAssignmentData.pyc')
 >>>
 ```
+For most current python users, the required modules are:
+* [xlrd](https://pypi.org/project/xlrd/)
+* [SimpleParse](https://pypi.org/project/SimpleParse/)
+* [numpy](https://pypi.org/project/numpy/)
+
+If you are using python 3, you may need [pywin32](https://pypi.org/project/pywin32/) as well.
 
 ## Build a Network
 
