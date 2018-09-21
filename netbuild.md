@@ -16,6 +16,8 @@ CONTENTS
    1. [Software requirements](#software-requirements)
    1. [Using the command line, python interpreter, and the NetworkWrangler Python module](#using-the-command-line-python-interpreter-and-the-networkwrangler-python-module)
 1. [Build a network](#build-a-network)
+   1. [Build a Future](#build-a-future)
+   1. [Build a Test Network](#build-a-test-network)
 1. [Coding a project](#Coding-a-project)
 
 ---
@@ -169,7 +171,7 @@ C:\>cd Users\lzorn\Documents\NetworkWrangler\scripts
 C:\Users\lzorn\Documents\NetworkWrangler\scripts>
 ```
 
-### Futures Network
+### Build a Future
 
 The futures network script and configuration exists to build the networks for each of the [three Horizon futures](https://mtc.ca.gov/sites/default/files/Horizon-Futures_Shortlist.pdf).  The network building script is [build_network_mtc_futures.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc_futures.py) and its configuration is [net_spec_futures_round1.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_futures_round1.py).
 
@@ -208,7 +210,7 @@ C:\Users\lzorn\Documents\NetworkWrangler\scripts>dir CleanAndGreen
 
 This creates the 2015 network (really just a copy of the base) and the 2045 network, which has 1 foot of Sea Level Rise.  As we create projects, those will get added to the [network configuration's `NETWORK_PROJECTS`](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_futures_round1.py#L29) based on the project's opening year, and more intermediate year networks will get created; the script does not create an intermediate year network unless a project has been applied.
 
-### Test Network
+### Build a Test Network
 
 The test network script and configuration are very similar, but they exist as a convenience to test the project coding that you're working on.  As the network projects get coded and the Futures network configuration becomes more filled out, building a full network series for each future will become slower.  To make project coding easier, the test network script and configuration exist to build a bare-bones network so you can add only the project you're working on (and it's required projects, if any) for testing.
 
