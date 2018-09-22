@@ -247,7 +247,7 @@ C:\Users\lzorn\Documents\NetworkWrangler\scripts>dir Test_Scenario_network*
 
 ## Coding a Project
 
-Network projects are coded as folders within **`M:\Application\Model Two\NetworkProjects`**.  Each project or folder is a local Git repository.  To code a project, you'll likely want to start with a similar seed project (more on that below) and create a new folder, name it appropriately and copy the contents of the seed project into your folder to start.  Make sure you do not copy the `.git` folder, as that is the git version history of the seed project, and your project will have its own git version history.
+Network projects are coded as folders within **`M:\Application\Model Two\NetworkProjects`**.  Each project or folder is a [local Git repository](https://www.intertech.com/Blog/introduction-to-git-concepts/) (that will not be attached to a remote repository -- so it will be standalone).  To code a project, you'll likely want to start with a similar seed project (more on that below) and create a new folder, name it appropriately and copy the contents of the seed project into your folder to start.  Make sure you do not copy the `.git` folder, as that is the git version history of the seed project, and your project will have its own git version history.
 
 The basic files required in a project are:
 * `README.txt` - While not technically *required*, it's good practice to keep basic documentation and notes here.  Since we plan to keep much of our notes/conversations on Asana, assuming we continue that practice, a link the relevant Asana task is sufficient.
