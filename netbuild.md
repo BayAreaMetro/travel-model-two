@@ -39,7 +39,7 @@ To build model networks, the following software needs to be installed on your co
 
 The next step is to test if you can import Wrangler. Open a command window, and type in the following DOS commands:
 
-#### Stop 0: Open a Command Prompt window.
+#### Step 0: Open a Command Prompt window.
 
 To open a command prompt window, open `cmd.exe`, which comes with Windows.  
 
@@ -247,7 +247,13 @@ C:\Users\lzorn\Documents\NetworkWrangler\scripts>dir Test_Scenario_network*
 
 ## Coding a Project
 
-Network projects are coded as folders within **`M:\Application\Model Two\NetworkProjects`** (configured in [build_network_mtc.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc.py#L56) and [build_network_mtc_futures.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc_futures.py#L53)).  Each project or folder is a [local Git repository](https://www.intertech.com/Blog/introduction-to-git-concepts/) (that will not be attached to a remote repository -- so it will be standalone).  To code a project, you'll likely want to start with a similar seed project (more on that below) and create a new folder, name it appropriately and copy the contents of the seed project into your folder to start.  Make sure you do not copy the `.git` folder, as that is the git version history of the seed project, and your project will have its own git version history.
+Network projects are coded as folders within **`M:\Application\Model Two\NetworkProjects`** (configured in [build_network_mtc.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc.py#L56) and [build_network_mtc_futures.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc_futures.py#L53)).  Each project or folder is a [local Git repository](https://www.intertech.com/Blog/introduction-to-git-concepts/) (that will not be attached to a remote repository -- so it will be standalone).  
+
+### Step 1: Create project folder
+
+To code a project, you'll likely want to start with a similar seed project (more on that below) and create a new folder, name it appropriately and copy the contents of the seed project into your folder to start.  Make sure you do not copy the `.git` folder, as that is the git version history of the seed project, and your project will have its own git version history.
+
+### Step 2. Make small updates to project
 
 The basic files required in a project are:
 * `README.txt` - While not technically *required*, it's good practice to keep basic documentation and notes here.  Since we plan to keep much of our notes/conversations on Asana, assuming we continue that practice, a link the relevant Asana task is sufficient.
@@ -257,6 +263,22 @@ The basic files required in a project are:
    * For transit projects, the `applyEdits()` method will be meaningful; more on that later.
 * `apply.s` - This Cube script is run for roadway projects.  More on that below.
 * data files - These names can vary depending on what the project does to the network, although it'd be nice for them to have intuitive names, like `mod_nodes.csv`, `new_links.csv`, etc.
+
+Initially, just make the minimal changes to `README.txt` and `__init__.py` and get things ready to test.  Once you're able to build a test network with this new project, you can fill out the details.
+
+### Step 3. Make your project into a local git repository and commit your files
+
+1. In Windows Explorer, go to your project folder and right click in the blank space of this folder
+2.	Choose **Git GUI Here**
+3.	Choose **Create New Repository**
+4. Select the current folder and click **Create**
+5. On the top left quadrant, click on each file to move the files from *unstaged* to *staged*.  Alternatively, click on the button that says *Stage Changed* to staget all of them at once.
+6.	Supply a commit message.  For the first commit, it doesn't need to be that meaningful, so I typically start with *initial commit*.
+7.	Click **Commit**
+
+Now your project is ready to be added to a network.
+
+## Step 4. Build a network with your project
 
 ### Coding a Roadway Project
 
@@ -270,25 +292,6 @@ Roadway projects can take basically (one or more of) six actions:
 | Create new links | To be created |
 | Modify attributes for links | *ALA050014_SR84_Livermore* |
 | Delete links | *SeaLevelRise_1foot* |
-
-
-### Specifying the network changes
-Step 1: Create a new directory for the set of network changes in here: M:\Application\Model Two\NetworkProjects. (This location is hard-coded in the script build_network_mtc.py)
-
-Step 2: Copy apply.s, mod.dat, del.dat, __init__.py and README.txt from a previous project to this new directory
-
-Step 3: Specify links to be modified or deleted in mod.dat and del.dat
-
-Step 4: Edit __init__.py as appropriate (in most cases, I only have to edit the description text field e.g. d="Test SLR 1"); Also enter information in readme.txt as appropriate
-
-Step 5: Create a new Git repository here
--	Right click in the blank space of this folder
--	Choose “Git GUI here”
--	Choose “Create New Repository”
--	Select the current folder and click “Create”
--	On the top left quadrant, click on each file to move the files from “unstaged” to “staged”
--	Supply a commit message
--	Click “Commit”
 
 ### Getting ready to run Wrangler
 Step 1: Go into or create a directory for the scenario. This is where the specification file (network_test_specification.py) will be saved
