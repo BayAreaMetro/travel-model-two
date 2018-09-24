@@ -201,11 +201,11 @@ The following transit modes are defined based on the [Open511](https://511.org/d
 | EM | Emery Go-Round | 12 | Local bus | |
 | FS | Fairfield-Suisun Transit | 92 | Express Bus | 5, 150-152, 154 |
 | FS | Fairfield-Suisun Transit | 52 | Local bus | |
-| GF | Golden Gate Ferry | 101 | Ferry service | 115-117 |
-| GG | Golden Gate Transit | 87 | Express Bus | 1, 5, 12-16, 201, 204 |
-| GG | Golden Gate Transit | 70 | Local bus | 1, 5, 12-16, 201, 204 |
+| GF | [Golden Gate Ferry](http://goldengateferry.org/) | 101 | Ferry service | 115-117 |
+| GG | [Golden Gate Transit](http://goldengatetransit.org/) | 87 | Express Bus | 1, 5, 12-16, 201, 204 |
+| GG | [Golden Gate Transit](http://goldengatetransit.org/) | 70 | Local bus | 1, 5, 12-16, 201, 204 |
 | HB | Alameda Harbor Bay Ferry | 100 | Ferry service | 122-124 |
-| MA | [Marin Transit](https://marintransit.org/) | 70 | Local bus | |
+| MA | [Marin Transit](https://marintransit.org/) | 71 | Local bus | |
 | MS | Stanford Marguerite Shuttle | 13 | Local bus | |
 | PE | Petaluma Transit | 68 | Local bus | |
 | RV | Rio Vista Delta Breeze | 52 | Local bus | 150, 170 |
