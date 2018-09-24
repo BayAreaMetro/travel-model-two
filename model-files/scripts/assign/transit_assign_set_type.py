@@ -32,6 +32,7 @@ config = ConfigParser.RawConfigParser(defaults= {
     'transit.crowding.linkdf': 0.4,
     'transit.crowding.voldf': 0.4,
     'transit.crowding.waitdf': 0.4,
+	'transit.crowding.iterations': 3,
 })
 
 # This is a patch (workaround), so Python can read a straight Java properties file.
@@ -54,11 +55,13 @@ crowding_config['converge'] = config.getfloat('defaults', 'transit.crowding.conv
 crowding_config['linkdf'] = config.getfloat('defaults', 'transit.crowding.linkdf')
 crowding_config['voldf'] = config.getfloat('defaults', 'transit.crowding.voldf')
 crowding_config['waitdf'] = config.getfloat('defaults', 'transit.crowding.waitdf')
+crowding_config['iterations'] = config.getint('defaults','transit.crowding.iterations')
 
 
-crowding_line = 'CROWDMODEL APPLY=T, ADJUSTLINK={}, ADJUSTWAIT={}, ITERATIONS=10, PERIOD=@PERIOD_DURATION@, RDIFF=T, RMSE=T, STOP2STOP=T, SKIMS=T'.format(
+crowding_line = 'CROWDMODEL APPLY=T, ADJUSTLINK={}, ADJUSTWAIT={}, ITERATIONS={}, PERIOD=@PERIOD_DURATION@, RDIFF=T, RMSE=T, STOP2STOP=T, SKIMS=T'.format(
         'T' if crowding_config['adjustlink'] else 'F',
-        'T' if crowding_config['adjustwait'] else 'F'
+        'T' if crowding_config['adjustwait'] else 'F',
+		crowding_config['iterations']
 )
 crowd_convergence = '    LINKDF={linkdf:.5f}, VOLDF={voldf:.5f}, WAITDF={waitdf:.5f}, RMSESTOP=T, RMSECUTOFF={converge:.10f}'.format(**crowding_config)
 
