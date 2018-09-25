@@ -9,6 +9,8 @@ This is a step-by-step guide for Travel Model Two users who want to build or mod
 
 These instructions are written assuming installation on Windows (tested on Windows 10).
 
+![Building a Future](/travel-model-two/assets/NetBuildingFuture.PNG | width=500)
+
 ---
 CONTENTS
 
