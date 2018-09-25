@@ -20,7 +20,8 @@ CONTENTS
    1. [Build a Test Network](#build-a-test-network)
 1. [Coding a project](#coding-a-project)
    1. [Coding a Roadway Project](#coding-a-roadway-project)
-  
+   1. [Coding a Transit Project](#coding-a-transit-project)
+
 ---
 
 ## Setting it up for the first time
@@ -279,7 +280,7 @@ Initially, just make the minimal changes to `README.txt` and `__init__.py` and g
 
 Now your project is ready to be added to a network.
 
-## Step 4. Build a network with your project
+### Step 4. Build a network with your project
 
 Modify your local copy of [net_spec_test.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_test.py) in a text editor to add your project.  You can add it to any year by adding the string to the `hwy` and\or `trn` list for that year (depending on what kind of project it is).
 
