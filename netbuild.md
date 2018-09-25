@@ -20,6 +20,7 @@ CONTENTS
    1. [Build a Test Network](#build-a-test-network)
 1. [Coding a project](#coding-a-project)
    1. [Coding a Roadway Project](#coding-a-roadway-project)
+  
 ---
 
 ## Setting it up for the first time
@@ -264,7 +265,7 @@ The basic files required in a project are:
 * `apply.s` - This Cube script is run for roadway projects.  More on that below.
 * data files - These names can vary depending on what the project does to the network, although it'd be nice for them to have intuitive names, like `mod_nodes.csv`, `new_links.csv`, etc.
 
-Initially, just make the minimal changes to `README.txt` and `__init__.py` and get things ready to test.  Once you're able to build a test network with this new project, you can fill out the details.
+Initially, just make the minimal changes to `README.txt` and `__init__.py` and get things ready to test.  Once you're able to [build a test network](#build-a-test-network) with this new project, you can fill out the details.
 
 ### Step 3. Make your project into a local git repository and commit your files
 
@@ -280,6 +281,21 @@ Now your project is ready to be added to a network.
 
 ## Step 4. Build a network with your project
 
+Modify your local copy of [net_spec_test.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_test.py) in a text editor to add your project.  You can add it to any year by adding the string to the `hwy` and\or `trn` list for that year (depending on what kind of project it is).
+
+For example, if your project is called `ALA050014_SR84_Livermore`, the test spec specifies:
+```python
+NETWORK_PROJECTS = collections.OrderedDict([
+    (2015, {'hwy':['PROJ_attributes'], 'trn':[]}),  # adds PROJ attributes to NODE and LINK
+    (2020, {
+        'hwy':['ALA050014_SR84_Livermore'],
+        'trn':[]
+    }),
+    ...
+```
+
+Now, [build a test network as described above](#build-a-test-network).
+
 ### Coding a Roadway Project
 
 Roadway projects can take basically (one or more of) six actions:
@@ -293,44 +309,12 @@ Roadway projects can take basically (one or more of) six actions:
 | Modify attributes for links | *ALA050014_SR84_Livermore* |
 | Delete links | *SeaLevelRise_1foot* |
 
-### Getting ready to run Wrangler
-Step 1: Go into or create a directory for the scenario. This is where the specification file (network_test_specification.py) will be saved
+More documentation to be filled in.
 
-Step 2: Modify network_test_specification.py in a text editor. Remember to:
-•	Go through all the mandatory fields
-•	make sure the piv_directory is correct
-•	make sure the directory where the network changes are specified is named here
-o	e.g. 'hwy':['test_SLR1']
-o	e.g. 'trn':[], # 'test_trn_proj'
-(note: the hwy directory should include: turnsam.pen, turnsop.pen, turnspm.pen)
+### Coding a Transit Project
 
-### Run Wrangler
-Step 1: Open a command window
+More documentation here on what comprises a transit network, in addition to the Wrangler aspect.
 
-Step 2: “cd” into the directory for the scenario. This is where the specification file (network_test_specification.py) is saved.
-
-Step 3: run the DOS commands  below
-
-```
-REM Set the path DOS environment variable and python path
-set PATH= %PATH%;C:\Python27
-set PYTHONPATH=%PYTHONPATH%;C:\Python27
-
-REM Set the Cube Voyager path
-set PATH= %PATH%;C:\Program Files (x86)\Citilabs\CubeVoyager
-
-REM Set the pythonpath to point to wrangler
-set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\
-set PYTHONPATH=%PYTHONPATH%;C:\Users\ftsang\Documents\GitHub\NetworkWrangler\_static
-
-REM run wrangler
-REM cd into the folder where the specification file (network_test_specification.py) is stored, if you haven't
-python C:\Users\ftsang\Documents\GitHub\NetworkWrangler\scripts\build_network_mtc.py network_test_specification.py
-```
-
-Users will be asked about pre-requisite, co-requisite and conflicting projects. In most MTC applications, just answer “y”for yes  to these.
-
-The output .net file would be in \scratch\[name you chose in the specification file]\hwy, inside the current working directory
 
 ### Checks
 The script currently doesn’t check whether Cube successfully runs. But users can check the .prn file in the subdirectory Wrangler_tmp_ xxxxx\[test name] to confirm this.
