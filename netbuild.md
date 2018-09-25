@@ -7,7 +7,7 @@ title: Network Building Guide
 
 This is a step-by-step guide for Travel Model Two users who want to build or modify the roadway and transit networks using the tool [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler).
 
-These instructions are written assuming installation on Windows (tested on Windows 10).
+The basic premise is that we start with a base network (representing 2015), layer network projects on top of that, and output networks representing future years.
 
 ![Building a Future](http://bayareametro.github.io//travel-model-two/assets/NetBuildingFuture.PNG)
 
@@ -30,6 +30,7 @@ CONTENTS
 
 ### Software requirements
 To build model networks, the following software needs to be installed on your computer.
+These instructions are written assuming installation on Windows (tested on Windows 10).
 
 * **Install [Python](https://www.python.org/downloads/)** if you don't already have it. [NetworkWrangler](https://github.com/BayAreaMetro/NetworkWrangler) should work with either Python 2 or Python 3.  You'll also need [pip](https://pypi.org/project/pip/) to help you to install python modules, but this should be [included](https://pip.pypa.io/en/stable/installing/) with Python 2 if your version is >= 2.7.9 and with Python 3 if your version >= 3.4.  We typically install the 64-bit version of python (not the 32-bit version) and install it in the root level (e.g. `C:\Python27` or `C:\Python35`). **Be sure to note where your Python is installed.**   Python is a fairly easy language to learn and there are some nice tutorials for Python online ([Python 2 tutorial](https://docs.python.org/2/tutorial/), [Python 3 tutorial](https://docs.python.org/3/tutorial/)) if you're unfamiliar with it.
 *	**Install [Citilabs Cube 6.4.4 or newer](http://www.citilabs.com/support/downloads/).** After installing when you run the application, you'll be asked where the license server is located -- there is a note in Lisa's office with this information.  Cube is typically installed in `C:\Program Files (x86)\Citilabs`, and `RUNTPP.EXE` is typically found in `C:\Program Files (x86)\Citilabs\CubeVoyager`.
@@ -179,6 +180,8 @@ C:\Users\lzorn\Documents\NetworkWrangler\scripts>
 
 The futures network script and configuration exists to build the networks for each of the [three Horizon futures](https://mtc.ca.gov/sites/default/files/Horizon-Futures_Shortlist.pdf).  The network building script is [build_network_mtc_futures.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc_futures.py) and its configuration is [net_spec_futures_round1.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_futures_round1.py).
 
+![Building a Future](http://bayareametro.github.io//travel-model-two/assets/NetBuildingFuture.PNG)
+
 In order to use the script, you will need to set the `PIVOT_DIR` (which is the base network dir) to point to the location of the 2015 base network inputs which should be available via Box Drive.  For example, the location of my inputs are [committed into the network config](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_futures_round1.py#L14), but yours may vary depending on which directory is at your top Box level.
 ```python
 PIVOT_DIR = os.path.join(os.environ["USERPROFILE"], "Box","Modeling and Surveys","Development","Travel Model Two Development","Model Inputs","2015_revised_mazs")
@@ -217,6 +220,8 @@ This creates the 2015 network (really just a copy of the base) and the 2045 netw
 ### Build a Test Network
 
 The test network script and configuration are very similar, but they exist as a convenience to test the project coding that you're working on.  As the network projects get coded and the Futures network configuration becomes more filled out, building a full network series for each future will become slower.  To make project coding easier, the test network script and configuration exist to build a bare-bones network so you can add only the project you're working on (and it's required projects, if any) for testing.
+
+![Building a Test Network](http://bayareametro.github.io//travel-model-two/assets/NetBuildingTestNetwork.PNG)
 
 The network building script is [build_network_mtc.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/build_network_mtc.py) and its configuration is [net_spec_test.py](https://github.com/BayAreaMetro/NetworkWrangler/blob/master/scripts/net_spec_test.py).
 
