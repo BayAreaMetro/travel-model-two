@@ -11,9 +11,16 @@ Create transit schedule from spreadsheet or gtfs.
 
 Specify an operator set -- currently support Caltrain_NB, Caltrain_SB and SonomaCounty.
 
+=====
 For Caltrain, the schedule is read from a spreadsheet since this is a typical representation of the Caltrain schedule.
-The lines are then clustered based on their stop pattern and those are converted into Local/Limited/Baby Bullet lines.
+Each trip is assigned a time period based on what time period the most stops reside within (createNetworkForSchedule), and
+each trip is transformed into a string representation based on stops (e.g. ......S....S..S....S...S....S).
 
+The lines are then clustered based on their stop pattern encoded in the string, with different clustering algorithms tried.
+tripClusterToNetwork() converts the clustered schedule into a network coding.  For each cluster, the most common stop pattern
+in the cluster is used as the coded line's stop pattern, and the line's frequency is set by the number of trips in the cluster.
+
+=====
 For SonomaCounty, the route alignment is pulled from the existing network coding.  For each route/direction, the existing
 network coding doesn't indicate which direction it's for, so that needs to be configured for bi-directional routes.  The
 longest (most stops) coding is assumed to be the prototype line, and it's renamed for legibility according to configuration,
@@ -24,7 +31,9 @@ and the frequencies are set according the the gtfs frequencies for the route/dir
 USERNAME     = os.environ["USERNAME"]
 LOG_FILENAME = "createTransitSchedule_{}_info.log"
 TM2_INPUTS   = os.path.join(r"C:\\Users", USERNAME, "Box\\Modeling and Surveys\\Development\\Travel Model Two Development\\Model Inputs")
-TRN_NETFILE  = os.path.join(TM2_INPUTS,"2015_revised_mazs","trn")
+#  TRN_NETFILE  = os.path.join(TM2_INPUTS,"2015_revised_mazs","trn")
+TRN_NETDIR   = "network_pre_update"
+TRN_NETFILE  = "transitLines_v3"
 TRN_LABELFILE= os.path.join(TM2_INPUTS,"TM2 Transit Nodes.csv")
 
 OPERATOR_SET_DICT = {
@@ -470,6 +479,8 @@ def calculateTransitNetworkBoardAlightHeadways(trn_network, station_key_df, sche
 
     # merge into schedule_headways_df
     combined_headway_df = pandas.merge(left=schedule_headways_df, right=combined_headway_df, how="outer")
+    # fill on zero for blank
+    combined_headway_df.loc[ pandas.isnull(combined_headway_df["avg_headway {}".format(label)]), "avg_headway {}".format(label)] = 0
     combined_headway_df["avg_headway_diff {}".format(label)] = combined_headway_df["avg_headway {}".format(label)] - \
                                                                combined_headway_df["avg_headway schedule"]
     Wrangler.WranglerLogger.debug("combined_headway_df\n{}".format(combined_headway_df.head()))
@@ -527,7 +538,7 @@ def createNetworkForSchedule(operator_set, schedule_df, station_key_df, trips_df
     trips_list = trips_df.to_dict(orient="list")["Trip Number"]
 
 
-    # transforme the schedule into a series of strings, one for each trip
+    # transformed the schedule into a series of strings, one for each trip
     schedule_str_df = pandas.notnull(schedule_df).replace({True:"S",False:"."}).transpose()
     all_stops = pandas.Series(schedule_str_df.values.tolist()).str.join("")
     trips_df["all_stops"] = all_stops
@@ -762,6 +773,7 @@ def tripClusterToNetwork(operator_set, schedule_df, station_key_df, trips_df):
 
         # Figure out frequency for each time period - create  time_period -> trip count dictionary
         trip_count = cluster_trips_df.groupby("time_period").size().to_dict()
+        Wrangler.WranglerLogger.debug("trip_count: {}".format(trip_count))
 
         trn_line = Wrangler.TransitLine(name="{}_{:02d}".format(OPERATOR_SET_DICT[operator_set]["lin_prefix"], cluster_id))
 
@@ -797,7 +809,7 @@ def tripClusterToNetwork(operator_set, schedule_df, station_key_df, trips_df):
         # get Station Num
         trip_schedule_df = pandas.merge(left=trip_schedule_df, right=station_key_df, how="left")
         # drop non-stops
-        trip_stops_df = trip_schedule_df.loc[ pandas.notnull(trip_schedule_df["stop_time"])]
+        trip_stops_df = trip_schedule_df.loc[ pandas.notnull(trip_schedule_df["stop_time"])].copy()
         # set prev stop time
         trip_stops_df["prev_stop_time"] = trip_stops_df["stop_time"].shift(1)
         trip_stops_df["link_time"] = trip_stops_df["stop_time"] - trip_stops_df["prev_stop_time"]
@@ -856,7 +868,7 @@ if __name__ == '__main__':
 
     # read the PT transit network line file
     existing_trn_net = Wrangler.TransitNetwork(modelType=Wrangler.Network.MODEL_TYPE_TM2, modelVersion=1.0,
-                                               basenetworkpath=TRN_NETFILE, isTiered=True, networkName="transitLines")
+                                               basenetworkpath=TRN_NETDIR, isTiered=True, networkName=TRN_NETFILE)
     operator_set_re = re.compile(OPERATOR_SET_DICT[args.operator_set]["existing_re"])
 
     schedule_file = OPERATOR_SET_DICT[args.operator_set]["schedule_file"]
@@ -905,6 +917,7 @@ if __name__ == '__main__':
         summary_df.to_csv("{}_summaries.csv".format(args.operator_set), header=True, index=False)
 
         # merge and write them all
+        combined_headway_all_df.sort_values(by=["time_period","Station Num_board","Station Num_alight"], inplace=True)
         combined_headway_all_df.to_csv("{}_headways.csv".format(args.operator_set), header=True, index=False)
 
     elif schedule_file.endswith(".zip"):
