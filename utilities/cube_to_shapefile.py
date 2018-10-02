@@ -26,6 +26,17 @@ TRN_LINES_SHPFILE = "network_trn_lines{}.shp"
 TRN_LINKS_SHPFILE = "network_trn_links{}.shp"
 TRN_STOPS_SHPFILE = "network_trn_stops{}.shp"
 
+# aggregated by name set
+TRN_ROUTE_LINKS_SHPFILE = "network_trn_route_links.shp"
+
+TIMEPERIOD_DURATIONS = collections.OrderedDict([
+    ("EA",3.0),
+    ("AM",4.0),
+    ("MD",5.0),
+    ("PM",4.0),
+    ("EV",8.0)
+])
+
 TRN_OPERATORS = collections.OrderedDict([
     # filename_append       # list of operator text
     ("_SF_Muni",             ["San Francisco MUNI"]),
@@ -147,6 +158,8 @@ def rename_fields(input_feature, output_feature, old_to_new):
     return output_feature
 
 if __name__ == '__main__':
+    pandas.options.display.width = 500
+    pandas.options.display.max_rows = 1000
 
     # assume code dir is where this script is
     CODE_DIR    = os.path.dirname(os.path.realpath(__file__))
@@ -227,6 +240,19 @@ if __name__ == '__main__':
     link_cursor      = {}
     stop_cursor      = {}
     operator_to_file = {}
+
+    # store link information here -- we'll aggregate this a bit and output later
+    link_rows = []
+    link_rows_cols   = [
+        "A", "A_X", "A_Y", "A_STATION",
+        "B", "B_X", "B_Y", "B_STATION",
+        "NAME"    ,        "NAME_SET"  ,
+        "MODE"    ,        "MODE_TYPE" ,
+        "OPERATOR",        "OPERATOR_T",
+        "SEATCAP" ,        "CRUSHCAP"  ,
+        # assume these are additive
+        "TRIPS_EA", "TRIPS_AM", "TRIPS_MD", "TRIPS_PM", "TRIPS_EV"
+    ]
 
     for operator_file in operator_files:
         if args.by_operator:
@@ -345,6 +371,16 @@ if __name__ == '__main__':
         seq              = 1
         op_txt           = line.attr['USERA1'].strip('\""')
 
+        vtype_num  = int(line.attr['VEHICLETYPE'])
+        vtype_name = ""
+        seatcap    = 0
+        crushcap   = 0
+        if vtype_num in trn_net.ptsystem.vehicleTypes:
+            vtype_dict = trn_net.ptsystem.vehicleTypes[vtype_num]
+            if "NAME"     in vtype_dict: vtype_name = vtype_dict["NAME"].strip('"')
+            if "SEATCAP"  in vtype_dict: seatcap    = int(vtype_dict["SEATCAP"])
+            if "CRUSHCAP" in vtype_dict: crushcap   = int(vtype_dict["CRUSHCAP"])
+
         if not args.by_operator:
             operator_file = ""
         elif op_txt in operator_to_file:
@@ -378,9 +414,6 @@ if __name__ == '__main__':
                 first_n    = n
                 first_name = station
                 first_point = (node_dicts["X"][n], node_dicts["Y"][n])
-            last_n     = n
-            last_name  = station
-            last_point = (node_dicts["X"][n], node_dicts["Y"][n])
 
             # From NNTIME documentation:
             # NODES=1,2,3,4, NNTIME=10, NODES=5,6,7, NNTIME=15
@@ -406,12 +439,26 @@ if __name__ == '__main__':
                 plink_shape = arcpy.Polyline(link_point_array)
                 link_cursor[operator_file].insertRow([line.name, plink_shape,
                                                       last_n, n, last_station, station, seq, nntime])
+                # save the link data for aggregation
+                link_rows.append( [last_n, last_point[0],      last_point[1],      last_name,
+                                   n,      node_dicts["X"][n], node_dicts["Y"][n], station,
+                                   line.name, name_set,
+                                   line.attr['MODE'], line.attr['USERA2'].strip('\""'), # mode type
+                                   line.attr['OPERATOR'], op_txt,
+                                   seatcap, crushcap,
+                                   TIMEPERIOD_DURATIONS["EA"]*60.0/float(line.attr['HEADWAY[1]']) if float(line.attr['HEADWAY[1]'])>0 else 0,
+                                   TIMEPERIOD_DURATIONS["AM"]*60.0/float(line.attr['HEADWAY[2]']) if float(line.attr['HEADWAY[2]'])>0 else 0,
+                                   TIMEPERIOD_DURATIONS["MD"]*60.0/float(line.attr['HEADWAY[3]']) if float(line.attr['HEADWAY[3]'])>0 else 0,
+                                   TIMEPERIOD_DURATIONS["PM"]*60.0/float(line.attr['HEADWAY[4]']) if float(line.attr['HEADWAY[4]'])>0 else 0,
+                                   TIMEPERIOD_DURATIONS["EV"]*60.0/float(line.attr['HEADWAY[5]']) if float(line.attr['HEADWAY[5]'])>0 else 0
+                                ])
                 link_count += 1
                 link_point_array.removeAll()
                 link_point_array.add(point)
 
-            last_n = n
-            last_station = station
+            last_n     = n
+            last_name  = station
+            last_point = (node_dicts["X"][n], node_dicts["Y"][n])
             seq += 1
 
         # one last link if necessary
@@ -419,18 +466,11 @@ if __name__ == '__main__':
             plink_shape = arcpy.Polyline(link_point_array)
             link_cursor[operator_file].insertRow([line.name, plink_shape,
                                                   last_n, n, last_station, station, seq, nntime])
+
+
             link_count += 1
             link_point_array.removeAll()
 
-        vtype_num  = int(line.attr['VEHICLETYPE'])
-        vtype_name = ""
-        seatcap    = 0
-        crushcap   = 0
-        if vtype_num in trn_net.ptsystem.vehicleTypes:
-            vtype_dict = trn_net.ptsystem.vehicleTypes[vtype_num]
-            if "NAME"     in vtype_dict: vtype_name = vtype_dict["NAME"].strip('"')
-            if "SEATCAP"  in vtype_dict: seatcap    = int(vtype_dict["SEATCAP"])
-            if "CRUSHCAP" in vtype_dict: crushcap   = int(vtype_dict["CRUSHCAP"])
 
         farestruct = ""
         iboardfare = 0
@@ -474,4 +514,79 @@ if __name__ == '__main__':
     logging.info("Wrote {} lines to {}".format(line_count, TRN_LINES_SHPFILE))
 
     del link_cursor
-    logging.info("Write {} links to {}".format(link_count, TRN_LINKS_SHPFILE))
+    logging.info("Wrote {} links to {}".format(link_count, TRN_LINKS_SHPFILE))
+
+    # aggregate link level data
+    links_df = pandas.DataFrame(columns=link_rows_cols, data=link_rows)
+    links_df["LINE_COUNT"] = 1
+    logging.debug("\n{}".format(links_df.head(20)))
+
+    # SEATCAP and CRUSHCAP are passengers per trip -- multiply by trip to get passengers pr time period
+    links_df["SEATCAP_EA"] = links_df["SEATCAP"]*links_df["TRIPS_EA"]
+    links_df["SEATCAP_AM"] = links_df["SEATCAP"]*links_df["TRIPS_AM"]
+    links_df["SEATCAP_MD"] = links_df["SEATCAP"]*links_df["TRIPS_MD"]
+    links_df["SEATCAP_PM"] = links_df["SEATCAP"]*links_df["TRIPS_PM"]
+    links_df["SEATCAP_EV"] = links_df["SEATCAP"]*links_df["TRIPS_EV"]
+
+    links_df["CRSHCAP_EA"] = links_df["CRUSHCAP"]*links_df["TRIPS_EA"]
+    links_df["CRSHCAP_AM"] = links_df["CRUSHCAP"]*links_df["TRIPS_AM"]
+    links_df["CRSHCAP_MD"] = links_df["CRUSHCAP"]*links_df["TRIPS_MD"]
+    links_df["CRSHCAP_PM"] = links_df["CRUSHCAP"]*links_df["TRIPS_PM"]
+    links_df["CRSHCAP_EV"] = links_df["CRUSHCAP"]*links_df["TRIPS_EV"]
+
+    # aggregate by A,B,MODE,MODE_TYPE,OPERATOR,OPERATOR_T,NAME_SET
+    links_df_GB = links_df.groupby(by=["A","B","A_STATION","B_STATION","NAME_SET","MODE","MODE_TYPE","OPERATOR","OPERATOR_T"])
+    links_df    = links_df_GB.agg({"A_X":"first", "A_Y":"first", "B_X":"first", "B_Y":"first", "LINE_COUNT":"sum",
+                                   "TRIPS_EA"  :"sum","TRIPS_AM"  :"sum","TRIPS_MD"  :"sum","TRIPS_PM"  :"sum","TRIPS_EV"  :"sum",
+                                   "SEATCAP_EA":"sum","SEATCAP_AM":"sum","SEATCAP_MD":"sum","SEATCAP_PM":"sum","SEATCAP_EV":"sum",
+                                   "CRSHCAP_EA":"sum","CRSHCAP_AM":"sum","CRSHCAP_MD":"sum","CRSHCAP_PM":"sum","CRSHCAP_EV":"sum"}).reset_index()
+
+    logging.debug("\n{}".format(links_df.head(20)))
+    # create the link file by route
+    arcpy.Delete_management(TRN_ROUTE_LINKS_SHPFILE)
+    arcpy.CreateFeatureclass_management(WORKING_DIR, TRN_ROUTE_LINKS_SHPFILE, "POLYLINE")
+    arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "A",         "LONG")
+    arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "B",         "LONG")
+    arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "A_STATION", "TEXT", field_length=40)
+    arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "B_STATION", "TEXT", field_length=40)
+    arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "NAME_SET",  "TEXT", field_length=25)
+    arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "MODE",      "SHORT")
+    arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "MODE_TYPE", "TEXT", field_length=15)
+    arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "OPERATOR",  "SHORT")
+    arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "OPERATOR_T","TEXT", field_length=40)
+    arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "LINE_COUNT","SHORT")
+
+    for timeperiod in TIMEPERIOD_DURATIONS.keys():
+        arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "TRIPS_{}".format(timeperiod),    "FLOAT", field_precision=7, field_scale=2)
+        arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "SEATCAP_{}".format(timeperiod),  "FLOAT", field_precision=9, field_scale=2)
+        arcpy.AddField_management(TRN_ROUTE_LINKS_SHPFILE, "CRSHCAP_{}".format(timeperiod),  "FLOAT", field_precision=9, field_scale=2)
+
+    arcpy.DefineProjection_management(TRN_ROUTE_LINKS_SHPFILE, sr)
+
+    # update link_rows_cols
+    for remove_col in ["A_X","A_Y","B_X","B_Y","NAME","SEATCAP","CRUSHCAP"]:
+        link_rows_cols.remove(remove_col)
+    link_rows_cols = ["SHAPE@"] + link_rows_cols + ["LINE_COUNT"] + \
+        ["SEATCAP_{}".format(tp) for tp in TIMEPERIOD_DURATIONS.keys()] + \
+        ["CRSHCAP_{}".format(tp) for tp in TIMEPERIOD_DURATIONS.keys()]
+    # create cursor
+    link_cursor = arcpy.da.InsertCursor(TRN_ROUTE_LINKS_SHPFILE, link_rows_cols)
+    ab_array    = arcpy.Array()
+
+    # fill it in
+    links_df_records = links_df.to_dict(orient="records")
+    for record in links_df_records:
+        cursor_rec = []
+        for col in link_rows_cols:
+            if col=="SHAPE@":
+                ab_array.add( arcpy.Point( record["A_X"], record["A_Y"]) )
+                ab_array.add( arcpy.Point( record["B_X"], record["B_Y"]))
+                ab_line   = arcpy.Polyline(ab_array)
+                cursor_rec.append(ab_line)
+                ab_array.removeAll()
+            else:
+                cursor_rec.append (record[col])
+        link_cursor.insertRow(cursor_rec)
+
+    del link_cursor
+    logging.info("Wrote {} links to {}".format(len(links_df), TRN_ROUTE_LINKS_SHPFILE))
