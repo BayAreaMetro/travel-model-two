@@ -16,6 +16,7 @@ import com.pb.mtctm2.abm.application.MTCTM2TourBasedModel;
 import com.pb.mtctm2.abm.application.SandagCtrampDmuFactory;
 import com.pb.mtctm2.abm.application.SandagHouseholdDataManager;
 import com.pb.mtctm2.abm.application.SandagModelStructure;
+import com.pb.mtctm2.abm.ctramp.Household;
 import com.pb.mtctm2.abm.ctramp.HouseholdDataManager;
 import com.pb.mtctm2.abm.ctramp.HouseholdDataManagerIf;
 import com.pb.mtctm2.abm.ctramp.HouseholdDataManagerRmi;
@@ -40,6 +41,7 @@ public class CreateLogsums {
     private SandagModelStructure modelStructure;
     private SandagCtrampDmuFactory dmuFactory;
     private MatrixDataServerIf ms;
+    private ModelOutputReader modelOutputReader;
     
     /**
      * Constructor.
@@ -75,7 +77,99 @@ public class CreateLogsums {
         // they can create DMU objects
         dmuFactory = new SandagCtrampDmuFactory(modelStructure);
 
+        modelOutputReader = new ModelOutputReader(propertyMap,modelStructure, globalIterationNumber);
 	}
+	
+	
+	/**
+	 * Run all components.
+	 * 
+	 */
+	public void run(){
+		
+		initialize();
+		readModelOutputsAndCreateTours();
+		createWorkLogsums();
+		createNonWorkLogsums();
+	}
+	
+	/**
+	 * Read the model outputs and create tours.
+	 */
+	public void readModelOutputsAndCreateTours(){
+		
+		modelOutputReader.readHouseholdDataOutput();
+		modelOutputReader.readPersonDataOutput();
+		modelOutputReader.readTourDataOutput();
+		
+		Household[] households = householdDataManager.getHhArray();
+		for(Household household : households){
+			modelOutputReader.createJointTours(household);
+			modelOutputReader.createIndividualTours(household);
+		}
+		householdDataManager.setHhArray(households);
+	}
+	
+	
+	
+	/**
+	 * Calculate and write work destination choice logsums for the synthetic population.
+	 * 
+	 * @param propertyMap
+	 */
+	public void createWorkLogsums(){
+        
+        jppfClient = new JPPFClient();
+
+        if (aggAcc == null)
+        {
+            logger.info("creating Accessibilities Object for UWSL.");
+            aggAcc = BuildAccessibilities.getInstance();
+            aggAcc.setupBuildAccessibilities(propertyMap);
+            aggAcc.setJPPFClient(jppfClient);
+            
+            aggAcc.calculateSizeTerms();
+            aggAcc.calculateConstants();
+          
+            boolean readAccessibilities = ResourceUtil.getBooleanProperty(resourceBundle, "acc.read.input.file");
+            if (readAccessibilities)
+            {
+            	String projectDirectory = Util.getStringValueFromPropertyMap(propertyMap,"Project.Directory");
+                String accFileName = Paths.get(projectDirectory,Util.getStringValueFromPropertyMap(propertyMap, "acc.output.file")).toString();
+
+                aggAcc.readAccessibilityTableFromFile(accFileName);
+
+            } else
+            {
+
+                aggAcc.calculateDCUtilitiesDistributed(propertyMap);
+
+            }
+        }
+
+        // new the usual school and location choice model object
+        UsualWorkSchoolLocationChoiceModel usualWorkSchoolLocationChoiceModel = new UsualWorkSchoolLocationChoiceModel(
+                resourceBundle, "none", jppfClient, modelStructure, ms, dmuFactory, aggAcc);
+
+        // calculate and get the array of worker size terms table - MGRAs by
+        // occupations
+        aggAcc.createWorkSegmentNameIndices();
+        aggAcc.calculateWorkerSizeTerms();
+        double[][] workerSizeTerms = aggAcc.getWorkerSizeTerms();
+
+        // run the model
+        logger.info("Starting usual work location choice for logsum calculations.");
+        usualWorkSchoolLocationChoiceModel.runWorkLocationChoiceModel(householdDataManager, workerSizeTerms);
+        logger.info("Finished with usual work location choice for logsum calculations.");
+
+
+	}
+	
+	public void createNonWorkLogsums(){
+		
+	}
+	
+
 	
 	/**
 	 * Create the household data manager. Based on the code in MTCTM2TourBasedModel.runTourBasedModel() 
@@ -161,63 +255,6 @@ public class CreateLogsums {
         }
 
         return householdDataManager;
-	}
-	
-	/**
-	 * Calculate and write work destination choice logsums for the synthetic population.
-	 * 
-	 * @param propertyMap
-	 */
-	public void createWorkLogsums(){
-        
-        jppfClient = new JPPFClient();
-
-        if (aggAcc == null)
-        {
-            logger.info("creating Accessibilities Object for UWSL.");
-            aggAcc = BuildAccessibilities.getInstance();
-            aggAcc.setupBuildAccessibilities(propertyMap);
-            aggAcc.setJPPFClient(jppfClient);
-            
-            aggAcc.calculateSizeTerms();
-            aggAcc.calculateConstants();
-          
-            boolean readAccessibilities = ResourceUtil.getBooleanProperty(resourceBundle, "acc.read.input.file");
-            if (readAccessibilities)
-            {
-            	String projectDirectory = Util.getStringValueFromPropertyMap(propertyMap,"Project.Directory");
-                String accFileName = Paths.get(projectDirectory,Util.getStringValueFromPropertyMap(propertyMap, "acc.output.file")).toString();
-
-                aggAcc.readAccessibilityTableFromFile(accFileName);
-
-            } else
-            {
-
-                aggAcc.calculateDCUtilitiesDistributed(propertyMap);
-
-            }
-        }
-
-        // new the usual school and location choice model object
-        UsualWorkSchoolLocationChoiceModel usualWorkSchoolLocationChoiceModel = new UsualWorkSchoolLocationChoiceModel(
-                resourceBundle, "none", jppfClient, modelStructure, ms, dmuFactory, aggAcc);
-
-        // calculate and get the array of worker size terms table - MGRAs by
-        // occupations
-        aggAcc.createWorkSegmentNameIndices();
-        aggAcc.calculateWorkerSizeTerms();
-        double[][] workerSizeTerms = aggAcc.getWorkerSizeTerms();
-
-        // run the model
-        logger.info("Starting usual work location choice for logsum calculations.");
-        usualWorkSchoolLocationChoiceModel.runWorkLocationChoiceModel(householdDataManager, workerSizeTerms);
-        logger.info("Finished with usual work location choice for logsum calculations.");
-
-
-	}
-	
-	public void createNonWorkLogsums(){
-		
 	}
 	
 	

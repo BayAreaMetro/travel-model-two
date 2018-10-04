@@ -323,61 +323,20 @@ public class HouseholdIndividualMandatoryTourFrequencyModel
                         choiceModelApplication.logUECResults(modelLogger, loggingHeader);
 
                     }
-
+                    // set the choice in the person object
                     person.setImtfChoice(choice);
-
-                    // set the person choices
-                    if (choice == CHOICE_ONE_WORK)
-                    {
-                        person.createWorkTours(1, 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
-                                ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
-                    } else if (choice == CHOICE_TWO_WORK)
-                    {
-                        person.createWorkTours(2, 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
-                                ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
-                    } else if (choice == CHOICE_ONE_SCHOOL)
-                    {
-                        if (person.getPersonIsUniversityStudent() == 1) person.createSchoolTours(1,
-                                0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
-                                ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
-                        else person.createSchoolTours(1, 0,
-                                ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
-                                ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
-                    } else if (choice == CHOICE_TWO_SCHOOL)
-                    {
-                        if (person.getPersonIsUniversityStudent() == 1) person.createSchoolTours(2,
-                                0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
-                                ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
-                        else person.createSchoolTours(2, 0,
-                                ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
-                                ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
-                    } else if (choice == CHOICE_WORK_AND_SCHOOL)
-                    {
-                        person.createWorkTours(1, 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
-                                ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
-                        if (person.getPersonIsUniversityStudent() == 1) person.createSchoolTours(1,
-                                0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
-                                ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
-                        else person.createSchoolTours(1, 0,
-                                ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
-                                ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
-                    }
-
+                    //create tours
+                    createMandatoryTours(choice,person);
+                 
                 } // mandatory activity if
                 else if (activity.equalsIgnoreCase(MANDATORY_ACTIVITY)
                         && person.getPersonIsPreschoolChild() == 1)
                 {
                     // pre-school child with mandatory activity type is assigned
                     // choice = 3 (1 school tour).
-                    choice = 3;
-
-                    person.setImtfChoice(choice);
-
-                    // get the school purpose name for a non-driving age person to
-                    // use for preschool tour purpose
-                    person.createSchoolTours(1, 0, ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
-                            ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
-                }
+                    choice = CHOICE_ONE_SCHOOL;
+                    createMandatoryTours(choice,person);
+                                   }
 
             } catch (Exception e)
             {
@@ -391,5 +350,54 @@ public class HouseholdIndividualMandatoryTourFrequencyModel
         household.setImtfRandomCount(household.getHhRandomCount());
 
     }
+    
+    /**
+     * Moving this logic to a static method that can be accessed
+     * without instantiating an instance of the parent class. 
+     * 
+     * @param choice The individual mandatory tour frequency choice
+     * @param person The person object in which to set tours.
+     */
+    public static void createMandatoryTours(int choice, Person person){
+
+        // set the person choices
+        if (choice == CHOICE_ONE_WORK)
+        {
+            person.createWorkTours(1, 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
+                    ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
+        } else if (choice == CHOICE_TWO_WORK)
+        {
+            person.createWorkTours(2, 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
+                    ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
+        } else if (choice == CHOICE_ONE_SCHOOL)
+        {
+            if (person.getPersonIsUniversityStudent() == 1) person.createSchoolTours(1,
+                    0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
+                    ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
+            else person.createSchoolTours(1, 0,
+                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
+                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
+        } else if (choice == CHOICE_TWO_SCHOOL)
+        {
+            if (person.getPersonIsUniversityStudent() == 1) person.createSchoolTours(2,
+                    0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
+                    ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
+            else person.createSchoolTours(2, 0,
+                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
+                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
+        } else if (choice == CHOICE_WORK_AND_SCHOOL)
+        {
+            person.createWorkTours(1, 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
+                    ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
+            if (person.getPersonIsUniversityStudent() == 1) person.createSchoolTours(1,
+                    0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
+                    ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
+            else person.createSchoolTours(1, 0,
+                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
+                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
+        }
+
+    } 
+
 
 }

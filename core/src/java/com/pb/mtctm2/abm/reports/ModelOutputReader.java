@@ -16,6 +16,8 @@ import com.pb.mtctm2.abm.ctramp.HouseholdDataWriter;
 import com.pb.mtctm2.abm.ctramp.HouseholdIndividualMandatoryTourFrequencyModel;
 import com.pb.mtctm2.abm.ctramp.ModelStructure;
 import com.pb.mtctm2.abm.ctramp.Person;
+import com.pb.mtctm2.abm.ctramp.Tour;
+import com.pb.mtctm2.abm.ctramp.Util;
 
 public class ModelOutputReader {
 
@@ -30,9 +32,10 @@ public class ModelOutputReader {
     private ModelStructure      modelStructure;
     private int                 iteration;
     private HashMap<String,String> rbMap;
+    private HashMap<Long, HouseholdFileAttributes> householdFileAttributesMap;
     private HashMap<Long, PersonFileAttributes> personFileAttributesMap;
-    private HashMap<Long, TourFileAttributes> individualTourAttributesMap; //by person_id
-    private HashMap<Long, TourFileAttributes> jointTourAttributesMap; //by hh_id
+    private HashMap<Long, ArrayList<TourFileAttributes>> individualTourAttributesMap; //by person_id
+    private HashMap<Long, ArrayList<TourFileAttributes>> jointTourAttributesMap; //by hh_id
    
     /**
      * Default constructor.
@@ -48,33 +51,41 @@ public class ModelOutputReader {
 		this.iteration = iteration;
 		this.rbMap = rbMap;
 	}
+   
 	/**
-	 * Create a file name with the iteration number appended.
-	 * 
-	 * @param originalFileName The original file name	
-	 * @param iteration The iteration number
-	 * @return The reformed file name with the iteration number appended.
+	 * Read household data and store records in householdFileAttributesMap
 	 */
-    private String formFileName(String originalFileName, int iteration)
-    {
-        int lastDot = originalFileName.lastIndexOf('.');
+    public void readHouseholdDataOutput(){
+		
+		String baseDir = rbMap.get(CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
+		String hhFile = formFileName(rbMap.get(PROPERTIES_HOUSEHOLD_DATA_FILE), iteration);
+		
+	    TableDataSet householdData = readTableData(baseDir+hhFile);
 
-        String returnString = "";
-        if (lastDot > 0)
-        {
-            String base = originalFileName.substring(0, lastDot);
-            String ext = originalFileName.substring(lastDot);
-            returnString = String.format("%s_%d%s", base, iteration, ext);
-        } else
-        {
-            returnString = String.format("%s_%d.csv", originalFileName, iteration);
-        }
+	    householdFileAttributesMap = new HashMap<Long, HouseholdFileAttributes>();
+	        
+	    for(int row = 1; row<=householdData.getRowCount();++row){
+			
+	    	long hhid = (long) householdData.getValueAt(row,"hhid");
+			int home_mgra = (int)householdData.getValueAt(row,"home_mgra");
+	        int income = (int) householdData.getValueAt(row,"income");
+	        int autos = (int) householdData.getValueAt(row,"autos");
+	        int automated_vehicles = (int) householdData.getValueAt(row,"automated_vehicles");
+	        int transponder = (int) householdData.getValueAt(row,"transponder");
+	        String cdap_pattern =  householdData.getStringValueAt(row,"cdap_pattern");
+	        String jtf_choice = householdData.getStringValueAt(row,"jtf_choice");
+	        float sampleRate = householdData.getValueAt(row,"sampleRate");
+	        
+	        HouseholdFileAttributes hhAttributes = new HouseholdFileAttributes(hhid,
+	        		home_mgra, income, autos, automated_vehicles,transponder,cdap_pattern,
+	        		jtf_choice,sampleRate);
+	        
+	        householdFileAttributesMap.put(hhid, hhAttributes);
 
-        logger.info("writing " + originalFileName + " file to " + returnString);
+	    }
+	}
 
-        return returnString;
-    }
-
+    
     /**
      * Read the data from the Results.PersonDataFile.
      * Data is stored in HashMap personFileAttributesMap<person_id,PersonFileAttributes>
@@ -122,6 +133,20 @@ public class ModelOutputReader {
 
 	}
 
+	/**
+	 * Read both tour files.
+	 * 
+	 */
+	public void readTourDataOutput(){
+		
+		String baseDir = rbMap.get(CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
+	    String indivTourFile = formFileName(rbMap.get(PROPERTIES_INDIV_TOUR_DATA_FILE), iteration);
+        String jointTourFile = formFileName(rbMap.get(PROPERTIES_JOINT_TOUR_DATA_FILE), iteration);
+        readTourData(baseDir+indivTourFile, false, individualTourAttributesMap);
+        readTourData(baseDir+jointTourFile, false, jointTourAttributesMap);
+       
+	}
+
 	
     /**
      * Read the data from the Results.IndivTourDataFile or Results.JointTourDataFile.
@@ -131,11 +156,11 @@ public class ModelOutputReader {
      * indexed by person_id.
      * 
      */
-	public void readTourDataOutput(String filename, boolean isJoint, HashMap<Long, TourFileAttributes> tourFileAttributesMap ){
+	public void readTourData(String filename, boolean isJoint, HashMap<Long, ArrayList<TourFileAttributes>> tourFileAttributesMap ){
 		
         TableDataSet tourData = readTableData(filename);
 
-        tourFileAttributesMap = new HashMap<Long, TourFileAttributes>();
+        tourFileAttributesMap = new HashMap<Long, ArrayList<TourFileAttributes>>();
         
         for(int row = 1; row<=tourData.getRowCount();++row){
         	
@@ -197,30 +222,244 @@ public class ModelOutputReader {
     				 in_btap, in_atap, out_set, in_set, sampleRate, avAvailable,
     				util, prob, tour_composition, tour_participants);
         	
-        	tourFileAttributesMap.put(person_id,tourFileAttributes);
+        	//if individual tour, map key is person_id, else it is hh_id
+        	long key = -1;
+        	if(!isJoint)
+        		key = person_id;
+        	else
+        		key = hh_id;
+        	
+        	//if the not the first tour for this person or hh, add the tour to the existing
+        	//arraylist; else create a new arraylist and add the tour attributes to it,
+        	//then add the arraylist to the map
+        	if(tourFileAttributesMap.containsKey(key)){
+        		ArrayList<TourFileAttributes> tourArray = tourFileAttributesMap.get(key);
+        		tourArray.add(tourFileAttributes);
+        	}else{
+        		ArrayList<TourFileAttributes> tourArray = new ArrayList<TourFileAttributes>();
+        		tourArray.add(tourFileAttributes);
+        		tourFileAttributesMap.put(key, tourArray);
+        	}
         	
         }
 
 	}
 
+	/**
+	 * Create individual tour objects for all persons in the household object based
+	 * on the data read in the individual tour file.
+	 *
+	 * @param household
+	 */
+	public void createIndividualTours(Household household){
+		
+		HashMap<String,Integer> purposeIndexMap = modelStructure.getPrimaryPurposeNameIndexMap();
+		for(Person p: household.getPersons()){
+			long personId = p.getPersonId();
+			if(individualTourAttributesMap.containsKey(personId)){
+
+				ArrayList<TourFileAttributes> tourAttributesArray = individualTourAttributesMap.get(personId);
+				
+				//store tours by type
+				ArrayList<TourFileAttributes> workTours = new ArrayList<TourFileAttributes>();
+				ArrayList<TourFileAttributes> universityTours = new ArrayList<TourFileAttributes>();
+				ArrayList<TourFileAttributes> schoolTours = new ArrayList<TourFileAttributes>();
+				ArrayList<TourFileAttributes> atWorkSubtours = new ArrayList<TourFileAttributes>();
+				ArrayList<TourFileAttributes> nonMandTours = new ArrayList<TourFileAttributes>();
+				
+				for(int i=0;i<tourAttributesArray.size();++i){
+					
+					TourFileAttributes tourAttributes = tourAttributesArray.get(i);
+					if(tourAttributes.tour_purpose.compareTo(modelStructure.WORK_PRIMARY_PURPOSE_NAME)==0)
+						workTours.add(tourAttributes);
+					else if(tourAttributes.tour_purpose.compareTo(modelStructure.SCHOOL_PRIMARY_PURPOSE_NAME)==0)
+						schoolTours.add(tourAttributes);
+					else if(tourAttributes.tour_purpose.compareTo(modelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME)==0)
+						universityTours.add(tourAttributes);
+					else if(tourAttributes.tour_purpose.compareTo(modelStructure.AT_WORK_PURPOSE_NAME)==0)
+						atWorkSubtours.add(tourAttributes);
+					else
+						nonMandTours.add(tourAttributes);
+				}
+				
+				//create the mandatory tours
+				if(workTours.size()>0){
+					p.createWorkTours(workTours.size(), 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
+	                    ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
+					//set tour attributes
+					
+				}
+				//create school tours
+				if(schoolTours.size()>0){
+					p.createSchoolTours(schoolTours.size(), 0, ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
+		                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
+					//set tour attributes
+				}
+				//create university tours
+				if(universityTours.size()>0){
+					p.createSchoolTours(universityTours.size(), 0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
+		                    ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
+				
+					//set tour attributes
+				}
+				//create non-mandatory tours
+				for(int i =0; i<nonMandTours.size(); ++i){
+					TourFileAttributes tourAttributes = nonMandTours.get(i);
+					p.createIndividualNonMandatoryTours(1, tourAttributes.tour_purpose);
+				
+					//set tour attributes
+				}
+				//create at-work sub-tours
+				for(int i =0; i<atWorkSubtours.size(); ++i){
+					TourFileAttributes tourAttributes = atWorkSubtours.get(i);
+					//TODO: assuming first work tour is location of this at-work tour; write out actual work location or parent tour ID
+					//TODO: assuming purpose is eat out; need to write out actual purpose
+					p.createAtWorkSubtour(tourAttributes.tour_id, 0, workTours.get(0).dest_mgra,modelStructure.AT_WORK_EAT_PURPOSE_NAME);
+					
+					//set tour attributes
+					
+				}
+			}
+		}
+		
+	}
 	
 	
 	/**
-	 * Set person attributes for this household object. This method uses
+	 * Create joint tours in the household object based on data read in the joint tour file.
+	 * 
+	 * @param household
+	 */
+	public void createJointTours(Household household){
+
+		HashMap<String,Integer> purposeIndexMap = modelStructure.getPrimaryPurposeNameIndexMap();
+		
+		//joint tours
+		long hhid = household.getHhId();
+		if(jointTourAttributesMap.containsKey(hhid)){
+			ArrayList<TourFileAttributes> tourArray = jointTourAttributesMap.get(hhid);
+			int numberOfJointTours = tourArray.size();
+			
+			//get the first joint tour
+			TourFileAttributes tourAttributes = tourArray.get(0);
+			String purposeString = tourAttributes.tour_purpose;
+			int purpose = purposeIndexMap.get(purposeString);
+            int composition = tourAttributes.tour_composition; 
+            int[] tourParticipants = getTourParticipantsArray(tourAttributes.tour_participants);
+            
+            Tour t1 = new Tour(household,purposeString, ModelStructure.JOINT_NON_MANDATORY_CATEGORY, purpose);
+            t1.setJointTourComposition(composition);
+            t1.setPersonNumArray(tourParticipants);
+           
+            //if the household has two joint tours, get the second
+         	if(numberOfJointTours==2){
+				tourAttributes = tourArray.get(2);
+				purposeString = tourAttributes.tour_purpose;
+				purpose = purposeIndexMap.get(purposeString);
+	            composition = tourAttributes.tour_composition; 
+	            tourParticipants = getTourParticipantsArray(tourAttributes.tour_participants);
+	            
+	            Tour t2 = new Tour(household,purposeString, ModelStructure.JOINT_NON_MANDATORY_CATEGORY, purpose);
+	            t2.setJointTourComposition(composition);
+				t2.setPersonNumArray(tourParticipants);
+				
+				//set in hh object
+				household.createJointTourArray(t1, t2);
+	            tourAttributes.setModeledTourAttributes(t1);
+	            tourAttributes.setModeledTourAttributes(t2);
+		    }else{
+				household.createJointTourArray(t1);
+	            tourAttributes.setModeledTourAttributes(t1);
+			}
+		}
+		
+		
+	}
+	
+// HELPER METHODS AND CLASSES
+	
+	/**
+	 * Split the participants string around spaces and return the 
+	 * integer array of participant numbers.
+	 * 
+	 * @param tourParticipants
+	 * @return
+	 */
+	public int[] getTourParticipantsArray(String tourParticipants){
+		
+		String[] values = tourParticipants.split(" ");
+	    int[] array = new int[values.length];
+	    for (int i = 0; i < array.length; i++)
+	       	array[i] = Integer.parseInt(values[i]);
+	    return array;
+	}
+	
+	/**
+	 * Set household and person attributes for this household object. This method uses
 	 * the data in the personFileAttributesMap to set the data members of the
 	 * Person objects for all persons in the household.
 	 * 
 	 * @param hhObject
 	 */
-	public void setPersonAttributes(Household hhObject){
+	public void setHouseholdAndPersonAttributes(Household hhObject){
 		
 		int hhid = hhObject.getHhId();
+		HouseholdFileAttributes hhAttributes = householdFileAttributesMap.get(hhid);
+		hhAttributes.setHouseholdAttributes(hhObject);
+		
 		for(Person p : hhObject.getPersons()){
 			
 			long person_id = p.getPersonId();
 			PersonFileAttributes personFileAttributes = personFileAttributesMap.get(person_id);
 			personFileAttributes.setPersonAttributes(p);
 		}
+	}
+	
+	/**
+	 * A class to hold a household file record attributes.
+	 * @author joel.freedman
+	 *
+	 */
+	private class HouseholdFileAttributes{
+		
+		long hhid;
+        int home_mgra;
+        int income;
+        int autos;
+        int automated_vehicles;
+        int transponder;
+        String cdap_pattern;
+        String jtf_choice;
+        float sampleRate;
+        
+        public HouseholdFileAttributes(long hhid, int home_mgra,
+        		int income, int autos, int automated_vehicles, int transponder,
+        		String cdap_pattern, String jtf_choice, float sampleRate){
+        	
+    		this.hhid = hhid;
+            this.home_mgra = home_mgra;
+            this.income = income;
+            this.autos = autos;
+            this.automated_vehicles = automated_vehicles;
+            this.transponder = transponder;
+            this.cdap_pattern = cdap_pattern;
+            this.jtf_choice = jtf_choice;
+            this.sampleRate = sampleRate;
+        }
+        
+        public void setHouseholdAttributes(Household hh){
+        	
+        	hh.setHhMgra(home_mgra);
+        	hh.setHhIncome(income);
+        	hh.setHhAutos(autos);
+        	hh.setAutomatedVehicles(automated_vehicles);
+        	hh.setTpChoice(transponder);
+        	hh.setCoordinatedDailyActivityPatternResult(cdap_pattern);
+        	String[] jtf = jtf_choice.split("_");
+        	int jtfAlt = new Integer(jtf[0]);
+        	hh.setJointTourFreqResult(jtfAlt, jtf[1]);
+        	hh.setSampleRate(sampleRate);
+        }
 	}
 	
 	
@@ -356,50 +595,28 @@ public class ModelOutputReader {
 						
 		}
 		
-		
+		/**
+		 * Set the tour attributes up through tour destination
+		 * and time-of-day choice. Tour mode choice is not
+		 * known (requires running tour mode choice).
+		 * 
+		 * @param tour
+		 */
+		public void setModeledTourAttributes(Tour tour){
+			
+			tour.setTourOrigMgra(orig_mgra);
+			tour.setTourDestMgra(dest_mgra);
+			tour.setTourDepartPeriod(start_period);
+			tour.setTourArrivePeriod(end_period);
+			tour.setSubtourFreqChoice(atWork_freq);
+			tour.setSampleRate(sampleRate);
+			tour.setUseOwnedAV(avAvailable==1 ? true : false);
+		}
+
 		
 	}
 	
-	public void createIndividualMandatoryTours(int indMandTourFreqChoice, Person person){
-		
-        // set the person choices
-        if (indMandTourFreqChoice == HouseholdIndividualMandatoryTourFrequencyModel.CHOICE_ONE_WORK)
-        {
-            person.createWorkTours(1, 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
-                    ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
-        } else if (indMandTourFreqChoice == HouseholdIndividualMandatoryTourFrequencyModel.CHOICE_TWO_WORK)
-        {
-            person.createWorkTours(2, 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
-                    ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
-        } else if (indMandTourFreqChoice == HouseholdIndividualMandatoryTourFrequencyModel.CHOICE_ONE_SCHOOL)
-        {
-            if (person.getPersonIsUniversityStudent() == 1) person.createSchoolTours(1,
-                    0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
-                    ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
-            else person.createSchoolTours(1, 0,
-                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
-                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
-        } else if (indMandTourFreqChoice == HouseholdIndividualMandatoryTourFrequencyModel.CHOICE_TWO_SCHOOL)
-        {
-            if (person.getPersonIsUniversityStudent() == 1) person.createSchoolTours(2,
-                    0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
-                    ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
-            else person.createSchoolTours(2, 0,
-                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
-                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
-        } else if (indMandTourFreqChoice == HouseholdIndividualMandatoryTourFrequencyModel.CHOICE_WORK_AND_SCHOOL)
-        {
-            person.createWorkTours(1, 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
-                    ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
-            if (person.getPersonIsUniversityStudent() == 1) person.createSchoolTours(1,
-                    0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
-                    ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
-            else person.createSchoolTours(1, 0,
-                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
-                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
-        }
-    }
-
+	
 	
 	/**
 	 * Calculate person type value based on string.
@@ -421,20 +638,6 @@ public class ModelOutputReader {
 	}
 
 	
-	public void readHouseholdDataOutput(){
-	
-		String baseDir = rbMap.get(CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
-		String hhFile = formFileName(rbMap.get(PROPERTIES_HOUSEHOLD_DATA_FILE), iteration);
-	    
-	}
-	
-	public void readTourDataOutput(){
-		
-		String baseDir = rbMap.get(CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
-	    String indivTourFile = formFileName(rbMap.get(PROPERTIES_INDIV_TOUR_DATA_FILE), iteration);
-        String jointTourFile = formFileName(rbMap.get(PROPERTIES_JOINT_TOUR_DATA_FILE), iteration);
-
-	}
 	
 	/**
 	 * Read data into inputDataTable tabledataset.
@@ -458,7 +661,33 @@ public class ModelOutputReader {
         
         return tableDataSet;
 	}
-	
+	/**
+	 * Create a file name with the iteration number appended.
+	 * 
+	 * @param originalFileName The original file name	
+	 * @param iteration The iteration number
+	 * @return The reformed file name with the iteration number appended.
+	 */
+    private String formFileName(String originalFileName, int iteration)
+    {
+        int lastDot = originalFileName.lastIndexOf('.');
+
+        String returnString = "";
+        if (lastDot > 0)
+        {
+            String base = originalFileName.substring(0, lastDot);
+            String ext = originalFileName.substring(lastDot);
+            returnString = String.format("%s_%d%s", base, iteration, ext);
+        } else
+        {
+            returnString = String.format("%s_%d.csv", originalFileName, iteration);
+        }
+
+        logger.info("writing " + originalFileName + " file to " + returnString);
+
+        return returnString;
+    }
+ 
 
 
 }
