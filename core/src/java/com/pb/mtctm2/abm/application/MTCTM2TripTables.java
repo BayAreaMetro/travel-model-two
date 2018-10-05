@@ -23,6 +23,7 @@ import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.Util;
+import com.pb.mtctm2.abm.maas.NewTransitPathModel;
 import com.pb.mtctm2.abm.reports.SkimBuilder;
 
 public class MTCTM2TripTables {
@@ -71,9 +72,11 @@ public class MTCTM2TripTables {
     public MazSets mazSets;
     
     public int numSkimSets;
+    public boolean transitResim;
     
-    public MTCTM2TripTables(String resourceBundleName, int iteration){
+    public MTCTM2TripTables(String resourceBundleName, int iteration, boolean transitResim){
 
+    	this.transitResim = transitResim;
         rbMap = ResourceUtil.getResourceBundleAsHashMap(resourceBundleName);
         properties = new Properties();
         for (String key : rbMap.keySet()) 
@@ -225,14 +228,23 @@ public class MTCTM2TripTables {
 	 */
 	public void createTripTables(){
 		
+		String indivTripFile = null;
+		String jointTripFile = null;
 
 		//Open the individual trip file 
-		String indivTripFile = properties.getProperty("Results.IndivTripDataFile");
+		if(transitResim){
+			indivTripFile = NewTransitPathModel.ResimulateTransitPathIndividualOutputFileProperty;
+			jointTripFile = NewTransitPathModel.ResimulateTransitPathJointOutputFileProperty;
+		}else{
+			indivTripFile = properties.getProperty("Results.IndivTripDataFile");
+			jointTripFile = properties.getProperty("Results.JointTripDataFile");
+			
+		}
+			
 		indivTripFile = formFileName(directory + indivTripFile, iteration);		
 		indivTripData = openTripFile(indivTripFile);
 		
 		//Open the joint trip file 
-		String jointTripFile = properties.getProperty("Results.JointTripDataFile");
 		jointTripFile = formFileName(directory + jointTripFile, iteration);
 		jointTripData = openTripFile(jointTripFile);
 
@@ -264,12 +276,14 @@ public class MTCTM2TripTables {
 		}
         
 		//write the vehicles by parking-constrained MGRA
-		String CBDFile = properties.getProperty("Results.CBDFile");
-		writeCBDFile(directory+CBDFile);
+		if(! transitResim){
+			String CBDFile = properties.getProperty("Results.CBDFile");
+			writeCBDFile(directory+CBDFile);
 
-		//write the vehicles by PNR lot TAP
-		String PNRFile = properties.getProperty("Results.PNRFile");
-		writePNRFile(directory+PNRFile);
+			//write the vehicles by PNR lot TAP
+			String PNRFile = properties.getProperty("Results.PNRFile");
+			writePNRFile(directory+PNRFile);
+		}
 	}
 	
 	/**
@@ -474,6 +488,9 @@ public class MTCTM2TripTables {
 		fileName[4] = directory + properties.getProperty("Results.AutoAVTripMatrix") + end;
 		
 		for(int i=0;i<fileName.length;++i) {
+			//don't write non-transit matrices if in transit resim mode
+			if(transitResim && i!=2)
+				continue;
 			writeMatricesToFile(fileName[i], matrix[i]);
 		}
  	}
@@ -638,12 +655,34 @@ public class MTCTM2TripTables {
 	public static void main(String[] args) {
 
 		//command line arguments
-		String propertiesName = args[0];
-		//args[1] is "-iteration"
-		int iteration = new Integer(args[2]).intValue();
+		String propertiesName = null;
+        int iteration=0;
+        boolean transitResim=false;
+        
+        if (args.length == 0)
+        {
+            logger.error(String
+                    .format("no properties file base name (without .properties extension) was specified as an argument."));
+            return;
+        } else {
+        	propertiesName = args[0];
+
+	        for (int i = 1; i < args.length; ++i)
+	        {
+	            if (args[i].equalsIgnoreCase("-iteration"))
+	            {
+	                iteration = Integer.valueOf(args[i + 1]);
+	            }
+	           
+	            if (args[i].equalsIgnoreCase("-transitResim"))
+	            {
+	                transitResim = args[i + 1].equalsIgnoreCase("TRUE");
+	            }
+	        }
+        }
 		
 		//run trip table generator
-		MTCTM2TripTables tripTables = new MTCTM2TripTables(propertiesName, iteration);		
+		MTCTM2TripTables tripTables = new MTCTM2TripTables(propertiesName, iteration, transitResim);		
 		tripTables.createTripTables();
 
 	}

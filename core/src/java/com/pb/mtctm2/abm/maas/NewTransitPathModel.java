@@ -86,8 +86,8 @@ public class NewTransitPathModel{
     private static final String ResimulateTransitPathUECProperty = "ResimulateTransitPath.uec.file";
     private static final String ResimulateTransitPathDataPageProperty = "ResimulateTransitPath.data.page";
     private static final String ResimulateTransitPathIdentifyPageProperty = "ResimulateTransitPath.identifyTripToResimulate.page";
-    private static final String ResimulateTransitPathIndividualOutputFileProperty = "ResimulateTransitPath.results.IndivTripDataFile";
-    private static final String ResimulateTransitPathJointOutputFileProperty = "ResimulateTransitPath.results.JointTripDataFile";
+    public static final String ResimulateTransitPathIndividualOutputFileProperty = "ResimulateTransitPath.results.IndivTripDataFile";
+    public static final String ResimulateTransitPathJointOutputFileProperty = "ResimulateTransitPath.results.JointTripDataFile";
     
 
     /**
@@ -214,16 +214,17 @@ public class NewTransitPathModel{
 		//iterate through data and calculate transit path, write results
 		for(Trip trip : transitTrips ){
 			
+			boolean resimulatedTrip = false;
 			//skip trip if doesn't need to be resimulated
 			if(resimulateTransitTrip(trip)== false){
 				if(trip.getJoint()==0)
-					writeTrip(trip,outputIndivTripWriter);
+					writeTrip(trip,resimulatedTrip,outputIndivTripWriter);
 				else
-					writeTrip(trip,outputJointTripWriter);
+					writeTrip(trip,resimulatedTrip,outputJointTripWriter);
 				
 				continue;
 			}
-				
+			resimulatedTrip=true;	
 			++resimulatedTransitTrips;
 			
 			TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
@@ -305,15 +306,17 @@ public class NewTransitPathModel{
 			
 			//write results
 			if(trip.getJoint()==0)
-				writeTrip(trip,outputIndivTripWriter);
+				writeTrip(trip,resimulatedTrip,outputIndivTripWriter);
 			else
-				writeTrip(trip,outputJointTripWriter);
+				writeTrip(trip,resimulatedTrip,outputJointTripWriter);
 
 		}
 		if(tripsWithNoTransitPath>0)
 			logger.info("There are "+tripsWithNoTransitPath+" transit trips with no valid transit path");
 		
-		logger.info("Resimulated "+resimulatedTransitTrips+" transit trips");
+		float percentResimulated = ((float)resimulatedTransitTrips)/((float)transitTrips.size()) * 100.0f;
+		
+		logger.info("Resimulated "+resimulatedTransitTrips+" transit trips out of "+ transitTrips.size()+ " transit trips ("+percentResimulated+"%).");
 		outputIndivTripWriter.close();
 		outputJointTripWriter.close();
 	}
@@ -559,7 +562,7 @@ public class NewTransitPathModel{
 			
 	        String headerString = new String(
 			"hh_id,person_id,person_num,tour_id,stop_id,inbound,tour_purpose,orig_purpose,dest_purpose,orig_mgra,dest_mgra,trip_dist,"+
-	        "parking_mgra,stop_period,trip_mode,trip_board_tap,trip_alight_tap,tour_mode,set,sampleRate,avAvailable");
+	        "parking_mgra,stop_period,trip_mode,trip_board_tap,trip_alight_tap,tour_mode,set,sampleRate,avAvailable,resimulatedTrip");
 
 	        printWriter.println(headerString);
 
@@ -574,7 +577,7 @@ public class NewTransitPathModel{
 			
 	        String headerString = new String(
 			"hh_id,tour_id,stop_id,inbound,tour_purpose,orig_purpose,dest_purpose,orig_mgra,dest_mgra,trip_dist,parking_mgra,stop_period,"
-			+"trip_mode,num_participants,trip_board_tap,trip_alight_tap,tour_mode,set,sampleRate,avAvailable");
+			+"trip_mode,num_participants,trip_board_tap,trip_alight_tap,tour_mode,set,sampleRate,avAvailable,resimulatedTrip");
 
 	        printWriter.println(headerString);
 
@@ -585,7 +588,7 @@ public class NewTransitPathModel{
 		 * @param trip
 		 * @param writer
 		 */
-		private void writeTrip(Trip trip, PrintWriter writer){
+		private void writeTrip(Trip trip, boolean resimulated,PrintWriter writer){
 			
 			String outputRecord= new String(trip.getHhid() + ",");
 			
@@ -617,7 +620,8 @@ public class NewTransitPathModel{
 					+ trip.getTourMode() + ","
 					+ trip.getSet() + ","
 					+ trip.getSampleRate() + ","
-					+ trip.getAvAvailable() 
+					+ trip.getAvAvailable() + ","
+					+ (resimulated ? 1: 0)
 					);
 			writer.println(outputRecord);
 			writer.flush();
