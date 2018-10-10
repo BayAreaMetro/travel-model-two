@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import com.pb.mtctm2.abm.ctramp.TapDataManager;
 import com.pb.mtctm2.abm.ctramp.TazDataManager;
 import com.pb.common.calculator.MatrixDataServerIf;
+import com.pb.common.datafile.NEW_CSVFileReader;
 import com.pb.common.datafile.OLD_CSVFileReader;
 import com.pb.common.datafile.CSVFileWriter;
 import com.pb.common.datafile.TableDataSet;
@@ -23,7 +24,7 @@ import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.Util;
-import com.pb.mtctm2.abm.maas.NewTransitPathModel;
+import com.pb.mtctm2.abm.maas.ResimulateTransitPathModel;
 import com.pb.mtctm2.abm.reports.SkimBuilder;
 
 public class MTCTM2TripTables {
@@ -233,8 +234,8 @@ public class MTCTM2TripTables {
 
 		//Open the individual trip file 
 		if(transitResim){
-			indivTripFile = NewTransitPathModel.ResimulateTransitPathIndividualOutputFileProperty;
-			jointTripFile = NewTransitPathModel.ResimulateTransitPathJointOutputFileProperty;
+			indivTripFile = properties.getProperty(ResimulateTransitPathModel.ResimulateTransitPathIndividualOutputFileProperty);
+			jointTripFile = properties.getProperty(ResimulateTransitPathModel.ResimulateTransitPathJointOutputFileProperty);
 		}else{
 			indivTripFile = properties.getProperty("Results.IndivTripDataFile");
 			jointTripFile = properties.getProperty("Results.JointTripDataFile");
@@ -298,7 +299,7 @@ public class MTCTM2TripTables {
 	    TableDataSet tripData;
 	    
         try {
-        	OLD_CSVFileReader csvFile = new OLD_CSVFileReader();
+        	NEW_CSVFileReader csvFile = new NEW_CSVFileReader();
             tripData = csvFile.readFile(new File(fileName));
         } catch (IOException e) {
             throw new RuntimeException(e);

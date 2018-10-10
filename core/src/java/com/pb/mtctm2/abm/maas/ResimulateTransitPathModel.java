@@ -45,9 +45,9 @@ import com.pb.mtctm2.abm.survey.OutputTapPairs;
  * @author joel.freedman
  *
  */
-public class NewTransitPathModel{
+public class ResimulateTransitPathModel{
 
-	private static final Logger logger = Logger.getLogger(NewTransitPathModel.class);
+	private static final Logger logger = Logger.getLogger(ResimulateTransitPathModel.class);
     private BestTransitPathCalculator         bestPathCalculator;
     public static final int         MATRIX_DATA_SERVER_PORT        = 1171;
     public static final int         MATRIX_DATA_SERVER_PORT_OFFSET = 0;
@@ -95,7 +95,7 @@ public class NewTransitPathModel{
      * @param propertyMap
      * @param iteration
      */
-    public NewTransitPathModel(HashMap<String, String> propertyMap, int iteration){
+    public ResimulateTransitPathModel(HashMap<String, String> propertyMap, int iteration){
      	
     	this.iteration = iteration;
     	this.propertyMap = propertyMap;
@@ -662,7 +662,7 @@ public class NewTransitPathModel{
 	        }
 	        
 	        pMap = ResourceUtil.getResourceBundleAsHashMap(propertiesFile);
-	        NewTransitPathModel transitPathModel = new NewTransitPathModel(pMap, iteration);
+	        ResimulateTransitPathModel transitPathModel = new ResimulateTransitPathModel(pMap, iteration);
 	        transitPathModel.readInputFiles();
 	        transitPathModel.run();
 
