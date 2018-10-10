@@ -46,7 +46,7 @@ library(data.table)
 geography = "maz_v1_0"
 
 # Directories
-if (Sys.getenv("USERNAME") == "lzorn") {
+if (Sys.getenv("USERNAME") %in% c("lzorn","SIsrael")) {
   # this is the output directory
   WD                   <- file.path("M:/Data/HomeInterview/2010/Analysis/Calibration Targets", geography)
 
@@ -58,7 +58,7 @@ if (Sys.getenv("USERNAME") == "lzorn") {
   if (geography == "maz_v1_0") {
     SkimDir            <- file.path(BOX_TM2, "Observed Data",   "RSG_CHTS")
     geogXWalkDir       <- file.path(BOX_TM2, "Observed Data",   "CHTS Processing", "Trip End Geocodes maz_v1_0")
-    mazDataDir         <- file.path(BOX_TM2, "Model Inputs",    "2015", "landuse")
+    mazDataDir         <- file.path(BOX_TM2, "Model Inputs",    "2015_maz_v1", "landuse")
     districtDef        <- file.path(BOX_TM2, "Model Geography", "Zones v1.0", "taz_superdistrictv1.csv")
   } else if (geography == "maz_v2_2") {
     SkimDir            <- file.path(BOX_TM2, "Model Geography", "Zones v2.2")
