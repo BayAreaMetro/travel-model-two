@@ -84,15 +84,16 @@
 ; author: sn(11/7/2014)
 ; ----------------------------------------------------------------------------------------------------------------
 
-CROWDING_SKIM_BLOCK = '%BASE_SCRIPTS%\block\transit_assign_type.block'
-SKIM_MATRICES = '%BASE_SCRIPTS%\block\skim_matrices.block'
-SKIM_MATRIX_DEF = '%BASE_SCRIPTS%\block\skim_matrix_definitions.block'
+CROWDING_SKIM_BLOCK = 'ctramp\scripts\block\transit_assign_type.block'
+SKIM_MATRICES = 'ctramp\scripts\block\skim_matrices.block'
+SKIM_MATRIX_DEF = 'ctramp\scripts\block\skim_matrix_definitions.block'
 
 ;start cluster nodes - one for each skim set and time period
 *Cluster.exe MTC_TRANASN 1-5 start exit
 
 ;now build transit times based on congested times from loaded network
 ;loop over time period
+
 LOOP PERIOD = 1,5
 
     ; a two letter token is used for each time period

@@ -58,7 +58,7 @@ crowding_config['waitdf'] = config.getfloat('defaults', 'transit.crowding.waitdf
 crowding_config['iterations'] = config.getint('defaults','transit.crowding.iterations')
 
 
-crowding_line = 'CROWDMODEL APPLY=T, ADJUSTLINK={}, ADJUSTWAIT={}, ITERATIONS={}, PERIOD=@PERIOD_DURATION@, RDIFF=T, RMSE=T, STOP2STOP=T, SKIMS=T'.format(
+crowding_line = 'CROWDMODEL APPLY=T, ADJUSTLINK={}, ADJUSTWAIT={}, ITERATIONS={}, PERIOD=@PERIOD_DURATION@, RDIFF=T, RMSE=T, STOP2STOP=T, SKIMS=F'.format(
         'T' if crowding_config['adjustlink'] else 'F',
         'T' if crowding_config['adjustwait'] else 'F',
 		crowding_config['iterations']

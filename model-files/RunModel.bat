@@ -19,7 +19,7 @@ set ENVTYPE=MTC
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :: Step 0: Copy over CTRAMP from %GITHUB_DIR%
-set GITHUB_DIR=C:\Users\mtcpb\Documents\GitHub\travel-model-two
+set GITHUB_DIR=E:\projects\clients\mtc\GitHub\master\rsg\travel-model-two
 if not exist CTRAMP (
   mkdir CTRAMP\model
   mkdir CTRAMP\runtime
@@ -46,11 +46,14 @@ SET /A SELECT_COUNTY=-1
 CALL CTRAMP\runtime\CTRampEnv.bat
 
 :: Set the model feedback iterations
-SET /A MAX_ITERATION=1
+SET /A MAX_ITERATION=3
+
+:: Set the inner transit capacity restraint iterations
+SET /A MAX_INNER_ITERATION=1
 
 ::  Set choice model household sample rate
-SET SAMPLERATE_ITERATION1=1.0
-SET SAMPLERATE_ITERATION2=0.50
+SET SAMPLERATE_ITERATION1=0.25
+SET SAMPLERATE_ITERATION2=0.5
 SET SAMPLERATE_ITERATION3=1.0
 SET SAMPLERATE_ITERATION4=1.0
 SET SAMPLERATE_ITERATION5=1.0
@@ -67,11 +70,12 @@ set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUB
 
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
-:: SET /A ITERATION=1
-:: IF %ITERATION% EQU 1 SET SAMPLERATE=%SAMPLERATE_ITERATION1%
+:: SET /A ITERATION=3
+:: SET /A INNER_ITERATION=1
+:: IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
 :: call zoneSystem.bat
 :: goto here
-:: --------- ------------- ------------------------------------------------------------------------------
+:: ------------------------------------------------------------------------------------------------------
 
 
 :: ------------------------------------------------------------------------------------------------------
@@ -159,7 +163,7 @@ if ERRORLEVEL 2 goto done
 IF ERRORLEVEL 1 goto done
 
 IF %SELECT_COUNTY% GTR 0 (
-  copy INPUT\popsyn\          popsyn\    /Y
+  copy INPUT\popsyn\         popsyn\    /Y
   :: Renumber the household file MAZs
   "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\RenumberHHFileMAZs.PY popsyn\households.csv landuse\maz_data.csv %SELECT_COUNTY%
 
@@ -345,7 +349,7 @@ copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
 if ERRORLEVEL 2 goto done
 del mtctm2.properties
-rem taskkill /im "java.exe" /F
+taskkill /im "java.exe" /F
 
 
 IF NOT %MATRIX_SERVER%==localhost (
@@ -362,7 +366,7 @@ IF NOT %HH_SERVER%==localhost (
 :: copy results back over here
 :: ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.mat /NDL /NFL
 
-runtpp CTRAMP\scripts\assign\merge_demand_matrices.s
+runtpp CTRAMP\scripts\assign\merge_auto_matrices.s
 if ERRORLEVEL 2 goto done
 
 :: ------------------------------------------------------------------------------------------------------
@@ -424,31 +428,65 @@ if ERRORLEVEL 2 goto done
 runtpp CTRAMP\scripts\assign\MergeNetworks.job
 if ERRORLEVEL 2 goto done
 
-:: If another iteration is to be run, run hwy and transit
-:: assignment. Reskim networks, and get everything prepped
-:: for the next iteration.
+:: If another iteration is to be run, run hwy skims
 IF %ITERATION% LSS %MAX_ITERATION% (
+
   runtpp %BASE_SCRIPTS%\skims\HwySkims.job
   if ERRORLEVEL 2 goto done
+  
+)
 
-  runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
-  if ERRORLEVEL 2 goto done
+runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
+if ERRORLEVEL 2 goto done
 
-  runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
-  if ERRORLEVEL 2 goto done
+runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
+if ERRORLEVEL 2 goto done
 
-  :: Create the block file that controls whether the crowding functions are called during transit assignment.
-  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
+:: Create the block file that controls whether the crowding functions are called during transit assignment.
+"%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
+
+::Inner iterations with transit assignment and path recalculator
+SET /A INNER_ITERATION=0
+:inner_iteration_start
+SET /A INNER_ITERATION+=1
+
+	runtpp CTRAMP\scripts\assign\merge_transit_matrices.s
+	if ERRORLEVEL 2 goto done
 
   :: Run Transit Assignment
   runtpp CTRAMP\scripts\assign\TransitAssign.job
   if ERRORLEVEL 2 goto done
-  
+
   runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
   if ERRORLEVEL 2 goto done
+
+  :: Start Matrix Server remotely or locally
+  IF %MATRIX_SERVER%==localhost (
+      rem =========== local ========================
+      call CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%JAVA_PATH%"
+      echo Started matrix manager
+  ) ELSE (
+      rem =========== remote ========================
+      rem (wait 10 seconds between each call because otherwise psXXX sometimes bashes on its own authentication/permissions)
+      CTRAMP\runtime\config\pskill %MATRIX_SERVER% u %UN% -p %PWD% java
+      ping -n 10 localhost
+      CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d "%MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd" "%MATRIX_SERVER_JAVA_PATH%" 
+      ping -n 10 localhost
+  )
+   
+   :: Run Transit Best Path Recalculation (uncomment for transit capacity restraint)
+   :: copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
+   :: call CTRAMP\runtime\runTransitPathRecalculator.cmd %ITERATION% "%JAVA_PATH%"
+   :: if ERRORLEVEL 2 goto done
+   :: del mtctm2.properties
+
+	:: backup the trip files
+	:: copy ctramp_output\indivTripDataResim_%ITERATION%.csv ctramp_output\indivTripDataResim_%ITERATION%_%INNER_ITERATION%.csv 
+ 	:: copy ctramp_output\jointTripDataResim_%ITERATION%.csv ctramp_output\jointTripDataResim_%ITERATION%_%INNER_ITERATION%.csv 
+
+	IF %INNER_ITERATION% LSS %MAX_INNER_ITERATION% GOTO inner_iteration_start
   
-  GOTO iteration_start
-)
+IF %ITERATION% LSS %MAX_ITERATION% GOTO iteration_start
 
 :: ------------------------------------------------------------------------------------------------------
 ::

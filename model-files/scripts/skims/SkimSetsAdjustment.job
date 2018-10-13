@@ -42,9 +42,9 @@ LOOP PERIOD = 1,5
         ZONES=%TAP_COUNT%
         
         ;input matrices 
-        MATI[1] = "skims\transit_skims_@TOKEN_PERIOD@_SET1.TPP"
-        MATI[2] = "skims\transit_skims_@TOKEN_PERIOD@_SET2.TPP"
-        MATI[3] = "skims\transit_skims_@TOKEN_PERIOD@_SET3.TPP"
+        MATI[1] = skims\transit_skims_@TOKEN_PERIOD@_SET1.TPP
+        MATI[2] = skims\transit_skims_@TOKEN_PERIOD@_SET2.TPP
+        MATI[3] = skims\transit_skims_@TOKEN_PERIOD@_SET3.TPP
         
         FILLMW MW[1]= MI.1.COMPCOST
         FILLMW MW[2]= MI.1.IWAIT
