@@ -205,7 +205,7 @@ public class MTCTM2TripTables {
 				//dim TAZ to TAZ auto matrices + MAZ to MAZ matrices
 				matrix[i] = new Matrix[autoModes + mazSets.numSets];
 				for(int j=0;j<autoModes;++j){
-					modeName = modelStructure.getModeName(j+1);
+					modeName = modelStructure.getModeName(j+1);  //the auto mode name
 					matrix[i][j] = new Matrix(modeName+"_AV_"+periodName,"",tazs,tazs);
 					
 					mazSets.autoMatOffset = j;

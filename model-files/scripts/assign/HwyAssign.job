@@ -84,7 +84,7 @@ free_flow_block_param = '%BASE_SCRIPTS%\block\FreeFlowSpeed.block'
 vdf_block_param = '%BASE_SCRIPTS%\block\SpeedFlowCurve.block'
 
 ;start cluster nodes
-*Cluster.exe MTC_HWYASN 1-24 start exit
+*Cluster.exe MTC_HWYASN 1-25 start exit
 
 
 ; do, more or less, the same skim procedure for each of the five time periods
@@ -158,20 +158,30 @@ loop period = 1,5
         NETO = hwy\avgload@token_period@_taz_temp2.net
 		
         PHASE=LINKMERGE
-			MAZMAZVOL=LI.2.MAZMAZVOL
-			IF(DELETE=1) DELETE
+	     		MAZMAZVOL=LI.2.MAZMAZVOL
+	       ENDPHASE
+    endrun
+    
+    
+     ; *DEL hwy\avgload@token_period@_taz.net
+     ; *copy hwy\avgload@token_period@_taz_temp2.net hwy\avgload@token_period@_taz.net
+     ; *DEL hwy\avgload@token_period@_taz_temp2.net
+	 
+    ;Delete links for assignment
+    run pgm = network
+        NETI = hwy\avgload@token_period@_taz_temp2.net
+        NETO = hwy\avgload@token_period@_taz_delete.net
+		
+        PHASE=LINKMERGE
+			    IF(DELETE=1) DELETE
         ENDPHASE
     endrun
     
-     *DEL hwy\avgload@token_period@_taz.net
-     *copy hwy\avgload@token_period@_taz_temp2.net hwy\avgload@token_period@_taz.net
-     *DEL hwy\avgload@token_period@_taz_temp2.net
-	 
      run pgm = highway
         DistributeIntrastep processid = 'MTC_HWYASN', processlist = @intrastep_range@ saveprn = f
     
         ; time-specific input highway network
-        neti = hwy\avgload@token_period@_taz.net
+        neti = hwy\avgload@token_period@_taz_delete.net
 
         ; household travel demand
         mati[1] = ctramp_output\TAZ_Demand_@token_period@.mat
@@ -242,7 +252,7 @@ loop period = 1,5
             ; free-flow speed is used in the volume/delay functions
             lw.ffs = li.FFS
             
-            ;free flow time
+            ; free flow time
             lw.fft = li.FFT
 
             ; link capacity is a function of the number of lanes
@@ -349,56 +359,11 @@ loop period = 1,5
          
       endphase
       
-   endrun      
-   ; merge the links from the original network back in, and set the time and congested speed to free-flow conditions for deleted links
-   run pgm = network
-       NETI[1] = hwy\load@token_period@.net
-       NETI[2] = hwy\avgload@token_period@_taz_temp1.net
-       NETO = hwy\avgload@token_period@_taz_temp2.net 
-	   
-		  MERGE RECORD = TRUE FIRST=V_%ITERATION%,TIME_%ITERATION%,VC_%ITERATION%,CSPD_%ITERATION%,VDT_%ITERATION%,VHT_%ITERATION%,V1_%ITERATION%,V2_%ITERATION%,V3_%ITERATION%,V4_%ITERATION%,V5_%ITERATION%,V6_%ITERATION%,
-		  V7_%ITERATION%,V8_%ITERATION%,V9_%ITERATION%,V10_%ITERATION%,VT_%ITERATION%,V1T_%ITERATION%,V2T_%ITERATION%,V3T_%ITERATION%,V4T_%ITERATION%,V5T_%ITERATION%,V6T_%ITERATION%,V7T_%ITERATION%,V8T_%ITERATION%,V9T_%ITERATION%,V10T_%ITERATION% LAST=DELETE
-		
-        PHASE=LINKMERGE
-			
-			
-			IF(LI.2.DELETE=1) TIME_%ITERATION%=lI.2.FFT
-			IF(LI.2.DELETE=1) CSPD_%ITERATION%=lI.2.FFS
-			IF(LI.2.DELETE=1) V_%ITERATION% = 0 
-			IF(LI.2.DELETE=1) VC_%ITERATION%= 0
-			IF(LI.2.DELETE=1) VDT_%ITERATION%= 0
-			IF(LI.2.DELETE=1) VHT_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V1_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V2_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V3_%ITERATION%= 0
-		    IF(LI.2.DELETE=1) V4_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V5_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V6_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V7_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V8_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V9_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V10_%ITERATION%= 0
-			IF(LI.2.DELETE=1) VT_%ITERATION% = 0
-			IF(LI.2.DELETE=1) V1T_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V2T_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V3T_%ITERATION%= 0
-		    IF(LI.2.DELETE=1) V4T_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V5T_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V6T_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V7T_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V8T_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V9T_%ITERATION%= 0
-			IF(LI.2.DELETE=1) V10T_%ITERATION%= 0
-			
-        ENDPHASE
-    endrun
+   endrun  
    
-    ; delete the output from assignment, rename the merged file to load, and delete the temp files.
-    *DEL hwy\load@token_period@.net
-    *copy hwy\avgload@token_period@_taz_temp2.net hwy\load@token_period@.net
-    *DEL hwy\avgload@token_period@_taz_temp1.net
-    *DEL hwy\avgload@token_period@_taz_temp2.net
+
    
+      
    EndDistributeMultistep
 
  
@@ -407,7 +372,113 @@ endloop ; time period loop
 Wait4Files files = MTC_HWYASN1.script.end, MTC_HWYASN2.script.end, MTC_HWYASN3.script.end, MTC_HWYASN4.script.end, MTC_HWYASN5.script.end, 
           PrintFiles = merge, DelDistribFiles = t, CheckReturnCode = t
 
-*Cluster.exe MTC_HWYASN 1-24 close exit
+*Cluster.exe MTC_HWYASN 1-25 close exit
 
+loop period = 1,5
+  
+    ; a two letter token is used for each time period
+    if (period = 1)   
+      token_period = 'EA'   
+    elseif (period = 2)   
+      token_period = 'AM'    
+    elseif (period = 3)   
+      token_period = 'MD'    
+    elseif (period = 4)   
+      token_period = 'PM'
+    elseif (period = 5)   
+      token_period = 'EV'
+    endif
+    
+
+
+  ;write the volumes out to a text file (small network)
+   RUN PGM=NETWORK
+      NETI = hwy\load@token_period@.net
+      LINKO = hwy\load@token_period@.CSV, FORMAT=SDF DELIMITER=',' INCLUDE=A,B,V_1,TIME_1,VC_1,CSPD_1,VDT_1,VHT_1,V1_1,V2_1,V3_1,V4_1,V5_1,V6_1,
+		  V7_1,V8_1,V9_1,V10_1,VT_1,V1T_1,V2T_1,V3T_1,V4T_1,V5T_1,V6T_1,V7T_1,V8T_1,V9T_1,V10T_1
+		
+   ENDRUN
+   
+   
+       
+   ; read the volumes back in to the big network
+   run pgm = network
+      NETI = hwy\avgload@token_period@_taz_temp2.net
+      LINKI[2] = hwy\load@token_period@.CSV, VAR=A,B,V_1,TIME_1,VC_1,CSPD_1,VDT_1,VHT_1,V1_1,V2_1,V3_1,V4_1,V5_1,V6_1,
+		  V7_1,V8_1,V9_1,V10_1,VT_1,V1T_1,V2T_1,V3T_1,V4T_1,V5T_1,V6T_1,V7T_1,V8T_1,V9T_1,V10T_1
+		
+      NETO = hwy\avgload@token_period@_taz_temp3.net 
+
+		
+      PHASE=LINKMERGE
+
+		  V_1 =   LI.2.V_1   
+			VC_1=   LI.2.VC_1 
+			VDT_1=  LI.2.VDT_1
+			VHT_1=  LI.2.VHT_1
+			V1_1=   LI.2.V1_1 
+			V2_1=   LI.2.V2_1 
+			V3_1=   LI.2.V3_1 
+		  V4_1=   LI.2.V4_1 
+			V5_1=   LI.2.V5_1 
+			V6_1=   LI.2.V6_1 
+			V7_1=   LI.2.V7_1 
+			V8_1=   LI.2.V8_1 
+			V9_1=   LI.2.V9_1 
+			V10_1=  LI.2.V10_1
+			VT_1 =  LI.2.VT_1 
+			V1T_1=  LI.2.V1T_1
+			V2T_1=  LI.2.V2T_1
+			V3T_1=  LI.2.V3T_1
+		  V4T_1=  LI.2.V4T_1
+			V5T_1=  LI.2.V5T_1
+			V6T_1=  LI.2.V6T_1
+			V7T_1=  LI.2.V7T_1
+			V8T_1=  LI.2.V8T_1
+			V9T_1=  LI.2.V9T_1
+			V10T_1= LI.2.V10T_1
+			
+			
+			IF(LI.1.DELETE=1) TIME_1=lI.1.FFT
+			IF(LI.1.DELETE=1) CSPD_1=lI.1.FFS
+			IF(LI.1.DELETE=1) V_1 = 0 
+			IF(LI.1.DELETE=1) VC_1= 0
+			IF(LI.1.DELETE=1) VDT_1= 0
+			IF(LI.1.DELETE=1) VHT_1= 0
+			IF(LI.1.DELETE=1) V1_1= 0
+			IF(LI.1.DELETE=1) V2_1= 0
+			IF(LI.1.DELETE=1) V3_1= 0
+		  IF(LI.1.DELETE=1) V4_1= 0
+			IF(LI.1.DELETE=1) V5_1= 0
+			IF(LI.1.DELETE=1) V6_1= 0
+			IF(LI.1.DELETE=1) V7_1= 0
+			IF(LI.1.DELETE=1) V8_1= 0
+			IF(LI.1.DELETE=1) V9_1= 0
+			IF(LI.1.DELETE=1) V10_1= 0
+			IF(LI.1.DELETE=1) VT_1 = 0
+			IF(LI.1.DELETE=1) V1T_1= 0
+			IF(LI.1.DELETE=1) V2T_1= 0
+			IF(LI.1.DELETE=1) V3T_1= 0
+		  IF(LI.1.DELETE=1) V4T_1= 0
+			IF(LI.1.DELETE=1) V5T_1= 0
+			IF(LI.1.DELETE=1) V6T_1= 0
+			IF(LI.1.DELETE=1) V7T_1= 0
+			IF(LI.1.DELETE=1) V8T_1= 0
+			IF(LI.1.DELETE=1) V9T_1= 0
+			IF(LI.1.DELETE=1) V10T_1= 0
+			
+        ENDPHASE
+    endrun
+  
+    ; delete the output from assignment, rename the merged file to load, and delete the temp files.
+     *DEL hwy\load@token_period@.csv
+     *DEL hwy\avgload@token_period@_taz_temp1.net
+     *copy hwy\avgload@token_period@_taz_temp2.net hwy\avgload@token_period@_taz.net
+     *DEL hwy\avgload@token_period@_taz_temp2.net
+     *copy hwy\avgload@token_period@_taz_temp3.net hwy\load@token_period@.net
+     *DEL hwy\avgload@token_period@_taz_temp3.net
+    
+endloop ; time period loop
+ 
 
 

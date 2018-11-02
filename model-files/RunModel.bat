@@ -74,7 +74,7 @@ set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUB
 :: SET /A INNER_ITERATION=1
 :: IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
 :: call zoneSystem.bat
-:: goto here
+:: goto core
 :: ------------------------------------------------------------------------------------------------------
 
 
@@ -136,11 +136,6 @@ if NOT %MATRIX_SERVER%==localhost (
 
 : Pre-Process
 
-IF %SELECT_COUNTY% GTR 0 (
-  :: Collapse the mazs outside select county
-  runtpp %BASE_SCRIPTS%\preprocess\CreateCollapsedNetwork.job
-  if ERRORLEVEL 2 goto done
-)
 
 :: Write a batch file with number of zones, taps, mazs
 runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
@@ -148,11 +143,6 @@ if ERRORLEVEL 2 goto done
 
 ::Run the batch file
 call zoneSystem.bat
-
-IF %SELECT_COUNTY% GTR 0 (
-  ::Collapse the MAZ data (except county 9 which is Marin)
-  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\CollapseMAZ.PY landuse\maz_data.csv %SELECT_COUNTY%
-)
 
 :: Build sequential numberings
 runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
@@ -162,15 +152,50 @@ if ERRORLEVEL 2 goto done
 "%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
 IF ERRORLEVEL 1 goto done
 
+:: Renumber the TAZ/MAZ in the households file
+"%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\renumber.py popsyn\households.csv popsyn\households_renum.csv --input_col MAZ TAZ --renum_join_col N N --renum_out_col MAZSEQ TAZSEQ --output_rename_col ORIG_MAZ ORIG_TAZ --output_new_col MAZ TAZ
+IF ERRORLEVEL 1 goto done
+move popsyn\households.csv       popsyn\households_original.csv
+move popsyn\households_renum.csv popsyn\households.csv
+
 IF %SELECT_COUNTY% GTR 0 (
-  copy INPUT\popsyn\         popsyn\    /Y
+
+  :: Collapse the mazs outside select county
+  runtpp %BASE_SCRIPTS%\preprocess\CreateCollapsedNetwork.job
+  if ERRORLEVEL 2 goto done
+
+  :: RERUN: Write a batch file with number of zones, taps, mazs
+  runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
+  if ERRORLEVEL 2 goto done
+
+  ::RERUN: Run the batch file
+  call zoneSystem.bat
+
+  :: Collapse the MAZ data (except county 9 which is Marin)
+  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\CollapseMAZ.PY landuse\maz_data.csv %SELECT_COUNTY%
+  if ERRORLEVEL 2 goto done
+
   :: Renumber the household file MAZs
   "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\RenumberHHFileMAZs.PY popsyn\households.csv landuse\maz_data.csv %SELECT_COUNTY%
 
   :: Sample households according to sample rates by TAZ
   "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\popsampler.PY landuse\sampleRateByTAZ.csv popsyn\households.csv popsyn\persons.csv
+
+  :: RERUN: Build sequential numberings
+  runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
+  if ERRORLEVEL 2 goto done
+
+  ::RERUN: Create all necessary input files based on updated sequential zone numbering
+  "%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
+  IF ERRORLEVEL 1 goto done
+
 )
 
+:: RERUN: Renumber the TAZ/MAZ in the households file
+:: "%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\renumber.py popsyn\households.csv popsyn\households_renum.csv --input_col MAZ TAZ --renum_join_col N N --renum_out_col MAZSEQ TAZSEQ --output_rename_col ORIG_MAZ ORIG_TAZ --output_new_col MAZ TAZ
+::  IF ERRORLEVEL 1 goto done
+::  move popsyn\households.csv       popsyn\households_original_2.csv
+::  move popsyn\households_renum.csv popsyn\households.csv
 
 :: Write out the intersection and maz XYs
 runtpp %BASE_SCRIPTS%\preprocess\maz_densities.job
@@ -213,12 +238,6 @@ if ERRORLEVEL 2 goto done
 :: Create taz networks
 runtpp %BASE_SCRIPTS%\preprocess\BuildTazNetworks.job
 if ERRORLEVEL 2 goto done
-
-:: Renumber the TAZ/MAZ in the households file
-"%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\renumber.py popsyn\households.csv popsyn\households_renum.csv --input_col MAZ TAZ --renum_join_col N N --renum_out_col MAZSEQ TAZSEQ --output_rename_col ORIG_MAZ ORIG_TAZ --output_new_col MAZ TAZ
-IF ERRORLEVEL 1 goto done
-move popsyn\households.csv       popsyn\households_original.csv
-move popsyn\households_renum.csv popsyn\households.csv
 
 echo COMPLETED PREPROCESS  %DATE% %TIME% >> logs\feedback.rpt 
 
@@ -290,7 +309,7 @@ IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
 ECHO ****MODEL ITERATION %ITERATION% (SAMPLE RATE %SAMPLERATE%)****
 
 :: Copy skims and other related files to remote machine
-IF NOT %HH_SERVER%==localhost (
+IF NOT %RUNTYPE%==LOCAL (
   ROBOCOPY skims "%HH_SERVER_BASE_DIR%\skims" *.tpp drive_maz_taz_tap.csv /NDL /NFL
   ROBOCOPY trn   "%HH_SERVER_BASE_DIR%\trn"    tapLines.csv               /NDL /NFL
 )
@@ -306,10 +325,11 @@ IF NOT %HH_SERVER%==localhost (
 ::  Run CT-RAMP
 
 :: Start HH Server locally or remotely
-IF %HH_SERVER%==localhost (
+IF %RUNTYPE%==LOCAL (
   rem =========== local ========================
   call CTRAMP\runtime\runHhMgr.cmd "%JAVA_PATH%" %HOST_IP_ADDRESS%
   echo Started household manager
+  ping -n 10 localhost
 ) ELSE (
   rem =========== remote ========================
   rem Copy dependencies for HH data manager
@@ -327,10 +347,11 @@ IF %HH_SERVER%==localhost (
 )
 
 :: Start Matrix Server remotely or locally
-IF %MATRIX_SERVER%==localhost (
+IF %RUNTYPE%==LOCAL (
   rem =========== local ========================
   call CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%JAVA_PATH%"
   echo Started matrix manager
+  ping -n 10 localhost
 ) ELSE (
   rem =========== remote ========================
   rem (wait 10 seconds between each call because otherwise psXXX sometimes bashes on its own authentication/permissions)
@@ -412,10 +433,12 @@ if ERRORLEVEL 2 goto done
 :: Step 9:  Assignment
 ::
 :: ------------------------------------------------------------------------------------------------------
-:: Highway assignment
+
+:mazasgn
 runtpp CTRAMP\scripts\assign\build_and_assign_maz_to_maz_auto.job
 if ERRORLEVEL 2 goto done
 
+:tazasgn
 runtpp CTRAMP\scripts\assign\HwyAssign.job
 if ERRORLEVEL 2 goto done
 
@@ -461,7 +484,7 @@ SET /A INNER_ITERATION+=1
   if ERRORLEVEL 2 goto done
 
   :: Start Matrix Server remotely or locally
-  IF %MATRIX_SERVER%==localhost (
+  IF %RUNTYPE%==LOCAL (
       rem =========== local ========================
       call CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%JAVA_PATH%"
       echo Started matrix manager

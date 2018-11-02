@@ -69,8 +69,8 @@ writer = csv.writer(collapseFile, delimiter=',')
 writer.writerow(header)
 
 # Find columns
-mazColumn = header.index('maz')
-tazColumn = header.index('taz')
+mazColumn = header.index('MAZ')
+tazColumn = header.index('TAZ')
 
 # MAZ_ORIGINAL > (county_code-1) * 10000 & MAZ_ORIGINAL < (county_code * 10000)
 # then the MAZ is in the selected county; if so, dont collapse
@@ -79,7 +79,7 @@ for row in reader:
     if ((origMAZ> ((cntyCode-1)*100000)) and (origMAZ< (cntyCode*100000))):
         writer.writerow(row)
     else:
-		TAZ = float(row[tazColumn])
+		TAZ = int(row[tazColumn])
 		newMAZ = seqTazToMazMap[TAZ]
 		row[mazColumn] = newMAZ
 		writer.writerow(row)

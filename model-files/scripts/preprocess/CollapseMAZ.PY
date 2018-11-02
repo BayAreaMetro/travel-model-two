@@ -27,6 +27,7 @@ nonAggFile = os.path.join(outFolder, "nonCollapseRows.csv")
 # Open input file for reading
 readFile = open(inCsv, 'r')
 header = list(readFile.readline().strip().split(','))
+mazCol = header.index('MAZ_ORIGINAL')
 ##print header
 reader = csv.reader(readFile, delimiter=',')
 ##next(reader)
@@ -41,7 +42,7 @@ writer_2.writerow(header)
 # MAZ_ORIGINAL > (county_code-1) * 10000 & MAZ_ORIGINAL < (county_code * 10000)
 # then the MAZ is in the selected county; if so, dont collapse
 for row in reader:
-    origMAZ = float(row[2])
+    origMAZ = float(row[mazCol])
 ##    print origMAZ
     if ((origMAZ> ((cntyCode-1)*100000)) and (origMAZ< (cntyCode*100000))):
         writer_1.writerow(row)
@@ -120,7 +121,8 @@ outDf = pd.concat(frames)
 
 outDf['MAZ_ORIGINAL'] = outDf.MAZ_ORIGINAL.astype(int)
 outDf['TAZ_ORIGINAL'] = outDf.TAZ_ORIGINAL.astype(int)
-outDf['TAZ'] = outDf.TAZ.astype(int)
+# dont write out TAZ
+#outDf['TAZ'] = outDf.TAZ.astype(int)
 outDf = outDf.sort_values(by='MAZ_ORIGINAL', ascending=True)
 
 count = 1

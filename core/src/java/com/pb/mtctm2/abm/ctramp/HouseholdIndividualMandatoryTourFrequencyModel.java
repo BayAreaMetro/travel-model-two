@@ -335,6 +335,7 @@ public class HouseholdIndividualMandatoryTourFrequencyModel
                     // pre-school child with mandatory activity type is assigned
                     // choice = 3 (1 school tour).
                     choice = CHOICE_ONE_SCHOOL;
+                    person.setImtfChoice(choice);
                     createMandatoryTours(choice,person);
                                    }
 
