@@ -317,7 +317,37 @@ Roadway projects can take basically (one or more of) six actions:
 | Modify attributes for links | *ALA050014_SR84_Livermore* |
 | Delete links | *SeaLevelRise_1foot* |
 
-More documentation to be filled in.
+#### Adding a node
+
+When adding a node, it's good practice to check whether the node number is already in use and error if so; otherwise,
+the project could be moving an existing node and creating an error.
+
+For example:
+```
+RUN PGM=NETWORK
+  NETI[1] =FREEFLOW.BLD
+  NETO    =FREEFLOW.BLDOUT, exclude=_PROJECT
+  NODEI[2]="new_nodes.csv" VAR=N,X,Y,_PROJECT(c) START=(substr(record,1,4)='N,X,')
+
+  _NODES_ADDED = 0
+  
+  PHASE=NODEMERGE
+    IF (ni.2._PROJECT=='my_project')
+      X        = ni.2.X
+      Y        = ni.2.Y
+
+      IF (NI.1.X <> 0)
+        PRINT LIST="BAD node number: ",ni.2.N
+        ABORT MSG="Node collision: node number already in use"
+      ENDIF
+      
+      _NODES_ADDED = _NODES_ADDED + 1
+    ENDIF
+  ENDPHASE
+
+ENDRUN
+*copy /y FREEFLOW.BLDOUT FREEFLOW.BLD
+```
 
 ### Coding a Transit Project
 
