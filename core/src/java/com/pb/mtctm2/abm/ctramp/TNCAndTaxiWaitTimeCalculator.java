@@ -22,6 +22,9 @@ public class TNCAndTaxiWaitTimeCalculator {
 	private LognormalDist[] TaxiWaitTimeDistribution;
 	float[] meanTNCWaitTime ;
 	float[] meanTaxiWaitTime ;
+	
+	float maxWaitTimeTNC = 60;
+	float maxWaitTimeTaxi =  60;
 
 
 	
@@ -134,7 +137,7 @@ public class TNCAndTaxiWaitTimeCalculator {
 		for(int i = 0; i < startPopEmpPerSqMi.length;++i){
 			
 			if(popEmpPerSqMi <startPopEmpPerSqMi[i]){
-				return TNCWaitTimeDistribution[i].inverseF(rnum);
+				return Math.min(TNCWaitTimeDistribution[i].inverseF(rnum),maxWaitTimeTNC);
 			}
 		}
 		
@@ -157,7 +160,7 @@ public class TNCAndTaxiWaitTimeCalculator {
 		for(int i = 0; i < startPopEmpPerSqMi.length;++i){
 			
 			if(popEmpPerSqMi <startPopEmpPerSqMi[i]){
-				return TaxiWaitTimeDistribution[i].inverseF(rnum);
+				return Math.min(TaxiWaitTimeDistribution[i].inverseF(rnum),maxWaitTimeTaxi);
 			}
 		}
 		

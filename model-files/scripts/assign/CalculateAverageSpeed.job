@@ -107,7 +107,7 @@ loop period = 1,5
         read file = @hwy_block_param@
     
         ; read in the speed/capacity table
-        read file = @speed_cap_block_param@
+        ;read file = @speed_cap_block_param@ - modified by F&P
     
         ; set the working variables
     
@@ -123,7 +123,7 @@ loop period = 1,5
     
             ; the speed/capacity table and the computation of the volume/delay function parameter (see FreeFlowSpeed.block) uses the capacity class code
             ; which is area type * 10 + facility type
-            lw.capclass = li.CAPCLASS
+            ;lw.capclass = li.CAPCLASS - removed by F&P
             
             IF (li.FEET = 0)
                 lw.dist = 1.0 / 5280.0
@@ -134,12 +134,18 @@ loop period = 1,5
             ENDIF
             t0 = li.FFT
             t1 = li.CTIM
+
+	    ; free-flow speed is used in the volume/delay functions
+            ffs = li.FFS
+
+	    ; capacity
+	    c = li.CAP_TOTFAC
     
             ; free-flow time is a function of free-flow speed and distance and is used in the generalized cost function
-            lw.fft = li.FFT
+            fft = li.FFT
     
             ; link capacity is a function of the number of lanes
-            lw.lanes = li.NUMLANES
+            ;lw.lanes = li.NUMLANES
     
             read file = @free_flow_block_param@
     

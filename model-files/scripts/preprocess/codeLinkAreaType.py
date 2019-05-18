@@ -9,7 +9,7 @@ import math, os, csv, sys
 from rtree import index
 
 model_run_dir = sys.argv[1]
-MAZ_DATA_FILE = os.path.join(model_run_dir,r'landuse\maz_data.csv')
+MAZ_DATA_FILE = os.path.join(model_run_dir,r'landuse\maz_data_withdensity.csv')
 NODE_CSV_FILE = os.path.join(model_run_dir,r'hwy\mtc_final_network_with_tolls_nodes.csv')
 LINK_CSV_FILE = os.path.join(model_run_dir,r'hwy\mtc_final_network_with_tolls_links.csv')
 AREA_TYPE_FILE = os.path.join(model_run_dir,r'hwy\link_area_type.csv')

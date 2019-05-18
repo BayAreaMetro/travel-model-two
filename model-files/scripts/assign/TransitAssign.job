@@ -119,11 +119,11 @@ LOOP PERIOD = 1,5
     ; do each time of day and mode as a separate process
     DistributeMultistep processid = 'MTC_TRANASN', processNum = counter
         ;make a copy of the network so that we don't walk all over each other
-        *copy hwy\mtc_transit_network_@TOKEN_PERIOD@.net trn\mtc_transit_network_@TOKEN_PERIOD@.net
+        *copy hwy\mtc_transit_network_@TOKEN_PERIOD@_CONG.net trn\mtc_transit_network_@TOKEN_PERIOD@_CONG.net
 
         ;next, assign trips
-        RUN PGM = PUBLIC TRANSPORT PRNFILE="TRANSIT_ASSIGN.prn"
-            FILEI NETI = "trn\mtc_transit_network_@TOKEN_PERIOD@.net"
+        RUN PGM = PUBLIC TRANSPORT PRNFILE="TRANSIT_ASSIGN_@TOKEN_PERIOD@.prn"
+            FILEI NETI = "trn\mtc_transit_network_@TOKEN_PERIOD@_CONG.net"
             FILEI LINEI[1] = "trn\transitLines_new_nodes.lin"
             FILEI SYSTEMI = "trn\transitSystem.PTS"
             FILEI FACTORI[1] = "trn\transitFactors_SET1.fac"
@@ -150,7 +150,12 @@ LOOP PERIOD = 1,5
             READ FILE = @SKIM_MATRICES@
             
             FILEO REPORTO = "trn\mtc_transit_report_@TOKEN_PERIOD@_with_transit_assign.rpt"
-            ;
+	    
+	    FILEO PRINTO = "trn\TRANSIT_ASSIGN_@TOKEN_PERIOD@.csv"
+
+	    fileo lineo = "trn\trnline@token_period@.csv"  
+            
+	    ;
             ; The stop2stop file is for BART station-station boardings. It writes a dbf file of boardings 
             : by station pair for the listed station nodes. Note that node numbers change for each network
             ; due to changes in node sequencing. The list below is specific to the version of the 2015
@@ -192,7 +197,7 @@ LOOP PERIOD = 1,5
             PARAMETERS TRIPSIJ[2] = MI.2.1 + MI.2.2 + MI.2.3 ;WLK, PNR, KNR
             PARAMETERS TRIPSIJ[3] = MI.3.1 + MI.3.2 + MI.3.3 ;WLK, PNR, KNR
             
-            REPORT LINES=T, SORT=MODE, LINEVOLS=T, STOPSONLY=T, SKIP0=T
+            REPORT LINES=T, SORT=NAME, LINEVOLS=T, STOPSONLY=T, SKIP0=T
             
 			READ FILE = @CROWDING_SKIM_BLOCK@
             

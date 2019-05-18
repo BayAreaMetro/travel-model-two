@@ -292,17 +292,17 @@ loop period = 1, 5
       ENDRUN
       
       ;delete intermediate files
-      *del hwy\avgload@token_period@_maz_taz.net
-      *del hwy\load_1_@token_period@_maz.net
-      *del hwy\load_2_@token_period@_maz.net
-      *del hwy\load_3_@token_period@_maz.net
-      *del hwy\avgload_1_@token_period@_maz.net
-      *del hwy\avgload_2_@token_period@_maz.net
-      *del hwy\avgload_3_@token_period@_maz.net      
-      *del hwy\ZONES_1_@token_period@.txt
-      *del hwy\ZONES_2_@token_period@.txt
-      *del hwy\ZONES_3_@token_period@.txt
-      *del hwy\load_@token_period@_maz.net
+      ;*del hwy\avgload@token_period@_maz_taz.net
+      ;*del hwy\load_1_@token_period@_maz.net
+      ;*del hwy\load_2_@token_period@_maz.net
+      ;*del hwy\load_3_@token_period@_maz.net
+      ;*del hwy\avgload_1_@token_period@_maz.net
+      ;*del hwy\avgload_2_@token_period@_maz.net
+      ;*del hwy\avgload_3_@token_period@_maz.net      
+      ;*del hwy\ZONES_1_@token_period@.txt
+      ;*del hwy\ZONES_2_@token_period@.txt
+      ;*del hwy\ZONES_3_@token_period@.txt
+      ;*del hwy\load_@token_period@_maz.net
       
     EndDistributeMultistep
     

@@ -148,8 +148,6 @@ public final class MgraDataManager
     private int[]                       mstallssam;
     private float[]                     mparkcost;
     
-    private int[] 					 	countyId;
-    
     private TableDataSet tapLinesTable;
     private HashMap<Integer,String> taplines;
     
@@ -1095,11 +1093,19 @@ public final class MgraDataManager
     }
     
     
-public TableDataSet getMgraTableDataSet() {
+    public TableDataSet getMgraTableDataSet() {
 		return mgraTableDataSet;
 	}
 
-private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) {
+  	public int getCountyId(int mgra){
+		
+        int row = mgraDataTableMgraRowMap.get(mgra);
+        return (int)mgraTableDataSet.getValueAt(row, MGRA_COUNTY_FIELD_NAME);
+
+	}
+
+	
+	private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) {
         
         // open output file to write average parking costs for each mgra
         PrintWriter out = null;

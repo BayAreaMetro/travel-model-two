@@ -4,7 +4,7 @@
 :: set RUNTYPE=DISTRIBUTED to farm out work to other nodes
 set RUNTYPE=LOCAL
 :: set ENVTYPE=MTC or RSG
-set ENVTYPE=MTC
+set ENVTYPE=RSG
 
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 :: RunModel.bat
@@ -19,15 +19,15 @@ set ENVTYPE=MTC
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :: Step 0: Copy over CTRAMP from %GITHUB_DIR%
-set GITHUB_DIR=E:\projects\clients\mtc\GitHub\master\rsg\travel-model-two
-if not exist CTRAMP (
-  mkdir CTRAMP\model
-  mkdir CTRAMP\runtime
-  mkdir CTRAMP\scripts
-  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\model"       CTRAMP\model
-  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\runtime"     CTRAMP\runtime
-  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\scripts"     CTRAMP\scripts
-)
+:: set GITHUB_DIR=E:\projects\clients\mtc\GitHub\master\rsg\travel-model-two
+:: if not exist CTRAMP (
+::  mkdir CTRAMP\model
+::  mkdir CTRAMP\runtime
+::  mkdir CTRAMP\scripts
+::  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\model"       CTRAMP\model
+::  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\runtime"     CTRAMP\runtime
+::  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\scripts"     CTRAMP\scripts
+::)
 :: ------------------------------------------------------------------------------------------------------
 ::
 :: Step 1:  Set the necessary path and other computer/environment-specific variables
@@ -74,7 +74,7 @@ set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUB
 :: SET /A INNER_ITERATION=1
 :: IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
 :: call zoneSystem.bat
-:: goto core
+::goto starthere
 :: ------------------------------------------------------------------------------------------------------
 
 
@@ -136,7 +136,6 @@ if NOT %MATRIX_SERVER%==localhost (
 
 : Pre-Process
 
-
 :: Write a batch file with number of zones, taps, mazs
 runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
 if ERRORLEVEL 2 goto done
@@ -146,7 +145,6 @@ call zoneSystem.bat
 
 :: Build sequential numberings
 runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
-if ERRORLEVEL 2 goto done
 
 :: Create all necessary input files based on updated sequential zone numbering
 "%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
@@ -163,34 +161,34 @@ IF %SELECT_COUNTY% GTR 0 (
   :: Collapse the mazs outside select county
   runtpp %BASE_SCRIPTS%\preprocess\CreateCollapsedNetwork.job
   if ERRORLEVEL 2 goto done
-
+  
   :: RERUN: Write a batch file with number of zones, taps, mazs
   runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
   if ERRORLEVEL 2 goto done
-
+  
   ::RERUN: Run the batch file
   call zoneSystem.bat
-
+  
   :: Collapse the MAZ data (except county 9 which is Marin)
   "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\CollapseMAZ.PY landuse\maz_data.csv %SELECT_COUNTY%
   if ERRORLEVEL 2 goto done
-
+  
   :: Renumber the household file MAZs
   "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\RenumberHHFileMAZs.PY popsyn\households.csv landuse\maz_data.csv %SELECT_COUNTY%
 
   :: Sample households according to sample rates by TAZ
   "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\popsampler.PY landuse\sampleRateByTAZ.csv popsyn\households.csv popsyn\persons.csv
-
+  
   :: RERUN: Build sequential numberings
   runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
   if ERRORLEVEL 2 goto done
-
+  
   ::RERUN: Create all necessary input files based on updated sequential zone numbering
   "%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
   IF ERRORLEVEL 1 goto done
 
 )
-
+goto done
 :: RERUN: Renumber the TAZ/MAZ in the households file
 :: "%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\renumber.py popsyn\households.csv popsyn\households_renum.csv --input_col MAZ TAZ --renum_join_col N N --renum_out_col MAZSEQ TAZSEQ --output_rename_col ORIG_MAZ ORIG_TAZ --output_new_col MAZ TAZ
 ::  IF ERRORLEVEL 1 goto done
@@ -204,6 +202,10 @@ if ERRORLEVEL 2 goto done
 :: Calculate density fields and append to MAZ file
 "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\createMazDensityFile.py 
 IF ERRORLEVEL 1 goto done
+
+:: Build sequential numberings
+runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
+if ERRORLEVEL 2 goto done
 
 :: Translate the roadway network into a non-motorized network
 runtpp %BASE_SCRIPTS%\preprocess\CreateNonMotorizedNetwork.job
@@ -370,6 +372,7 @@ copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
 if ERRORLEVEL 2 goto done
 del mtctm2.properties
+
 taskkill /im "java.exe" /F
 
 
@@ -384,8 +387,10 @@ IF NOT %HH_SERVER%==localhost (
   ping -n 10 localhost
 )
 
+
 :: copy results back over here
-:: ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.mat /NDL /NFL
+ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.mat /NDL /NFL
+
 
 runtpp CTRAMP\scripts\assign\merge_auto_matrices.s
 if ERRORLEVEL 2 goto done
@@ -409,7 +414,7 @@ if ERRORLEVEL 2 goto done
 :: Apply a value toll choice model for the internal/external demand
 runtpp CTRAMP\scripts\nonres\IxTollChoice.job
 if ERRORLEVEL 2 goto done
-
+:starthere
 :: Apply the commercial vehicle generation models
 runtpp CTRAMP\scripts\nonres\TruckTripGeneration.job
 if ERRORLEVEL 2 goto done
@@ -448,6 +453,7 @@ if ERRORLEVEL 2 goto done
 runtpp CTRAMP\scripts\assign\CalculateAverageSpeed.job
 if ERRORLEVEL 2 goto done
 
+
 runtpp CTRAMP\scripts\assign\MergeNetworks.job
 if ERRORLEVEL 2 goto done
 
@@ -458,6 +464,8 @@ IF %ITERATION% LSS %MAX_ITERATION% (
   if ERRORLEVEL 2 goto done
   
 )
+
+:here
 
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
@@ -475,6 +483,7 @@ SET /A INNER_ITERATION+=1
 
 	runtpp CTRAMP\scripts\assign\merge_transit_matrices.s
 	if ERRORLEVEL 2 goto done
+
 
   :: Run Transit Assignment
   runtpp CTRAMP\scripts\assign\TransitAssign.job

@@ -116,9 +116,9 @@ LOOP PERIOD = 1,5
 		FILLMW MW[74]=MI.3.EXCESSPROP
         
         ;if skim time components are the same, then set skims to 0 which is used for availability in CT-RAMP
-        MW[17] = MW[2] + MW[3] + MW[8] + MW[9] + MW[10] + MW[11] + MW[12] + MW[13] + MW[14] + MW[15]
-        MW[37] = MW[28]+ MW[29]+ MW[34]+ MW[35]+ MW[36] + MW[37] + MW[38] + MW[39] + MW[40] + MW[41]
-        MW[57] = MW[54]+ MW[55]+ MW[60]+ MW[61]+ MW[62] + MW[63] + MW[64] + MW[65] + MW[66] + MW[67]
+        MW[23] = MW[2] + MW[3] + MW[8] + MW[9] + MW[10] + MW[11] + MW[12] + MW[13] + MW[14] + MW[15]
+        MW[49] = MW[28]+ MW[29]+ MW[34]+ MW[35]+ MW[36] + MW[37] + MW[38] + MW[39] + MW[40] + MW[41]
+        MW[75] = MW[54]+ MW[55]+ MW[60]+ MW[61]+ MW[62] + MW[63] + MW[64] + MW[65] + MW[66] + MW[67]
         
         ;output matrices
         MATO[1] = "skims\transit_skims_@TOKEN_PERIOD@_SET1_Adj.TPP",MO=1-16,18-22,
@@ -140,7 +140,7 @@ LOOP PERIOD = 1,5
           ;PRINT LIST=I, J, MW[17][J], MW[37][J], MW[57][J], CSV=T, FILE=SkimSetsAdjustmentsLog.csv
           
           ;compare set 1 and 2
-          IF (MW[17][J] == MW[37][J])
+          IF (MW[23][J] == MW[49][J])
             MW[27][J] = NA
             MW[28][J] = NA
             MW[29][J] = NA
@@ -166,7 +166,7 @@ LOOP PERIOD = 1,5
           ENDIF
           
           ;compare set 1 and 3
-          IF (MW[17][J] == MW[57][J])
+          IF (MW[23][J] == MW[49][J])
             MW[53][J] = NA
             MW[54][J] = NA
             MW[55][J] = NA
@@ -192,7 +192,7 @@ LOOP PERIOD = 1,5
           ENDIF
           
           ;compare set 2 and 3
-          IF (MW[37][J] == MW[57][J])
+          IF (MW[49][J] == MW[75][J])
             MW[53][J] = NA
             MW[54][J] = NA
             MW[55][J] = NA

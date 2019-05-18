@@ -135,7 +135,7 @@ read file = %BASE_SCRIPTS%\block\hwyparam.block
 hwy_block_param = '%BASE_SCRIPTS%\block\hwyparam.block'
 
 ;start cluster nodes
-*Cluster.exe MTC_HWYSKIM 1-25 start exit
+*Cluster.exe MTC_HWYSKIM 1-30 start exit
 
 ;first, do taz-taz skims
 
@@ -154,19 +154,19 @@ loop period = 1, 5
    ; a two letter token is used for each time period
    if (period = 1)   
       token_period = 'EA'   
-      intrastep_range = '6-9'
+      intrastep_range = '6-10'
    elseif (period = 2)   
       token_period = 'AM'    
-      intrastep_range = '10-13'
+      intrastep_range = '11-15'
    elseif (period = 3)   
       token_period = 'MD'    
-      intrastep_range = '14-17'
+      intrastep_range = '16-20'
    elseif (period = 4)   
       token_period = 'PM'
-      intrastep_range = '18-21'
+      intrastep_range = '21-25'
    elseif (period = 5)   
       token_period = 'EV'
-      intrastep_range = '22-25'
+      intrastep_range = '26-30'
    endif
    
    ; do each time of day as a separate process
@@ -624,5 +624,5 @@ Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM
 
 
 ;stop cluster nodes
-*Cluster.exe MTC_HWYSKIM 1-25 close exit
+*Cluster.exe MTC_HWYSKIM 1-30 close exit
 
