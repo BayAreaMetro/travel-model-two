@@ -10,9 +10,6 @@ import org.apache.log4j.Logger;
 
 import com.pb.common.datafile.OLD_CSVFileReader;
 import com.pb.common.datafile.TableDataSet;
-import com.pb.mtc.ctramp.MtcModelOutputReader.HouseholdFileAttributes;
-import com.pb.mtc.ctramp.MtcModelOutputReader.PersonFileAttributes;
-import com.pb.mtc.ctramp.MtcModelOutputReader.TourFileAttributes;
 import com.pb.mtctm2.abm.ctramp.CtrampApplication;
 import com.pb.mtctm2.abm.ctramp.Household;
 import com.pb.mtctm2.abm.ctramp.HouseholdDataWriter;
