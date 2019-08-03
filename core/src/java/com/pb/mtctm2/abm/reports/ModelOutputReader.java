@@ -10,6 +10,9 @@ import org.apache.log4j.Logger;
 
 import com.pb.common.datafile.OLD_CSVFileReader;
 import com.pb.common.datafile.TableDataSet;
+import com.pb.mtc.ctramp.MtcModelOutputReader.HouseholdFileAttributes;
+import com.pb.mtc.ctramp.MtcModelOutputReader.PersonFileAttributes;
+import com.pb.mtc.ctramp.MtcModelOutputReader.TourFileAttributes;
 import com.pb.mtctm2.abm.ctramp.CtrampApplication;
 import com.pb.mtctm2.abm.ctramp.Household;
 import com.pb.mtctm2.abm.ctramp.HouseholdDataWriter;
@@ -23,12 +26,12 @@ public class ModelOutputReader {
 
     private transient Logger    logger                          = Logger.getLogger(ModelOutputReader.class);
 
-    private static final String PROPERTIES_HOUSEHOLD_DATA_FILE  = "Results.HouseholdDataFile";
-    private static final String PROPERTIES_PERSON_DATA_FILE     = "Results.PersonDataFile";
-    private static final String PROPERTIES_INDIV_TOUR_DATA_FILE = "Results.IndivTourDataFile";
-    private static final String PROPERTIES_JOINT_TOUR_DATA_FILE = "Results.JointTourDataFile";
-    private static final String PROPERTIES_INDIV_TRIP_DATA_FILE = "Results.IndivTripDataFile";
-    private static final String PROPERTIES_JOINT_TRIP_DATA_FILE = "Results.JointTripDataFile";
+    private static final String PROPERTIES_HOUSEHOLD_DATA_FILE  = "Accessibilities.HouseholdDataFile";
+    private static final String PROPERTIES_PERSON_DATA_FILE     = "Accessibilities.PersonDataFile";
+    private static final String PROPERTIES_INDIV_TOUR_DATA_FILE = "Accessibilities.IndivTourDataFile";
+    private static final String PROPERTIES_JOINT_TOUR_DATA_FILE = "Accessibilities.JointTourDataFile";
+    private static final String PROPERTIES_INDIV_TRIP_DATA_FILE = "Accessibilities.IndivTripDataFile";
+    private static final String PROPERTIES_JOINT_TRIP_DATA_FILE = "Accessibilities.JointTripDataFile";
     private ModelStructure      modelStructure;
     private int                 iteration;
     private HashMap<String,String> rbMap;
@@ -37,6 +40,9 @@ public class ModelOutputReader {
     private HashMap<Long, ArrayList<TourFileAttributes>> individualTourAttributesMap; //by person_id
     private HashMap<Long, ArrayList<TourFileAttributes>> jointTourAttributesMap; //by hh_id
    
+    private boolean readIndividualTourFile = false;
+    private boolean readJointTourFile = false;
+
     /**
      * Default constructor.
      * @param rbMap          Hashmap of properties
@@ -70,6 +76,8 @@ public class ModelOutputReader {
 			int home_mgra = (int)householdData.getValueAt(row,"home_mgra");
 	        int income = (int) householdData.getValueAt(row,"income");
 	        int autos = (int) householdData.getValueAt(row,"autos");
+	        int size = (int) householdData.getValueAt(row,"size");
+	        int workers = (int) householdData.getValueAt(row,"workers");
 	        int automated_vehicles = (int) householdData.getValueAt(row,"automated_vehicles");
 	        int transponder = (int) householdData.getValueAt(row,"transponder");
 	        String cdap_pattern =  householdData.getStringValueAt(row,"cdap_pattern");
@@ -77,7 +85,7 @@ public class ModelOutputReader {
 	        float sampleRate = householdData.getValueAt(row,"sampleRate");
 	        
 	        HouseholdFileAttributes hhAttributes = new HouseholdFileAttributes(hhid,
-	        		home_mgra, income, autos, automated_vehicles,transponder,cdap_pattern,
+	        		home_mgra, income, size, workers, autos, automated_vehicles,transponder,cdap_pattern,
 	        		jtf_choice,sampleRate);
 	        
 	        householdFileAttributesMap.put(hhid, hhAttributes);
@@ -140,11 +148,31 @@ public class ModelOutputReader {
 	public void readTourDataOutput(){
 		
 		String baseDir = rbMap.get(CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
-	    String indivTourFile = formFileName(rbMap.get(PROPERTIES_INDIV_TOUR_DATA_FILE), iteration);
-        String jointTourFile = formFileName(rbMap.get(PROPERTIES_JOINT_TOUR_DATA_FILE), iteration);
-        readTourData(baseDir+indivTourFile, false, individualTourAttributesMap);
-        readTourData(baseDir+jointTourFile, false, jointTourAttributesMap);
-       
+		
+		if(rbMap.containsKey(PROPERTIES_INDIV_TOUR_DATA_FILE)){
+			String indivTourFile = rbMap.get(PROPERTIES_INDIV_TOUR_DATA_FILE);
+			if(indivTourFile != null){
+				if(indivTourFile.length()>0){
+					individualTourAttributesMap = readTourData(baseDir+indivTourFile, false, individualTourAttributesMap);
+					readIndividualTourFile = true;
+				}
+			}
+		}
+		if(rbMap.containsKey(PROPERTIES_JOINT_TOUR_DATA_FILE)){
+			String jointTourFile = rbMap.get(PROPERTIES_JOINT_TOUR_DATA_FILE);
+			if(jointTourFile != null){
+				if(jointTourFile.length()>0){
+					jointTourAttributesMap = readTourData(baseDir+jointTourFile, true, jointTourAttributesMap);
+					readJointTourFile = true;
+				}
+			}
+		}
+		if(readIndividualTourFile==false){
+			logger.info("No individual tour file to read in MtcModelOutputReader class");
+		}
+		if(readJointTourFile==false){
+			logger.info("No joint tour file to read in MtcModelOutputReader class");
+		}       
 	}
 
 	
@@ -156,7 +184,7 @@ public class ModelOutputReader {
      * indexed by person_id.
      * 
      */
-	public void readTourData(String filename, boolean isJoint, HashMap<Long, ArrayList<TourFileAttributes>> tourFileAttributesMap ){
+	public HashMap<Long, ArrayList<TourFileAttributes>> readTourData(String filename, boolean isJoint, HashMap<Long, ArrayList<TourFileAttributes>> tourFileAttributesMap ){
 		
         TableDataSet tourData = readTableData(filename);
 
@@ -242,7 +270,8 @@ public class ModelOutputReader {
         	}
         	
         }
-
+        
+        return tourFileAttributesMap;
 	}
 
 	/**
@@ -254,7 +283,9 @@ public class ModelOutputReader {
 	public void createIndividualTours(Household household){
 		
 		HashMap<String,Integer> purposeIndexMap = modelStructure.getPrimaryPurposeNameIndexMap();
-		for(Person p: household.getPersons()){
+		Person[] persons = household.getPersons();
+		for(int pnum=1;pnum<persons.length;++pnum){
+			Person p = persons[pnum];
 			long personId = p.getPersonId();
 			if(individualTourAttributesMap.containsKey(personId)){
 
@@ -286,29 +317,48 @@ public class ModelOutputReader {
 				if(workTours.size()>0){
 					p.createWorkTours(workTours.size(), 0, ModelStructure.WORK_PRIMARY_PURPOSE_NAME,
 	                    ModelStructure.WORK_PRIMARY_PURPOSE_INDEX);
-					//set tour attributes
-					
+					ArrayList<Tour> workTourArrayList = p.getListOfWorkTours();
+					for(int i=0;i<workTourArrayList.size();++i){
+						Tour workTour = workTourArrayList.get(i);
+						TourFileAttributes workTourAttributes = workTours.get(i);
+						workTourAttributes.setModeledTourAttributes(workTour);
+					}					
 				}
 				//create school tours
 				if(schoolTours.size()>0){
 					p.createSchoolTours(schoolTours.size(), 0, ModelStructure.SCHOOL_PRIMARY_PURPOSE_NAME,
 		                    ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX);
-					//set tour attributes
+					ArrayList<Tour> schoolTourArrayList = p.getListOfSchoolTours();
+					for(int i=0;i<schoolTourArrayList.size();++i){
+						Tour schoolTour = schoolTourArrayList.get(i);
+						TourFileAttributes schoolTourAttributes = schoolTours.get(i);
+						schoolTourAttributes.setModeledTourAttributes(schoolTour);
+					}
 				}
 				//create university tours
 				if(universityTours.size()>0){
 					p.createSchoolTours(universityTours.size(), 0, ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_NAME,
 		                    ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX);
-				
-					//set tour attributes
+					ArrayList<Tour> universityTourArrayList = p.getListOfSchoolTours();
+					for(int i=0;i<universityTourArrayList.size();++i){
+						Tour universityTour = universityTourArrayList.get(i);
+						TourFileAttributes universityTourAttributes = universityTours.get(i);
+						universityTourAttributes.setModeledTourAttributes(universityTour);
+					}
 				}
 				//create non-mandatory tours
 				for(int i =0; i<nonMandTours.size(); ++i){
 					TourFileAttributes tourAttributes = nonMandTours.get(i);
 					p.createIndividualNonMandatoryTours(1, tourAttributes.tour_purpose);
-				
-					//set tour attributes
 				}
+				ArrayList<Tour> nonMandTourArrayList = p.getListOfIndividualNonMandatoryTours();
+				for(int i =0; i<nonMandTours.size(); ++i){
+					TourFileAttributes nonMandTourAttributes = nonMandTours.get(i);
+					Tour nonMandTour = nonMandTourArrayList.get(i);
+					nonMandTourAttributes.setModeledTourAttributes(nonMandTour);
+				}
+
+				
 				//create at-work sub-tours
 				for(int i =0; i<atWorkSubtours.size(); ++i){
 					TourFileAttributes tourAttributes = atWorkSubtours.get(i);
@@ -403,13 +453,17 @@ public class ModelOutputReader {
 	 */
 	public void setHouseholdAndPersonAttributes(Household hhObject){
 		
-		int hhid = hhObject.getHhId();
+		long hhid = (long) hhObject.getHhId();
 		HouseholdFileAttributes hhAttributes = householdFileAttributesMap.get(hhid);
 		hhAttributes.setHouseholdAttributes(hhObject);
-		
-		for(Person p : hhObject.getPersons()){
-			
-			long person_id = p.getPersonId();
+		Person[] persons = hhObject.getPersons();
+		for(int i=1;i<persons.length;++i){
+			Person p = persons[i];
+			long person_id = (long) p.getPersonId();
+			if(!personFileAttributesMap.containsKey(person_id)){
+				logger.error("Error: personFileAttributes map does not contain person_id "+person_id+" in household "+hhid);
+				throw new RuntimeException();
+			}
 			PersonFileAttributes personFileAttributes = personFileAttributesMap.get(person_id);
 			personFileAttributes.setPersonAttributes(p);
 		}
@@ -426,6 +480,8 @@ public class ModelOutputReader {
         int home_mgra;
         int income;
         int autos;
+        int size;
+        int workers;
         int automated_vehicles;
         int transponder;
         String cdap_pattern;
@@ -433,13 +489,15 @@ public class ModelOutputReader {
         float sampleRate;
         
         public HouseholdFileAttributes(long hhid, int home_mgra,
-        		int income, int autos, int automated_vehicles, int transponder,
+        		int income, int autos, int size, int workers, int automated_vehicles, int transponder,
         		String cdap_pattern, String jtf_choice, float sampleRate){
         	
     		this.hhid = hhid;
             this.home_mgra = home_mgra;
             this.income = income;
             this.autos = autos;
+            this.size = size;
+            this.workers = workers;
             this.automated_vehicles = automated_vehicles;
             this.transponder = transponder;
             this.cdap_pattern = cdap_pattern;
@@ -452,8 +510,9 @@ public class ModelOutputReader {
         	hh.setHhMgra(home_mgra);
         	hh.setHhIncome(income);
         	hh.setHhAutos(autos);
-        	hh.setAutomatedVehicles(automated_vehicles);
-        	hh.setTpChoice(transponder);
+         	hh.setHhWorkers(workers);
+        	hh.setAutomatedVehicles((short)automated_vehicles);
+            hh.setTpChoice(transponder);
         	hh.setCoordinatedDailyActivityPatternResult(cdap_pattern);
         	String[] jtf = jtf_choice.split("_");
         	int jtfAlt = new Integer(jtf[0]);
@@ -688,6 +747,29 @@ public class ModelOutputReader {
         return returnString;
     }
  
+	public HashMap<Long, HouseholdFileAttributes> getHouseholdFileAttributesMap() {
+		return householdFileAttributesMap;
+	}
+
+	public HashMap<Long, PersonFileAttributes> getPersonFileAttributesMap() {
+		return personFileAttributesMap;
+	}
+
+	public HashMap<Long, ArrayList<TourFileAttributes>> getIndividualTourAttributesMap() {
+		return individualTourAttributesMap;
+	}
+
+	public HashMap<Long, ArrayList<TourFileAttributes>> getJointTourAttributesMap() {
+		return jointTourAttributesMap;
+	}
+
+	public boolean hasIndividualTourFile() {
+		return readIndividualTourFile;
+	}
+
+	public boolean hasJointTourFile() {
+		return readJointTourFile;
+	}
 
 
 }

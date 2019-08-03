@@ -16,12 +16,17 @@ import com.pb.mtctm2.abm.application.MTCTM2TourBasedModel;
 import com.pb.mtctm2.abm.application.SandagCtrampDmuFactory;
 import com.pb.mtctm2.abm.application.SandagHouseholdDataManager;
 import com.pb.mtctm2.abm.application.SandagModelStructure;
+import com.pb.mtctm2.abm.ctramp.CtrampApplication;
 import com.pb.mtctm2.abm.ctramp.Household;
+import com.pb.mtctm2.abm.ctramp.HouseholdChoiceModelRunner;
 import com.pb.mtctm2.abm.ctramp.HouseholdDataManager;
 import com.pb.mtctm2.abm.ctramp.HouseholdDataManagerIf;
 import com.pb.mtctm2.abm.ctramp.HouseholdDataManagerRmi;
+import com.pb.mtctm2.abm.ctramp.HouseholdDataWriter;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
+import com.pb.mtctm2.abm.ctramp.NonMandatoryDestChoiceModel;
+import com.pb.mtctm2.abm.ctramp.TourModeChoiceModel;
 import com.pb.mtctm2.abm.ctramp.UsualWorkSchoolLocationChoiceModel;
 import com.pb.mtctm2.abm.ctramp.Util;
 
@@ -43,6 +48,7 @@ public class CreateLogsums {
     private MatrixDataServerIf ms;
     private ModelOutputReader modelOutputReader;
     
+ 
     /**
      * Constructor.
      * 
@@ -51,7 +57,7 @@ public class CreateLogsums {
      * @param globalSampleRate
      * @param sampleSeed
      */
-	public void CreateLogsums(String propertiesFile, int globalIterationNumber, float globalSampleRate, int sampleSeed){
+	public CreateLogsums(String propertiesFile, int globalIterationNumber, float globalSampleRate, int sampleSeed){
 		
 		this.resourceBundle = ResourceBundle.getBundle(propertiesFile);
 		propertyMap = ResourceUtil.getResourceBundleAsHashMap ( propertiesFile);
@@ -91,6 +97,10 @@ public class CreateLogsums {
 		readModelOutputsAndCreateTours();
 		createWorkLogsums();
 		createNonWorkLogsums();
+				
+        HouseholdDataWriter dataWriter = new HouseholdDataWriter( propertyMap, modelStructure,  globalIterationNumber );
+        dataWriter.writeDataToFiles(householdDataManager);
+
 	}
 	
 	/**
@@ -167,6 +177,9 @@ public class CreateLogsums {
 	
 	public void createNonWorkLogsums(){
 		
+        HouseholdChoiceModelRunner runner = new HouseholdChoiceModelRunner( propertyMap, jppfClient, "False", householdDataManager, ms, modelStructure, dmuFactory );
+        runner.runHouseholdChoiceModels();
+
 	}
 	
 
@@ -285,8 +298,94 @@ public class CreateLogsums {
 	
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 
+		long startTime = System.currentTimeMillis();
+	    int globalIterationNumber = -1;
+	    float iterationSampleRate = -1.0f;
+	    int sampleSeed = -1;
+	        
+	    ResourceBundle rb = null;
+
+	    logger.info( String.format( "Generating Logsums from MTC Tour Based Model using CT-RAMP version %s, 22feb2011 build %s", CtrampApplication.VERSION, 2 ) );
+	        
+	    if ( args.length == 0 ) {
+	    	logger.error( String.format( "no properties file base name (without .properties extension) was specified as an argument." ) );
+	        return;
+	    }
+	    else {
+	    	rb = ResourceBundle.getBundle( args[0] );
+
+	        // optional arguments
+	        for (int i=1; i < args.length; i++) {
+
+	        	if (args[i].equalsIgnoreCase("-iteration")) {
+	        		globalIterationNumber = Integer.parseInt( args[i+1] );
+	                logger.info( String.format( "-iteration %d.", globalIterationNumber ) );
+	        	}
+
+	            if (args[i].equalsIgnoreCase("-sampleRate")) {
+	            	iterationSampleRate = Float.parseFloat( args[i+1] );
+	                logger.info( String.format( "-sampleRate %.4f.", iterationSampleRate ) );
+	            }
+
+	            if (args[i].equalsIgnoreCase("-sampleSeed")) {
+	            	sampleSeed = Integer.parseInt( args[i+1] );
+	                logger.info( String.format( "-sampleSeed %d.", sampleSeed ) );
+	            }
+
+	        }
+	                
+	        if ( globalIterationNumber < 0 ) {
+	        	globalIterationNumber = 1;
+	            logger.info( String.format( "no -iteration flag, default value %d used.", globalIterationNumber ) );
+	        }
+
+	        if ( iterationSampleRate < 0 ) {
+	        	iterationSampleRate = 1;
+	            logger.info( String.format( "no -sampleRate flag, default value %.4f used.", iterationSampleRate ) );
+	        }
+
+	        if ( sampleSeed < 0 ) {
+	        	sampleSeed = 0;
+	            logger.info( String.format( "no -sampleSeed flag, default value %d used.", sampleSeed ) );
+	        }
+
+	    }
+
+
+	    String baseName;
+	    if ( args[0].endsWith(".properties") ) {
+	    	int index = args[0].indexOf(".properties");
+	        baseName = args[0].substring(0, index);
+	    }
+	    else {
+	    	baseName = args[0];
+	    }
+
+
+	    // create an instance of this class for main() to use.
+	    CreateLogsums mainObject = new CreateLogsums(  args[0], globalIterationNumber, iterationSampleRate, sampleSeed );
+
+	    // Create logsums
+	    try {
+
+	    	logger.info ("Creating logsums.");
+	            mainObject.run();
+	         
+	        }
+	        catch ( RuntimeException e ) {
+	            logger.error ( "RuntimeException caught in com.pb.mtctm2.abm.reports.CreateLogsums.main() -- exiting.", e );
+	            System.exit(2);
+	        }
+
+
+	        logger.info ("");
+	        logger.info ("");
+	        logger.info ("CreateLogsums finished in " + ((System.currentTimeMillis() - startTime) / 60000.0) + " minutes.");
+
+	        System.exit(0);
+
+	
 	}
 
 }
