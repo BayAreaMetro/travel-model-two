@@ -15,9 +15,12 @@ public class MandatoryDestChoiceModel
     private transient Logger                     dcManLogger                      = Logger.getLogger("tourDcMan");
     // this constant used as a dimension for saving distance and logsums for
     // alternatives in samples
-    private static final int                     MAXIMUM_SOA_ALTS_FOR_ANY_MODEL   = 200;
+//    private static final int                     MAXIMUM_SOA_ALTS_FOR_ANY_MODEL   = 5000;
     private static final int                     DC_DATA_SHEET                    = 0;
     private static final int                     DC_WORK_AT_HOME_SHEET            = 1;
+    
+    private static final String                  WORK_AT_HOME_PROPERTY = "RunModel.WorkAtHomeChoice";
+    
     private MgraDataManager                      mgraManager;
     private DestChoiceSize                       dcSizeObj;
     private DestChoiceDMU                        dcDmuObject;
@@ -41,6 +44,9 @@ public class MandatoryDestChoiceModel
     private double[]                             sampleAlternativeLogsums;
     private double[]                             mgraDistanceArray;
     private BuildAccessibilities                 aggAcc;
+    
+    private boolean                              workAtHomeChoiceAvailable;
+    
     public MandatoryDestChoiceModel(int index, HashMap<String, String> propertyMap,
             DestChoiceSize dcSizeObj, BuildAccessibilities aggAcc, MgraDataManager mgraManager,
             String dcUecFileName, String soaUecFile, int soaSampleSize, String modeChoiceUecFile,
@@ -57,9 +63,14 @@ public class MandatoryDestChoiceModel
         dcSoaDmuObject = dmuFactory.getDcSoaDMU();
         dcSoaDmuObject.setAggAcc(aggAcc);
         shadowPricingIteration = 0;
-        sampleAlternativeDistances = new double[MAXIMUM_SOA_ALTS_FOR_ANY_MODEL];
-        sampleAlternativeLogsums = new double[MAXIMUM_SOA_ALTS_FOR_ANY_MODEL];
+        sampleAlternativeDistances = new double[soaSampleSize+1];
+        sampleAlternativeLogsums = new double[soaSampleSize+1];
         workOccupValueSegmentIndexMap = aggAcc.getWorkOccupValueIndexMap();
+        
+        workAtHomeChoiceAvailable=true;
+        if(propertyMap.containsKey(WORK_AT_HOME_PROPERTY))
+	        workAtHomeChoiceAvailable=Util.getBooleanValueFromPropertyMap(propertyMap, WORK_AT_HOME_PROPERTY);
+	        
     }
     public void setupWorkSegments(int[] myUecSheetIndices, int[] mySoaUecSheetIndices)
     {
@@ -496,6 +507,10 @@ public class MandatoryDestChoiceModel
     private int selectWorksAtHomeChoice(DestChoiceDMU dcDmuObject, Household household,
             Person person)
     {
+    	//skip this model if RunModel property set to false
+    	if(!workAtHomeChoiceAvailable)
+    		return 1;
+    	
         // set tour origin taz/subzone and start/end times for calculating mode
         // choice logsum
         Logger modelLogger = dcManLogger;

@@ -61,7 +61,7 @@ public class ModelOutputReader {
     public void readHouseholdDataOutput(){
 		
 		String baseDir = rbMap.get(CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
-		String hhFile = formFileName(rbMap.get(PROPERTIES_HOUSEHOLD_DATA_FILE), iteration);
+		String hhFile = rbMap.get(PROPERTIES_HOUSEHOLD_DATA_FILE);
 		
 	    TableDataSet householdData = readTableData(baseDir+hhFile);
 
@@ -69,7 +69,7 @@ public class ModelOutputReader {
 	        
 	    for(int row = 1; row<=householdData.getRowCount();++row){
 			
-	    	long hhid = (long) householdData.getValueAt(row,"hhid");
+	    	long hhid = (long) householdData.getValueAt(row,"hh_id");
 			int home_mgra = (int)householdData.getValueAt(row,"home_mgra");
 	        int income = (int) householdData.getValueAt(row,"income");
 	        int autos = (int) householdData.getValueAt(row,"autos");
@@ -78,7 +78,7 @@ public class ModelOutputReader {
 	        int automated_vehicles = (int) householdData.getValueAt(row,"automated_vehicles");
 	        int transponder = (int) householdData.getValueAt(row,"transponder");
 	        String cdap_pattern =  householdData.getStringValueAt(row,"cdap_pattern");
-	        String jtf_choice = householdData.getStringValueAt(row,"jtf_choice");
+	        int jtf_choice = (int) householdData.getValueAt(row,"jtf_choice");
 	        float sampleRate = householdData.getValueAt(row,"sampleRate");
 	        
 	        HouseholdFileAttributes hhAttributes = new HouseholdFileAttributes(hhid,
@@ -101,7 +101,7 @@ public class ModelOutputReader {
 		
         //read person data
         String baseDir = rbMap.get(CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
-        String personFile = baseDir + formFileName(rbMap.get(PROPERTIES_PERSON_DATA_FILE), iteration);
+        String personFile = baseDir + rbMap.get(PROPERTIES_PERSON_DATA_FILE);
         TableDataSet personData = readTableData(personFile);
 
         personFileAttributesMap = new HashMap<Long, PersonFileAttributes>();
@@ -120,8 +120,9 @@ public class ModelOutputReader {
         	float valueOfTime = personData.getValueAt(row,"value_of_time");
         	String activityPattern = personData.getStringValueAt(row,"activity_pattern");
         	
-        	String personTypeString = personData.getStringValueAt(row,"type");
-        	int personType = getPersonType(personTypeString);
+        	int personType = (int) personData.getValueAt(row,"type");
+        	
+        	int occup  = (int) personData.getValueAt(row,"occp"); 
         	
         	int imfChoice = (int) personData.getValueAt(row, "imf_choice");
         	int inmfChoice = (int) personData.getValueAt(row, "inmf_choice");
@@ -130,7 +131,7 @@ public class ModelOutputReader {
         	float sampleRate = personData.getValueAt(row,"sampleRate");
            
         	PersonFileAttributes personFileAttributes = new PersonFileAttributes(hhid,person_id,personNumber,age,gender,valueOfTime,
-        			activityPattern,personType,imfChoice,inmfChoice,fp_choice,reimb_pct,sampleRate);
+        			activityPattern,personType,occup, imfChoice,inmfChoice,fp_choice,reimb_pct,sampleRate);
         	
         	personFileAttributesMap.put(person_id,personFileAttributes);
         	
@@ -230,17 +231,7 @@ public class ModelOutputReader {
     		float[] util = new float[modelStructure.getMaxTourModeIndex()];
     		float[] prob = new float[modelStructure.getMaxTourModeIndex()];
     		
-    		for(int i = 0; i<util.length;++i){
-    			String colName = "util_"+(i+1);
-    			util[i]= tourData.getValueAt(row,colName);
-    		}
-    		
-    		for(int i = 0; i<prob.length;++i){
-    			String colName = "prob"+(i+1);
-    			prob[i]= tourData.getValueAt(row,colName);
-    		}
-          
-        	TourFileAttributes tourFileAttributes = new TourFileAttributes(hh_id, person_id, person_num, person_type,
+    		TourFileAttributes tourFileAttributes = new TourFileAttributes(hh_id, person_id, person_num, person_type,
     				 tour_id,  tour_category, tour_purpose, orig_mgra,dest_mgra,
     				 start_period, end_period, tour_mode, tour_distance, tour_time,
     				 atWork_freq,  num_ob_stops, num_ib_stops, out_btap, out_atap,
@@ -482,12 +473,12 @@ public class ModelOutputReader {
         int automated_vehicles;
         int transponder;
         String cdap_pattern;
-        String jtf_choice;
+        int jtf_choice;
         float sampleRate;
         
         public HouseholdFileAttributes(long hhid, int home_mgra,
         		int income, int autos, int size, int workers, int automated_vehicles, int transponder,
-        		String cdap_pattern, String jtf_choice, float sampleRate){
+        		String cdap_pattern, int jtf_choice, float sampleRate){
         	
     		this.hhid = hhid;
             this.home_mgra = home_mgra;
@@ -511,9 +502,7 @@ public class ModelOutputReader {
         	hh.setAutomatedVehicles((short)automated_vehicles);
             hh.setTpChoice(transponder);
         	hh.setCoordinatedDailyActivityPatternResult(cdap_pattern);
-        	String[] jtf = jtf_choice.split("_");
-        	int jtfAlt = new Integer(jtf[0]);
-        	hh.setJointTourFreqResult(jtfAlt, jtf[1]);
+        	hh.setJointTourFreqResult(jtf_choice, "JTF_CHOICE_STRING_UNKNOWN");
         	hh.setSampleRate(sampleRate);
         }
 	}
@@ -535,6 +524,7 @@ public class ModelOutputReader {
     	float valueOfTime;
     	String activityPattern;
     	int personType;
+    	int occupation;
     	int imfChoice;
     	int inmfChoice;
     	int fp_choice;
@@ -542,7 +532,7 @@ public class ModelOutputReader {
     	float sampleRate;
 
 		public PersonFileAttributes(long hhid, long person_id, long personNumber, int age, int gender,float valueOfTime, 
-				String activityPattern,int personType,
+				String activityPattern,int personType, int occup,
 				int imfChoice,int inmfChoice,int fp_choice, float reimb_pct,float sampleRate){
 			
 			this.hhid=hhid;
@@ -553,6 +543,7 @@ public class ModelOutputReader {
 			this.valueOfTime=valueOfTime;
 			this.activityPattern=activityPattern;
 			this.personType=personType;
+			this.occupation=occup;
 			this.imfChoice=imfChoice;
 			this.inmfChoice=inmfChoice;
 			this.fp_choice=fp_choice;
@@ -568,6 +559,7 @@ public class ModelOutputReader {
 			p.setValueOfTime(valueOfTime);
 			p.setDailyActivityResult(activityPattern);
 			p.setPersonTypeCategory(personType);
+			p.setPersPecasOccup(occupation);
 			p.setImtfChoice(imfChoice);
 			p.setInmtfChoice(inmfChoice);
 			p.setFreeParkingAvailableResult(fp_choice);
@@ -684,7 +676,7 @@ public class ModelOutputReader {
 		for(int i =0;i<Person.personTypeNameArray.length;++i){
 			
 			if(personTypeString.compareTo(Person.personTypeNameArray[i])==0)
-				return i;
+				return i+1;
 			
 		}
 	   

@@ -62,7 +62,7 @@ public class CreateLogsums {
 		this.resourceBundle = ResourceBundle.getBundle(propertiesFile);
 		propertyMap = ResourceUtil.getResourceBundleAsHashMap ( propertiesFile);
 	    this.globalIterationNumber = globalIterationNumber;
-	    this.iterationSampleRate = iterationSampleRate;
+	    this.iterationSampleRate = globalSampleRate;
 	    this.sampleSeed = sampleSeed;
 	 
 	}
@@ -78,7 +78,8 @@ public class CreateLogsums {
         modelStructure = new SandagModelStructure();
 
 		householdDataManager = getHouseholdDataManager();
-	
+		logger.info("There are " + householdDataManager.getNumHouseholds()+" households in hh manager after getting household manager");
+
 		// create a factory object to pass to various model components from which
         // they can create DMU objects
         dmuFactory = new SandagCtrampDmuFactory(modelStructure);
@@ -112,12 +113,22 @@ public class CreateLogsums {
 		modelOutputReader.readPersonDataOutput();
 		modelOutputReader.readTourDataOutput();
 		
+		logger.info("There are " + householdDataManager.getNumHouseholds()+" households in hh manager before reading model output");
+
 		Household[] households = householdDataManager.getHhArray();
 		for(Household household : households){
-			modelOutputReader.createJointTours(household);
-			modelOutputReader.createIndividualTours(household);
+			
+			modelOutputReader.setHouseholdAndPersonAttributes(household);
+			
+			if(modelOutputReader.hasJointTourFile())
+				modelOutputReader.createJointTours(household);
+			
+			if(modelOutputReader.hasIndividualTourFile())
+				modelOutputReader.createIndividualTours(household);
 		}
 		householdDataManager.setHhArray(households);
+		logger.info("There are " + householdDataManager.getNumHouseholds()+" households in hh manager after reading model output");
+
 	}
 	
 	
@@ -172,11 +183,14 @@ public class CreateLogsums {
         usualWorkSchoolLocationChoiceModel.runWorkLocationChoiceModel(householdDataManager, workerSizeTerms);
         logger.info("Finished with usual work location choice for logsum calculations.");
 
+		logger.info("There are " + householdDataManager.getNumHouseholds()+" households in hh manager after running school and work location choice");
 
 	}
 	
 	public void createNonWorkLogsums(){
 		
+		logger.info("There are " + householdDataManager.getNumHouseholds()+" households in hh manager before running non-work logsums");
+
         HouseholdChoiceModelRunner runner = new HouseholdChoiceModelRunner( propertyMap, jppfClient, "False", householdDataManager, ms, modelStructure, dmuFactory );
         runner.runHouseholdChoiceModels();
 

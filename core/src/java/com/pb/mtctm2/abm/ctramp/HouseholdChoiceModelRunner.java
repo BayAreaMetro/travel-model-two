@@ -134,6 +134,8 @@ public class HouseholdChoiceModelRunner
             job.setDataProvider(dataProvider);
 
             ArrayList<int[]> startEndTaskIndicesList = getTaskHouseholdRanges(hhDataManager.getNumHouseholds());
+            
+            logger.info("There are "+hhDataManager.getNumHouseholds()+" total households in household manager");
 
             int startIndex = 0;
             int endIndex = 0;
