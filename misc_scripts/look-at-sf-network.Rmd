@@ -1,0 +1,183 @@
+---
+title: "Look at SF Network"
+output: html_notebook
+---
+
+# Overhead
+```{r overhead, include = FALSE}
+packages_vector <- c("tidyverse",
+                     "sf")
+
+need_to_install <- packages_vector[!(packages_vector %in% installed.packages()[,"Package"])]
+
+if (length(need_to_install)) install.packages(need_to_install)
+
+for (package in packages_vector) {
+  library(package, character.only = TRUE)
+}
+
+```
+
+# Remote I/O
+```{r remote-io}
+input_file_name <- "working_networks/sf_tomtom.shp"
+output_file_name <- "working_networks/simple_sf_tomtom_osm.geojson"
+```
+
+# Data Reads
+```{r read}
+input_sf <- st_read(input_file_name, stringsAsFactors = FALSE)
+```
+
+# Reductions
+```{r reductions}
+working_sf <- input_sf %>%
+  rename(shstReference = shstRefere,
+         shstGeometry = shstGeomet,
+         fromIntersection = fromInters,
+         toIntersection = toIntersec,
+         osm_lanes = lanes,
+         tomtom_f_jnctid = tomtom_f_j,
+         tomtom_t_jnctid = tomtom_t_j,
+         tom_lanes = LANES_1)
+
+# deal with lanes
+lane_columns_vector <- sprintf("lane_%02d", seq(from = 1, to = 20))
+
+osm_lanes_df <- tibble(shstReference = working_sf$shstReference,
+                       osm_lanes = working_sf$osm_lanes) %>%
+  mutate(osm_fix = str_replace(osm_lanes, "\\(", "")) %>%
+  mutate(osm_fix = str_replace(osm_fix, "\\)", "")) %>%
+  rowwise() %>%
+  mutate(colon = str_locate(osm_fix, ":")[1]) %>%
+  ungroup() %>%
+  mutate(osm_fix = str_sub(osm_fix, start = (colon + 1))) %>%
+  separate(., osm_fix, 
+           into = lane_columns_vector, 
+           sep = ",", 
+           extra = "warn",
+           fill = "right",
+           keep = FALSE) %>%
+  select(-osm_lanes, -colon) %>%
+  gather(., key = lane_field, value = lanes, -shstReference) %>%
+  filter(!lanes == "nan") %>%
+  filter(!lanes == "...") %>%
+  mutate(lanes = as.integer(lanes)) %>%
+  group_by(shstReference) %>%
+  summarise(min_osm_lanes = min(lanes), max_osm_lanes = max(lanes)) %>%
+  ungroup() %>%
+  mutate(osm_lanes_ambiguous = min_osm_lanes != max_osm_lanes)
+
+# deal with name
+name_columns_vector <- sprintf("name_%02d", seq(from = 1, to = 20))
+
+osm_name_df <- tibble(shstReference = working_sf$shstReference,
+                      name = working_sf$name) %>%
+  mutate(name_fix = str_replace(name, "\\(", "")) %>%
+  mutate(name_fix = str_replace(name_fix, "\\)", "")) %>%
+  rowwise() %>%
+  mutate(colon = str_locate(name_fix, ":")[1]) %>%
+  ungroup() %>%
+  mutate(name_fix = str_sub(name_fix, start = (colon + 1))) %>%
+  separate(., name_fix, 
+           into = name_columns_vector, 
+           sep = ",", 
+           extra = "warn",
+           fill = "right",
+           keep = FALSE) %>%
+  select(-name, -colon) %>%
+  gather(., key = name_field, value = name, -shstReference) %>%
+  group_by(shstReference) %>%
+  summarise(osm_name = first(name)) %>%
+  ungroup() %>%
+  filter(!osm_name == "nan")
+
+# deal with highway
+highway_columns_vector <- sprintf("highway_%02d", seq(from = 1, to = 20))
+
+osm_highway_df <- tibble(shstReference = working_sf$shstReference,
+                      highway = working_sf$highway) %>%
+  mutate(highway_fix = str_replace(highway, "\\(", "")) %>%
+  mutate(highway_fix = str_replace(highway_fix, "\\)", "")) %>%
+  rowwise() %>%
+  mutate(colon = str_locate(highway_fix, ":")[1]) %>%
+  ungroup() %>%
+  mutate(highway_fix = str_sub(highway_fix, start = (colon + 1))) %>%
+  separate(., highway_fix, 
+           into = highway_columns_vector, 
+           sep = ",", 
+           extra = "warn",
+           fill = "right",
+           keep = FALSE) %>%
+  select(-highway, -colon) %>%
+  gather(., key = highway_field, value = highway, -shstReference) %>%
+  group_by(shstReference) %>%
+  summarise(osm_highway = first(highway)) %>%
+  ungroup() %>%
+  filter(!osm_highway == "nan")
+
+output_sf <- left_join(working_sf, osm_lanes_df, by = c("shstReference")) %>%
+  left_join(., osm_name_df, by = c("shstReference")) %>%
+  left_join(., osm_highway_df, by = c("shstReference")) %>%
+  mutate(lanes_match = FALSE) %>%
+  mutate(lanes_match = tom_lanes <= max_osm_lanes & tom_lanes >= min_osm_lanes) %>%
+  mutate(min_osm_lanes = replace_na(min_osm_lanes, -9)) %>%
+  mutate(max_osm_lanes = replace_na(max_osm_lanes, -9)) %>%
+  mutate(tomtom_id = if_else(is.nan(tomtom_id), -9, tomtom_id)) %>%
+  mutate(tomtom_f_jnctid = if_else(is.nan(tomtom_f_jnctid), -9, tomtom_f_jnctid)) %>%
+  mutate(tomtom_t_jnctid = if_else(is.nan(tomtom_t_jnctid), -9, tomtom_t_jnctid)) %>%
+  mutate(tom_lanes = if_else(is.nan(tom_lanes), -9, tom_lanes)) %>%
+  mutate(lanes_match = replace_na(lanes_match, FALSE))
+
+```
+
+# Diagnostics
+```{r diagnostics-match}
+tom_tom_by_highway_df <- output_sf %>%
+  st_set_geometry(NULL) %>%
+  mutate(tom_tom_match = tomtom_id > 0) %>%
+  filter(!is.na(osm_highway)) %>%
+  group_by(osm_highway, tom_tom_match) %>%
+  summarise(count = n()) %>%
+  group_by(osm_highway) %>%
+  mutate(match_rate = count / sum(count)) %>%
+  ungroup() %>%
+  filter(tom_tom_match) %>%
+  select(osm_highway, match_rate, count) %>%
+  arrange(match_rate)
+  
+
+tom_tom_by_highway_df
+```
+
+```{r diagnostics-lane}
+osm_highway_roads_vector <- c("primary", "secondary", "motorway_link", "tertiary",
+                              "motorway", "trunk", "residential", "tertiary_link",
+                              "trunk_link", "secondary_link", "primary_link")
+
+lanes_by_highway_df <- output_sf %>%
+  st_set_geometry(NULL) %>%
+  filter(!is.na(osm_highway)) %>%
+  filter(osm_highway %in% osm_highway_roads_vector) %>%
+  mutate(osm_lanes_present = min_osm_lanes > 0) %>%
+  mutate(tom_lanes_present = tom_lanes > 0) %>%
+  mutate(osm_or_tom_lanes_present = osm_lanes_present | tom_lanes_present) %>%
+  group_by(osm_highway, osm_or_tom_lanes_present) %>%
+  summarise(count = n()) %>%
+  group_by(osm_highway) %>%
+  mutate(match_rate = count / sum(count)) %>%
+  ungroup() %>%
+  filter(osm_or_tom_lanes_present) %>%
+  select(osm_highway, match_rate, count) %>%
+  arrange(match_rate)
+
+lanes_by_highway_df
+```
+
+
+
+# Write
+```{r write}
+st_write(output_sf, output_file_name, delete_dsn = TRUE)
+```
+

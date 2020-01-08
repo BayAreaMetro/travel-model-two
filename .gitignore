@@ -2,3 +2,8 @@
 core/build/
 core/release/
 /bin/
+misc_scripts/.DS_Store
+.DS_Store
+.Rproj.user
+misc_scripts/.Rhistory
+misc_scripts/working_networks/sf_tomtom.dbf
