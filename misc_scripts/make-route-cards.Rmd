@@ -1,0 +1,60 @@
+---
+title: "Look at SF Network"
+output: html_notebook
+---
+
+# Overhead
+```{r overhead, include = FALSE}
+packages_vector <- c("tidyverse",
+                     "sf")
+
+need_to_install <- packages_vector[!(packages_vector %in% installed.packages()[,"Package"])]
+
+if (length(need_to_install)) install.packages(need_to_install)
+
+for (package in packages_vector) {
+  library(package, character.only = TRUE)
+}
+
+```
+
+# Remote I/O
+```{r remote-io}
+transit_dir <- "tests/networkstandard/step2_transit/"
+output_file_name <- "transit_for_tableau.csv"
+```
+
+# Data Reads
+```{r read}
+routes_df <- read_csv(paste0(transit_dir, "routes.txt"), col_types = "icccciccc")
+freq_df <- read_csv(paste0(transit_dir, "frequencies.txt"), col_types = "iitt")
+trips_df <- read_csv(paste0(transit_dir, "trips.txt"), col_types = "iiiciii")
+stops_df <- read_csv(paste0(transit_dir, "stops.txt"), col_types  = "iccddiccc")
+shapes_df <- read_csv(paste0(transit_dir, "shapes.txt"), col_types = "iicc")
+stop_times_df <- read_csv(paste0(transit_dir, "stop_times.txt"), col_types = "ittiicccn")
+
+nodes_sf <- st_read(paste0(transit_dir, "sf_node.geojson"))
+```
+
+# Reductions
+```{r reductions}
+nodes_df <- bind_cols(tibble(osm_node_id = nodes_sf$osm_node_id), as_tibble(st_coordinates(nodes_sf))) %>%
+  mutate(osm_node_id = paste0(osm_node_id)) %>%
+  rename(lng = X, lat = Y)
+  
+output_df <- select(routes_df, route_id, agency_id, route_short_name, route_long_name) %>%
+  left_join(select(trips_df, route_id, service_id, trip_id, trip_headsign, direction_id, shape_id),
+            ., by = c("route_id")) %>%
+  left_join(., freq_df, by = c("trip_id")) %>%
+  left_join(select(stop_times_df, trip_id, stop_id, stop_sequence), ., by = c("trip_id")) %>%
+  left_join(., select(stops_df, stop_id, stop_name, stop_lat, stop_lon), by = c("stop_id")) %>%
+  left_join(., select(shapes_df, shape_id, shape_pt_sequence, shape_osm_node_id), by = c("shape_id")) %>%
+  left_join(., nodes_df, by = c("shape_osm_node_id" = "osm_node_id"))
+
+```
+
+# Write
+```{r write}
+write_csv(output_df, path = output_file_name)
+```
+
