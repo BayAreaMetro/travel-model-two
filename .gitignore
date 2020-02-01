@@ -27,4 +27,3 @@ misc_scripts/shst_node_js_extraction/*.geojson
 
 misc_scripts/tomtom/
 misc_scripts/tests/networkstandard/step1_roadway/sf_link_with_tomtom_lanes_for_Dave.geojson
-misc_scripts/transit_for_tableau.csv

@@ -38,18 +38,27 @@ nodes_sf <- st_read(paste0(transit_dir, "sf_node.geojson"))
 
 # Reductions
 ```{r reductions}
-nodes_df <- bind_cols(tibble(osm_node_id = nodes_sf$osm_node_id), as_tibble(st_coordinates(nodes_sf))) %>%
-  mutate(osm_node_id = paste0(osm_node_id)) %>%
+nodes_df <- bind_cols(tibble(shst_node_id = nodes_sf$shst_node_id), as_tibble(st_coordinates(nodes_sf))) %>%
+  mutate(shst_node_id = paste0(shst_node_id)) %>%
   rename(lng = X, lat = Y)
   
-output_df <- select(routes_df, route_id, agency_id, route_short_name, route_long_name) %>%
+output_stops_df <- select(routes_df, route_id, agency_id, route_short_name, route_long_name) %>%
   left_join(select(trips_df, route_id, service_id, trip_id, trip_headsign, direction_id, shape_id),
             ., by = c("route_id")) %>%
   left_join(., freq_df, by = c("trip_id")) %>%
   left_join(select(stop_times_df, trip_id, stop_id, stop_sequence), ., by = c("trip_id")) %>%
   left_join(., select(stops_df, stop_id, stop_name, stop_lat, stop_lon), by = c("stop_id")) %>%
-  left_join(., select(shapes_df, shape_id, shape_pt_sequence, shape_osm_node_id), by = c("shape_id")) %>%
-  left_join(., nodes_df, by = c("shape_osm_node_id" = "osm_node_id"))
+  mutate(summary = "stops")
+
+output_shapes_df <- select(routes_df, route_id, agency_id, route_short_name, route_long_name) %>%
+  left_join(select(trips_df, route_id, service_id, trip_id, trip_headsign, direction_id, shape_id),
+            ., by = c("route_id")) %>%
+  left_join(., freq_df, by = c("trip_id")) %>%
+  left_join(., select(shapes_df, shape_id, shape_pt_sequence, shape_shst_node_id), by = c("shape_id")) %>%
+  left_join(., nodes_df, by = c("shape_shst_node_id" = "shst_node_id")) %>%
+  mutate(summary = "shapes")
+
+output_df <- bind_rows(output_stops_df, output_shapes_df)
 
 ```
 
