@@ -6,24 +6,14 @@ misc_scripts/.DS_Store
 .DS_Store
 .Rproj.user
 misc_scripts/.Rhistory
-misc_scripts/working_networks/sf_tomtom.dbf
 *.hubstorinfo
 
-misc_scripts/notebooks/.ipynb_checkpoints/
-
-misc_scripts/existing_network/*.dbf
-misc_scripts/existing_network/*.shp
-
-misc_scripts/osmnx_extraction/
+*.ipynb_checkpoints/
 
 *.zip
 *.graphml
 
-misc_scripts/tests/networkstandard/step1_roadway/link.json
-misc_scripts/tests/networkstandard/step1_roadway/shape.geojson
-misc_scripts/tests/networkstandard/step1_roadway/node.geojson
 
-misc_scripts/shst_node_js_extraction/*.geojson
-
-misc_scripts/tomtom/
-misc_scripts/tests/networkstandard/step1_roadway/sf_link_with_tomtom_lanes_for_Dave.geojson
+TPPL.PRJ
+TPPL*.PRN
+sf_tomtom.dbf
