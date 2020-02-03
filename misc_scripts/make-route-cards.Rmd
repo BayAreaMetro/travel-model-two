@@ -29,8 +29,8 @@ output_file_name <- "transit_for_tableau.csv"
 routes_df <- read_csv(paste0(transit_dir, "routes.txt"), col_types = "icccciccc")
 freq_df <- read_csv(paste0(transit_dir, "frequencies.txt"), col_types = "iitt")
 trips_df <- read_csv(paste0(transit_dir, "trips.txt"), col_types = "iiiciii")
-stops_df <- read_csv(paste0(transit_dir, "stops.txt"), col_types  = "iccddiccc")
-shapes_df <- read_csv(paste0(transit_dir, "shapes.txt"), col_types = "iicc")
+stops_df <- read_csv(paste0(transit_dir, "stops.txt"), col_types  = "iccddicccc")
+shapes_df <- read_csv(paste0(transit_dir, "shapes.txt"), col_types = "iiccc")
 stop_times_df <- read_csv(paste0(transit_dir, "stop_times.txt"), col_types = "ittiicccn")
 
 nodes_sf <- st_read(paste0(transit_dir, "sf_node.geojson"))
@@ -38,8 +38,8 @@ nodes_sf <- st_read(paste0(transit_dir, "sf_node.geojson"))
 
 # Reductions
 ```{r reductions}
-nodes_df <- bind_cols(tibble(shst_node_id = nodes_sf$shst_node_id), as_tibble(st_coordinates(nodes_sf))) %>%
-  mutate(shst_node_id = paste0(shst_node_id)) %>%
+nodes_df <- bind_cols(tibble(model_node_id = nodes_sf$model_node_id), as_tibble(st_coordinates(nodes_sf))) %>%
+  mutate(model_node_id = paste0(model_node_id)) %>%
   rename(lng = X, lat = Y)
   
 output_stops_df <- select(routes_df, route_id, agency_id, route_short_name, route_long_name) %>%
@@ -54,8 +54,8 @@ output_shapes_df <- select(routes_df, route_id, agency_id, route_short_name, rou
   left_join(select(trips_df, route_id, service_id, trip_id, trip_headsign, direction_id, shape_id),
             ., by = c("route_id")) %>%
   left_join(., freq_df, by = c("trip_id")) %>%
-  left_join(., select(shapes_df, shape_id, shape_pt_sequence, shape_shst_node_id), by = c("shape_id")) %>%
-  left_join(., nodes_df, by = c("shape_shst_node_id" = "shst_node_id")) %>%
+  left_join(., select(shapes_df, shape_id, shape_pt_sequence, shape_model_node_id), by = c("shape_id")) %>%
+  left_join(., nodes_df, by = c("shape_model_node_id" = "model_node_id")) %>%
   mutate(summary = "shapes")
 
 output_df <- bind_rows(output_stops_df, output_shapes_df)
