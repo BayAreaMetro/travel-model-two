@@ -20,8 +20,8 @@ for (package in packages_vector) {
 
 # Remote I/O
 ```{r remote-io}
-transit_dir <- "tests/networkstandard/step2_transit/"
-output_file_name <- "transit_for_tableau.csv"
+transit_dir <- "../../data/processed/step2_transit/"
+output_file_name <- "../../data/interim/transit_for_tableau.csv"
 ```
 
 # Data Reads
