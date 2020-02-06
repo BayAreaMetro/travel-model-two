@@ -3,7 +3,10 @@ package com.pb.mtctm2.abm.ctramp;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
+
 import org.apache.log4j.Logger;
+
 import com.pb.mtctm2.abm.accessibilities.AutoAndNonMotorizedSkimsCalculator;
 import com.pb.mtctm2.abm.accessibilities.BestTransitPathCalculator;
 import com.pb.common.newmodel.Alternative;
@@ -63,8 +66,9 @@ public class McLogsumsCalculator implements Serializable
     private int                                setTourMcLogsumDmuAttributesTotalTime = 0;
     private int                                setTripMcLogsumDmuAttributesTotalTime = 0;
 
-
-    
+    //added for TNC and Taxi modes
+    TNCAndTaxiWaitTimeCalculator tncTaxiWaitTimeCalculator = null;
+       
     public McLogsumsCalculator()
     {
         if (mgraManager == null)
@@ -77,7 +81,8 @@ public class McLogsumsCalculator implements Serializable
         this.lsWgtAvgCostD = mgraManager.getLsWgtAvgCostD();
         this.lsWgtAvgCostH = mgraManager.getLsWgtAvgCostH();
         this.parkingArea = mgraManager.getMgraParkAreas();
-    }
+        
+      }
     
     
     public BestTransitPathCalculator getBestTransitPathCalculator()
@@ -90,6 +95,10 @@ public class McLogsumsCalculator implements Serializable
     {
         bestPathUEC = new BestTransitPathCalculator(rbMap);
         anm = new AutoAndNonMotorizedSkimsCalculator(rbMap);
+        
+        tncTaxiWaitTimeCalculator = new TNCAndTaxiWaitTimeCalculator();
+        tncTaxiWaitTimeCalculator.createWaitTimeDistributions(rbMap);
+
     }
 
     public void setTazDistanceSkimArrays( double[][][] storedFromTazDistanceSkims, double[][][] storedToTazDistanceSkims ) {     
@@ -123,7 +132,7 @@ public class McLogsumsCalculator implements Serializable
         mcDmuObject.setLsWgtAvgCostM( lsWgtAvgCostM[destMgra] );
         mcDmuObject.setLsWgtAvgCostD( lsWgtAvgCostD[destMgra] );
         mcDmuObject.setLsWgtAvgCostH( lsWgtAvgCostH[destMgra] );
-       
+        
         int tourOrigTaz = mgraManager.getTaz(origMgra);
         int tourDestTaz = mgraManager.getTaz(destMgra);
         
@@ -140,6 +149,32 @@ public class McLogsumsCalculator implements Serializable
         mcDmuObject.setReimburseProportion( reimbursePct );
         mcDmuObject.setParkingArea(parkingArea[destMgra]);
  
+        float TNCWaitTimeOrig = 0;
+        float TaxiWaitTimeOrig = 0;
+        float TNCWaitTimeDest = 0;
+        float TaxiWaitTimeDest = 0;
+        float popEmpDenOrig = (float) mgraManager.getPopEmpPerSqMi(origMgra);
+        float popEmpDenDest = (float) mgraManager.getPopEmpPerSqMi(destMgra);
+        
+        Household household = mcDmuObject.getHouseholdObject();
+        if(household!=null){
+            Random hhRandom = household.getHhRandom();
+            double rnum = hhRandom.nextDouble();
+            TNCWaitTimeOrig = (float) tncTaxiWaitTimeCalculator.sampleFromTNCWaitTimeDistribution(rnum, popEmpDenOrig);
+            TaxiWaitTimeOrig = (float) tncTaxiWaitTimeCalculator.sampleFromTaxiWaitTimeDistribution(rnum, popEmpDenOrig);
+            TNCWaitTimeDest = (float) tncTaxiWaitTimeCalculator.sampleFromTNCWaitTimeDistribution(rnum, popEmpDenDest);
+            TaxiWaitTimeDest = (float) tncTaxiWaitTimeCalculator.sampleFromTaxiWaitTimeDistribution(rnum, popEmpDenDest);
+        }else{
+            TNCWaitTimeOrig = (float) tncTaxiWaitTimeCalculator.getMeanTNCWaitTime( popEmpDenOrig);
+            TaxiWaitTimeOrig = (float) tncTaxiWaitTimeCalculator.getMeanTaxiWaitTime( popEmpDenOrig);
+            TNCWaitTimeDest = (float) tncTaxiWaitTimeCalculator.getMeanTNCWaitTime( popEmpDenDest);
+            TaxiWaitTimeDest = (float) tncTaxiWaitTimeCalculator.getMeanTaxiWaitTime(popEmpDenDest);
+        }
+        
+        mcDmuObject.setOrigTaxiWaitTime(TaxiWaitTimeOrig);
+        mcDmuObject.setDestTaxiWaitTime(TaxiWaitTimeDest);
+        mcDmuObject.setOrigTNCWaitTime(TNCWaitTimeOrig);
+        mcDmuObject.setDestTNCWaitTime(TNCWaitTimeDest);
 
     }
     
@@ -211,7 +246,24 @@ public class McLogsumsCalculator implements Serializable
         mcDmuObject.setPTazTerminalTime( tazManager.getOriginTazTerminalTime(mgraManager.getTaz(origMgra)) );
         mcDmuObject.setATazTerminalTime( tazManager.getDestinationTazTerminalTime(mgraManager.getTaz(destMgra)) );
 
+        float TNCWaitTime = 0;
+        float TaxiWaitTime = 0;
+        float popEmpDen = (float) mgraManager.getPopEmpPerSqMi(origMgra);
         
+        Household household = mcDmuObject.getHouseholdObject();
+        if(household!=null){
+            Random hhRandom = household.getHhRandom();
+            double rnum = hhRandom.nextDouble();
+            TNCWaitTime = (float) tncTaxiWaitTimeCalculator.sampleFromTNCWaitTimeDistribution(rnum, popEmpDen);
+            TaxiWaitTime = (float) tncTaxiWaitTimeCalculator.sampleFromTaxiWaitTimeDistribution(rnum, popEmpDen);
+       }else{
+            TNCWaitTime = (float) tncTaxiWaitTimeCalculator.getMeanTNCWaitTime( popEmpDen);
+            TaxiWaitTime = (float) tncTaxiWaitTimeCalculator.getMeanTaxiWaitTime( popEmpDen);
+        }
+        
+        mcDmuObject.setWaitTimeTaxi(TaxiWaitTime);
+        mcDmuObject.setWaitTimeTNC(TNCWaitTime);
+
         mcModel.computeUtilities(mcDmuObject, mcDmuIndex);
         double logsum = mcModel.getLogsum();
         tripModeChoiceSegmentStoredProbabilities = Arrays.copyOf( mcModel.getCumulativeProbabilities(), mcModel.getNumberOfAlternatives() );
@@ -316,7 +368,10 @@ public class McLogsumsCalculator implements Serializable
     	    	
     	// walk access, walk egress transit, outbound
         int skimPeriodIndexOut = ModelStructure.getSkimPeriodIndex(departPeriod);
-        bestWtwTapPairsOut = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger);
+        int pTaz = mgraManager.getTaz(origMgra);
+        int aTaz = mgraManager.getTaz(destMgra);
+        float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
+        bestWtwTapPairsOut = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
         
         if (bestWtwTapPairsOut[0] == null) {
         	mcDmuObject.setTransitLogSum( WTW, false, bestPathUEC.NA );
@@ -334,7 +389,7 @@ public class McLogsumsCalculator implements Serializable
         	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
         	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
 
-        	bestWtwTapPairsOut = bestPathUEC.calcPersonSpecificUtilities(bestWtwTapPairsOut, walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger);
+        	bestWtwTapPairsOut = bestPathUEC.calcPersonSpecificUtilities(bestWtwTapPairsOut, walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
         	double logsumOut = bestPathUEC.calcTripLogSum(bestWtwTapPairsOut, loggingEnabled, autoSkimLogger);
         	mcDmuObject.setTransitLogSum( WTW, false, logsumOut);
         }
@@ -345,7 +400,7 @@ public class McLogsumsCalculator implements Serializable
         
         // walk access, walk egress transit, inbound
         int skimPeriodIndexIn = ModelStructure.getSkimPeriodIndex(arrivePeriod);
-        bestWtwTapPairsIn = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTW, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger);
+        bestWtwTapPairsIn = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTW, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
 
         if (bestWtwTapPairsIn[0] == null) {
         	mcDmuObject.setTransitLogSum( WTW, true, bestPathUEC.NA );
@@ -363,7 +418,7 @@ public class McLogsumsCalculator implements Serializable
         	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
         	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
         	
-        	bestWtwTapPairsIn = bestPathUEC.calcPersonSpecificUtilities(bestWtwTapPairsIn, walkDmu, driveDmu, WTW, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger);
+        	bestWtwTapPairsIn = bestPathUEC.calcPersonSpecificUtilities(bestWtwTapPairsIn, walkDmu, driveDmu, WTW, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
         	double logsumIn = bestPathUEC.calcTripLogSum(bestWtwTapPairsIn, loggingEnabled, autoSkimLogger);             
         	mcDmuObject.setTransitLogSum( WTW, true, logsumIn);
         }
@@ -411,8 +466,11 @@ public class McLogsumsCalculator implements Serializable
     	
         // walk access, drive egress transit, inbound
         int skimPeriodIndexIn = ModelStructure.getSkimPeriodIndex(arrivePeriod);
-        bestWtdTapPairsIn = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTD, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger);
+        int pTaz = mgraManager.getTaz(origMgra);
+        int aTaz = mgraManager.getTaz(destMgra);
+        float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
 
+        bestWtdTapPairsIn = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTD, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
         if (bestWtdTapPairsIn[0] == null) {
         	mcDmuObject.setTransitLogSum( WTD, true, bestPathUEC.NA );
         } else {
@@ -429,7 +487,7 @@ public class McLogsumsCalculator implements Serializable
         	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
         	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
         	
-        	bestWtdTapPairsIn = bestPathUEC.calcPersonSpecificUtilities(bestWtdTapPairsIn, walkDmu, driveDmu, WTD, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger);
+        	bestWtdTapPairsIn = bestPathUEC.calcPersonSpecificUtilities(bestWtdTapPairsIn, walkDmu, driveDmu, WTD, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
         	double logsumIn = bestPathUEC.calcTripLogSum(bestWtdTapPairsIn, loggingEnabled, autoSkimLogger);
         	mcDmuObject.setTransitLogSum( WTD, true, logsumIn);
         }
@@ -443,8 +501,11 @@ public class McLogsumsCalculator implements Serializable
     	
     	// drive access, walk egress transit, outbound
         int skimPeriodIndexOut = ModelStructure.getSkimPeriodIndex(departPeriod);
-        bestDtwTapPairsOut = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger);
+        int pTaz = mgraManager.getTaz(origMgra);
+        int aTaz = mgraManager.getTaz(destMgra);
+        float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
         
+        bestDtwTapPairsOut = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
         if (bestDtwTapPairsOut[0] == null) {
         	mcDmuObject.setTransitLogSum( DTW, false, bestPathUEC.NA );
         } else {
@@ -454,14 +515,13 @@ public class McLogsumsCalculator implements Serializable
         	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
         	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
         	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
-        	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	
-        	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
+
+          	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
+            driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
         	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
         	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
         	
-        	bestDtwTapPairsOut = bestPathUEC.calcPersonSpecificUtilities(bestDtwTapPairsOut, walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger);
+        	bestDtwTapPairsOut = bestPathUEC.calcPersonSpecificUtilities(bestDtwTapPairsOut, walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
         	double logsumOut = bestPathUEC.calcTripLogSum(bestDtwTapPairsOut, loggingEnabled, autoSkimLogger);
         	mcDmuObject.setTransitLogSum( DTW, false, logsumOut);
         }
@@ -550,6 +610,8 @@ public class McLogsumsCalculator implements Serializable
         // calculate logsum
         int skimPeriodIndex = ModelStructure.getSkimPeriodIndex(departPeriod);
         double logsum = bestPathUEC.calcTripLogSum(bestTapPairs, loggingEnabled, autoSkimLogger);
+        if(loggingEnabled)
+        	autoSkimLogger.info("Setting DTW logsum in trip MC DMU object to "+logsum);
         tripMcDmuObject.setTransitLogSum( DTW, logsum);
         bestDtwTripTapPairs = bestTapPairs;
         
@@ -580,9 +642,12 @@ public class McLogsumsCalculator implements Serializable
     	
         // walk access and walk egress for transit segment
         int skimPeriodIndex = ModelStructure.getSkimPeriodIndex(departPeriod);
+        int pTaz = mgraManager.getTaz(origMgra);
+        int aTaz = mgraManager.getTaz(destMgra);
+        float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
         
         // store best tap pairs for walk-transit-walk
-        bestWtwTripTapPairs = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger );
+        bestWtwTripTapPairs = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance );
 
         //set person specific variables and re-calculate best tap pair utilities
     	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TRIPMC);
@@ -595,7 +660,7 @@ public class McLogsumsCalculator implements Serializable
     	driveDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
     	
         // calculate logsum
-    	bestWtwTripTapPairs = bestPathUEC.calcPersonSpecificUtilities(bestWtwTripTapPairs, walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger);
+    	bestWtwTripTapPairs = bestPathUEC.calcPersonSpecificUtilities(bestWtwTripTapPairs, walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
         double logsum = bestPathUEC.calcTripLogSum(bestWtwTripTapPairs, loggingEnabled, autoSkimLogger);
         tripMcDmuObject.setTransitLogSum( WTW, logsum);
         
@@ -609,9 +674,12 @@ public class McLogsumsCalculator implements Serializable
     	
         // walk access, drive egress transit, outbound
         int skimPeriodIndex = ModelStructure.getSkimPeriodIndex(departPeriod);
+        int pTaz = mgraManager.getTaz(origMgra);
+        int aTaz = mgraManager.getTaz(destMgra);
+        float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
         
         // store best tap pairs using outbound direction array
-        bestWtdTripTapPairs = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTD, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger);
+        bestWtdTripTapPairs = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTD, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
         
         //set person specific variables and re-calculate best tap pair utilities
         walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TRIPMC);
@@ -624,7 +692,7 @@ public class McLogsumsCalculator implements Serializable
     	driveDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
     	
         // calculate logsum
-    	bestWtdTripTapPairs = bestPathUEC.calcPersonSpecificUtilities(bestWtdTripTapPairs, walkDmu, driveDmu, WTD, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger);
+    	bestWtdTripTapPairs = bestPathUEC.calcPersonSpecificUtilities(bestWtdTripTapPairs, walkDmu, driveDmu, WTD, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
         double logsum = bestPathUEC.calcTripLogSum(bestWtdTripTapPairs, loggingEnabled, autoSkimLogger);
         tripMcDmuObject.setTransitLogSum( WTD, logsum);
         
@@ -638,9 +706,12 @@ public class McLogsumsCalculator implements Serializable
     	
         // drive access, walk egress transit, outbound
         int skimPeriodIndex = ModelStructure.getSkimPeriodIndex(departPeriod);
+        int pTaz = mgraManager.getTaz(origMgra);
+        int aTaz = mgraManager.getTaz(destMgra);
+        float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
         
         // store best tap pairs using outbound direction array
-        bestDtwTripTapPairs = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger);
+        bestDtwTripTapPairs = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
        
         //set person specific variables and re-calculate best tap pair utilities
         walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TRIPMC);
@@ -653,7 +724,7 @@ public class McLogsumsCalculator implements Serializable
     	driveDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
     	
         // calculate logsum
-    	bestDtwTripTapPairs = bestPathUEC.calcPersonSpecificUtilities(bestDtwTripTapPairs, walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger);
+    	bestDtwTripTapPairs = bestPathUEC.calcPersonSpecificUtilities(bestDtwTripTapPairs, walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
         double logsum = bestPathUEC.calcTripLogSum(bestDtwTripTapPairs, loggingEnabled, autoSkimLogger);
         tripMcDmuObject.setTransitLogSum( DTW, logsum);
         

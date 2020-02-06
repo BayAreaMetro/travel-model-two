@@ -8,17 +8,17 @@
 ; next day. Next the script loops through seven vehicle classes, three personal (drive alone, shared ride 2, and shared ride 3+)
 ; and four commercial (very small trucks, small trucks, medium trucks, and large trucks). 
 ;
-; The skims are based on the shortest generalized cost path; the generalized cost calculation makees the following
+; The skims are based on the shortest generalized cost path; the generalized cost calculation makes the following
 ; assumptions:
-;    (a) the automobile operating cost is 14.2 cents ($2000) per mile, which is based on a state-wide agreed 
+;    (a) the automobile operating cost is 14.2 cents (2010 dollars) per mile, which is based on a state-wide agreed 
 ;        upon approach (use EMFAC's implied fleetwide MPG combined with an agreed upon gas price);
-;    (b) the truck operating cost is 28.4 cents ($2000) per mile, which is assumed to be two times the
+;    (b) the truck operating cost is 28.4 cents (2010 dollars) per mile, which is assumed to be two times the
 ;        passenger vehicle operating cost;
-;    (c) the assumed personal vehicle value of time is $15 per hour ($2000); a value of time is needed to 
+;    (c) the assumed personal vehicle value of time is $15 per hour (2010 dollars); a value of time is needed to 
 ;           determine if the value toll path is reasonable and one should lean towards a high value, which will 
 ;           create a pay path, thus allowing the mode choice model the opportunity to evaluate it -- Vovsha 
 ;           recommends a value of time in the $6 to $22 ($2008) per hour range, which we are in;
-;    (d) the assumed commercial vehicle value of time is $30 per hour ($2000) -- Vovsha recommends $30 per hour
+;    (d) the assumed commercial vehicle value of time is $30 per hour (2010 dollars) -- Vovsha recommends $30 per hour
 ;           ($2008) for light trucks and $60 per hour ($2008) for heavy trucks, we are in this range and, again,
 ;           the value of time is only used to create reasonable pay paths;
 ;    (e) shared ride 2 vehicles share tolls, but not evenly, as some vehicles will contain two members from the
@@ -117,7 +117,7 @@
 ;        (28) Large (four-plus axle) truck value toll path, value toll (year 2000 cents), TOLLVTOLLLRG;
 ;                                     
 ;
-; Notes:  (1)  Output matrices are in miles, minutes, and cents ($2000) and are stored as real values;
+; Notes:  (1)  Output matrices are in miles, minutes, and cents (2010 dollars) and are stored as real values;
 ;         (2)  Intrazonal distance/time is one half the distance/time to the nearest neighbor;
 ;         (3)  Intrazonal bridge and value tolls are assumed to be zero
 ;
@@ -135,7 +135,7 @@ read file = %BASE_SCRIPTS%\block\hwyparam.block
 hwy_block_param = '%BASE_SCRIPTS%\block\hwyparam.block'
 
 ;start cluster nodes
-*Cluster.exe MTC_HWYSKIM 1-25 start exit
+*Cluster.exe MTC_HWYSKIM 1-30 start exit
 
 ;first, do taz-taz skims
 
@@ -154,19 +154,19 @@ loop period = 1, 5
    ; a two letter token is used for each time period
    if (period = 1)   
       token_period = 'EA'   
-      intrastep_range = '6-9'
+      intrastep_range = '6-10'
    elseif (period = 2)   
       token_period = 'AM'    
-      intrastep_range = '10-13'
+      intrastep_range = '11-15'
    elseif (period = 3)   
       token_period = 'MD'    
-      intrastep_range = '14-17'
+      intrastep_range = '16-20'
    elseif (period = 4)   
       token_period = 'PM'
-      intrastep_range = '18-21'
+      intrastep_range = '21-25'
    elseif (period = 5)   
       token_period = 'EV'
-      intrastep_range = '22-25'
+      intrastep_range = '26-30'
    endif
    
    ; do each time of day as a separate process
@@ -451,6 +451,9 @@ loop period = 1, 5
       mw[10]   = mi.1.TOLLFFTDA
       mw[11]   = mi.1.TOLLHOVDISTDA
       mw[12]   = mi.1.TOLLTOLLDISTDA
+
+      ; if there's no DA from any TAZ to TAZ, this will cause problems in the long run
+      if (ROWMAX(2) == 1000000) ABORT msg="FATAL: TAZ-pairs exist with no DA path"
       
       ; shared ride 2
       mw[13]  = mi.2.TIMES2
@@ -621,5 +624,5 @@ Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM
 
 
 ;stop cluster nodes
-*Cluster.exe MTC_HWYSKIM 1-25 close exit
+*Cluster.exe MTC_HWYSKIM 1-30 close exit
 

@@ -59,6 +59,10 @@ public class Tour
     private int       choosenTransitPathOut;
     
     private float     sampleRate;
+    
+    private boolean   useOwnedAV;
+    
+    private float destinationChoiceLogsum;
 
     // this constructor used for mandatory tour creation
     public Tour(Person perObj, int tourId, int primaryIndex)
@@ -724,6 +728,21 @@ public class Tour
 
 	public void setSampleRate(float sampleRate) {
 		this.sampleRate = sampleRate;
+	}
+
+	public boolean getUseOwnedAV() {
+		return useOwnedAV;
+	}
+
+	public void setUseOwnedAV(boolean useOwnedAV) {
+		this.useOwnedAV = useOwnedAV;
+	}
+	public float getDestinationChoiceLogsum() {
+		return destinationChoiceLogsum;
+	}
+
+	public void setDestinationChoiceLogsum(float destinationChoiceLogsum) {
+		this.destinationChoiceLogsum = destinationChoiceLogsum;
 	}
 
 }

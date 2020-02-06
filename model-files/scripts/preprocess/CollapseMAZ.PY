@@ -27,6 +27,7 @@ nonAggFile = os.path.join(outFolder, "nonCollapseRows.csv")
 # Open input file for reading
 readFile = open(inCsv, 'r')
 header = list(readFile.readline().strip().split(','))
+mazCol = header.index('MAZ_ORIGINAL')
 ##print header
 reader = csv.reader(readFile, delimiter=',')
 ##next(reader)
@@ -41,7 +42,7 @@ writer_2.writerow(header)
 # MAZ_ORIGINAL > (county_code-1) * 10000 & MAZ_ORIGINAL < (county_code * 10000)
 # then the MAZ is in the selected county; if so, dont collapse
 for row in reader:
-    origMAZ = float(row[2])
+    origMAZ = float(row[mazCol])
 ##    print origMAZ
     if ((origMAZ> ((cntyCode-1)*100000)) and (origMAZ< (cntyCode*100000))):
         writer_1.writerow(row)
@@ -68,7 +69,7 @@ header = list(data)
 keyField = ["TAZ"]
 other = ["MAZ", "MAZ_ORIGINAL", "TAZ_ORIGINAL", "mall_flag"]
 avgAll = ["hparkcost", "numfreehrs", "dparkcost", "mparkcost"]
-commObs = ["ech_dist", "hch_dist", "parkarea"]
+commObs = ["ech_dist", "hch_dist", "parkarea", "CountyID", "CountyName", "DistID", "DistName"]
 #nonObs = ["TotInt", "DUDen", "EmpDen", "PopDen", "RetEmpDen", "IntDenBin", "EmpDenBin", "DuDenBin"]
 nonObs = []
 # Fill sumAll list with remaining fields
@@ -120,13 +121,15 @@ outDf = pd.concat(frames)
 
 outDf['MAZ_ORIGINAL'] = outDf.MAZ_ORIGINAL.astype(int)
 outDf['TAZ_ORIGINAL'] = outDf.TAZ_ORIGINAL.astype(int)
+# dont write out TAZ
+#outDf['TAZ'] = outDf.TAZ.astype(int)
 outDf = outDf.sort_values(by='MAZ_ORIGINAL', ascending=True)
 
 count = 1
 for row in outDf.iterrows():
     count+=1
 outDf['MAZ'] = (range(1, count, 1))
-outDf['TAZ'] = 0
+# outDf['TAZ'] = 0
 # Zero outfields to leave blank ('nonObs" fields)
 for field in nonObs:
     outDf[field] = 0

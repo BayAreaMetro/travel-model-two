@@ -964,7 +964,7 @@ public class CtrampApplication implements Serializable
 
                     Household household = householdArray[i];
                     int hhid = household.getHhId();
-                    int ao = household.getAutoOwnershipModelResult();
+                    int ao = household.getAutosOwned();
 
                     outStream.println(String.format("%d,%d", hhid, ao));
 
@@ -1012,7 +1012,7 @@ public class CtrampApplication implements Serializable
             {
 
                 Household household = householdArray[i];
-                int ao = household.getAutoOwnershipModelResult();
+                int ao = household.getAutosOwned();
                 if (ao > hhsByAutoOwnership.length - 1) ao = hhsByAutoOwnership.length - 1;
 
                 int gq = household.getIsGroupQuarters();

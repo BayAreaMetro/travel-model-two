@@ -547,9 +547,9 @@ public class TazDataManager
         switch (aMode)
         {
             case PARK_N_RIDE:
-                return (tazParkNRideTaps[taz][1][pos] * 0.01f);
+                return (tazParkNRideTaps[taz][1][pos]);
             case KISS_N_RIDE:
-                return (tazKissNRideTaps[taz][1][pos] * 0.01f);
+                return (tazKissNRideTaps[taz][1][pos]);
             default:
                 throw new RuntimeException(
                         "Error trying to get ParkRideOrKissRideTaps for invalid access mode: "
@@ -596,9 +596,9 @@ public class TazDataManager
         switch (aMode)
         {
             case PARK_N_RIDE:
-                return (tazParkNRideTaps[taz][2][pos] * 0.01f);
+                return tazParkNRideTaps[taz][2][pos]/5280f;
             case KISS_N_RIDE:
-                return (tazKissNRideTaps[taz][2][pos] * 0.01f);
+                return tazKissNRideTaps[taz][2][pos]/5180f;
             default:
                 throw new RuntimeException(
                         "Error trying to get ParkRideOrKissRideTaps for invalid access mode: "

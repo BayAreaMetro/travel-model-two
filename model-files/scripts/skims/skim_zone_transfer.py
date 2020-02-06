@@ -4,7 +4,7 @@ skim_zone_transfer.py zone_mapping_file skim_file columns_to_transfer [transfer_
     Transfer the zones listed in a csv skim file to the sequence zone numbering. The transfer
     will happen to the first n columns, where n is specified when calling this script
 
-    Arguments: zone_mapping_file: a headerless csv file holding a mapping from zone->TAZ,MAZ,TAP,EXT
+    Arguments: zone_mapping_file: a csv file holding a mapping from zone->TAZ,MAZ,TAP,EXT
                skim_file: the (headerless csv ) skim file to transfer - it will be replaced by this process
                columns_to_transfer: the number of columns to transfer
                transfer_types: if present, they type of transfer for each column; if this is present, then
@@ -17,7 +17,7 @@ skim_zone_transfer.py zone_mapping_file skim_file columns_to_transfer [transfer_
                                  EXT - going from sequence to original node numbering for EXTs
 
 """
-import sys,os
+import csv,sys,os,shutil
 
 zone_mapping_file = os.path.abspath(sys.argv[1])
 skim_file = os.path.abspath(sys.argv[2])
@@ -35,20 +35,20 @@ taz_mapping = {}
 maz_mapping = {}
 tap_mapping = {}
 ext_mapping = {}
-for line in open(zone_mapping_file):
-    data = map(int,line.strip().split(','))
-    if data[1] > 0:
-        seq_mapping[data[0]] = str(data[1])
-        taz_mapping[data[1]] = str(data[0])
-    if data[2] > 0:
-        seq_mapping[data[0]] = str(data[2])
-        maz_mapping[data[2]] = str(data[0])
-    if data[3] > 0:
-        seq_mapping[data[0]] = str(data[3])
-        tap_mapping[data[3]] = str(data[0])
-    if data[4] > 0:
-        seq_mapping[data[0]] = str(data[4])
-        ext_mapping[data[4]] = str(data[0])
+reader = csv.DictReader(open(zone_mapping_file))
+for data in reader:
+    if int(data["TAZSEQ"]) > 0:
+        seq_mapping[int(data["N"     ])] = str(data["TAZSEQ"])
+        taz_mapping[int(data["TAZSEQ"])] = str(data["N"     ])
+    if int(data["MAZSEQ"]) > 0:
+        seq_mapping[int(data["N"     ])] = str(data["MAZSEQ"])
+        maz_mapping[int(data["MAZSEQ"])] = str(data["N"     ])
+    if int(data["TAPSEQ"]) > 0:
+        seq_mapping[int(data["N"     ])] = str(data["TAPSEQ"])
+        tap_mapping[int(data["TAPSEQ"])] = str(data["N"     ])
+    if int(data["EXTSEQ"]) > 0:
+        seq_mapping[int(data["N"     ])] = str(data["EXTSEQ"])
+        ext_mapping[int(data["EXTSEQ"])] = str(data["N"     ])
 
 if transfer:
     for i in range(columns_to_transfer):
@@ -64,6 +64,9 @@ if transfer:
             transfer[i] = ext_mapping
         else:
             raise Exception('Unknown transfer: ' + transfer[i])
+
+# save the original?
+# shutil.copy2(skim_file, skim_file + '.bak')
 
 temp_skim_file = skim_file + '.tmp'
 f = open(temp_skim_file,'wb')

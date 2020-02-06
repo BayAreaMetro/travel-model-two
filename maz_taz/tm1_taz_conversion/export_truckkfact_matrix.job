@@ -1,0 +1,16 @@
+;;
+;; export truck k factors to csv
+;;
+
+RUN PGM=MATRIX
+
+  filei mati[1]   = "M:\Development\Travel Model One\Trucks\nonres\truckkfact.k22.z1454.mat"
+  fileo printo[1] = "truckkfact.k22.z1454.csv"
+
+  if (I == 1) print CSV=T PRINTO=1 LIST="I","J","truck_k"
+
+  JLOOP
+    print CSV=T PRINTO=1 LIST=I(L), J(L), MI.1.truck_k(16.3L)
+  ENDJLOOP
+
+ENDRUN

@@ -42,9 +42,9 @@ LOOP PERIOD = 1,5
         ZONES=%TAP_COUNT%
         
         ;input matrices 
-        MATI[1] = "skims\transit_skims_@TOKEN_PERIOD@_SET1.TPP"
-        MATI[2] = "skims\transit_skims_@TOKEN_PERIOD@_SET2.TPP"
-        MATI[3] = "skims\transit_skims_@TOKEN_PERIOD@_SET3.TPP"
+        MATI[1] = skims\transit_skims_@TOKEN_PERIOD@_SET1.TPP
+        MATI[2] = skims\transit_skims_@TOKEN_PERIOD@_SET2.TPP
+        MATI[3] = skims\transit_skims_@TOKEN_PERIOD@_SET3.TPP
         
         FILLMW MW[1]= MI.1.COMPCOST
         FILLMW MW[2]= MI.1.IWAIT
@@ -62,53 +62,71 @@ LOOP PERIOD = 1,5
         FILLMW MW[14]=MI.1.HR_TIME
         FILLMW MW[15]=MI.1.CR_TIME
         FILLMW MW[16]=MI.1.BEST_MODE
+		
+		FILLMW MW[18]=MI.1.CWDWAITA
+		FILLMW MW[19]=MI.1.CWDWAITP
+		FILLMW MW[20]=MI.1.CWDCOSTP
+		FILLMW MW[21]=MI.1.EXCESSDEMAND
+		FILLMW MW[22]=MI.1.EXCESSPROP
+       
+        FILLMW MW[27]=MI.2.COMPCOST 
+        FILLMW MW[28]=MI.2.IWAIT    
+        FILLMW MW[29]=MI.2.XWAIT    
+        FILLMW MW[30]=MI.2.XPEN     
+        FILLMW MW[31]=MI.2.BRDPEN   
+        FILLMW MW[32]=MI.2.XFERS    
+        FILLMW MW[33]=MI.2.FARE     
+        FILLMW MW[34]=MI.2.XWTIME   
+        FILLMW MW[35]=MI.2.AEWTIME  
+        FILLMW MW[36]=MI.2.LB_TIME  
+        FILLMW MW[37]=MI.2.EB_TIME  
+        FILLMW MW[38]=MI.2.FR_TIME  
+        FILLMW MW[39]=MI.2.LR_TIME  
+        FILLMW MW[40]=MI.2.HR_TIME  
+        FILLMW MW[41]=MI.2.CR_TIME   
+        FILLMW MW[42]=MI.2.BEST_MODE
+		
+		FILLMW MW[44]=MI.2.CWDWAITA
+		FILLMW MW[45]=MI.2.CWDWAITP
+		FILLMW MW[46]=MI.2.CWDCOSTP
+		FILLMW MW[47]=MI.2.EXCESSDEMAND
+		FILLMW MW[48]=MI.2.EXCESSPROP
         
-        FILLMW MW[21]=MI.2.COMPCOST 
-        FILLMW MW[22]=MI.2.IWAIT    
-        FILLMW MW[23]=MI.2.XWAIT    
-        FILLMW MW[24]=MI.2.XPEN     
-        FILLMW MW[25]=MI.2.BRDPEN   
-        FILLMW MW[26]=MI.2.XFERS    
-        FILLMW MW[27]=MI.2.FARE     
-        FILLMW MW[28]=MI.2.XWTIME   
-        FILLMW MW[29]=MI.2.AEWTIME  
-        FILLMW MW[30]=MI.2.LB_TIME  
-        FILLMW MW[31]=MI.2.EB_TIME  
-        FILLMW MW[32]=MI.2.FR_TIME  
-        FILLMW MW[33]=MI.2.LR_TIME  
-        FILLMW MW[34]=MI.2.HR_TIME  
-        FILLMW MW[35]=MI.2.CR_TIME   
-        FILLMW MW[36]=MI.2.BEST_MODE
-        
-        FILLMW MW[41]=MI.3.COMPCOST 
-        FILLMW MW[42]=MI.3.IWAIT    
-        FILLMW MW[43]=MI.3.XWAIT    
-        FILLMW MW[44]=MI.3.XPEN     
-        FILLMW MW[45]=MI.3.BRDPEN   
-        FILLMW MW[46]=MI.3.XFERS    
-        FILLMW MW[47]=MI.3.FARE     
-        FILLMW MW[48]=MI.3.XWTIME   
-        FILLMW MW[49]=MI.3.AEWTIME  
-        FILLMW MW[50]=MI.3.LB_TIME  
-        FILLMW MW[51]=MI.3.EB_TIME  
-        FILLMW MW[52]=MI.3.FR_TIME  
-        FILLMW MW[53]=MI.3.LR_TIME  
-        FILLMW MW[54]=MI.3.HR_TIME  
-        FILLMW MW[55]=MI.3.CR_TIME   
-        FILLMW MW[56]=MI.3.BEST_MODE
+        FILLMW MW[53]=MI.3.COMPCOST 
+        FILLMW MW[54]=MI.3.IWAIT    
+        FILLMW MW[55]=MI.3.XWAIT    
+        FILLMW MW[56]=MI.3.XPEN     
+        FILLMW MW[57]=MI.3.BRDPEN   
+        FILLMW MW[58]=MI.3.XFERS    
+        FILLMW MW[59]=MI.3.FARE     
+        FILLMW MW[60]=MI.3.XWTIME   
+        FILLMW MW[61]=MI.3.AEWTIME  
+        FILLMW MW[62]=MI.3.LB_TIME  
+        FILLMW MW[63]=MI.3.EB_TIME  
+        FILLMW MW[64]=MI.3.FR_TIME  
+        FILLMW MW[65]=MI.3.LR_TIME  
+        FILLMW MW[66]=MI.3.HR_TIME  
+        FILLMW MW[67]=MI.3.CR_TIME   
+        FILLMW MW[68]=MI.3.BEST_MODE
+		
+		FILLMW MW[70]=MI.3.CWDWAITA
+		FILLMW MW[71]=MI.3.CWDWAITP
+		FILLMW MW[72]=MI.3.CWDCOSTP
+		FILLMW MW[73]=MI.3.EXCESSDEMAND
+		FILLMW MW[74]=MI.3.EXCESSPROP
         
         ;if skim time components are the same, then set skims to 0 which is used for availability in CT-RAMP
-        MW[17] = MW[2] + MW[3] + MW[8] + MW[9] + MW[10] + MW[11] + MW[12] + MW[13] + MW[14] + MW[15]
-        MW[37] = MW[22]+ MW[23]+ MW[28]+ MW[29]+ MW[30] + MW[31] + MW[32] + MW[33] + MW[34] + MW[35]
-        MW[57] = MW[42]+ MW[43]+ MW[48]+ MW[49]+ MW[50] + MW[51] + MW[52] + MW[53] + MW[54] + MW[55]
+        MW[23] = MW[2] + MW[3] + MW[8] + MW[9] + MW[10] + MW[11] + MW[12] + MW[13] + MW[14] + MW[15]
+        MW[49] = MW[28]+ MW[29]+ MW[34]+ MW[35]+ MW[36] + MW[37] + MW[38] + MW[39] + MW[40] + MW[41]
+        MW[75] = MW[54]+ MW[55]+ MW[60]+ MW[61]+ MW[62] + MW[63] + MW[64] + MW[65] + MW[66] + MW[67]
         
         ;output matrices
-        MATO[1] = "skims\transit_skims_@TOKEN_PERIOD@_SET1_Adj.TPP",MO=1-16,
-          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
-        MATO[2] = "skims\transit_skims_@TOKEN_PERIOD@_SET2_Adj.TPP",MO=21-36,
-          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
-        MATO[3] = "skims\transit_skims_@TOKEN_PERIOD@_SET3_Adj.TPP",MO=41-56,
-          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE
+        MATO[1] = "skims\transit_skims_@TOKEN_PERIOD@_SET1_Adj.TPP",MO=1-16,18-22,
+          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE,CWDWAITA,CWDWAITP,CWDCOSTP,EXCESSDEMAND,EXCESSPROP
+        MATO[2] = "skims\transit_skims_@TOKEN_PERIOD@_SET2_Adj.TPP",MO=27-42,44-48,
+          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE,CWDWAITA,CWDWAITP,CWDCOSTP,EXCESSDEMAND,EXCESSPROP
+        MATO[3] = "skims\transit_skims_@TOKEN_PERIOD@_SET3_Adj.TPP",MO=53-68,70-74,
+          NAME = COMPCOST,IWAIT,XWAIT,XPEN,BRDPEN,XFERS,FARE,XWTIME,AEWTIME,LB_TIME,EB_TIME,FR_TIME,LR_TIME,HR_TIME,CR_TIME,BEST_MODE,CWDWAITA,CWDWAITP,CWDCOSTP,EXCESSDEMAND,EXCESSPROP
         
         ;NA-out OD pairs with the same values
         
@@ -122,13 +140,7 @@ LOOP PERIOD = 1,5
           ;PRINT LIST=I, J, MW[17][J], MW[37][J], MW[57][J], CSV=T, FILE=SkimSetsAdjustmentsLog.csv
           
           ;compare set 1 and 2
-          IF (MW[17][J] == MW[37][J])
-            MW[21][J] = NA
-            MW[22][J] = NA
-            MW[23][J] = NA
-            MW[24][J] = NA
-            MW[25][J] = NA
-            MW[26][J] = NA
+          IF (MW[23][J] == MW[49][J])
             MW[27][J] = NA
             MW[28][J] = NA
             MW[29][J] = NA
@@ -139,47 +151,97 @@ LOOP PERIOD = 1,5
             MW[34][J] = NA
             MW[35][J] = NA
             MW[36][J] = NA
+            MW[37][J] = NA
+            MW[38][J] = NA
+            MW[39][J] = NA
+            MW[40][J] = NA
+            MW[41][J] = NA
+            MW[42][J] = NA
+			
+			MW[44][J] = NA
+			MW[45][J] = NA
+			MW[46][J] = NA
+			MW[47][J] = NA
+			MW[48][J] = NA
           ENDIF
           
           ;compare set 1 and 3
-          IF (MW[17][J] == MW[57][J])
-            MW[41][J] = NA
-            MW[42][J] = NA
-            MW[43][J] = NA
-            MW[44][J] = NA
-            MW[45][J] = NA
-            MW[46][J] = NA
-            MW[47][J] = NA
-            MW[48][J] = NA
-            MW[49][J] = NA
-            MW[50][J] = NA
-            MW[51][J] = NA
-            MW[52][J] = NA
+          IF (MW[23][J] == MW[49][J])
             MW[53][J] = NA
             MW[54][J] = NA
             MW[55][J] = NA
             MW[56][J] = NA
+            MW[57][J] = NA
+            MW[58][J] = NA
+            MW[59][J] = NA
+            MW[60][J] = NA
+            MW[61][J] = NA
+            MW[62][J] = NA
+            MW[63][J] = NA
+            MW[64][J] = NA
+            MW[65][J] = NA
+            MW[66][J] = NA
+            MW[67][J] = NA
+            MW[68][J] = NA
+			
+			MW[70][J] = NA
+			MW[71][J] = NA
+			MW[72][J] = NA
+			MW[73][J] = NA
+			MW[74][J] = NA
           ENDIF
           
           ;compare set 2 and 3
-          IF (MW[37][J] == MW[57][J])
-            MW[41][J] = NA
-            MW[42][J] = NA
-            MW[43][J] = NA
-            MW[44][J] = NA
-            MW[45][J] = NA
-            MW[46][J] = NA
-            MW[47][J] = NA
-            MW[48][J] = NA
-            MW[49][J] = NA
-            MW[50][J] = NA
-            MW[51][J] = NA
-            MW[52][J] = NA
+          IF (MW[49][J] == MW[75][J])
             MW[53][J] = NA
             MW[54][J] = NA
             MW[55][J] = NA
             MW[56][J] = NA
+            MW[57][J] = NA
+            MW[58][J] = NA
+            MW[59][J] = NA
+            MW[60][J] = NA
+            MW[61][J] = NA
+            MW[62][J] = NA
+            MW[63][J] = NA
+            MW[64][J] = NA
+            MW[65][J] = NA
+            MW[66][J] = NA
+            MW[67][J] = NA
+            MW[68][J] = NA
+			
+			MW[70][J] = NA
+			MW[71][J] = NA
+			MW[72][J] = NA
+			MW[73][J] = NA
+			MW[74][J] = NA
           ENDIF
+          
+          ;if skimset 3 doesnt have both local and premium, make it NA
+          if(MW[62][J]==0 | (MW[63][J]+MW[64][J]+MW[65][J]+MW[66][J]+MW[67][J])==0)
+            MW[53][J] = NA
+            MW[54][J] = NA
+            MW[55][J] = NA
+            MW[56][J] = NA
+            MW[57][J] = NA
+            MW[58][J] = NA
+            MW[59][J] = NA
+            MW[60][J] = NA
+            MW[61][J] = NA
+            MW[62][J] = NA
+            MW[63][J] = NA
+            MW[64][J] = NA
+            MW[65][J] = NA
+            MW[66][J] = NA
+            MW[67][J] = NA
+            MW[68][J] = NA
+			
+			MW[70][J] = NA
+			MW[71][J] = NA
+			MW[72][J] = NA
+			MW[73][J] = NA
+			MW[74][J] = NA
+		  ENDIF
 
         ENDJLOOP
         
@@ -204,4 +266,3 @@ Wait4Files files = MTC_TRANSKIM1.script.end, MTC_TRANSKIM2.script.end, MTC_TRANS
 
 ;stop cluster nodes
 *Cluster.exe MTC_TRANSKIM 1-5 close exit
-

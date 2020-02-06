@@ -27,20 +27,32 @@ ENDRUN
 
 ;run script to add area type to network links
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\codeLinkAreaType.py .
+IF (RETURNCODE > 0) abort
 
 ;read in link data with area type and calculate capclass
 RUN PGM=NETWORK
-;    PAR  NODES=10000000
     NETI = hwy\mtc_final_network_with_tolls.net
     LINKI[2] = hwy\link_area_type.csv VAR=A,B,AT
     NETO = hwy\mtc_final_network_with_tolls_areatype.net
 
     PHASE=LINKMERGE
+      MAZMAZVOL=0
+       
         IF (AT < 0)
             CAPCLASS = -1
         ELSE
-            CAPCLASS = 10*AT + FT
+            CAPCLASS = 15*AT + FT
         ENDIF
+
+        SPEED = FFS * SPD_FAC
+	    FFS = SPEED
+	
+        if (FFS > 0)
+          FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
+        else
+          FFT = (60.0 / 5280.0) * FEET / 25 ; put a default of 25 mph
+	    endif
+ 
     ENDPHASE
 ENDRUN
 

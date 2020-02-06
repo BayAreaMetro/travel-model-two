@@ -24,20 +24,61 @@ tap_lines_file = os.path.join(base_dir,r'trn\tapLines.csv')
 
 start_time = pytime.time()
 
-print 'reading transit lines'
+print 'reading transit lines from {}'.format(transit_line_file)
 linesByNode = dict()
-for line in open(transit_line_file):
-  split_line = map(str.strip,re.split('[=,]',line.strip()))
+trn_line = ""
+for temp_line in open(transit_line_file):
+  # strip leading and trailing whitespace
+  temp_line = temp_line.strip()
+
+  # if our line has a comment - cut it out
+  semicolon_index = temp_line.find(";")
+  if semicolon_index >= 0:
+    temp_line = temp_line[:semicolon_index].strip()
+    
+  # skip blank lines
+  if len(temp_line)==0: continue
+
+  # append to our transit line string
+  trn_line = trn_line + temp_line
+
+  # if it ends in a comma, continue until we find the end
+  if temp_line[-1]==",":
+    continue
+
+  # print("trn_line={}".format(trn_line))
+
+  split_line = map(str.strip,re.split('[=,]',trn_line.strip()))
   if len(split_line) < 3:
     continue
   
   lineName = split_line[1]
-  for i in range(split_line.index('N') + 1,len(split_line)):
-    n = int(split_line[i])
+  iter = split_line.index('N') + 1
+  while iter < len(split_line):
+    #skip NNTIME,TIME,ACCESS,etc token and value
+    if split_line[iter] in ["NNTIME", "TIME", "ACCESS", "ACCESS_C", "DELAY", "DELAY_C", "DWELL", "DWELL_C"]:
+        iter = iter + 2
+        continue
+    #skip N token
+    if (split_line[iter] == "N"):
+        iter = iter + 1
+        continue
+    n = int(split_line[iter])
     if n > 0:
       if n not in linesByNode:
         linesByNode[n] = set()
       linesByNode[n].add(lineName.replace('"',""))
+    iter = iter + 1
+
+  # just processed the line, rset
+  trn_line = ""
+	
+#  for i in range(split_line.index('N') + 1,len(split_line)):
+#    n = int(split_line[i])
+#    if n > 0:
+#      if n not in linesByNode:
+#        linesByNode[n] = set()
+#      linesByNode[n].add(lineName.replace('"',""))
 
 print 'reading tap connectors'
 access_links = []
@@ -49,10 +90,10 @@ with open(network_tap_links_file, 'rb') as csvfile:
 print 'reading zone sequence file'
 tapToSeqTap = dict()
 with open(zone_seq_file, 'rb') as csvfile:
-  tapreader = csv.reader(csvfile, skipinitialspace=True)
+  tapreader = csv.DictReader(csvfile)
   for row in tapreader:
-    node_id = int(row[0])
-    seq_tap_id = int(row[3])
+    node_id = int(row["N"])
+    seq_tap_id = int(row["TAPSEQ"])
     if seq_tap_id > 0:
       tapToSeqTap[node_id] = seq_tap_id
 
@@ -87,6 +128,7 @@ for tap in linesByTap.keys():
   if lines != "":
     f.write("%s,%s\n" % (tapToSeqTap[tap],lines))
 f.close()
+print("wrote {}".format(tap_lines_file))
 
 end_time = pytime.time()
-print 'elapsed time in seconds: ' + str((end_time - start_time) / 1000.0)
+print 'elapsed time in minutes: ' + str((end_time - start_time) / 60.0)

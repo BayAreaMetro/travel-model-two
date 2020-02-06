@@ -80,6 +80,12 @@ public class SchoolLocationChoiceModel implements Serializable {
         this.aggAcc = aggAcc;
         this.dcSizeObj = dcSizeObj;
         this.mcModel = mcModel;
+        
+        if(soaSampleSize> MAXIMUM_SOA_ALTS_FOR_ANY_MODEL) {
+        	logger.fatal("Attempting to create work location model with more SOA alternatives ("+soaSampleSize+") than maximum ("+MAXIMUM_SOA_ALTS_FOR_ANY_MODEL+")");
+        	throw new RuntimeException();
+        }
+
         this.soaSampleSize = soaSampleSize;
         
         modelIndex = index;

@@ -144,7 +144,11 @@ public class AutoTazSkimsCalculator
     }                                                                                                           
                                                                                                                 
                                                                                                                 
-    public double[][][] getStoredFromTazToAllTazsDistanceSkims() {                                              
+   public double getTazToTazDistance(int period, int oTaz, int dTaz){
+    	
+    	return storedFromTazDistanceSkims[period][oTaz][dTaz];
+    }
+   public double[][][] getStoredFromTazToAllTazsDistanceSkims() {                                              
         return storedFromTazDistanceSkims;                                                                      
     }                                                                                                           
                                                                                                                 

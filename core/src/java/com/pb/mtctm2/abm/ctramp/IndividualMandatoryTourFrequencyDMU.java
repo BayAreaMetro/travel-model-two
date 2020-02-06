@@ -198,7 +198,7 @@ public class IndividualMandatoryTourFrequencyDMU
 
     public int getAutos()
     {
-        return (household.getAutoOwnershipModelResult());
+        return (household.getAutosOwned());
     }
 
     public int getDrivers()

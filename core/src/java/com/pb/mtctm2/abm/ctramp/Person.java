@@ -501,6 +501,7 @@ public class Person
             else tempTour.setTourDestMgra(workLoc);
 
             tempTour.setTourPurpose(tourPurpose);
+    		tempTour.setDestinationChoiceLogsum(workLocLogsum);
 
             tempTour.setTourDepartPeriod(-1);
             tempTour.setTourArrivePeriod(-1);
@@ -568,6 +569,8 @@ public class Person
                 tempTour.setTourDestMgra(schoolLoc);
 
             tempTour.setTourPurpose(tourPurpose);
+
+    		tempTour.setDestinationChoiceLogsum(schoolLocLogsum);
 
             tempTour.setTourDepartPeriod(-1);
             tempTour.setTourArrivePeriod(-1);

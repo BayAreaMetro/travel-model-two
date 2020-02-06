@@ -46,10 +46,11 @@
 
 ; put kfactors into sequential ordering
  *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\assign\taz_matrix_transfer.py . nonres\truck_kfactors_taz.csv nonres\truck_kfactors_taz_seq.csv
+IF (ReturnCode != 0) ABORT
 
-run pgm = matrix         
+run pgm = matrix
     filei mati[1] = nonres\truck_kfactors_taz_seq.csv, pattern = IJM:V, fields=#1,2,0,3 SKIPRECS=1
-    fileo mato = nonres\truck_kfactors.mat, mo = 1, name = kfactors
+    fileo mato = nonres\truck_kfactors.tpp, mo = 1, name = kfactors
     ZONES = %TAZ_COUNT%
     mw[1]  = mi.1.1
 endrun
@@ -99,20 +100,17 @@ Wait4Files Files=MTC_TRUCK1.script.end
 run pgm = tripdist
 
    ; read in the trip generation output
-   filei zdati[1] = nonres\TruckTG.dat, z = 1-12, verySmallTruckP = 13-24, verySmallTruckA = 25-36,
-                                                      smallTruckP = 37-48,     smallTruckA = 49-60,
-                                                     mediumTruckP = 61-72,    mediumTruckA = 73-84, 
-                                                      largeTruckP = 85-96,     largeTruckA = 97-108
-                                                
+   filei zdati[1] = nonres\TruckTG.dbf, Z=TAZ
+
    ; read in the level of service matrix with the blended time
    filei mati[1] = nonres\blendedTruckTime.tpp
    
    ; read in the k-factors
-   filei mati[2] = nonres\truck_kfactors.mat
+   filei mati[2] = nonres\truck_kfactors.tpp
    
    ; write out the results
-   fileo mato[1] = nonres\DailyTruckTrips.tpp, mo = 5-8, name = verySmall, small, medium, large 
-                                                
+   fileo mato[1] = nonres\DailyTruckTrips.tpp, mo = 5-8, name = verySmall, small, medium, large
+
    ; set the parameters
    ;   - maximum iterations is 99
    maxiters = 99
@@ -124,26 +122,26 @@ run pgm = tripdist
    zones = %TAZ_COUNT%
    
    ; set the production and attraction variables
-   setpa p[1] = zi.1.verySmallTruckP
-   setpa a[1] = zi.1.verySmallTruckA
+   setpa p[1] = zi.1.TRK_VSM_P
+   setpa a[1] = zi.1.TRK_VSM_A
    
-   setpa p[2] = zi.1.smallTruckP
-   setpa a[2] = zi.1.smallTruckA
+   setpa p[2] = zi.1.TRK_SML_P
+   setpa a[2] = zi.1.TRK_SML_A
    
-   setpa p[3] = zi.1.mediumTruckP
-   setpa a[3] = zi.1.mediumTruckA
+   setpa p[3] = zi.1.TRK_MED_P
+   setpa a[3] = zi.1.TRK_MED_A
    
-   setpa p[4] = zi.1.largeTruckP
-   setpa a[4] = zi.1.largeTruckA
+   setpa p[4] = zi.1.TRK_LRG_P
+   setpa a[4] = zi.1.TRK_LRG_A
    
    ; set the friction factors (time is in column 1, very small FF in 2, small FF in 3, medium FF in 4, and large FF in 5)
-   lookup list = Y, file = nonres\truckFF.dat, name = truckff, 
+   lookup list = Y, file = nonres\truckFF.dat, name = truckff,
           lookup[1] = 1, result = 2,
           lookup[2] = 1, result = 3,
           lookup[3] = 1, result = 4,
           lookup[4] = 1, result = 5,
           interpolate = Y, setupper = N
-          
+
    ; apply the gravity models (note the very small trucks do not use the K-factors)
    gravity purpose = 1, los = mi.1.timeVSM, ffactors = truckff
    gravity purpose = 2, los = mi.1.timeSML, ffactors = truckff, kfactors = mi.2.kfactors

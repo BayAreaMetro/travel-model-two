@@ -101,7 +101,16 @@ loop period = 1, 5
       neto = hwy\msamerge%ITERATION%_@token_period@.net
       
       ; set the v/c ratio
-      vc@token_period@ = VC
+      vc@token_period@ = VC_1
+
+      ; set the total capacity
+      cap@token_period@ = CAP_TOTFAC
+
+      ; set the freeflow speed
+      ffs@token_period@ = FFS
+
+      ; set the distance
+      dist@token_period@ = FEET / 5280
       
       ; set the assignment-class-specific volumes: non-value-toll-paying classes
       vol@token_period@_da = VOL_DA                     
@@ -129,19 +138,19 @@ loop period = 1, 5
       if ((FT != 6) & (FT != 0))
       
          ; delay is the congested time minus the free-flow time, weighted by the link volume, and converted from minutes to hours
-         delay@token_period@ = (CTIM - FFT) * vol@token_period@_tot / 60.0
+         delay@token_period@ = (TIME_1 - FFT) * vol@token_period@_tot / 60.0
          
          ; vehicle-miles traveled is the distance weighted by the volume
          vmt@token_period@ = FEET * vol@token_period@_tot / 5280.0
          
          ; vehicle-hours traveled is the congested travel time (expressed here in minutes) weighted by the volume, and converted from minutes to hours
-         vht@token_period@ = CTIM * vol@token_period@_tot / 60.0 
+         vht@token_period@ = TIME_1 * vol@token_period@_tot / 60.0 
          
          ctim@token_period@ = CTIM
          
-        if (CTIM > 0)
-            cspd@token_period@ = FEET / CTIM / 5280.0 * 60.0
-        endif
+        
+         cspd@token_period@ = CSPD_1
+        
          
          
       endif ; facility type is not six check
@@ -181,11 +190,11 @@ run pgm = hwynet
                      TOLLPM_DA,TOLLPM_S2,TOLLPM_S3,TOLLPM_VSM,TOLLPM_SML,TOLLPM_MED,TOLLPM_LRG,
                      TOLLEV_DA,TOLLEV_S2,TOLLEV_S3,TOLLEV_VSM,TOLLEV_SML,TOLLEV_MED,TOLLEV_LRG,
                      PEMSID,AT,CAPCLASS,FFT,A_NEW_NODE,OLD_A,B_NEW_NODE,OLD_B,
-                     vcEA,volEA_da,volEA_s2,volEA_s3,volEA_sm,volEA_hv,volEA_daT,volEA_s2T,volEA_s3T,volEA_smT,volEA_hvT,volEA_maz,volEA_tot,delayEA,vmtEA,vhtEA,ctimEA,cspdEA,
-                     vcAM,volAM_da,volAM_s2,volAM_s3,volAM_sm,volAM_hv,volAM_daT,volAM_s2T,volAM_s3T,volAM_smT,volAM_hvT,volAM_maz,volAM_tot,delayAM,vmtAM,vhtAM,ctimAM,cspdAM,
-                     vcMD,volMD_da,volMD_s2,volMD_s3,volMD_sm,volMD_hv,volMD_daT,volMD_s2T,volMD_s3T,volMD_smT,volMD_hvT,volMD_maz,volMD_tot,delayMD,vmtMD,vhtMD,ctimMD,cspdMD,
-                     vcPM,volPM_da,volPM_s2,volPM_s3,volPM_sm,volPM_hv,volPM_daT,volPM_s2T,volPM_s3T,volPM_smT,volPM_hvT,volPM_maz,volPM_tot,delayPM,vmtPM,vhtPM,ctimPM,cspdPM,
-                     vcEV,volEV_da,volEV_s2,volEV_s3,volEV_sm,volEV_hv,volEV_daT,volEV_s2T,volEV_s3T,volEV_smT,volEV_hvT,volEV_maz,volEV_tot,delayEV,vmtEV,vhtEV,ctimEV,cspdEV
+                     capEA,vcEA,volEA_da,volEA_s2,volEA_s3,volEA_sm,volEA_hv,volEA_daT,volEA_s2T,volEA_s3T,volEA_smT,volEA_hvT,volEA_maz,volEA_tot,delayEA,distEA,vmtEA,vhtEA,ctimEA,cspdEA,ffsEA,
+                     capAM,vcAM,volAM_da,volAM_s2,volAM_s3,volAM_sm,volAM_hv,volAM_daT,volAM_s2T,volAM_s3T,volAM_smT,volAM_hvT,volAM_maz,volAM_tot,delayAM,distAM,vmtAM,vhtAM,ctimAM,cspdAM,ffsAM,
+                     capMD,vcMD,volMD_da,volMD_s2,volMD_s3,volMD_sm,volMD_hv,volMD_daT,volMD_s2T,volMD_s3T,volMD_smT,volMD_hvT,volMD_maz,volMD_tot,delayMD,distMD,vmtMD,vhtMD,ctimMD,cspdMD,ffsMD,
+                     capPM,vcPM,volPM_da,volPM_s2,volPM_s3,volPM_sm,volPM_hv,volPM_daT,volPM_s2T,volPM_s3T,volPM_smT,volPM_hvT,volPM_maz,volPM_tot,delayPM,distPM,vmtPM,vhtPM,ctimPM,cspdPM,ffsPM,
+                     capEV,vcEV,volEV_da,volEV_s2,volEV_s3,volEV_sm,volEV_hv,volEV_daT,volEV_s2T,volEV_s3T,volEV_smT,volEV_hvT,volEV_maz,volEV_tot,delayEV,distEV,vmtEV,vhtEV,ctimEV,cspdEV,ffsEV
                      
 
      
@@ -287,6 +296,12 @@ run pgm = network
                 "volMD_tot,",
                 "volPM_tot,",
                 "volEV_tot,",
+		"vol24hr_tot,",
+                "capEA,",
+                "capAM,",
+                "capMD,",
+                "capPM,",
+                "capEV,",
                 "ctimEA,",
                 "ctimAM,",
                 "ctimMD,",
@@ -322,6 +337,12 @@ run pgm = network
              volMD_tot(12.2),",",
              volPM_tot(12.2),",",
              volEV_tot(12.2),",",
+             vol24hr_tot(12.2),",",
+             capEA(8.2),",",
+             capAM(8.2),",",
+             capMD(8.2),",",
+             capPM(8.2),",",
+             capEV(8.2),",",
              ctimEA(8.2),",",
              ctimAM(8.2),",",
              ctimMD(8.2),",",

@@ -129,7 +129,7 @@ public class DestChoiceSize
     /**
      * Scale the destination choice size values so that the total modeled
      * destinations by segment match the total origins. total Origin/Destination
-     * constraining usuallu done for home oriented mandatory tours, e.g. work
+     * constraining usually done for home oriented mandatory tours, e.g. work
      * university, school. This method also has the capability to read a file of
      * destination size adjustments and apply them during the balancing procedure.
      * This capability was used in the Morpc model and was transferred to the
@@ -140,7 +140,7 @@ public class DestChoiceSize
      *            residence zone, subzone, by segment.
      * 
      */
-    public void balanceSizeVariables(int[][] originsByHomeMgra)
+    public void balanceSizeVariables(double[][] originsByHomeMgra)
     {
 
         // store the original size variable values.
@@ -300,7 +300,7 @@ public class DestChoiceSize
 
     }
 
-    public void updateShadowPrices(int[][] modeledDestinationLocationsByDestMgra)
+    public void updateShadowPrices(double[][] modeledDestinationLocationsByDestMgra)
     {
 
         // get the number of MGRAs
@@ -322,7 +322,7 @@ public class DestChoiceSize
 
     }
 
-    public void reportMaxDiff(int iteration, int[][] modeledDestinationLocationsByDestMgra)
+    public void reportMaxDiff(int iteration, double[][] modeledDestinationLocationsByDestMgra)
     {
 
         double[] maxSize = {10, 100, 1000, Double.MAX_VALUE};
@@ -467,7 +467,7 @@ public class DestChoiceSize
 
     }
 
-    public void saveSchoolMaxDiffValues(int iteration, int[][] modeledDestinationLocationsByDestMgra)
+    public void saveSchoolMaxDiffValues(int iteration, double[][] modeledDestinationLocationsByDestMgra)
     {
 
         // define labels for the schoolsegment categories
@@ -606,7 +606,7 @@ public class DestChoiceSize
     }
     
 
-    public void saveWorkMaxDiffValues(int iteration, int[][] modeledDestinationLocationsByDestMgra)
+    public void saveWorkMaxDiffValues(int iteration, double[][] modeledDestinationLocationsByDestMgra)
     {
 
         // define labels for the schoolsegment categories
@@ -737,8 +737,8 @@ public class DestChoiceSize
         return noShadowPriceSchoolSegmentIndices.contains( segment );
     }
     
-    public void updateShadowPricingInfo(int iteration, int[][] originsByHomeMgra,
-            int[][] modeledDestinationLocationsByDestMgra, String mandatoryType)
+    public void updateShadowPricingInfo(int iteration, double[][] originsByHomeMgra,
+            double[][] modeledDestinationLocationsByDestMgra, String mandatoryType)
     {
 
         // get the number of MGRAs

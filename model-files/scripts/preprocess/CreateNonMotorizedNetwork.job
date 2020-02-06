@@ -60,7 +60,7 @@ RUN PGM=NETWORK
     
     PHASE=LINKMERGE
         ;pedestrian links only; FRC != 8 is used to drop off TANA ferry and other non-street links; EXT links are not included in non-motorized network
-        IF (((FT=0 | FT=3 | FT=4 | FT=6 | FT=7) & (CNTYPE='TANA' | CNTYPE='PED' | CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='TAP')) | (BIKEPEDOK=1))
+        IF (((FT=0 | FT=3 | FT=4 | FT=6 | FT=7 | FT=11 | FT=12 | FT=13 | FT=14) & (CNTYPE='TANA' | CNTYPE='PED' | CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='TAP')) | (BIKEPEDOK=1))
             ;Keep record
         ELSE
             DELETE
@@ -103,7 +103,7 @@ RUN PGM=NETWORK
     
     PHASE=LINKMERGE
         ;bike links only; FRC != 8 is used to drop off TANA ferry and other non-street links
-        IF (((FT=0 | FT=3 | FT=4 | FT=6 | FT=7) & (CNTYPE='TANA' | CNTYPE='BIKE' | CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='TAP')) | (BIKEPEDOK=1))
+        IF (((FT=0 | FT=3 | FT=4 | FT=6 | FT=7 | FT=11 | FT=12 | FT=13 | FT=14) & (CNTYPE='TANA' | CNTYPE='BIKE' | CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='TAP')) | (BIKEPEDOK=1))
             ;Keep record
         ELSE
             DELETE

@@ -3,6 +3,7 @@ package com.pb.mtctm2.abm.ctramp;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Random;
+
 import com.pb.common.calculator.IndexValues;
 import com.pb.common.calculator.VariableTable;
 import com.pb.mtctm2.abm.accessibilities.AutoAndNonMotorizedSkimsCalculator;
@@ -68,7 +69,8 @@ public class TourModeChoiceModel
         mcDmuObject = dmuFactory.getModeChoiceDMU();
         setupModeChoiceModelApplicationArray(propertyMap, tourCategory);
 
-        mgraManager = MgraDataManager.getInstance();        
+        mgraManager = MgraDataManager.getInstance();     
+        
     }
 
 

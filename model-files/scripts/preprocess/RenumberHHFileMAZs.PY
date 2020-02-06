@@ -13,12 +13,15 @@ from shutil import copyfile
 
 # Variables: Input
 inHHs = sys.argv[1] # "households.csv"
+#inHHs = 'E:\\projects\\clients\\marin\\2015_test_2019_02_13\\popsyn\\households.csv'
 inMAZs = sys.argv[2] # "maz_data.csv"
+#inMAZs = 'E:\\projects\\clients\\marin\\2015_test_2019_02_13\\landuse\\maz_data.csv'
 
 print inHHs
 print inMAZs
 
 cntyCode = int(sys.argv[3]) # 9
+#cntyCode = 9
 print cntyCode
 
 # Open MAZ file for reading
@@ -28,17 +31,21 @@ header = list(readFile.readline().strip().split(','))
 # Find columns
 seqMazColumn = header.index('MAZ')
 seqTazColumn = header.index('TAZ')
+origMazColumn = header.index('MAZ_ORIGINAL')
 
 # Create file reader
 reader = csv.reader(readFile, delimiter=',')
 
 seqTazToMazMap = {} #Note: map will contain junk for TAZs in select county, because these have not been collapsed
+origMazToSeqMazMap = {}
 
 for row in reader:
     seqMaz = int(row[seqMazColumn])
     seqTaz = int(row[seqTazColumn])
+    origMaz = int(row[origMazColumn])
     seqTazToMazMap[seqTaz] = seqMaz
-
+    origMazToSeqMazMap[origMaz] = seqMaz
+    
 del reader
 readFile.close()
 
@@ -69,17 +76,21 @@ writer = csv.writer(collapseFile, delimiter=',')
 writer.writerow(header)
 
 # Find columns
-mazColumn = header.index('maz')
-tazColumn = header.index('taz')
+mazColumn = header.index('MAZ')
+tazColumn = header.index('TAZ')
+origMazColumn = header.index('ORIG_MAZ')
+origTazColumn = header.index('ORIG_TAZ')
 
 # MAZ_ORIGINAL > (county_code-1) * 10000 & MAZ_ORIGINAL < (county_code * 10000)
 # then the MAZ is in the selected county; if so, dont collapse
 for row in reader:
-    origMAZ = float(row[mazColumn])
+    origMAZ = float(row[origMazColumn])
     if ((origMAZ> ((cntyCode-1)*100000)) and (origMAZ< (cntyCode*100000))):
+        newMAZ = origMazToSeqMazMap[origMAZ]
+        row[mazColumn] = newMAZ
         writer.writerow(row)
     else:
-		TAZ = float(row[tazColumn])
+		TAZ = int(row[tazColumn])
 		newMAZ = seqTazToMazMap[TAZ]
 		row[mazColumn] = newMAZ
 		writer.writerow(row)

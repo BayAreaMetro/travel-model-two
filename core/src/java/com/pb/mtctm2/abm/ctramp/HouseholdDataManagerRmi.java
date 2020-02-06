@@ -81,58 +81,58 @@ public class HouseholdDataManagerRmi
         return (Integer) remote.method("getArrayIndex", objArray);
     }
 
-    public int[] getWorksAtHomeBySegment(HashMap<Integer, Integer> segmentValueIndexMap)
+    public double[] getWorksAtHomeBySegment(HashMap<Integer, Integer> segmentValueIndexMap)
     {
         Object[] objArray = {segmentValueIndexMap};
-        return (int[]) remote.method("getWorksAtHomeBySegment", objArray);
+        return (double[]) remote.method("getWorksAtHomeBySegment", objArray);
     }
     
-    public int[][] getWorkToursByDestMgra(HashMap<Integer, Integer> segmentValueIndexMap)
+    public double[][] getWorkToursByDestMgra(HashMap<Integer, Integer> segmentValueIndexMap)
     {
         Object[] objArray = {segmentValueIndexMap};
-        return (int[][]) remote.method("getWorkToursByDestMgra", objArray);
+        return (double[][]) remote.method("getWorkToursByDestMgra", objArray);
     }
 
-    public int[][] getSchoolToursByDestMgra()
+    public double[][] getSchoolToursByDestMgra()
     {
         Object[] objArray = {};
-        return (int[][]) remote.method("getSchoolToursByDestMgra", objArray);
+        return (double[][]) remote.method("getSchoolToursByDestMgra", objArray);
     }
 
-    public int[][] getWorkersByHomeMgra(HashMap<Integer, Integer> segmentValueIndexMap)
+    public double[][] getWorkersByHomeMgra(HashMap<Integer, Integer> segmentValueIndexMap)
     {
         Object[] objArray = {segmentValueIndexMap};
-        return (int[][]) remote.method("getWorkersByHomeMgra", objArray);
+        return (double[][]) remote.method("getWorkersByHomeMgra", objArray);
     }
 
-    public int[][] getStudentsByHomeMgra()
+    public double[][] getStudentsByHomeMgra()
     {
         Object[] objArray = {};
-        return (int[][]) remote.method("getStudentsByHomeMgra", objArray);
+        return (double[][]) remote.method("getStudentsByHomeMgra", objArray);
     }
 
-    public int[][] getTourPurposePersonsByHomeMgra(String[] purposeList)
+    public double[][] getTourPurposePersonsByHomeMgra(String[] purposeList)
     {
         Object[] objArray = {purposeList};
-        return (int[][]) remote.method("getTourPurposePersonsByHomeMgra", objArray);
+        return (double[][]) remote.method("getTourPurposePersonsByHomeMgra", objArray);
     }
 
-    public int[] getIndividualNonMandatoryToursByHomeMgra(String purposeString)
+    public double[] getIndividualNonMandatoryToursByHomeMgra(String purposeString)
     {
         Object[] objArray = {purposeString};
-        return (int[]) remote.method("getIndividualNonMandatoryToursByHomeMgra", objArray);
+        return (double[]) remote.method("getIndividualNonMandatoryToursByHomeMgra", objArray);
     }
 
-    public int[] getJointToursByHomeMgra(String purposeString)
+    public double[] getJointToursByHomeMgra(String purposeString)
     {
         Object[] objArray = {purposeString};
-        return (int[]) remote.method("getJointToursByHomeMgra", objArray);
+        return (double[]) remote.method("getJointToursByHomeMgra", objArray);
     }
 
-    public int[] getAtWorkSubtoursByWorkMgra(String purposeString)
+    public double[] getAtWorkSubtoursByWorkMgra(String purposeString)
     {
         Object[] objArray = {purposeString};
-        return (int[]) remote.method("getAtWorkSubtoursByWorkMgra", objArray);
+        return (double[]) remote.method("getAtWorkSubtoursByWorkMgra", objArray);
     }
 
     public String testRemote()

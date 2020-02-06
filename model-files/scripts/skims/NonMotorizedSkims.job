@@ -251,7 +251,7 @@ LOOP PROC_COUNT=1,9
              ENDRUN
             
             ;run script
-            *"C:\Program Files\Citilabs\CubeVoyager\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
+            *Voyager.exe @SFILE@_@SKIM_COUNTY@.s /Start
             
             ;clean-up
 ;            *del @SFILE@_@SKIM_COUNTY@.s
@@ -289,8 +289,22 @@ Wait4Files Files=MTC_NONMOT1.script.end, MTC_NONMOT2.script.end, MTC_NONMOT3.scr
 *del skims\ped_distance_tap_tap_*.txt
 
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_maz.txt 3
+IF (RETURNCODE > 0) abort
+
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_tap.txt 3
+IF (RETURNCODE > 0) abort
+
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_maz.txt 3
+IF (RETURNCODE > 0) abort
+
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_tap.txt 3
+IF (RETURNCODE > 0) abort
+
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_taz_taz.txt 3
+IF (RETURNCODE > 0) abort
+
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_tap_tap.txt 3
+IF (RETURNCODE > 0) abort
+
+; clean up generated scripts
+*del SP_BIKE_MAZ_MAZ_?.s SP_BIKE_MAZ_TAP_?.s SP_BIKE_TAZ_TAZ_?.s SP_PED_MAZ_MAZ_?.s SP_PED_MAZ_TAP_?.s SP_PED_TAP_TAP_?.s

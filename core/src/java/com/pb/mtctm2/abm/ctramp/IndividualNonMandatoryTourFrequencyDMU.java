@@ -103,7 +103,7 @@ public class IndividualNonMandatoryTourFrequencyDMU
 
     public int getNumAutos()
     {
-        return hh.getAutoOwnershipModelResult();
+        return hh.getAutosOwned();
     }
 
     /**
@@ -112,7 +112,7 @@ public class IndividualNonMandatoryTourFrequencyDMU
      */
     public int getCarsEqualsWorkers()
     {
-        int numAutos = hh.getAutoOwnershipModelResult();
+        int numAutos = hh.getAutosOwned();
         int numWorkers = hh.getWorkers();
 
         // household must have at least 1 car, otherwise return 0.
@@ -133,7 +133,7 @@ public class IndividualNonMandatoryTourFrequencyDMU
      */
     public int getMoreCarsThanWorkers()
     {
-        int numAutos = hh.getAutoOwnershipModelResult();
+        int numAutos = hh.getAutosOwned();
         int numWorkers = hh.getWorkers();
 
         if (numAutos > numWorkers) return 1;
