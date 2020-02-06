@@ -21,30 +21,33 @@
 #       intDenBin       Intersection density bin (1 through 3 where 3 is the highest)
 #       empDenBin       Employment density bin (1 through 3 where 3 is the highest)
 #       duDenBin        Houseold density bin (1 through 3 where 3 is the highest)
-#
+#   landuse\maz_data_withDensity.csv: landuse\maz_data.csv joined with landuse\maz_density.csv on MAZ_ORIGINAL
+#   
 # Requires: Basic python 2.7.x, pandas
 #
 
 # Import modules
-import os, csv, sys, math
+import os, csv, datetime, sys, math
 import pandas as pd, numpy as np
 from shutil import copyfile
 
 # Variables: Input
-inMazNodes = "hwy\maz_nodes.csv" # VAR=N,X,Y
-inIntersectionNodes="hwy\intersection_nodes.csv" # VAR=N, X, Y
-inMazData = "landuse\maz_data.csv" # "maz_data.csv"
-outDensityData = "landuse\maz_density.csv"
-outMazData = "landuse\maz_data_withDensity.csv"
+inMazNodes          = "hwy\maz_nodes.csv"
+inIntersectionNodes = "hwy\intersection_nodes.csv"
+inMazData           = "landuse\maz_data.csv"
+outDensityData      = "landuse\maz_density.csv"
+outMazData          = "landuse\maz_data_withDensity.csv"
+start_time          = datetime.datetime.now()
 
 print inMazNodes
 print inIntersectionNodes
 print inMazData
 print outDensityData
 
-
 # Open intersection file as pandas table
-intersections = pd.read_csv(inIntersectionNodes, names=['N','X','Y'])
+intersections = pd.read_csv(inIntersectionNodes)
+print("Read {} intersections from {}".format(len(intersections), inIntersectionNodes))
+
 # add columns to intersections dataframe
 intersections['maz_x'] = 0
 intersections['maz_y'] = 0
@@ -55,11 +58,14 @@ intersections['count'] = 0
 readMazNodeFile = open(inMazNodes, 'r')
 
 # Create file reader
-reader = csv.reader(readMazNodeFile, delimiter=',')
+reader = csv.DictReader(readMazNodeFile)
 
 # iterate through file and store count of intersections within 1/2 mile of XY coordinates
 max_dist_fact = 0.5 # 1/2 mile radius from centroid
 max_dist = 5280 * max_dist_fact
+
+max_dist_popempden = 5280 * 5 # 5 miles radius to approximate a zip code (note: avg zip code size in US is 90 sq mi)
+
 int_cnt = []
 maz_x = []
 maz_y = []
@@ -67,9 +73,9 @@ maz_nonseq = []
 
 n = 0
 for row in reader:
-    maz_n = int(row[0])
-    x = float(row[1])
-    y = float(row[2])
+    maz_n = int(row['MAZ_ORIGINAL'])
+    x = float(row['MAZ_X'])
+    y = float(row['MAZ_Y'])
     maz_x.append(x)
     maz_y.append(y)
     maz_nonseq.append(maz_n)
@@ -80,7 +86,7 @@ for row in reader:
     
     intersections['distance'] = intersections.eval("((X-maz_x)**2 + (Y-maz_y)**2)**0.5")    
     int_cnt.append(len(intersections[intersections.distance <= max_dist]))
-    if((n ==1) or (n % 100) == 0):
+    if((n % 1000) == 0):
         print "Counting Intersections for MAZ ", maz_n, " : ", int_cnt[n] 
     n = n + 1
      
@@ -109,7 +115,7 @@ maz_nonseqn = mazData['MAZ_ORIGINAL'].tolist()
 # create writer
 writeMazDensityFile = open(outDensityData, "wb")
 writer = csv.writer(writeMazDensityFile, delimiter=',')
-outHeader = ["MAZ_ORIGINAL","TotInt","EmpDen","RetEmpDen","DUDen","PopDen","IntDenBin","EmpDenBin","DuDenBin"]
+outHeader = ["MAZ_ORIGINAL","TotInt","EmpDen","RetEmpDen","DUDen","PopDen","IntDenBin","EmpDenBin","DuDenBin","PopEmpDenPerMi"]
 writer.writerow(outHeader)
 
 # iterate through MAZs and calculate density terms
@@ -130,6 +136,12 @@ while i < len(maz_seqn):
     intDenBin = 0
     empDenBin = 0
     duDenBin = 0
+
+    #added for TNC\Taxi wait times
+    totPopWaitTime = 0
+    totEmpWaitTime = 0
+    totAcreWaitTime = 0    
+    popEmpWaitTimeDen = 0
     
     mazData['dest_x'] = maz_x_seq[i]
     mazData['dest_y'] = maz_y_seq[i]
@@ -146,12 +158,20 @@ while i < len(maz_seqn):
     totPop = mazData.loc[mazData['distance'] < max_dist, 'POP'].sum()
     totAcres = mazData.loc[mazData['distance'] < max_dist, 'ACRES'].sum()
     
+    # TNC\Taxi wait time density fields
+    totPopWaitTime = mazData.loc[mazData['distance'] < max_dist_popempden, 'POP'].sum()
+    totEmpWaitTime = mazData.loc[mazData['distance'] < max_dist_popempden, 'emp_total'].sum()
+    totAcreWaitTime = mazData.loc[mazData['distance'] < max_dist_popempden, 'ACRES'].sum()
+    
     # calculate density variables
     if(totAcres>0):
         empDen = totEmp/totAcres
         retDen = totRet/totAcres
         duDen = totHH/totAcres
         popDen = totPop/totAcres
+
+    if(totAcreWaitTime>0):
+        popEmpWaitTimeDen = (totPopWaitTime + totEmpWaitTime)/(totAcreWaitTime * 0.0015625)
     
     # calculate bins based on sandag bin ranges
     if (interCount < 80):
@@ -179,7 +199,7 @@ while i < len(maz_seqn):
  
     
     #write out results to csv file
-    outList = [origNonSeqMaz,interCount,empDen,retDen,duDen,popDen,intDenBin,empDenBin,duDenBin]
+    outList = [origNonSeqMaz,interCount,empDen,retDen,duDen,popDen,intDenBin,empDenBin,duDenBin,popEmpWaitTimeDen]
     writer.writerow(outList)
 
 writeMazDensityFile.close()
@@ -199,4 +219,7 @@ mazData.drop('distance', axis=1, inplace=True)
 # write the data back out
 mazData.to_csv(outMazData, index=False)
 
-print "*** Finished ***"
+end_time = datetime.datetime.now()
+duration = end_time - start_time
+
+print "*** Finished in {} minutes ***".format(duration.total_seconds()/60.0)

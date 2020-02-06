@@ -207,7 +207,7 @@ public class JointTourModelsDMU implements Serializable, VariableTable
 
     public int getAutoOwnership()
     {
-        return hh.getAutoOwnershipModelResult();
+        return hh.getAutosOwned();
     }
 
     public int getTourPurposeIsMaint()

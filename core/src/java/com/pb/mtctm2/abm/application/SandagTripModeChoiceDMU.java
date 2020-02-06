@@ -22,7 +22,7 @@ public class SandagTripModeChoiceDMU
      * @param hhIndex is the DMU household index
      * @param zoneIndex is the DMU zone index
      * @param origIndex is the DMU origin index
-     * @param destIndex is the DMU desatination index
+     * @param destIndex is the DMU destination index
      */
     public void setDmuIndexValues(int hhIndex, int zoneIndex, int origIndex, int destIndex,
             boolean debug)
@@ -188,6 +188,15 @@ public class SandagTripModeChoiceDMU
         return tourModeIsSchBus;
     }
     
+    public int getTourModeIsTaxi()
+    {
+    	return tourModeIsTaxi;
+    }
+    
+    public int getTourModeIsTNC()
+    {
+    	return tourModeIsTNC;
+    }
     
     private void setupMethodIndexMap()
     {
@@ -251,6 +260,11 @@ public class SandagTripModeChoiceDMU
         
         methodIndexMap.put("getTpChoice", 400);
         
+        methodIndexMap.put("getUseOwnedAV", 500);
+        methodIndexMap.put("getTourModeIsTaxi",501);
+        methodIndexMap.put("getTourModeIsTNC",502);
+        methodIndexMap.put("getWaitTimeTNC",503);
+        methodIndexMap.put("getWaitTimeTaxi",504);
 
     }
 
@@ -431,7 +445,21 @@ public class SandagTripModeChoiceDMU
             case 400:
                 returnValue = getTpChoice();
                 break;
-
+            case 500: 
+            	returnValue = getUseOwnedAV();
+            	break;
+            case 501:
+            	returnValue = getTourModeIsTaxi();
+            	break;
+            case 502:
+            	returnValue = getTourModeIsTNC();
+            	break;
+            case 503:
+            	returnValue = getWaitTimeTNC();
+            	break;
+            case 504:
+            	returnValue = getWaitTimeTaxi();
+            	break;            	
             default:
                 logger.error( "method number = " + variableIndex + " not found" );
                 throw new RuntimeException( "method number = " + variableIndex + " not found" );

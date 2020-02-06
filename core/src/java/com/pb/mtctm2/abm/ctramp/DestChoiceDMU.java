@@ -206,6 +206,17 @@ public abstract class DestChoiceDMU
     {
         return aggAcc.getMgraAdultSchoolEnrollment(mgra);
     }
+    
+    protected float getCountyIdDestAlt(int mgra)
+    {
+        return mgraManager.getCountyId(mgra);
+    }
+    
+    protected float getCountyIdOrigin(){
+    	int mgra = dmuIndex.getOriginZone();
+    	return mgraManager.getCountyId(mgra);
+    }
+
 
     protected int getIncome()
     {
@@ -219,7 +230,7 @@ public abstract class DestChoiceDMU
 
     protected int getAutos()
     {
-        return hh.getAutoOwnershipModelResult();
+        return hh.getAutosOwned();
     }
 
     protected int getWorkers()

@@ -61,6 +61,7 @@ public class HouseholdChoiceModels
     private String                                                   restartModelString;
 
     private HouseholdAutoOwnershipModel                              aoModel;
+    private TourVehicleTypeChoiceModel                               tvtcModel;
     private TransponderChoiceModel                                   tcModel;
     private ParkingProvisionModel                                    ppModel;
     private HouseholdCoordinatedDailyActivityPatternModel            cdapModel;
@@ -169,7 +170,8 @@ public class HouseholdChoiceModels
             // create the auto ownership choice model application object
             if (runAutoOwnershipModel) {
                 aoModel = new HouseholdAutoOwnershipModel(propertyMap, dmuFactory, accTable, mandAcc);
-                if ( measureObjectSizes ) logger.info ( "AO size:         " + ObjectUtil.sizeOf( aoModel ) );
+                tvtcModel = new TourVehicleTypeChoiceModel(propertyMap);
+                if ( measureObjectSizes ) logger.info ( "AO size:         " + ObjectUtil.sizeOf( aoModel ) + ObjectUtil.sizeOf(tvtcModel));
             }
 
             
@@ -391,15 +393,20 @@ public class HouseholdChoiceModels
         if (runCoordinatedDailyActivityPatternModel)
             cdapModel.applyModel(hhObject);
 
-        if (runIndividualMandatoryTourFrequencyModel)
+        if (runIndividualMandatoryTourFrequencyModel){
             imtfModel.applyModel(hhObject);
-
+            tvtcModel.applyModelToMandatoryTours(hhObject);
+        }
+        
         if (runMandatoryTourDepartureTimeAndDurationModel)
             imtodModel.applyModel(hhObject, runMandatoryTourModeChoiceModel);
 
         
-        if (runJointTourFrequencyModel)
+        if (runJointTourFrequencyModel){
             jtfModel.applyModel( hhObject );
+            tvtcModel.applyModelToJointTours(hhObject);
+        }
+        
 
         if (runJointTourLocationChoiceModel)
             nmlcModel.applyJointModel( hhObject );
@@ -408,8 +415,10 @@ public class HouseholdChoiceModels
             nmtodModel.applyJointModel( hhObject, runJointTourModeChoiceModel );
 
         
-        if (runIndividualNonMandatoryTourFrequencyModel)
+        if (runIndividualNonMandatoryTourFrequencyModel){
             inmtfModel.applyModel(hhObject);
+            tvtcModel.applyModelToNonMandatoryTours(hhObject);
+        }
 
         if (runIndividualNonMandatoryTourLocationChoiceModel)
             nmlcModel.applyIndivModel( hhObject );
@@ -418,9 +427,11 @@ public class HouseholdChoiceModels
             nmtodModel.applyIndivModel( hhObject, runIndividualNonMandatoryTourModeChoiceModel );
 
         
-        if (runAtWorkSubTourFrequencyModel)
+        if (runAtWorkSubTourFrequencyModel){
             awfModel.applyModel(hhObject);
-
+            tvtcModel.applyModelToAtWorkSubTours(hhObject);
+        }
+        
         if (runAtWorkSubtourLocationChoiceModel)
             awlcModel.applyModel( hhObject );
 
@@ -478,6 +489,7 @@ public class HouseholdChoiceModels
             //long hhSeed = globalSeed + hhObject.getHhId() + IMTF_SEED_OFFSET; 
             //hhObject.getHhRandom().setSeed( hhSeed );
             imtfModel.applyModel( hhObject );
+            tvtcModel.applyModelToMandatoryTours(hhObject);
             imtfTime += ( System.nanoTime() - check );
         }
 
@@ -497,6 +509,7 @@ public class HouseholdChoiceModels
             //long hhSeed = globalSeed + hhObject.getHhId() + JTF_SEED_OFFSET; 
             //hhObject.getHhRandom().setSeed( hhSeed );
             jtfModel.applyModel( hhObject );
+            tvtcModel.applyModelToJointTours(hhObject);
             jtfTime += ( System.nanoTime() - check );
         }
         
@@ -524,6 +537,7 @@ public class HouseholdChoiceModels
             //long hhSeed = globalSeed + hhObject.getHhId() + INMTF_SEED_OFFSET; 
             //hhObject.getHhRandom().setSeed( hhSeed );
             inmtfModel.applyModel( hhObject );
+            tvtcModel.applyModelToNonMandatoryTours(hhObject);
             inmtfTime += ( System.nanoTime() - check );
         }
         
@@ -553,6 +567,7 @@ public class HouseholdChoiceModels
             //long hhSeed = globalSeed + hhObject.getHhId() + AWTF_SEED_OFFSET; 
             //hhObject.getHhRandom().setSeed( hhSeed );
             awfModel.applyModel( hhObject );
+            tvtcModel.applyModelToAtWorkSubTours(hhObject);
             awtfTime += ( System.nanoTime() - check );
         }
         

@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import com.pb.mtctm2.abm.ctramp.TapDataManager;
 import com.pb.mtctm2.abm.ctramp.TazDataManager;
 import com.pb.common.calculator.MatrixDataServerIf;
+import com.pb.common.datafile.NEW_CSVFileReader;
 import com.pb.common.datafile.OLD_CSVFileReader;
 import com.pb.common.datafile.CSVFileWriter;
 import com.pb.common.datafile.TableDataSet;
@@ -23,6 +24,7 @@ import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.Util;
+import com.pb.mtctm2.abm.maas.ResimulateTransitPathModel;
 import com.pb.mtctm2.abm.reports.SkimBuilder;
 
 public class MTCTM2TripTables {
@@ -33,7 +35,7 @@ public class MTCTM2TripTables {
     private  TableDataSet jointTripData;
     
     //Some parameters
-    private int[] modeIndex;  // an index array, dimensioned by number of total modes, returns 0=auto modes, 1=non-motor, 2=transit, 3= other
+    private int[] modeIndex;  // an index array, dimensioned by number of total modes, returns 0=auto modes, 1=non-motor, 2=transit, 3= other, 4 AV auto modes
     private int[] matrixIndex; // an index array, dimensioned by number of modes, returns the element of the matrix array to store value
     
     //array modes: AUTO, NON-MOTORIZED, TRANSIT,  OTHER
@@ -41,6 +43,7 @@ public class MTCTM2TripTables {
 	private int tranModes=0;
 	private int nmotModes=0;
 	private int othrModes=0;
+	private int avModes = 0;
     
     //one file per time period
     private int numberOfPeriods;
@@ -63,18 +66,19 @@ public class MTCTM2TripTables {
     private int iteration;
 	private String directory;
 	private String matrixFileExtension = "mat";
- 	
-	private MatrixDataServerIf ms;
+ 	private MatrixDataServerIf ms;
         
     private HashMap<String, Float> averageOcc3Plus;  //a HashMap of average occupancies for 3+ vehicles by tour purpose
     
     public MazSets mazSets;
     
     public int numSkimSets;
+    public boolean transitResim;
     
-    public MTCTM2TripTables(String resourceBundleName, int iteration){
+    public MTCTM2TripTables(String resourceBundleName, int iteration, boolean transitResim){
 
-        HashMap<String,String> rbMap = ResourceUtil.getResourceBundleAsHashMap(resourceBundleName);
+    	this.transitResim = transitResim;
+        rbMap = ResourceUtil.getResourceBundleAsHashMap(resourceBundleName);
         properties = new Properties();
         for (String key : rbMap.keySet()) 
         	properties.put(key,rbMap.get(key));
@@ -101,6 +105,7 @@ public class MTCTM2TripTables {
 				modeIndex[i] = 0;
 				matrixIndex[i]= autoModes;
 				++autoModes;
+				++avModes;
 			}else if(modelStructure.getTourModeIsNonMotorized(i)){
 				modeIndex[i] = 1;
 				matrixIndex[i]= nmotModes;
@@ -115,6 +120,8 @@ public class MTCTM2TripTables {
 				++othrModes;
 			}
 		}
+		
+		
 		readOccupancies();
 		//Initialize arrays (need for all periods, so initialize here)
 		CBDVehicles = new float[mgraManager.getMaxMgra()+1][numberOfPeriods];
@@ -151,8 +158,8 @@ public class MTCTM2TripTables {
         int tazs = tazManager.getMaxTaz();
 		int taps = tapManager.getMaxTap();
 		
-		//Initialize matrices; one for each mode group (auto, non-mot, tran, other)
-		int numberOfModes = 4;
+		//Initialize matrices; one for each mode group (auto, non-mot, tran, other, AVs)
+		int numberOfModes = 5;
 		matrix = new Matrix[numberOfModes][];
 		for(int i = 0; i < numberOfModes; ++ i){
 			
@@ -188,12 +195,27 @@ public class MTCTM2TripTables {
 						matrix[i][(j*numSkimSets)+k] = new Matrix(modeName+"_set"+setName+"_"+periodName,"",taps,taps);
 					}
 				}
-			}else{
+			}else if(i==3){
 				matrix[i] = new Matrix[othrModes];
 				for(int j=0;j<othrModes;++j){
 					modeName = modelStructure.getModeName(j+1+autoModes+nmotModes+tranModes);
 					matrix[i][j] = new Matrix(modeName+"_"+periodName,"",tazs,tazs);
 				}
+			}else{ //AVs
+				//dim TAZ to TAZ auto matrices + MAZ to MAZ matrices
+				matrix[i] = new Matrix[autoModes + mazSets.numSets];
+				for(int j=0;j<autoModes;++j){
+					modeName = modelStructure.getModeName(j+1);  //the auto mode name
+					matrix[i][j] = new Matrix(modeName+"_AV_"+periodName,"",tazs,tazs);
+					
+					mazSets.autoMatOffset = j;
+				}
+				
+				//dim MAZ to MAZ auto matrices
+				for(int k=0;k<mazSets.numSets;k++){
+			      matrix[i][mazSets.autoMatOffset + k+1] = new Matrix("MAZ_AUTO"+"_AV_"+(k+1)+"_"+periodName,"",mazSets.numZones[k],mazSets.numZones[k]);	
+				}
+				
 			}
 		}
 	}
@@ -207,14 +229,23 @@ public class MTCTM2TripTables {
 	 */
 	public void createTripTables(){
 		
+		String indivTripFile = null;
+		String jointTripFile = null;
 
 		//Open the individual trip file 
-		String indivTripFile = properties.getProperty("Results.IndivTripDataFile");
+		if(transitResim){
+			indivTripFile = properties.getProperty(ResimulateTransitPathModel.ResimulateTransitPathIndividualOutputFileProperty);
+			jointTripFile = properties.getProperty(ResimulateTransitPathModel.ResimulateTransitPathJointOutputFileProperty);
+		}else{
+			indivTripFile = properties.getProperty("Results.IndivTripDataFile");
+			jointTripFile = properties.getProperty("Results.JointTripDataFile");
+			
+		}
+			
 		indivTripFile = formFileName(directory + indivTripFile, iteration);		
 		indivTripData = openTripFile(indivTripFile);
 		
 		//Open the joint trip file 
-		String jointTripFile = properties.getProperty("Results.JointTripDataFile");
 		jointTripFile = formFileName(directory + jointTripFile, iteration);
 		jointTripData = openTripFile(jointTripFile);
 
@@ -246,12 +277,14 @@ public class MTCTM2TripTables {
 		}
         
 		//write the vehicles by parking-constrained MGRA
-		String CBDFile = properties.getProperty("Results.CBDFile");
-		writeCBDFile(directory+CBDFile);
+		if(! transitResim){
+			String CBDFile = properties.getProperty("Results.CBDFile");
+			writeCBDFile(directory+CBDFile);
 
-		//write the vehicles by PNR lot TAP
-		String PNRFile = properties.getProperty("Results.PNRFile");
-		writePNRFile(directory+PNRFile);
+			//write the vehicles by PNR lot TAP
+			String PNRFile = properties.getProperty("Results.PNRFile");
+			writePNRFile(directory+PNRFile);
+		}
 	}
 	
 	/**
@@ -266,7 +299,7 @@ public class MTCTM2TripTables {
 	    TableDataSet tripData;
 	    
         try {
-        	OLD_CSVFileReader csvFile = new OLD_CSVFileReader();
+        	NEW_CSVFileReader csvFile = new NEW_CSVFileReader();
             tripData = csvFile.readFile(new File(fileName));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -314,6 +347,7 @@ public class MTCTM2TripTables {
 			float tripdist = (int) tripData.getValueAt(i,"TRIP_DISTANCE");
 			
 			float sampleRate = tripData.getValueAt(i,"sampleRate");
+			int avAvailable = (int) tripData.getValueAt(i, "avAvailable");
 
         	//transit trip - get boarding and alighting tap
         	int boardTap=0;
@@ -372,13 +406,25 @@ public class MTCTM2TripTables {
         			int mazSet = mazSets.getZoneSet(originMGRA, destinationMGRA);
         			int omaz = mazSets.getNewZoneSetNum(originMGRA);
         			int dmaz = mazSets.getNewZoneSetNum(destinationMGRA);
-        			float value = matrix[mode][mazSets.autoMatOffset + mazSet].getValueAt(omaz, dmaz);
-            		matrix[mode][mazSets.autoMatOffset + mazSet].setValueAt(omaz, dmaz, (value + vehicleTrips));
-        		
+        			
+        			if(avAvailable==0){
+        				float value = matrix[mode][mazSets.autoMatOffset + mazSet].getValueAt(omaz, dmaz);
+        				matrix[mode][mazSets.autoMatOffset + mazSet].setValueAt(omaz, dmaz, (value + vehicleTrips));
+        			}else{
+        				float value = matrix[4][mazSets.autoMatOffset + mazSet].getValueAt(omaz, dmaz);
+        				matrix[4][mazSets.autoMatOffset + mazSet].setValueAt(omaz, dmaz, (value + vehicleTrips));
+        			}
+            		
         		} else {        
         			//taz level
-        			float value = matrix[mode][mat].getValueAt(originTAZ, destinationTAZ);
-            		matrix[mode][mat].setValueAt(originTAZ, destinationTAZ, (value + vehicleTrips));
+        			if(avAvailable==0){
+        				float value = matrix[mode][mat].getValueAt(originTAZ, destinationTAZ);
+        				matrix[mode][mat].setValueAt(originTAZ, destinationTAZ, (value + vehicleTrips));
+        			}else{
+        				float value = matrix[4][mat].getValueAt(originTAZ, destinationTAZ);
+        				matrix[4][mat].setValueAt(originTAZ, destinationTAZ, (value + vehicleTrips));
+        				
+        			}
         		}
         		
         	} else if (mode==1){
@@ -434,14 +480,18 @@ public class MTCTM2TripTables {
 		
 		String per = modelStructure.getModelPeriodLabel(period);
 		String end = "_" + per;
-		String[] fileName = new String[4];
+		String[] fileName = new String[5];
 		
 		fileName[0] = directory + properties.getProperty("Results.AutoTripMatrix") + end;
 		fileName[1] = directory + properties.getProperty("Results.NMotTripMatrix") + end;
 		fileName[2] = directory + properties.getProperty("Results.TranTripMatrix") + end; 
 		fileName[3] = directory + properties.getProperty("Results.OthrTripMatrix") + end; 
+		fileName[4] = directory + properties.getProperty("Results.AutoAVTripMatrix") + end;
 		
 		for(int i=0;i<fileName.length;++i) {
+			//don't write non-transit matrices if in transit resim mode
+			if(transitResim && i!=2)
+				continue;
 			writeMatricesToFile(fileName[i], matrix[i]);
 		}
  	}
@@ -606,12 +656,34 @@ public class MTCTM2TripTables {
 	public static void main(String[] args) {
 
 		//command line arguments
-		String propertiesName = args[0];
-		//args[1] is "-iteration"
-		int iteration = new Integer(args[2]).intValue();
+		String propertiesName = null;
+        int iteration=0;
+        boolean transitResim=false;
+        
+        if (args.length == 0)
+        {
+            logger.error(String
+                    .format("no properties file base name (without .properties extension) was specified as an argument."));
+            return;
+        } else {
+        	propertiesName = args[0];
+
+	        for (int i = 1; i < args.length; ++i)
+	        {
+	            if (args[i].equalsIgnoreCase("-iteration"))
+	            {
+	                iteration = Integer.valueOf(args[i + 1]);
+	            }
+	           
+	            if (args[i].equalsIgnoreCase("-transitResim"))
+	            {
+	                transitResim = args[i + 1].equalsIgnoreCase("TRUE");
+	            }
+	        }
+        }
 		
 		//run trip table generator
-		MTCTM2TripTables tripTables = new MTCTM2TripTables(propertiesName, iteration);		
+		MTCTM2TripTables tripTables = new MTCTM2TripTables(propertiesName, iteration, transitResim);		
 		tripTables.createTripTables();
 
 	}
@@ -635,7 +707,6 @@ public class MTCTM2TripTables {
         float[] tripTime = new float[rowCount];
         float[] tripDistance = new float[rowCount];
         float[] tripCost = new float[rowCount];
-        int[] fullMode = new int[rowCount];
         
         //setup skim builder class
         SkimBuilder skimBuilder = new SkimBuilder(properties);
@@ -657,14 +728,12 @@ public class MTCTM2TripTables {
             tripTime[i] = attributes.getTripTime();
             tripDistance[i] = attributes.getTripDistance();
             tripCost[i] = attributes.getTripCost();
-            fullMode[i] = attributes.getFullMode();
         }
         
         //append data
         table.appendColumn(tripTime,"TRIP_TIME");
         table.appendColumn(tripDistance,"TRIP_DISTANCE");
         table.appendColumn(tripCost,"TRIP_COST");
-        table.appendColumn(fullMode,"FULL_MODE");
 	}
 	
 	public class MazSets implements Serializable
@@ -676,15 +745,52 @@ public class MTCTM2TripTables {
 		public int numSets = maxMaz.length;
 		public int autoMatOffset;
 		
+		public boolean intrazonalOnly = false;
+		
 		public MazSets() {
 			
 			//get max distance for maz to maz trips
 			maxMazAutoTripDistance = Float.parseFloat(properties.getProperty("Results.MAZAutoTripMatrix.TripMaxDistance"));
+			intrazonalOnly = Util.getBooleanValueFromPropertyMap(rbMap, "Results.MAZAutoTripMatrix.IntrazonalOnly");
+			
+			TableDataSet mgraDataTable = mgraManager.getMgraTableDataSet();
+			
+			int[] countiesSet1 = Util.getIntegerArrayFromPropertyMap(rbMap, "Results.MAZAutoTripMatrix.CountySet1");
+			int[] countiesSet2 = Util.getIntegerArrayFromPropertyMap(rbMap, "Results.MAZAutoTripMatrix.CountySet2");
+			int[] countiesSet3 = Util.getIntegerArrayFromPropertyMap(rbMap, "Results.MAZAutoTripMatrix.CountySet3");
+			
+			//figure out the max maz value in each set
+			int maxMazSet1 = 0;
+			int maxMazSet2 = 0;
+			int maxMazSet3 = 0;
+			
+			for(int row = 1; row< mgraDataTable.getRowCount();++row){
+				
+				int mgra = (int) mgraDataTable.getValueAt(row, "MAZ");
+				int county = (int) mgraDataTable.getValueAt(row,mgraManager.MGRA_COUNTY_FIELD_NAME);
+				
+				for(int i=0;i<countiesSet1.length;++i)
+					if(county == countiesSet1[i] ) //found county in set
+						if(mgra>maxMazSet1)
+							maxMazSet1=mgra;
+				
+				for(int i=0;i<countiesSet2.length;++i)
+					if(county == countiesSet2[i] ) //found county in set
+						if(mgra>maxMazSet2)
+							maxMazSet2=mgra;
+				
+				for(int i=0;i<countiesSet3.length;++i)
+					if(county == countiesSet3[i] ) //found county in set
+						if(mgra>maxMazSet3)
+							maxMazSet3=mgra;
+				
+			}
+			
 			
 			//get the near maz to maz assignment sets
-			maxMaz[0] = Integer.parseInt(properties.getProperty("Results.MAZAutoTripMatrix.MaxSeqMazSet1"));
-			maxMaz[1] = Integer.parseInt(properties.getProperty("Results.MAZAutoTripMatrix.MaxSeqMazSet2"));
-			maxMaz[2] = Integer.parseInt(properties.getProperty("Results.MAZAutoTripMatrix.MaxSeqMazSet3"));
+			maxMaz[0] = maxMazSet1;
+			maxMaz[1] = maxMazSet2;
+			maxMaz[2] = maxMazSet3;
 			
 			numZones[0] = maxMaz[0];
 			numZones[1] = maxMaz[1] - maxMaz[0];
@@ -736,12 +842,19 @@ public class MTCTM2TripTables {
 		
 		public boolean isMazSetTrip(float tripdist, int originMGRA, int destinationMGRA) {
 			
-			if((tripdist < maxMazAutoTripDistance) & (getZoneSet(originMGRA, destinationMGRA) > 0)) {
-				return(true);
-			} else {
-				return(false);
-			}
+			int oTaz = mgraManager.getTaz(originMGRA);
+			int dTaz = mgraManager.getTaz(destinationMGRA);
 			
+			boolean intrazonal = (oTaz==dTaz) ? true : false;
+			
+			
+			if(intrazonalOnly && intrazonal)
+				return true;
+			else if(((tripdist < maxMazAutoTripDistance)||intrazonal) & (getZoneSet(originMGRA, destinationMGRA) > 0))
+					return(true);
+			else 
+				return(false);
+				
 		}
 		
     }

@@ -70,6 +70,7 @@ public final class MgraDataManager
     private static final String         MGRA_ADULT_SCHOOL_ENROLLMENT_FIELD_NAME          = "AdultSchEnrl";
     private static final String         MGRA_GRADE_SCHOOL_DISTRICT_FIELD_NAME            = "ech_dist";
     private static final String         MGRA_HIGH_SCHOOL_DISTRICT_FIELD_NAME             = "hch_dist";
+    public static final String         MGRA_COUNTY_FIELD_NAME                           = "CountyID";
 
     private static final String PROPERTIES_PARKING_COST_OUTPUT_FILE = "mgra.avg.cost.output.file";
     
@@ -92,6 +93,9 @@ public final class MgraDataManager
     private static final String MGRA_MSTALLSSAM_FIELD = "mstallssam";
     private static final String MGRA_MPARKCOST_FIELD  = "mparkcost";
     
+    //for TNC and Taxi wait time calculations
+    private static final String MGRA_POPEMPPERSQMI_FIELD = "PopEmpDenPerMi";
+    
     
     private ArrayList<Integer>          mgras  = new ArrayList<Integer>();
     private int                         maxMgra;
@@ -101,6 +105,7 @@ public final class MgraDataManager
     // [mgra], [0=tapID, 1=Distance], [tap number (0-number of taps)]
     private int[][][]                   mgraWlkTapsDistArray;
     private int[]                       mgraTaz;
+    private float                       maxWalkTapDistMi = 1.25f;  
 
     // An array of Hashmaps dimensioned by origin mgra, with distance in feet, in a ragged
     // array (no key for mgra means no other mgras in walk distance)
@@ -125,6 +130,7 @@ public final class MgraDataManager
     private double[]                    duDen;
     private double[]                    empDen;
     private double[]                    totInt;
+    private double[]                    popEmpDenPerSqMi;
 
     private double[]                    lsWgtAvgCostM;
     private double[]                    lsWgtAvgCostD;
@@ -154,6 +160,12 @@ public final class MgraDataManager
     private MgraDataManager(HashMap<String, String> rbMap)
     {
         logger.info("MgraDataManager Started");
+        
+        if(rbMap.containsKey("maz.tap.maxWalkTapDistInMiles")){
+        
+        	maxWalkTapDistMi = Util.getFloatValueFromPropertyMap(rbMap, "maz.tap.maxWalkTapDistInMiles");
+        }
+        
         readMgraTableData(rbMap);
         
         //read maz to tap and trim set 
@@ -353,6 +365,10 @@ public final class MgraDataManager
         		int maz = Integer.parseInt(data[0]);
         		int tap = Integer.parseInt(data[1]);
         		int distance = new Double(data[4]).intValue();
+        		
+        		if(((float)distance) > (maxWalkTapDistMi * 5280.0))
+        			continue;
+        		
         		if (!mgraToTapToDistance.containsKey(maz)) 
         			mgraToTapToDistance.put(maz,new TreeMap<Integer,Integer>());
         		mgraToTapToDistance.get(maz).put(tap,distance);
@@ -395,9 +411,24 @@ public final class MgraDataManager
         readMazMazDistance(mazMazDistanceFile,oMgraBikeDistance,dMgraBikeDistance);
     }
     
+    /** 
+     * THis method reads the MAZ to MAZ distance file. The format of the file is:
+     * 
+     *   from_maz, to_maz, to_maz, generalized cost, distance in feet.
+     * 
+     * There is no header record. Note that there are no intrazonal MAZ distances in the file so this method calculates 
+     * the intraMAZ distance as half the distance to the nearest neighbor.
+     * 
+     * @param mazMazDistanceFile
+     * @param oDistance
+     * @param dDistance
+     */
     private void readMazMazDistance(File mazMazDistanceFile, HashMap[] oDistance, HashMap[] dDistance) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(mazMazDistanceFile))) {
+        
+    	HashMap<Integer, Integer> minDistanceMap = new HashMap<Integer, Integer>(); 
+    	try (BufferedReader reader = new BufferedReader(new FileReader(mazMazDistanceFile))) {
         	String line;
+        	
         	while ((line = reader.readLine()) != null) {
 				line = line.trim();
 				if (line.length() == 0)
@@ -414,10 +445,44 @@ public final class MgraDataManager
         		if (dDistance[tmaz] == null)
         			dDistance[tmaz] = new HashMap();
         		dDistance[tmaz].put(fmaz,distance);
+        		
+        		//store minimum distance from (strange but the walk file is asymmetrical)
+        		if(minDistanceMap.containsKey(fmaz)){
+        			int minDist = minDistanceMap.get(fmaz);
+        			if(distance < minDist )
+        				minDistanceMap.put(fmaz,distance);
+        		}else{
+        			minDistanceMap.put(fmaz,distance);
+        		}
+        		
+           		//store minimum distance to (strange but the walk file is asymmetrical)
+        		if(minDistanceMap.containsKey(tmaz)){
+        			int minDist = minDistanceMap.get(tmaz);
+        			if(distance < minDist )
+        				minDistanceMap.put(tmaz,distance);
+        		}else{
+        			minDistanceMap.put(tmaz,distance);
+        		}
+
         	}
         } catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+    	
+    	//now add intrazonal distance to arrays
+    	for(int maz : minDistanceMap.keySet()){
+    		
+    		float minDist = (float) minDistanceMap.get(maz);
+    		double intraDist = Math.max(minDist/2.0,100.0); // at least 100 feet
+    		
+    		if (oDistance[maz] == null)
+    			oDistance[maz] = new HashMap();
+    		oDistance[maz].put(maz, (int)(intraDist+0.5));
+    		if (dDistance[maz] == null)
+    			dDistance[maz] = new HashMap();
+    		dDistance[maz].put(maz, (int)(intraDist+0.5));
+   		
+    	}
     }
 
     /**
@@ -837,6 +902,11 @@ public final class MgraDataManager
         return totInt[mgra];
     }
     
+    public double getPopEmpPerSqMi( int mgra ) {
+        return popEmpDenPerSqMi[mgra];
+    }
+  
+    
     /**
      * Process the 4D density land use data file and store the selected fields as arrays indexed by the mgra value.
      * The data fields are in the mgra TableDataSet read from the MGRA csv file.
@@ -854,11 +924,16 @@ public final class MgraDataManager
             empDen = new double[maxMgra+1];
             totInt = new double[maxMgra+1];
             
+            //added for Taxi/TNC
+            popEmpDenPerSqMi = new double[maxMgra+1];
+            
             // get the data fields needed for the mode choice utilities as 0-based double[]
             double[] duDenField = mgraTableDataSet.getColumnAsDouble( MGRA_4DDENSITY_DU_DEN_FIELD );
             double[] empDenField = mgraTableDataSet.getColumnAsDouble( MGRA_4DDENSITY_EMP_DEN_FIELD );
             double[] totIntField = mgraTableDataSet.getColumnAsDouble( MGRA_4DDENSITY_TOT_INT_FIELD );
 
+            double[] popEmpField = mgraTableDataSet.getColumnAsDouble( MGRA_POPEMPPERSQMI_FIELD );
+            
             // create a HashMap to convert MGRA values to array indices for the data
             // arrays above
             int mgraCol = mgraTableDataSet.getColumnPosition( MGRA_FIELD_NAME );
@@ -869,6 +944,7 @@ public final class MgraDataManager
                 duDen[mgra] = duDenField[row-1];
                 empDen[mgra] = empDenField[row-1];
                 totInt[mgra] = totIntField[row-1];
+                popEmpDenPerSqMi [mgra] = popEmpField[row-1];
                 
             }
 
@@ -1017,11 +1093,19 @@ public final class MgraDataManager
     }
     
     
-public TableDataSet getMgraTableDataSet() {
+    public TableDataSet getMgraTableDataSet() {
 		return mgraTableDataSet;
 	}
 
-private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) {
+  	public int getCountyId(int mgra){
+		
+        int row = mgraDataTableMgraRowMap.get(mgra);
+        return (int)mgraTableDataSet.getValueAt(row, MGRA_COUNTY_FIELD_NAME);
+
+	}
+
+	
+	private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) {
         
         // open output file to write average parking costs for each mgra
         PrintWriter out = null;

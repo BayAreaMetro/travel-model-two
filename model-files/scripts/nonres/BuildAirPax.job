@@ -68,6 +68,8 @@
 ;start cluster nodes
 *Cluster.exe MTC_AIRPAX 1-12 start exit
 
+token_taz_count = %TAZ_COUNT%
+
 ; step 1: read in each of the year 2007 and 2035 files from Geoff Gosling and convert to Cube matrices
 loop year = 1,2
 
@@ -91,6 +93,7 @@ loop year = 1,2
         DistributeMultistep processid = 'MTC_AIRPAX', processNum = @processIdx@
              
              *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\assign\taz_matrix_transfer.py . nonres\@token_year@_@token_toFrom@@token_airport@.csv nonres\@token_year@_@token_toFrom@@token_airport@_seq.csv
+             IF (RETURNCODE > 0) abort
 
              run pgm = matrix
              
@@ -103,7 +106,7 @@ loop year = 1,2
                              PM_Escort_DA,PM_Escort_S2,PM_Escort_S3,PM_Park_DA,PM_Park_S2,PM_Park_S3,PM_Rent_DA,PM_Rent_S2,PM_Rent_S3,PM_Taxi_DA,PM_Taxi_S2,PM_Taxi_S3,PM_Limo_DA,PM_Limo_S2,PM_Limo_S3,PM_Van_S3,PM_Hotel_S3,PM_Chart_S3,
                              EV_Escort_DA,EV_Escort_S2,EV_Escort_S3,EV_Park_DA,EV_Park_S2,EV_Park_S3,EV_Rent_DA,EV_Rent_S2,EV_Rent_S3,EV_Taxi_DA,EV_Taxi_S2,EV_Taxi_S3,EV_Limo_DA,EV_Limo_S2,EV_Limo_S3,EV_Van_S3,EV_Hotel_S3,EV_Chart_S3
              
-                ZONES = %TAZ_COUNT%
+                ZONES = @token_taz_count@
                 
                 mw[1]  = mi.1.1
                 mw[2]  = mi.1.2

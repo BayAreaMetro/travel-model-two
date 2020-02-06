@@ -137,6 +137,7 @@ loop period = 1, 5
             volT_s3T = 0
             volT_smT = 0
             volT_hvT = 0
+            mazmazvol = 0
         ENDPHASE
     ENDRUN
     
