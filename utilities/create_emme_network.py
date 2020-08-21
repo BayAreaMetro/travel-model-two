@@ -34,6 +34,7 @@ extra_node_attr_file = os.path.join(emme_network_transaction_folder, "emme_extra
 extra_link_attr_file = os.path.join(emme_network_transaction_folder, "emme_extra_link_attributes.txt")
 emme_transit_network_file = os.path.join(emme_network_transaction_folder, "emme_transit_lines.txt")
 extra_transit_line_attr_file = os.path.join(emme_network_transaction_folder, "emme_extra_line_attributes.txt")
+emme_transit_time_function_file = os.path.join(emme_network_transaction_folder, "emme_transit_time_function.txt")
 # ------------- output files------------
 # name of folder for emme project
 emme_project_folder = "mtc_emme"
@@ -178,6 +179,16 @@ def import_vehicles(input_dir):
         scenario=modeller.scenario)
 
 
+def import_transit_time_functions(input_dir):
+    print "importing transit time functions"
+    process_functions_tool_path = "inro.emme.data.function.function_transaction"
+    process_functions_tool = modeller.tool(process_functions_tool_path)
+    input_file = os.path.join(input_dir, emme_transit_time_function_file).replace("\\","/")
+    process_functions_tool(
+        transaction_file=input_file,
+        throw_on_error=True)
+
+
 def import_transit_lines(input_dir):
     print "importing transit network"
     process_transit_lines_tool_path = "inro.emme.data.network.transit.transit_line_transaction"
@@ -214,18 +225,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # create emme project
-    # desktop = init_emme_project(args.root, args.title, args.emmeversion)
+    desktop = init_emme_project(args.root, args.title, args.emmeversion)
     # or connect to already open desktop for debugging
-    desktop = connect_to_running_desktop(port=59673)
+    # desktop = connect_to_running_desktop(port=59673)
 
     # create modeller instance used to import data to project database
     modeller = _m.Modeller(desktop)
 
-    # import_modes(input_dir=args.root)
-    # import_network(input_dir=args.root)
-    # import_extra_node_attributes(input_dir=args.root)
-    # import_extra_link_attributes(input_dir=args.root)
-    # import_vehicles(input_dir=args.root)
+    import_modes(input_dir=args.root)
+    import_network(input_dir=args.root)
+    import_extra_node_attributes(input_dir=args.root)
+    import_extra_link_attributes(input_dir=args.root)
+    import_vehicles(input_dir=args.root)
+    import_transit_time_functions(input_dir=args.root)
     import_transit_lines(input_dir=args.root)
     import_extra_transit_line_attributes(input_dir=args.root)
 
