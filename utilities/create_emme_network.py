@@ -511,7 +511,7 @@ if __name__ == "__main__":
     # desktop = connect_to_running_desktop(port=59673)
 
     # create modeller instance used to import data to project database
-    modeller = _m.Modeller(desktop)
+    # modeller = _m.Modeller(desktop)
 
     import_modes(input_dir=args.root)
     import_network(input_dir=args.root)

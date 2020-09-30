@@ -528,7 +528,7 @@ def run_skims(modeller, scenario, name, period, params, max_fare, num_processors
             "portion_of_path": "ORIGIN_TO_INITIAL_BOARDING",
             "trip_components": {"aux_transit": "length",},
             "path_operator": "+",
-            "path_selection_threshold": {"lower": 0, "upper": 999},
+            "path_selection_threshold": {"lower": 0, "upper": 999999 },
             "path_to_od_aggregation": {
                 "operator": "average",
                 "aggregated_path_values": 'mf"%s_ACCWALK"' % skim_name,
@@ -542,7 +542,7 @@ def run_skims(modeller, scenario, name, period, params, max_fare, num_processors
             "portion_of_path": "FINAL_ALIGHTING_TO_DESTINATION",
             "trip_components": {"aux_transit": "length",},
             "path_operator": "+",
-            "path_selection_threshold": {"lower": 0, "upper": 999},
+            "path_selection_threshold": {"lower": 0, "upper": 999999 },
             "path_to_od_aggregation": {
                 "operator": "average",
                 "aggregated_path_values": 'mf"%s_EGRWALK"' % skim_name
