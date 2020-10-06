@@ -22,10 +22,13 @@ import inro.emme.desktop.app as _app
 import inro.emme.desktop.types as _ws_types
 import inro.emme.database.emmebank as _eb
 import inro.modeller as _m
+
 import argparse
 import os
+import shutil as _shutil
 import pandas as pd
 import math
+from collections import defaultdict as _defaultdict
 
 # ------------- input files------------
 emme_network_transaction_folder = os.path.join(os.getcwd(),"emme_network_transaction_files")
@@ -49,11 +52,14 @@ WKT_PROJECTION = 'PROJCS["NAD_1983_StatePlane_California_VI_FIPS_0406_Feet",GEOG
 
 
 def init_emme_project(root, title, emmeversion, port=59673):
+    # emme_dir = os.path.join(root, emme_project_folder)
+    # if os.path.exists(emme_dir):
+    #     _shutil.rmtree(emme_dir)
     project_path = _app.create_project(root, emme_project_folder)
     desktop = _app.start(  # will not close desktop when program ends
         project=project_path, user_initials="RSG", visible=True, port=port)
     # desktop = _app.start_dedicated(
-        # project=project_path, user_initials="DH", visible=True)
+    #     project=project_path, user_initials="DH", visible=True)
     project = desktop.project
     project.name = "MTC Emme Project"
     prj_file_path = os.path.join(root, 'NAD 1983 StatePlane California VI FIPS 0406 Feet.prj')
@@ -236,8 +242,7 @@ def import_extra_transit_segment_attributes(input_dir):
     )
 
 
-def replace_route_for_lines_with_nntime_and_created_segments():
-    emme_network_transaction_folder = r"F:\Projects\Clients\mtc\TO13_emme_network\emme_network_transaction_files"
+def replace_route_for_lines_with_nntime_and_created_segments(network):
     stop_attributes_path = os.path.join(emme_network_transaction_folder, 'all_stop_attributes.csv')
     stop_attributes_df = pd.read_csv(stop_attributes_path)
     transit_line_path = os.path.join(emme_network_transaction_folder, 'lines_that_need_links_created.csv')
@@ -284,7 +289,7 @@ def replace_route_for_lines_with_nntime_and_created_segments():
 
 
 
-def fill_transit_times_for_created_segments():
+def fill_transit_times_for_created_segments(network):
     segments_fixed = 0
     lines_with_created_segments = []
 
@@ -312,7 +317,7 @@ def distribute_nntime_among_segments(segments_for_current_nntime):
             (segment.id, total_length, segment.link.length, segment['@tot_nntime'], new_nn_trantime)
 
 
-def distribute_nntime():
+def distribute_nntime(network):
     # redundant for lines that do not have missing segments and use NNTIME
     stop_attributes_path = os.path.join(emme_network_transaction_folder, 'all_stop_attributes.csv')
     stop_attributes_df = pd.read_csv(stop_attributes_path)
@@ -370,7 +375,7 @@ def distribute_nntime():
             segment.transit_time_func = 1  # tf1 = us1 (data1)
 
 
-def fix_bad_walktimes():
+def fix_bad_walktimes(network):
     for link in network.links():
         if link['@ntl_mode'] != 2:
             continue
@@ -383,13 +388,11 @@ def fix_bad_walktimes():
             link.data2 = link['@walktime']
 
 
-def split_tap_connectors_to_prevent_walk():
-    network.create_attribute("NODE", "tap_stop", False)
-    new_node_id = init_node_id()
+def split_tap_connectors_to_prevent_walk(network):
+    tap_stops = _defaultdict(lambda: [])
+    new_node_id = init_node_id(network)
     all_transit_modes = set([mode for mode in network.modes() if mode.type == "TRANSIT"])
-    for mode in network.modes():
-        print "Mode: %s" % mode
-    # print "All Modes: %s" % str(network.modes())
+
     access_mode = set([network.mode("a")])
     transfer_mode =  network.mode("w")
     egress_mode =  set([network.mode("e")])
@@ -417,7 +420,7 @@ def split_tap_connectors_to_prevent_walk():
                 new_node_id += 1
                 tap_stop = network.split_link(centroid, real_stop, new_node_id, include_reverse=True)
                 # tap_stop["@network_adj"] = 1
-                real_stop.tap_stop = tap_stop
+                tap_stops[real_stop].append(tap_stop)
                 transit_access_link = network.link(real_stop, tap_stop)
                 for link in transit_access_link, transit_access_link.reverse_link:
                     link.modes = all_transit_modes
@@ -435,65 +438,85 @@ def split_tap_connectors_to_prevent_walk():
 
     # re-route the transit lines through the new TAP-stops
     for line in network.transit_lines():
-        # store line and segment data for re-routing
-        line_data = dict((k, line[k]) for k in line_attributes)
-        line_data["id"] = line.id
-        line_data["vehicle"] = line.vehicle
-
+        # store segment data for re-routing
         seg_data = {}
         itinerary = []
-        tap_adjacent_stops = []
+        tap_segments = []
 
         for seg in line.segments(include_hidden=True):
-            seg_data[(seg.i_node, seg.j_node, seg.loop_index)] = \
-                dict((k, seg[k]) for k in seg_attributes)
+            seg_data[(seg.i_node, seg.j_node, seg.loop_index)] = dict((k, seg[k]) for k in seg_attributes)
+                                                         
             itinerary.append(seg.i_node.number)
-            if seg.i_node.tap_stop and seg.allow_boardings:
+            if seg.i_node in tap_stops and (seg.allow_boardings or seg.allow_alightings):
                 # insert tap_stop, real_stop loop after tap_stop
                 real_stop = seg.i_node
-                tap_stop = real_stop.tap_stop
-                itinerary.extend([tap_stop.number, real_stop.number])
-                tap_adjacent_stops.append(len(itinerary) - 1)  # index of "real" stop in itinerary
-
-        if tap_adjacent_stops:
+                tap_access = []
+                tap_egress = []
+                for tap_stop in tap_stops[real_stop]:
+                    itinerary.extend([tap_stop.number, real_stop.number])
+                    tap_access.append(len(itinerary) - 3)
+                    tap_egress.append(len(itinerary) - 2)
+                real_seg = len(itinerary) - 1
+                # track new segments to update stopping pattern
+                tap_segments.append({
+                    "access": tap_access,
+                    "egress": tap_egress,
+                    "real": real_seg
+                })
+    
+        if tap_segments:
+            # store line data for re-routing
+            line_data = dict((k, line[k]) for k in line_attributes)
+            line_data["id"] = line.id
+            line_data["vehicle"] = line.vehicle
+            # delete old line, then re-create on new, re-routed itinerary
             network.delete_transit_line(line)
+
             new_line = network.create_transit_line(
                 line_data.pop("id"),
                 line_data.pop("vehicle"),
                 itinerary)
+            # copy line attributes back
             for k, v in line_data.iteritems():
                 new_line[k] = v
-
+            # copy segment attributes back
             for seg in new_line.segments(include_hidden=True):
                 data = seg_data.get((seg.i_node, seg.j_node, seg.loop_index), {})
                 for k, v in data.iteritems():
                     seg[k] = v
-            for index in tap_adjacent_stops:
-                access_seg = new_line.segment(index - 2)
-                egress_seg = new_line.segment(index - 1)
-                real_seg = new_line.segment(index)
-                for k in seg_attributes:
-                    access_seg[k] = egress_seg[k] = real_seg[k]
-                access_seg.allow_boardings = False
-                access_seg.allow_alightings = True
-                access_seg.transit_time_func = 1
-                access_seg.dwell_time = real_seg.dwell_time
-                egress_seg.allow_boardings = True
-                egress_seg.allow_alightings = True
-                egress_seg.transit_time_func = 1
-                egress_seg.dwell_time = 0
-                real_seg.allow_boardings = True
+            # set boarding, alighting and dwell time on new tap access / egress segments
+            for tap_ref in tap_segments:
+                real_seg = new_line.segment(tap_ref["real"])
+                for access_ref in tap_ref["access"]:
+                    access_seg = new_line.segment(access_ref)
+                    for k in seg_attributes:
+                        access_seg[k] = real_seg[k]
+                    access_seg.allow_boardings = False
+                    access_seg.allow_alightings = False
+                    access_seg.transit_time_func = 1  # special 0-cost ttf
+                    access_seg.dwell_time = 0
+                
+                first_access_seg = new_line.segment(tap_ref["access"][0])
+                first_access_seg.allow_alightings = real_seg.allow_alightings
+                first_access_seg.dwell_time = real_seg.dwell_time
+                
+                for egress_ef in tap_ref["egress"]:
+                    egress_seg = new_line.segment(egress_ef)
+                    for k in seg_attributes:
+                        egress_seg[k] = real_seg[k]
+                    egress_seg.allow_boardings = real_seg.allow_boardings
+                    egress_seg.allow_alightings = real_seg.allow_alightings
+                    egress_seg.transit_time_func = 1  # special 0-cost ttf
+                    egress_seg.dwell_time = 0
+
                 real_seg.allow_alightings = False
                 real_seg.dwell_time = 0
 
-    network.delete_attribute("NODE", "tap_stop")
 
-
-def init_node_id():
+def init_node_id(network):
     new_node_id = max(n.number for n in network.nodes())
     new_node_id = math.ceil(new_node_id / 10000.0) * 10000
     return new_node_id
-
 
 
 if __name__ == "__main__":
@@ -509,9 +532,8 @@ if __name__ == "__main__":
     desktop = init_emme_project(args.root, args.title, args.emmeversion)
     # or connect to already open desktop for debugging
     # desktop = connect_to_running_desktop(port=59673)
-
     # create modeller instance used to import data to project database
-    # modeller = _m.Modeller(desktop)
+    modeller = _m.Modeller(desktop)
 
     import_modes(input_dir=args.root)
     import_network(input_dir=args.root)
@@ -529,14 +551,13 @@ if __name__ == "__main__":
     scenario = emmebank.scenario(1000)
     network = scenario.get_network()
 
-    replace_route_for_lines_with_nntime_and_created_segments()
-    fill_transit_times_for_created_segments()
-    distribute_nntime()
-    fix_bad_walktimes()
-    split_tap_connectors_to_prevent_walk()
+    replace_route_for_lines_with_nntime_and_created_segments(network)
+    fill_transit_times_for_created_segments(network)
+    distribute_nntime(network)
+    fix_bad_walktimes(network)
+    split_tap_connectors_to_prevent_walk(network)
 
 
     scenario.publish_network(network)
-
 
     # emmebank.dispose()
