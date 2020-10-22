@@ -18,6 +18,9 @@
 #////                                                                        ///
 #///////////////////////////////////////////////////////////////////////////////
 
+
+import apply_fares as _apply_fares
+
 import inro.emme.desktop.app as _app
 import inro.emme.desktop.types as _ws_types
 import inro.emme.database.emmebank as _eb
@@ -31,7 +34,7 @@ import math
 from collections import defaultdict as _defaultdict
 
 # ------------- input files------------
-emme_network_transaction_folder = os.path.join(os.getcwd(),"emme_network_transaction_files")
+emme_network_transaction_folder = "emme_network_transaction_files"
 emme_mode_transaction_file = os.path.join(emme_network_transaction_folder, "emme_modes.txt")
 emme_vehicle_transaction_file = os.path.join(emme_network_transaction_folder, "emme_vehicles.txt")
 emme_network_transaction_file = os.path.join(emme_network_transaction_folder, "emme_network.txt")
@@ -52,9 +55,9 @@ WKT_PROJECTION = 'PROJCS["NAD_1983_StatePlane_California_VI_FIPS_0406_Feet",GEOG
 
 
 def init_emme_project(root, title, emmeversion, port=59673):
-    # emme_dir = os.path.join(root, emme_project_folder)
-    # if os.path.exists(emme_dir):
-    #     _shutil.rmtree(emme_dir)
+    emme_dir = os.path.join(root, emme_project_folder)
+    if os.path.exists(emme_dir):
+        _shutil.rmtree(emme_dir)
     project_path = _app.create_project(root, emme_project_folder)
     desktop = _app.start(  # will not close desktop when program ends
         project=project_path, user_initials="RSG", visible=True, port=port)
@@ -75,22 +78,19 @@ def init_emme_project(root, title, emmeversion, port=59673):
         'full_matrices': 300,
 
         'scenarios': 7,
-        'centroids': 10000,
+        'centroids': 6500,
         'regular_nodes': 600000,
         'links': 1000000,
-        'turn_entries': 1900000,
+        'turn_entries': 1,
         'transit_vehicles': 200,
-        'transit_lines': 40000,
+        'transit_lines': 2000,
         'transit_segments': 2000000,
-        'extra_attribute_values': 40000000,
+        'extra_attribute_values': 100000000,
 
         'functions': 99,
-        'operators': 5000
+        'operators': 5000,
+        'sola_analyses': 240
     }
-
-    # for Emme version > 4.3.7, add the sola_analyses dimension
-    if emmeversion != '4.4.2':
-        dimensions['sola_analyses'] = 240
 
     os.mkdir(os.path.join(project_root, "Database"))
     emmebank = _eb.create(os.path.join(project_root, "Database", "emmebank"), dimensions)
@@ -128,8 +128,10 @@ def connect_to_running_desktop(port):
     return desktop
 
 
-def import_modes(input_dir):
+def import_modes(input_dir, modeller=None):
     print "importing modes"
+    if modeller is None:
+        modeller = _m.Modeller()
     process_modes_tool_path = "inro.emme.data.network.mode.mode_transaction"
     process_modes_tool = modeller.tool(process_modes_tool_path)
     input_file = os.path.join(input_dir, emme_mode_transaction_file).replace("\\","/")
@@ -138,8 +140,10 @@ def import_modes(input_dir):
         scenario=modeller.scenario)
 
 
-def import_network(input_dir):
+def import_network(input_dir, modeller=None):
     print "importing network"
+    if modeller is None:
+        modeller = _m.Modeller()
     process_network_tool_path = "inro.emme.data.network.base.base_network_transaction"
     process_network_tool = modeller.tool(process_network_tool_path)
     input_file = os.path.join(input_dir, emme_network_transaction_file).replace("\\","/")
@@ -148,8 +152,10 @@ def import_network(input_dir):
         scenario=modeller.scenario)
 
 
-def import_extra_node_attributes(input_dir):
+def import_extra_node_attributes(input_dir, modeller=None):
     print "importing extra node attributes"
+    if modeller is None:
+        modeller = _m.Modeller()
     import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
     input_file = os.path.join(input_dir, extra_node_attr_file)
@@ -164,8 +170,10 @@ def import_extra_node_attributes(input_dir):
     )
 
 
-def import_extra_link_attributes(input_dir):
+def import_extra_link_attributes(input_dir, modeller=None):
     print "importing extra link attributes"
+    if modeller is None:
+        modeller = _m.Modeller()
     import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
     input_file = os.path.join(input_dir, extra_link_attr_file)
@@ -180,8 +188,10 @@ def import_extra_link_attributes(input_dir):
     )
 
 
-def import_vehicles(input_dir):
+def import_vehicles(input_dir, modeller=None):
     print "importing transit vehicles"
+    if modeller is None:
+        modeller = _m.Modeller()
     process_vehicles_tool_path = "inro.emme.data.network.transit.vehicle_transaction"
     process_vehicles_tool = modeller.tool(process_vehicles_tool_path)
     input_file = os.path.join(input_dir, emme_vehicle_transaction_file).replace("\\","/")
@@ -190,8 +200,10 @@ def import_vehicles(input_dir):
         scenario=modeller.scenario)
 
 
-def import_transit_time_functions(input_dir):
+def import_transit_time_functions(input_dir, modeller=None):
     print "importing transit time functions"
+    if modeller is None:
+        modeller = _m.Modeller()
     process_functions_tool_path = "inro.emme.data.function.function_transaction"
     process_functions_tool = modeller.tool(process_functions_tool_path)
     input_file = os.path.join(input_dir, emme_transit_time_function_file).replace("\\","/")
@@ -200,8 +212,10 @@ def import_transit_time_functions(input_dir):
         throw_on_error=True)
 
 
-def import_transit_lines(input_dir):
+def import_transit_lines(input_dir, modeller=None):
     print "importing transit network"
+    if modeller is None:
+        modeller = _m.Modeller()
     process_transit_lines_tool_path = "inro.emme.data.network.transit.transit_line_transaction"
     process_transit_lines_tool = modeller.tool(process_transit_lines_tool_path)
     input_file = os.path.join(input_dir, emme_transit_network_file).replace("\\","/")
@@ -210,8 +224,10 @@ def import_transit_lines(input_dir):
         scenario=modeller.scenario)
 
 
-def import_extra_transit_line_attributes(input_dir):
+def import_extra_transit_line_attributes(input_dir, modeller=None):
     print "importing extra transit line attributes"
+    if modeller is None:
+        modeller = _m.Modeller()
     import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
     input_file = os.path.join(input_dir, extra_transit_line_attr_file)
@@ -226,8 +242,10 @@ def import_extra_transit_line_attributes(input_dir):
     )
 
 
-def import_extra_transit_segment_attributes(input_dir):
+def import_extra_transit_segment_attributes(input_dir, modeller=None):
     print "importing extra transit segment attributes"
+    if modeller is None:
+        modeller = _m.Modeller()
     import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
     input_file = os.path.join(input_dir, extra_transit_segment_attr_file)
@@ -242,10 +260,10 @@ def import_extra_transit_segment_attributes(input_dir):
     )
 
 
-def replace_route_for_lines_with_nntime_and_created_segments(network):
-    stop_attributes_path = os.path.join(emme_network_transaction_folder, 'all_stop_attributes.csv')
+def replace_route_for_lines_with_nntime_and_created_segments(network, root):
+    stop_attributes_path = os.path.join(root, emme_network_transaction_folder, 'all_stop_attributes.csv')
     stop_attributes_df = pd.read_csv(stop_attributes_path)
-    transit_line_path = os.path.join(emme_network_transaction_folder, 'lines_that_need_links_created.csv')
+    transit_line_path = os.path.join(root, emme_network_transaction_folder, 'lines_that_need_links_created.csv')
     transit_line_df = pd.read_csv(transit_line_path)
 
     with _m.logbook_trace("Creating links for specified transit lines"):
@@ -317,11 +335,11 @@ def distribute_nntime_among_segments(segments_for_current_nntime):
             (segment.id, total_length, segment.link.length, segment['@tot_nntime'], new_nn_trantime)
 
 
-def distribute_nntime(network):
+def distribute_nntime(network, root):
     # redundant for lines that do not have missing segments and use NNTIME
-    stop_attributes_path = os.path.join(emme_network_transaction_folder, 'all_stop_attributes.csv')
+    stop_attributes_path = os.path.join(root, emme_network_transaction_folder, 'all_stop_attributes.csv')
     stop_attributes_df = pd.read_csv(stop_attributes_path)
-    transit_line_path = os.path.join(emme_network_transaction_folder, 'lines_that_need_links_created.csv')
+    transit_line_path = os.path.join(root, emme_network_transaction_folder, 'lines_that_need_links_created.csv')
     transit_line_df = pd.read_csv(transit_line_path)
 
     for idx, row in transit_line_df.iterrows():
@@ -392,6 +410,7 @@ def split_tap_connectors_to_prevent_walk(network):
     tap_stops = _defaultdict(lambda: [])
     new_node_id = init_node_id(network)
     all_transit_modes = set([mode for mode in network.modes() if mode.type == "TRANSIT"])
+    node_attributes = network.attributes("NODE")
 
     access_mode = set([network.mode("a")])
     transfer_mode =  network.mode("w")
@@ -419,6 +438,8 @@ def split_tap_connectors_to_prevent_walk(network):
                 length = link.length
                 new_node_id += 1
                 tap_stop = network.split_link(centroid, real_stop, new_node_id, include_reverse=True)
+                for attr in node_attributes:
+                    tap_stop[attr] = real_stop[attr]
                 # tap_stop["@network_adj"] = 1
                 tap_stops[real_stop].append(tap_stop)
                 transit_access_link = network.link(real_stop, tap_stop)
@@ -525,13 +546,15 @@ if __name__ == "__main__":
                         default=os.path.abspath(os.getcwd()))
     parser.add_argument('-t', '--title', help="the Emmebank title",
                         default="MTC Initial Database")
-    parser.add_argument('-v', '--emmeversion', help='the Emme version', default='4.4.2')
+    parser.add_argument('-v', '--emmeversion', help='the Emme version', default='4.4.4.2')
+
     args = parser.parse_args()
+    root = args.root
 
     # create emme project
     desktop = init_emme_project(args.root, args.title, args.emmeversion)
     # or connect to already open desktop for debugging
-    # desktop = connect_to_running_desktop(port=59673)
+    # desktop = connect_to_running_desktop(port=4242)
     # create modeller instance used to import data to project database
     modeller = _m.Modeller(desktop)
 
@@ -544,20 +567,29 @@ if __name__ == "__main__":
     import_transit_lines(input_dir=args.root)
     import_extra_transit_line_attributes(input_dir=args.root)
     import_extra_transit_segment_attributes(input_dir=args.root)
-
-    database_path = os.path.join(args.root, emme_project_folder, "Database")
+    database_path = os.path.join(root, emme_project_folder, "Database")
     emmebank_path = os.path.join(database_path, "emmebank")
     emmebank = _eb.Emmebank(emmebank_path)
     scenario = emmebank.scenario(1000)
     network = scenario.get_network()
 
-    replace_route_for_lines_with_nntime_and_created_segments(network)
+    replace_route_for_lines_with_nntime_and_created_segments(network, root)
     fill_transit_times_for_created_segments(network)
-    distribute_nntime(network)
+    distribute_nntime(network, root)
     fix_bad_walktimes(network)
-    split_tap_connectors_to_prevent_walk(network)
-
-
     scenario.publish_network(network)
+    if emmebank.scenario(1001):
+        emmebank.delete_scenario(1001)
+    scenario = emmebank.copy_scenario(1000, 1001)
 
-    # emmebank.dispose()
+    apply_fares = _apply_fares.ApplyFares()
+    apply_fares.scenario = scenario
+    apply_fares.dot_far_file = os.path.join(root, "cube_network_data", "fares.far")
+    apply_fares.fare_matrix_file = os.path.join(root, "cube_network_data", "fareMatrix.txt")
+    apply_fares.execute()
+
+    scenario = emmebank.copy_scenario(1001, 1002)
+    network = scenario.get_network()
+    split_tap_connectors_to_prevent_walk(network)
+    scenario.publish_network(network)
+    emmebank.dispose()
