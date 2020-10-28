@@ -41,6 +41,7 @@ class ApplyFares(object):
         self.scenario = None
         self.dot_far_file = None
         self.fare_matrix_file = None
+        self.network = None
 
     def execute(self):
         self._log = []
@@ -48,7 +49,7 @@ class ApplyFares(object):
         fare_matrices = self.parse_fare_matrix_file()
 
         try:
-            network = self.scenario.get_network()
+            network = self.network = self.scenario.get_network()
             self.temp_network_fixes(network)
             self.create_attribute("TRANSIT_SEGMENT", "@board_cost", self.scenario, network)
             self.create_attribute("TRANSIT_SEGMENT", "@invehicle_cost", self.scenario, network)
@@ -66,11 +67,13 @@ class ApplyFares(object):
                 fs_data["NUM LINES"] += 1
                 fs_data["NUM SEGMENTS"] += len(list(line.segments()))
 
+
             self._log.append({"type": "header", "content": "Base fares by faresystem"})
             for fs_id, fs_data in faresystems.iteritems():
                 self._log.append(
                     {"type": "text", "content": "FAREZONE {}: {} {}".format(fs_id, fs_data["STRUCTURE"], fs_data["NAME"])})
                 lines = fs_data["LINES"]
+                fs_data["MODES"] = ",".join(set(l.mode.id for l in lines))
                 if len(lines) == 0:
                     self._log.append(
                         {"type": "text2", "content": "No lines associated with this farezone"})
@@ -89,7 +92,7 @@ class ApplyFares(object):
             raise
         finally:
             log_content = []
-            header = ["NUMBER", "NAME", "NUM LINES", "NUM SEGMENTS", "FAREMATRIX ID", "NUM ZONES", "NUM MATRIX RECORDS"]
+            header = ["NUMBER", "NAME", "NUM LINES", "NUM SEGMENTS", "MODES", "FAREMATRIX ID", "NUM ZONES", "NUM MATRIX RECORDS"]
             for fs_id, fs_data in faresystems.iteritems():
                 log_content.append([str(fs_data.get(h, "")) for h in header])
             self._log.insert(0, {
@@ -102,8 +105,8 @@ class ApplyFares(object):
             self.log_report()
             self.log_text_report()
 
-        bank_dir = _os.path.dirname(self.scenario.emmebank.path)
-        with open(_os.path.join(bank_dir, "journey_levels.ems"), 'w') as jl_spec:
+        project_dir = _os.path.dirname(_os.path.dirname(self.scenario.emmebank.path))
+        with open(_os.path.join(project_dir, "Specifications", "journey_levels.ems"), 'w') as jl_spec:
             _json.dump({"type": "EXTENDED_TRANSIT_ASSIGNMENT", "journey_levels": journey_levels}, jl_spec, indent=4)
         self.scenario.publish_network(network)
 
@@ -242,8 +245,8 @@ class ApplyFares(object):
         # copy costs from links to segments
         for line in lines:
             for segment in line.segments():
-                segment["@invehicle_cost"] = segment.link.invehicle_cost
-                segment["@board_cost"] = segment.link.board_cost
+                segment["@invehicle_cost"] = max(segment.link.invehicle_cost, 0)
+                segment["@board_cost"] = max(segment.link.board_cost, 0)
         network.delete_attribute("LINK", "invehicle_cost")
         network.delete_attribute("LINK", "board_cost")
 
@@ -279,7 +282,7 @@ class ApplyFares(object):
                 try:
                     board_cost = fare_matrix[farezone][farezone]
                 except KeyError:
-                    board_cost = min(fare_matrix[zone].itervalues())
+                    board_cost = min(fare_matrix[farezone].itervalues())
                     self._log.append({
                         "type": "text2", 
                         "content": farezone_warning3 % (board_cost, seg, fs_data["FAREMATRIX ID"], farezone, farezone)})
@@ -491,18 +494,24 @@ class ApplyFares(object):
             return True
 
         # group faresystems together which have the same transfer-to pattern
+        # and the same mode
         group_xfer_fares = []
         for fs_id, fs_data in faresystems.iteritems():
+            fs_mode = fs_data["MODES"]
+            if fs_mode == "":
+                continue
             xfers = fs_data["xfer_fares"]
             is_matched = False
-            for xfer_fares_list, group in group_xfer_fares:
+            for xfer_fares_list, group, mode in group_xfer_fares:
+                if fs_mode != mode:
+                    continue
                 is_matched = matching_xfer_fares(xfers, xfer_fares_list)
                 if is_matched:
                     group.append(fs_id)
                     xfer_fares_list.append(xfers)
                     break
             if not is_matched:
-                group_xfer_fares.append(([xfers], [fs_id]))
+                group_xfer_fares.append(([xfers], [fs_id], fs_mode))
        
         self._log.append(
             {"type": "header", "content": "Faresystems grouped by compatible transfer fares"})
@@ -510,7 +519,8 @@ class ApplyFares(object):
             {"type": "text2", "content": "Max transfer distance: %s" % MAX_TRANSFER_DISTANCE})
         xfer_fares_table = [["p/q"] + list(faresystems.keys())]
         faresystem_groups = []
-        for xfer_fares_list, group in group_xfer_fares:
+        i = 0
+        for xfer_fares_list, group, modes in group_xfer_fares:
             xfer_fares = {}
             for fs_id in faresystems.keys():
                 to_fares = [f[fs_id] for f in xfer_fares_list if f[fs_id] != "TOO_FAR"]
@@ -519,8 +529,10 @@ class ApplyFares(object):
             faresystem_groups.append((group, xfer_fares))
             for fs_id in group:
                 xfer_fares_table.append([fs_id] + list(faresystems[fs_id]["xfer_fares"].values()))
+            i += 1
             self._log.append(
-                {"type": "text2", "content": "Faresystems: %s" % ", ".join([str(x) for x in group])})
+                {"type": "text2", "content": "Level %s faresystems: %s modes: %s" % 
+                    (i, ", ".join([str(x) for x in group]), ", ".join([str(m) for m in modes]))})
 
         self._log.append(
             {"type": "header", "content": "Transfer fares list by faresystem, sorted by group"})
@@ -622,11 +634,11 @@ class ApplyFares(object):
                     xferboard_cost = float(xferboard_cost[6:])
                     for segment in line.segments():
                         if segment.allow_boardings:
-                            segment[boarding_cost_id] = xferboard_cost + segment["@board_cost"]
+                            segment[boarding_cost_id] = max(xferboard_cost + segment["@board_cost"], 0)
                 else:
                     for segment in line.segments():
                         if segment.allow_boardings:
-                            segment[boarding_cost_id] = xferboard_cost
+                            segment[boarding_cost_id] = max(xferboard_cost, 0)
             level += 1
         return journey_levels
 
@@ -683,7 +695,7 @@ class ApplyFares(object):
             try:
                 for item in self._log:
                     if item["type"] == "header":
-                        report.write("%s\n" % item["content"])
+                        report.write("\n%s\n" % item["content"])
                         report.write("-" * len(item["content"]) + "\n\n")
                     elif item["type"] == "text":
                         report.write("    %s\n" % item["content"])
@@ -781,6 +793,7 @@ class SPBuilder(object):
                 if outgoing.j_node == dest_node:
                     link_found = True
                     break
+                costs[outgoing] = cost_func(outgoing)
                 push(outgoing, cost_func(outgoing))
         try:
             while not link_found:
@@ -793,19 +806,20 @@ class SPBuilder(object):
                         continue
                     if outgoing in visited:
                         continue
-                    back_links[outgoing] = link
+                    outgoing_cost = costs[link] + cost_func(outgoing)
+                    if outgoing_cost < costs[outgoing]:
+                        back_links[outgoing] = link
+                        costs[outgoing] = outgoing_cost
+                        push(outgoing, outgoing_cost)
                     if outgoing.j_node == dest_node:
                         link_found = True
                         break
-                    outgoing_cost = costs[link] + cost_func(link)
-                    costs[link] = outgoing_cost
-                    push(outgoing, outgoing_cost)
         except RuntimeError:
             pass  # RuntimeError if heap is empty
         if not link_found:
             raise NoPathFound("No path found between %s and %s" % (orig_node, dest_node))
-        prev_link = back_links[outgoing]
-        route = [outgoing]
+        prev_link = outgoing
+        route = []
         while prev_link:
             route.append(prev_link)
             prev_link = back_links[prev_link]
