@@ -19,6 +19,7 @@ transit_SET3_file =  os.path.join(cube_network_data_folder, "transitFactors_SET3
 
 # ------------- output files------------
 emme_network_transaction_folder = os.path.join(os.getcwd(),"emme_network_transaction_files")
+
 node_id_crosswalk_file = os.path.join(emme_network_transaction_folder, "node_id_crosswalk.csv")
 emme_mode_transaction_file = os.path.join(emme_network_transaction_folder, "emme_modes.txt")
 emme_vehicle_transaction_file = os.path.join(emme_network_transaction_folder, "emme_vehicles.txt")
@@ -281,15 +282,15 @@ def create_and_write_mode_transaction_file():
     mode_transaction_df = mode_transaction_df.append({'transaction': 'a', 'mode': 'h', 'descr': 'heavy_rail', 'type':2 }, ignore_index=True)
     mode_transaction_df = mode_transaction_df.append({'transaction': 'a', 'mode': 'r', 'descr': 'comm_rail', 'type':2 }, ignore_index=True)
     mode_transaction_df['plot'] = 1  # deprecated but needed
-    mode_transaction_df['ctc'] = pd.NA  # operating cost/hour. Only needed for mode type 2 and 3
+    mode_transaction_df['ctc'] = 0  # operating cost/hour. Only needed for mode type 2 and 3
     mode_transaction_df.loc[mode_transaction_df['type'].isin([1,3]), 'ctc'] = 0
-    mode_transaction_df['cdc'] = pd.NA  # operating cost/unit length. Only needed for mode type 2 and 3
+    mode_transaction_df['cdc'] = 0  # operating cost/unit length. Only needed for mode type 2 and 3
     mode_transaction_df.loc[mode_transaction_df['type'].isin([1,3]), 'cdc'] = 0
-    mode_transaction_df['etc'] = pd.NA  # energy consumption/hour. Only needed for mode type 2 and 3
+    mode_transaction_df['etc'] = 0  # energy consumption/hour. Only needed for mode type 2 and 3
     mode_transaction_df.loc[mode_transaction_df['type'].isin([1,3]), 'etc'] = 0
-    mode_transaction_df['edc'] = pd.NA  # energy consumption/length. Only needed for mode type 2 and 3
+    mode_transaction_df['edc'] = 0    # energy consumption/length. Only needed for mode type 2 and 3
     mode_transaction_df.loc[mode_transaction_df['type'].isin([1,3]), 'edc'] = 0
-    mode_transaction_df['speed'] = pd.NA  # speed only needed for type = 3 (aux transit mode speed)
+    mode_transaction_df['speed'] = 0  # speed only needed for type = 3 (aux transit mode speed)
     # walk speed set to 3 mph
     # mode_transaction_df.loc[mode_transaction_df['mode'] == 'w', 'speed'] = 3
     # mode_transaction_df.loc[mode_transaction_df['mode'] == 'a', 'speed'] = 3
@@ -935,6 +936,9 @@ def write_extra_transit_segment_attributes_file(stop_df, transit_line_df):
 # --------------------------------------------- Entry Point ---------------------------------------
 if __name__ == "__main__":
     start_time = time.time()
+
+    if not os.path.exists(emme_network_transaction_folder):
+        os.mkdir(emme_network_transaction_folder)
 
     # ------ reading and processing input -----
     node_gdf, link_gdf = load_input_data()

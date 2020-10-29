@@ -21,6 +21,7 @@ import inro.emme.core.services as _services
 
 import shapely.geometry as _geom
 import numpy as _np
+from scipy.optimize import nnls as _nnls
 import time as _time
 import os as _os
 import argparse as _argparse
@@ -40,6 +41,7 @@ class ApplyFares(object):
         self.scenario = None
         self.dot_far_file = None
         self.fare_matrix_file = None
+        self.network = None
 
     def execute(self):
         self._log = []
@@ -47,7 +49,8 @@ class ApplyFares(object):
         fare_matrices = self.parse_fare_matrix_file()
 
         try:
-            network = self.scenario.get_network()
+            network = self.network = self.scenario.get_network()
+            self.temp_network_fixes(network)
             self.create_attribute("TRANSIT_SEGMENT", "@board_cost", self.scenario, network)
             self.create_attribute("TRANSIT_SEGMENT", "@invehicle_cost", self.scenario, network)
             # identify the lines by faresystem
@@ -56,16 +59,21 @@ class ApplyFares(object):
                 try:
                     fs_data = faresystems[fs_id]
                 except KeyError:
-                    raise Exception("Line %s with @faresystem '%s' not found in fares.far table" % (line.id, fs_id))
+                    self._log.append(
+                        {"type": "text", "content": "Line %s has @faresystem '%s' which was not found in fares.far table" % (line.id, fs_id)})
+                    #raise Exception("Line %s with @faresystem '%s' not found in fares.far table" % (line.id, fs_id))
+                    continue
                 fs_data["LINES"].append(line)
                 fs_data["NUM LINES"] += 1
                 fs_data["NUM SEGMENTS"] += len(list(line.segments()))
+
 
             self._log.append({"type": "header", "content": "Base fares by faresystem"})
             for fs_id, fs_data in faresystems.iteritems():
                 self._log.append(
                     {"type": "text", "content": "FAREZONE {}: {} {}".format(fs_id, fs_data["STRUCTURE"], fs_data["NAME"])})
                 lines = fs_data["LINES"]
+                fs_data["MODES"] = ",".join(set(l.mode.id for l in lines))
                 if len(lines) == 0:
                     self._log.append(
                         {"type": "text2", "content": "No lines associated with this farezone"})
@@ -77,9 +85,6 @@ class ApplyFares(object):
 
             faresystem_groups = self.group_faresystems(faresystems, network)
             journey_levels = self.generate_transfer_fares(faresystems, faresystem_groups, network)
-            bank_dir = _os.path.dirname(self.scenario.emmebank.path)
-            with open(_os.path.join(bank_dir, "journey_levels.ems"), 'w') as jl_spec:
-                _json.dump(journey_levels, jl_spec, indent=4)
         except Exception as error:
             self._log.append({"type": "text", "content": "error during apply fares"})
             self._log.append({"type": "text", "content": unicode(error)})
@@ -87,7 +92,7 @@ class ApplyFares(object):
             raise
         finally:
             log_content = []
-            header = ["NUMBER", "NAME", "NUM LINES", "NUM SEGMENTS", "FAREMATRIX ID", "NUM ZONES", "NUM MATRIX RECORDS"]
+            header = ["NUMBER", "NAME", "NUM LINES", "NUM SEGMENTS", "MODES", "FAREMATRIX ID", "NUM ZONES", "NUM MATRIX RECORDS"]
             for fs_id, fs_data in faresystems.iteritems():
                 log_content.append([str(fs_data.get(h, "")) for h in header])
             self._log.insert(0, {
@@ -99,6 +104,19 @@ class ApplyFares(object):
 
             self.log_report()
             self.log_text_report()
+
+        project_dir = _os.path.dirname(_os.path.dirname(self.scenario.emmebank.path))
+        with open(_os.path.join(project_dir, "Specifications", "journey_levels.ems"), 'w') as jl_spec:
+            _json.dump({"type": "EXTENDED_TRANSIT_ASSIGNMENT", "journey_levels": journey_levels}, jl_spec, indent=4)
+        self.scenario.publish_network(network)
+
+        return journey_levels
+
+    def temp_network_fixes(self, network):
+        pass
+        # network.node(138068)["@farezone"] = 2
+        # network.node(407379)["@farezone"] = 150
+        # network.node(55633)["@farezone"] = 123
 
     def parse_dot_far_file(self):
         data = {}
@@ -173,10 +191,6 @@ class ApplyFares(object):
             fs_data["NUM MATRIX RECORDS"] += len(zones)
             valid_farezones.update(set(zones))
         fs_data["NUM ZONES"] = len(valid_farezones)
-        # # insert default z->z value if missing
-        # for zone in valid_farezones:
-        #     if zone not in fare_matrix[zone]:
-        #         fare_matrix[zone][zone] = min(fare_matrix[zone].itervalues())
         valid_fz_str = ", ".join([str(x) for x in valid_farezones])
         self._log.append(
             {"type": "text2", "content": "{} valid zones: {}".format(fs_data["NUM ZONES"], valid_fz_str)})
@@ -231,20 +245,28 @@ class ApplyFares(object):
         # copy costs from links to segments
         for line in lines:
             for segment in line.segments():
-                segment["@invehicle_cost"] = segment.link.invehicle_cost
-                segment["@board_cost"] = segment.link.board_cost
+                segment["@invehicle_cost"] = max(segment.link.invehicle_cost, 0)
+                segment["@board_cost"] = max(segment.link.board_cost, 0)
         network.delete_attribute("LINK", "invehicle_cost")
         network.delete_attribute("LINK", "board_cost")
 
     def zone_boundary_crossing_approx(self, lines, valid_farezones, fare_matrix, fs_data):
-        farezone_warning =  "Warning: no value in fare matrix for @farezone ID '%s' "\
+        farezone_warning1 = "Warning: no value in fare matrix for @farezone ID '%s' "\
            "found on line %s at node %s (using @farezone from previous segment in itinerary)"
+        farezone_warning2 = "Error in fromto faresystem %s estimation on line %s: first node %s "\
+            "does not have a valid @farezone ID"
+        farezone_warning3 = "Warning: board cost set to %s at %s (no entry in farematrix %s "\
+            "for farezones %s-%s). This is an issue if there is a subsequent alighting in the same "\
+            "zone (if this message occures more than once per line with the same farezone ID)"
+        farezone_warning4 = "Error in fromto faresystem %s estimation on line %s: no entry in "\
+            "farematrix %s for farezones %s-%s and multiple stops found inside this farezone"
 
         self._log.append(
-        {"type": "text2", "content": "Using zone boundary crossings approximation"})
+            {"type": "text2", "content": "Using zone boundary crossings approximation"})
         for line in lines:
             prev_farezone = 0
             prev_seg = None
+            same_farezone_missing_cost = False
             for seg in line.segments(include_hidden=False):
                 if not (seg.allow_alightings or seg.allow_boardings):
                     continue
@@ -252,19 +274,24 @@ class ApplyFares(object):
                 if farezone not in valid_farezones:
                     if farezone != 0:
                         self._log.append({
-                            "type": "text3", "content": farezone_warning % (farezone, line, seg.i_node)})
+                            "type": "text3", "content": farezone_warning1 % (farezone, line, seg.i_node)})
                     if prev_farezone != 0:
                         farezone = prev_farezone
                     else:
-                        raise Exception("Error in fromto faresystem %s estimation: on line %s first node %s "
-                                        "does not have a valid @farezone ID" % (fs_data["NUMBER"], line, seg.i_node))
+                        raise Exception(farezone_warning2 % (fs_data["NUMBER"], line, seg.i_node))
                 try:
                     board_cost = fare_matrix[farezone][farezone]
                 except KeyError:
-                    raise Exception("No entry in farematrix %s for faresystem %s estimation at segment %s "
-                                    "farezones %s-%s" % (fs_data["FAREMATRIX ID"], fs_data["NUMBER"], seg, farezone, farezone))
+                    board_cost = min(fare_matrix[farezone].itervalues())
+                    self._log.append({
+                        "type": "text2", 
+                        "content": farezone_warning3 % (board_cost, seg, fs_data["FAREMATRIX ID"], farezone, farezone)})
+                    if same_farezone_missing_cost == farezone:
+                        raise Exception(farezone_warning4 % (fs_data["NUMBER"], line, fs_data["FAREMATRIX ID"], farezone, farezone))
+                    same_farezone_missing_cost = farezone
+                    
                 seg.link["board_cost"] = board_cost
-                if prev_farezone !=0 and farezone != prev_farezone:
+                if prev_farezone != 0 and farezone != prev_farezone:
                     try:
                         prev_seg.link["invehicle_cost"] = fare_matrix[prev_farezone][farezone] - prev_seg.link["board_cost"]
                     except KeyError:
@@ -320,10 +347,13 @@ class ApplyFares(object):
                 pq_pairs.append((p, q, orig_node, dest_node, cost))
                 if q == p or orig_node is None or dest_node is None or cost == "n/a":
                     continue
+                try:
+                    path_links = path_builder.find_path(
+                        orig_node, dest_node, lambda l: l in valid_links, lambda l: l.length)
+                except NoPathFound:
+                    continue
                 b.append(cost)
                 a_indices = [0]*index
-                path_links = path_builder.find_path(
-                    orig_node, dest_node, lambda l: l in valid_links, lambda l: l.length)
                 
                 a_indices[path_links[0].board_index] = 1
                 for link in path_links:
@@ -332,7 +362,9 @@ class ApplyFares(object):
                     a_indices[link.invehicle_index] = 1
                 A.append(a_indices)
 
-        x, res, rank, s = _np.linalg.lstsq(A, b, rcond=None)
+        #x, res, rank, s = _np.linalg.lstsq(A, b, rcond=None)
+        # Use scipy non-negative least squares solver
+        x, rnorm = _nnls(A, b)
         result = [round(i, 2) for i in x]
 
         header = ["Boarding node", "J-node", "Farezone", "Board cost", "Invehicle cost"]
@@ -367,10 +399,13 @@ class ApplyFares(object):
             if orig_node is None or dest_node is None:
                 row.append("%s, UNUSED" % (cost))
             else:
-                path_links = path_builder.find_path(
-                    orig_node, dest_node, lambda l: l in valid_links, lambda l: l.length)
-                path_cost = (path_links[0].board_cost + sum(l.invehicle_cost for l in path_links))
-                row.append("%s, $%.2f" % (cost, path_cost))
+                try:
+                    path_links = path_builder.find_path(
+                        orig_node, dest_node, lambda l: l in valid_links, lambda l: l.length)
+                    path_cost = (path_links[0].board_cost + sum(l.invehicle_cost for l in path_links))
+                    row.append("%s, $%.2f" % (cost, path_cost))
+                except NoPathFound:
+                    row.append("%s, NO PATH" % (cost))
             prev_p = p
         table_content.append(row)
 
@@ -459,18 +494,24 @@ class ApplyFares(object):
             return True
 
         # group faresystems together which have the same transfer-to pattern
+        # and the same mode
         group_xfer_fares = []
         for fs_id, fs_data in faresystems.iteritems():
+            fs_mode = fs_data["MODES"]
+            if fs_mode == "":
+                continue
             xfers = fs_data["xfer_fares"]
             is_matched = False
-            for xfer_fares_list, group in group_xfer_fares:
+            for xfer_fares_list, group, mode in group_xfer_fares:
+                if fs_mode != mode:
+                    continue
                 is_matched = matching_xfer_fares(xfers, xfer_fares_list)
                 if is_matched:
                     group.append(fs_id)
                     xfer_fares_list.append(xfers)
                     break
             if not is_matched:
-                group_xfer_fares.append(([xfers], [fs_id]))
+                group_xfer_fares.append(([xfers], [fs_id], fs_mode))
        
         self._log.append(
             {"type": "header", "content": "Faresystems grouped by compatible transfer fares"})
@@ -478,7 +519,8 @@ class ApplyFares(object):
             {"type": "text2", "content": "Max transfer distance: %s" % MAX_TRANSFER_DISTANCE})
         xfer_fares_table = [["p/q"] + list(faresystems.keys())]
         faresystem_groups = []
-        for xfer_fares_list, group in group_xfer_fares:
+        i = 0
+        for xfer_fares_list, group, modes in group_xfer_fares:
             xfer_fares = {}
             for fs_id in faresystems.keys():
                 to_fares = [f[fs_id] for f in xfer_fares_list if f[fs_id] != "TOO_FAR"]
@@ -487,8 +529,10 @@ class ApplyFares(object):
             faresystem_groups.append((group, xfer_fares))
             for fs_id in group:
                 xfer_fares_table.append([fs_id] + list(faresystems[fs_id]["xfer_fares"].values()))
+            i += 1
             self._log.append(
-                {"type": "text2", "content": "Faresystems: %s" % ", ".join([str(x) for x in group])})
+                {"type": "text2", "content": "Level %s faresystems: %s modes: %s" % 
+                    (i, ", ".join([str(x) for x in group]), ", ".join([str(m) for m in modes]))})
 
         self._log.append(
             {"type": "header", "content": "Transfer fares list by faresystem, sorted by group"})
@@ -554,7 +598,10 @@ class ApplyFares(object):
                 "transition_rules": transition_rules,
                 "waiting_time": None,
                 "boarding_time": None,
-                "boarding_cost": {"on_segments": boarding_cost_id}
+                "boarding_cost": {
+                    "global": None, "at_nodes": None, "on_lines": None,
+                    "on_segments": {"penalty": boarding_cost_id, "perception_factor": 1}
+                },
             })
             level_mode = network.create_mode("TRANSIT", get_mode_id())
             transition_rules.append({"mode": level_mode.id, "next_journey_level": level})
@@ -577,16 +624,21 @@ class ApplyFares(object):
             # xferfares is a list of transfer fares, as a number or a string "BOARD+" + a number
             for line in network.transit_lines():
                 to_faresystem = int(line["@faresystem"])
-                xferboard_cost = xfer_fares[to_faresystem]
+                try:
+                    xferboard_cost = xfer_fares[to_faresystem]
+                except KeyError:
+                    continue  # line does not have a valid faresystem ID
                 if xferboard_cost == "TOO_FAR":
                     pass  # use zero cost as transfer from this fs to line is impossible
                 elif isinstance(xferboard_cost, str) and xferboard_cost.startswith("BOARD+"):
                     xferboard_cost = float(xferboard_cost[6:])
                     for segment in line.segments():
-                        segment[boarding_cost_id] = xferboard_cost + segment["@board_cost"]
+                        if segment.allow_boardings:
+                            segment[boarding_cost_id] = max(xferboard_cost + segment["@board_cost"], 0)
                 else:
                     for segment in line.segments():
-                        segment[boarding_cost_id] = xferboard_cost
+                        if segment.allow_boardings:
+                            segment[boarding_cost_id] = max(xferboard_cost, 0)
             level += 1
         return journey_levels
 
@@ -643,7 +695,7 @@ class ApplyFares(object):
             try:
                 for item in self._log:
                     if item["type"] == "header":
-                        report.write("%s\n" % item["content"])
+                        report.write("\n%s\n" % item["content"])
                         report.write("-" * len(item["content"]) + "\n\n")
                     elif item["type"] == "text":
                         report.write("    %s\n" % item["content"])
@@ -741,6 +793,7 @@ class SPBuilder(object):
                 if outgoing.j_node == dest_node:
                     link_found = True
                     break
+                costs[outgoing] = cost_func(outgoing)
                 push(outgoing, cost_func(outgoing))
         try:
             while not link_found:
@@ -753,23 +806,28 @@ class SPBuilder(object):
                         continue
                     if outgoing in visited:
                         continue
-                    back_links[outgoing] = link
+                    outgoing_cost = costs[link] + cost_func(outgoing)
+                    if outgoing_cost < costs[outgoing]:
+                        back_links[outgoing] = link
+                        costs[outgoing] = outgoing_cost
+                        push(outgoing, outgoing_cost)
                     if outgoing.j_node == dest_node:
                         link_found = True
                         break
-                    outgoing_cost = costs[link] + cost_func(link)
-                    costs[link] = outgoing_cost
-                    push(outgoing, outgoing_cost)
         except RuntimeError:
             pass  # RuntimeError if heap is empty
         if not link_found:
-            raise Exception("No path found between %s and %s" % (orig_node, dest_node))
-        prev_link = back_links[outgoing]
-        route = [outgoing]
+            raise NoPathFound("No path found between %s and %s" % (orig_node, dest_node))
+        prev_link = outgoing
+        route = []
         while prev_link:
             route.append(prev_link)
             prev_link = back_links[prev_link]
         return list(reversed(route))
+
+
+class NoPathFound(Exception):
+    pass
 
 
 def bounding_rect(shape):
