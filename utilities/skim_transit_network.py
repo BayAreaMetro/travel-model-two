@@ -1,5 +1,6 @@
 import inro.modeller as _m
 import inro.emme.database.emmebank as _eb
+import inro.emme.desktop.app as _app
 import inro.emme.core.exception as _except
 import traceback as _traceback
 from copy import deepcopy as _copy
@@ -24,6 +25,8 @@ except Exception, e:
     def open_file(file_path, mode):
         return OmxMatrix(_omx.openFile(file_path, mode))
 
+output_omx_file = os.path.join(os.getcwd(), r"omx_test.omx")
+
 _all_periods = ['AM']
 # _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
 _all_components = ['transit_skims']
@@ -47,7 +50,7 @@ def connect_to_desktop(port=59673):
 
 # ------------------------------------ Initialize matrices -----------------------------------------
 
-@_m.logbook_trace("Create and initialize matrices", save_arguments=True)
+# @_m.logbook_trace("Create and initialize matrices", save_arguments=True)
 def initialize_matrices(components, periods, scenario, delete_all_existing=False):
     attributes = {
         "components": components,
@@ -156,8 +159,8 @@ def get_transit_skims():
     ]
     skim_sets = [
         ("BUS",    "Local bus only"),
-        # ("PREM",   "Premium modes only"),
-        # ("ALLPEN", "All w/ xfer pen")
+        ("PREM",   "Premium modes only"),
+        ("ALLPEN", "All w/ xfer pen")
     ]
     for period in _all_periods:
         for set_name, set_desc in skim_sets:
@@ -247,9 +250,9 @@ def perform_assignment_and_skim(modeller, scenario, period, data_table_name=None
     if not assignment_only:
         # max_fare = day_pass for local bus and regional_pass for premium modes
         run_skims(modeller, scenario, "BUS", period, params, max_fare, num_processors, network)
-        # run_skims(modeller, scenario, "PREM", period, params, max_fare, num_processors, network)
-        # run_skims(modeller, scenario, "ALLPEN", period, params, max_fare, num_processors, network)
-        # mask_allpen(scenario, period)
+        run_skims(modeller, scenario, "PREM", period, params, max_fare, num_processors, network)
+        run_skims(modeller, scenario, "ALLPEN", period, params, max_fare, num_processors, network)
+        mask_allpen(scenario, period)
         report(scenario, period)
 
 
@@ -330,7 +333,7 @@ def get_perception_parameters(period):
     return perception_parameters[period]
 
 
-@_m.logbook_trace("Transit assignment by demand set", save_arguments=True)
+# @_m.logbook_trace("Transit assignment by demand set", save_arguments=True)
 def run_assignment(modeller, scenario, period, params, network, skims_only, num_processors):
     assign_transit = modeller.tool(
         "inro.emme.transit_assignment.extended_transit_assignment")
@@ -357,11 +360,11 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
         "demand": "",
         "waiting_time": {
             "effective_headways": params["init_headway"], "headway_fraction": 0.5,
-            "perception_factor": params["init_wait"], "spread_factor": 1.0
+            "perception_factor": params["init_wait"], "spread_factor": 0.5
         },
         # Fare attributes
         "boarding_cost": {"global": {"penalty": 0, "perception_factor": 1}},
-        "boarding_time": {"global": {"penalty": 0, "perception_factor": 1}},
+        "boarding_time": {"global": {"penalty": 10, "perception_factor": 1}},
         "in_vehicle_cost": None,
         # "in_vehicle_cost": {"penalty": 0,
         #                     "perception_factor": params["coaster_fare_percep"]},
@@ -390,14 +393,14 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
             "modes": walk_modes + local_bus_mode,
             "journey_levels": local_bus_journey_levels
         }),
-        # ("PREM", {
-        #     "modes": walk_modes + premium_modes,
-        #     "journey_levels": premium_modes_journey_levels
-        # }),
-        # ("ALLPEN", {
-        #     "modes": walk_modes + local_bus_mode + premium_modes,
-        #     "journey_levels": journey_levels
-        # }),
+        ("PREM", {
+            "modes": walk_modes + premium_modes,
+            "journey_levels": premium_modes_journey_levels
+        }),
+        ("ALLPEN", {
+            "modes": walk_modes + local_bus_mode + premium_modes,
+            "journey_levels": journey_levels
+        }),
     ])
 
     if skims_only:
@@ -416,7 +419,7 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
             add_volumes = True
 
 
-@_m.logbook_trace("Extract skims", save_arguments=True)
+# @_m.logbook_trace("Extract skims", save_arguments=True)
 def run_skims(modeller, scenario, name, period, params, max_fare, num_processors, network):
     emmebank = scenario.emmebank
     matrix_calc = modeller.tool(
@@ -523,46 +526,48 @@ def run_skims(modeller, scenario, name, period, params, max_fare, num_processors
         matrix_calc(spec, scenario=scenario, num_processors=num_processors)
 
     # walk access time - get distance and convert to time with 3 miles / hr
-    with _m.logbook_trace("Walk time access, egress and xfer"):
-        path_spec = {
-            "portion_of_path": "ORIGIN_TO_INITIAL_BOARDING",
-            "trip_components": {"aux_transit": "length",},
-            "path_operator": "+",
-            "path_selection_threshold": {"lower": 0, "upper": 999999 },
-            "path_to_od_aggregation": {
-                "operator": "average",
-                "aggregated_path_values": 'mf"%s_ACCWALK"' % skim_name,
-            },
-            "type": "EXTENDED_TRANSIT_PATH_ANALYSIS"
-        }
-        path_analysis(path_spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
-
-        # walk egress time - get distance and convert to time with 3 miles/ hr
-        path_spec = {
-            "portion_of_path": "FINAL_ALIGHTING_TO_DESTINATION",
-            "trip_components": {"aux_transit": "length",},
-            "path_operator": "+",
-            "path_selection_threshold": {"lower": 0, "upper": 999999 },
-            "path_to_od_aggregation": {
-                "operator": "average",
-                "aggregated_path_values": 'mf"%s_EGRWALK"' % skim_name
-            },
-            "type": "EXTENDED_TRANSIT_PATH_ANALYSIS"
-        }
-        path_analysis(path_spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
-
+    # with _m.logbook_trace("Walk time access, egress and xfer"):
+    #     path_spec = {
+    #         "portion_of_path": "ORIGIN_TO_INITIAL_BOARDING",
+    #         "trip_components": {"aux_transit": "length",},
+    #         "path_operator": "+",
+    #         "path_selection_threshold": {"lower": 0, "upper": 999999 },
+    #         "path_to_od_aggregation": {
+    #             "operator": "average",
+    #             "aggregated_path_values": 'mf"%s_ACCWALK"' % skim_name,
+    #         },
+    #         "type": "EXTENDED_TRANSIT_PATH_ANALYSIS"
+    #     }
+    #     path_analysis(path_spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
+    #
+    #     # walk egress time - get distance and convert to time with 3 miles/ hr
+    #     path_spec = {
+    #         "portion_of_path": "FINAL_ALIGHTING_TO_DESTINATION",
+    #         "trip_components": {"aux_transit": "length",},
+    #         "path_operator": "+",
+    #         "path_selection_threshold": {"lower": 0, "upper": 999999 },
+    #         "path_to_od_aggregation": {
+    #             "operator": "average",
+    #             "aggregated_path_values": 'mf"%s_EGRWALK"' % skim_name
+    #         },
+    #         "type": "EXTENDED_TRANSIT_PATH_ANALYSIS"
+    #     }
+    #     path_analysis(path_spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
+    #
         spec_list = [
         {    # walk access time - convert to time with 3 miles/ hr
             "type": "MATRIX_CALCULATION",
             "constraint": None,
             "result": 'mf"%s_ACCWALK"' % skim_name,
-            "expression": '60.0 * %s_ACCWALK / 3.0' % skim_name,
+            # "expression": '60.0 * %s_ACCWALK / 3.0' % skim_name,
+            "expression": '.33',
         },
         {    # walk egress time - convert to time with 3 miles/ hr
             "type": "MATRIX_CALCULATION",
             "constraint": None,
             "result": 'mf"%s_EGRWALK"' % skim_name,
-            "expression": '60.0 * %s_EGRWALK / 3.0' % skim_name,
+            # "expression": '60.0 * %s_EGRWALK / 3.0' % skim_name,
+            "expression": '.33',
         },
         {   # transfer walk time = total - access - egress
             "type": "MATRIX_CALCULATION",
@@ -630,7 +635,7 @@ def mask_allpen(scenario, period):
     skims = [
         "FIRSTWAIT", "TOTALWAIT", "DWELLTIME", "XFERS", "TOTALWALK",
         "LBIVTT", "EBIVTT", "LRIVTT", "HRIVTT", "CRIVTT", "FRIVTT",
-        "GENCOST", "XFERWAIT", "FARE",
+        "GENCOST", "XFERWAIT", "FARE", "TOTDIST",
         "ACCWALK", "XFERWALK", "EGRWALK", "TOTALIVTT",
         "LBDIST", "EBDIST", "LRDIST", "HRDIST", "CRDIST"]
     localivt_skim = get_matrix_data(scenario, period + "_ALLPEN_LBIVTT")
@@ -641,6 +646,24 @@ def mask_allpen(scenario, period):
         mat_name = period + "_ALLPEN_" + skim
         data = get_matrix_data(scenario, mat_name)
         set_matrix_data(scenario, mat_name, data * has_both)
+
+
+def mask_transfers(scenario, period, max_transfers=3):
+    # Reset skims to 0 if number of transfers is greater than max_transfers
+    skims = [
+        "FIRSTWAIT", "TOTALWAIT", "DWELLTIME", "XFERS", "TOTALWALK",
+        "LBIVTT", "EBIVTT", "LRIVTT", "HRIVTT", "CRIVTT", "FRIVTT",
+        "GENCOST", "XFERWAIT", "FARE", "TOTDIST",
+        "ACCWALK", "XFERWALK", "EGRWALK", "TOTALIVTT",
+        "LBDIST", "EBDIST", "LRDIST", "HRDIST", "CRDIST"]
+
+    for set in ['_BUS_', '_PREM_', '_ALLPEN_']:
+        xfers = get_matrix_data(scenario, period + set + "XFERS")
+        xfer_mask = numpy.less_equal(xfers, max_transfers)
+        for skim in skims:
+            mat_name = period + set + skim
+            data = get_matrix_data(scenario, mat_name)
+            set_matrix_data(scenario, mat_name, data * xfer_mask)
 
 
 def get_matrix_data(scenario, name):
@@ -814,11 +837,11 @@ class ExportOMX(object):
             key, obj=numpy_array, chunkshape=chunkshape, attrs=attrs)
 
 
-@_m.logbook_trace("Export transit skims to OMX", save_arguments=True)
+# @_m.logbook_trace("Export transit skims to OMX", save_arguments=True)
 def export_matrices_to_omx(omx_file, periods, scenario, big_to_zero=False):
     attributes = {"omx_file": omx_file, "periods": periods, "big_to_zero": big_to_zero}
-    # gen_utils.log_snapshot("Export transit skims to OMX", str(self), attributes)
-    # init_matrices = _m.Modeller().tool("sandag.initialize.initialize_matrices")
+    # for period in periods:
+    #     mask_transfers(scenario, period, max_transfers=3)
     matrices = get_matrix_names("transit_skims", periods, scenario)
     with ExportOMX(omx_file, scenario, omx_key="NAME") as exporter:
         if big_to_zero:
@@ -837,11 +860,12 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--root', help="path to the root ABM folder, default is the working folder",
                         default=os.path.abspath(os.getcwd()))
     parser.add_argument('-n', '--name', help="the project folder name",
-                        default="mtc_emme_3")
+                        default="mtc_emme")
     args = parser.parse_args()
 
     # or connect to already open desktop for debugging
     desktop = connect_to_desktop(port=59673)
+    # desktop = connect_to_desktop(port=4242)
     modeller = _m.Modeller(desktop)
 
     # create modeller instance used to import data to project database
@@ -855,5 +879,5 @@ if __name__ == "__main__":
 
     perform_assignment_and_skim(modeller, scenario, period='AM', data_table_name=None, assignment_only=False,
                                     skims_only=True, num_processors="MAX-1")
-    # run_transit_assignment()
-    # create_transit_skims()
+
+    export_matrices_to_omx(omx_file=output_omx_file, periods=['AM'], scenario=scenario, big_to_zero=True)

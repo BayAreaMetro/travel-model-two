@@ -43,7 +43,7 @@ extra_transit_segment_attr_file = os.path.join(emme_network_transaction_folder, 
 emme_transit_time_function_file = os.path.join(emme_network_transaction_folder, "emme_transit_time_function.txt")
 # ------------- output files------------
 # name of folder for emme project
-emme_project_folder = "mtc_emme_3"
+# emme_project_folder = "mtc_emme"
 
 
 # modeller = _m.Modeller()
@@ -55,7 +55,7 @@ def init_emme_project(root, title, emmeversion, port=59673):
     # emme_dir = os.path.join(root, emme_project_folder)
     # if os.path.exists(emme_dir):
     #     _shutil.rmtree(emme_dir)
-    project_path = _app.create_project(root, emme_project_folder)
+    project_path = _app.create_project(root, title)
     desktop = _app.start(  # will not close desktop when program ends
         project=project_path, user_initials="RSG", visible=True, port=port)
     # desktop = _app.start_dedicated(
@@ -305,64 +305,54 @@ def fill_transit_times_for_created_segments(network):
     print "Number of created segments assigned link trantime: %s" % segments_fixed
 
 
-def distribute_nntime_among_segments(segments_for_current_nntime):
+def distribute_nntime_among_segments(segments_for_current_nntime, nntime):
     total_length = 0
     for segment in segments_for_current_nntime:
         total_length += segment.link.length
 
     for segment in segments_for_current_nntime:
-        segment['@nn_trantime'] = segment['@tot_nntime'] * (segment.link.length / total_length)
-        new_nn_trantime = segment['@tot_nntime'] * (segment.link.length / total_length)
-        print "Segment: %s, total_length: %s, length: %s, tot_nntime: %s, nn_trantime: %s," % \
-            (segment.id, total_length, segment.link.length, segment['@tot_nntime'], new_nn_trantime)
+        segment['@tot_nntime'] = nntime
+        segment['@nn_trantime'] = nntime * (segment.link.length / total_length)
+        # segment['@nn_trantime'] = segment['@tot_nntime'] * (segment.link.length / total_length)
+        # new_nn_trantime = segment['@tot_nntime'] * (segment.link.length / total_length)
+        # print "Segment: %s, total_length: %s, length: %s, tot_nntime: %s, nn_trantime: %s," % \
+        #     (segment.id, total_length, segment.link.length, segment['@tot_nntime'], segment['@nn_trantime'])
 
 
 def distribute_nntime(network):
     # redundant for lines that do not have missing segments and use NNTIME
     stop_attributes_path = os.path.join(emme_network_transaction_folder, 'all_stop_attributes.csv')
     stop_attributes_df = pd.read_csv(stop_attributes_path)
-    transit_line_path = os.path.join(emme_network_transaction_folder, 'lines_that_need_links_created.csv')
+    # transit_line_path = os.path.join(emme_network_transaction_folder, 'lines_that_need_links_created.csv')
+    # transit_line_df = pd.read_csv(transit_line_path)
+    transit_line_path = os.path.join(emme_network_transaction_folder, 'all_transit_lines.csv')
     transit_line_df = pd.read_csv(transit_line_path)
 
-    for idx, row in transit_line_df.iterrows():
-        if (row['uses_NNTIME'] == 0) | (row['keep_line'] == 0):
+    print "Setting transit station-to-station times (NNTIME in Cube)"
+
+    for line in network.transit_lines():
+        if (line['@uses_nntime'] == 0):
             continue
-        line = network.transit_line(row['NAME'])
-        print "distributing NNTIME for created line %s" % line.id
-        print "Number of stops in line: %s" % len(stop_attributes_df[stop_attributes_df['NAME'] == line.id])
-        # initializing variables
-        last_tot_nntime = -1
+        # print "distributing NNTIME for line %s" % line.id
         segments_for_current_nntime = []
-        tot_nntime = 0
         for segment in line.segments(include_hidden=False):
-            i_node = segment.link.i_node
-            nntime_check_df = stop_attributes_df.loc[
-                (stop_attributes_df['NAME'] == line.id) & (stop_attributes_df['node_id'] == int(i_node))]
+            # i_node = segment.link.i_node
+            j_node = segment.link.j_node
+            segments_for_current_nntime.append(segment)
 
-            if len(nntime_check_df > 0):
-                tot_nntime = nntime_check_df['NNTIME_fill'].fillna(0).values[0]
-            else:
-                # segments missing from Cube transit_lines file need to be included in the NNTIME
-                tot_nntime = last_tot_nntime
-            segment['@tot_nntime'] = tot_nntime
-            print "i_node: %s, tot_nntime: %s" % (i_node, segment['@tot_nntime'])
-
-            if (len(segments_for_current_nntime) == 0) & (tot_nntime > 0):
-                # appending first segment
-                segments_for_current_nntime.append(segment)
-            elif (tot_nntime == last_tot_nntime) & (tot_nntime > 0):
-                # appending subsequent segments
-                segments_for_current_nntime.append(segment)
-                segment['@tot_nntime'] = tot_nntime
-            else:
-                # end of current nntime
-                if len(segments_for_current_nntime) > 0:
-                    distribute_nntime_among_segments(segments_for_current_nntime)
-                    segments_for_current_nntime = []
-            last_tot_nntime = tot_nntime
-
-        if len(segments_for_current_nntime) > 0:
-            distribute_nntime_among_segments(segments_for_current_nntime)
+            nntime_df = stop_attributes_df.loc[
+                (stop_attributes_df['NAME'] == line.id)
+                & (stop_attributes_df['node_id'] == int(j_node)),
+                'NNTIME'
+            ]
+            # print "%s" % nntime_df
+            if nntime_df.notna().any():
+                nntime = nntime_df.values[0]
+                # NNTIME applies to all segments ending at node_id
+                # print "Distributing %s NNTIME among %s segments " % \
+                    # (nntime, len(segments_for_current_nntime))
+                distribute_nntime_among_segments(segments_for_current_nntime, nntime)
+                segments_for_current_nntime = []
 
     # if nntime exists, use that for ivtt, else use the link trantime
     for line in network.transit_lines():
@@ -372,7 +362,7 @@ def distribute_nntime(network):
             else:
                 segment['@trantime_final'] = segment['@link_trantime']
             segment.data1 = segment['@trantime_final']
-            segment.transit_time_func = 1  # tf1 = us1 (data1)
+            segment.transit_time_func = 2  # tf2 = us1 (data1)
 
 
 def fix_bad_walktimes(network):
@@ -445,7 +435,7 @@ def split_tap_connectors_to_prevent_walk(network):
 
         for seg in line.segments(include_hidden=True):
             seg_data[(seg.i_node, seg.j_node, seg.loop_index)] = dict((k, seg[k]) for k in seg_attributes)
-                                                         
+
             itinerary.append(seg.i_node.number)
             if seg.i_node in tap_stops and (seg.allow_boardings or seg.allow_alightings):
                 # insert tap_stop, real_stop loop after tap_stop
@@ -463,7 +453,7 @@ def split_tap_connectors_to_prevent_walk(network):
                     "egress": tap_egress,
                     "real": real_seg
                 })
-    
+
         if tap_segments:
             # store line data for re-routing
             line_data = dict((k, line[k]) for k in line_attributes)
@@ -495,11 +485,11 @@ def split_tap_connectors_to_prevent_walk(network):
                     access_seg.allow_alightings = False
                     access_seg.transit_time_func = 1  # special 0-cost ttf
                     access_seg.dwell_time = 0
-                
+
                 first_access_seg = new_line.segment(tap_ref["access"][0])
                 first_access_seg.allow_alightings = real_seg.allow_alightings
                 first_access_seg.dwell_time = real_seg.dwell_time
-                
+
                 for egress_ef in tap_ref["egress"]:
                     egress_seg = new_line.segment(egress_ef)
                     for k in seg_attributes:
@@ -523,15 +513,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create a new Emme project and database with MTC defaults.")
     parser.add_argument('-r', '--root', help="path to the root ABM folder, default is the working folder",
                         default=os.path.abspath(os.getcwd()))
-    parser.add_argument('-t', '--title', help="the Emmebank title",
-                        default="MTC Initial Database")
+    parser.add_argument('-n', '--name', help="the project folder name",
+                        default="mtc_emme")
     parser.add_argument('-v', '--emmeversion', help='the Emme version', default='4.4.2')
     args = parser.parse_args()
 
     # create emme project
-    desktop = init_emme_project(args.root, args.title, args.emmeversion)
+    desktop = init_emme_project(args.root, args.name, args.emmeversion)
     # or connect to already open desktop for debugging
     # desktop = connect_to_running_desktop(port=59673)
+    # desktop = connect_to_running_desktop(port=4242)
     # create modeller instance used to import data to project database
     modeller = _m.Modeller(desktop)
 
@@ -545,7 +536,7 @@ if __name__ == "__main__":
     import_extra_transit_line_attributes(input_dir=args.root)
     import_extra_transit_segment_attributes(input_dir=args.root)
 
-    database_path = os.path.join(args.root, emme_project_folder, "Database")
+    database_path = os.path.join(args.root, args.name, "Database")
     emmebank_path = os.path.join(database_path, "emmebank")
     emmebank = _eb.Emmebank(emmebank_path)
     scenario = emmebank.scenario(1000)
