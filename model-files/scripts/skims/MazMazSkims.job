@@ -300,8 +300,8 @@ Wait4Files Files=MTC_HWYMAZSKIM1.script.end, MTC_HWYMAZSKIM2.script.end, MTC_HWY
 *copy skims\HWYSKIM_MAZMAZ_BTOLL_DA_1.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_2.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_3.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_4.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_5.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_6.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_7.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_8.txt+skims\HWYSKIM_MAZMAZ_BTOLL_DA_9.txt skims\HWYSKIM_MAZMAZ_BTOLL_DA.txt
 *del skims\HWYSKIM_MAZMAZ_BTOLL_DA_*.txt
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\HWYSKIM_MAZMAZ_DIST_DA.txt 3
+*python %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\HWYSKIM_MAZMAZ_DIST_DA.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\HWYSKIM_MAZMAZ_BTOLL_DA.txt 3
+*python %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\HWYSKIM_MAZMAZ_BTOLL_DA.txt 3
 IF (RETURNCODE > 0) abort
