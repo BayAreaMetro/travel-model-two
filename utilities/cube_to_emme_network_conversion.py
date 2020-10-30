@@ -19,6 +19,7 @@ transit_SET3_file =  os.path.join(cube_network_data_folder, "transitFactors_SET3
 
 # ------------- output files------------
 emme_network_transaction_folder = os.path.join(os.getcwd(),"emme_network_transaction_files")
+
 node_id_crosswalk_file = os.path.join(emme_network_transaction_folder, "node_id_crosswalk.csv")
 emme_mode_transaction_file = os.path.join(emme_network_transaction_folder, "emme_modes.txt")
 emme_vehicle_transaction_file = os.path.join(emme_network_transaction_folder, "emme_vehicles.txt")
@@ -29,6 +30,8 @@ emme_transit_network_file = os.path.join(emme_network_transaction_folder, "emme_
 extra_transit_line_attr_file = os.path.join(emme_network_transaction_folder, "emme_extra_line_attributes.txt")
 extra_transit_segment_attr_file = os.path.join(emme_network_transaction_folder, "emme_extra_segment_attributes.txt")
 emme_transit_time_function_file = os.path.join(emme_network_transaction_folder, "emme_transit_time_function.txt")
+all_stop_attributes_file = os.path.join(emme_network_transaction_folder, "all_stop_attributes.csv")
+all_transit_lines_file = os.path.join(emme_network_transaction_folder, "all_transit_lines.csv")
 
 # ------------- run parameters ---------
 # maps transit 'Mode Group' defined in TM2 to a single character required by Emme
@@ -53,8 +56,6 @@ extra_transit_line_attributes = ['HEADWAY[1]','HEADWAY[2]','HEADWAY[3]','HEADWAY
 # --------------------------------------------- Methods --------------------------------------------
 def load_input_data():
     print("Loading input data")
-    # node_gdf = pd.DataFrame()
-    # link_gdf = pd.DataFrame()
     node_gdf = geopandas.read_file(node_shapefile)
     link_gdf = geopandas.read_file(link_shapefile)
 
@@ -281,15 +282,15 @@ def create_and_write_mode_transaction_file():
     mode_transaction_df = mode_transaction_df.append({'transaction': 'a', 'mode': 'h', 'descr': 'heavy_rail', 'type':2 }, ignore_index=True)
     mode_transaction_df = mode_transaction_df.append({'transaction': 'a', 'mode': 'r', 'descr': 'comm_rail', 'type':2 }, ignore_index=True)
     mode_transaction_df['plot'] = 1  # deprecated but needed
-    mode_transaction_df['ctc'] = pd.NA  # operating cost/hour. Only needed for mode type 2 and 3
+    mode_transaction_df['ctc'] = 0  # operating cost/hour. Only needed for mode type 2 and 3
     mode_transaction_df.loc[mode_transaction_df['type'].isin([1,3]), 'ctc'] = 0
-    mode_transaction_df['cdc'] = pd.NA  # operating cost/unit length. Only needed for mode type 2 and 3
+    mode_transaction_df['cdc'] = 0  # operating cost/unit length. Only needed for mode type 2 and 3
     mode_transaction_df.loc[mode_transaction_df['type'].isin([1,3]), 'cdc'] = 0
-    mode_transaction_df['etc'] = pd.NA  # energy consumption/hour. Only needed for mode type 2 and 3
+    mode_transaction_df['etc'] = 0  # energy consumption/hour. Only needed for mode type 2 and 3
     mode_transaction_df.loc[mode_transaction_df['type'].isin([1,3]), 'etc'] = 0
-    mode_transaction_df['edc'] = pd.NA  # energy consumption/length. Only needed for mode type 2 and 3
+    mode_transaction_df['edc'] = 0    # energy consumption/length. Only needed for mode type 2 and 3
     mode_transaction_df.loc[mode_transaction_df['type'].isin([1,3]), 'edc'] = 0
-    mode_transaction_df['speed'] = pd.NA  # speed only needed for type = 3 (aux transit mode speed)
+    mode_transaction_df['speed'] = 0  # speed only needed for type = 3 (aux transit mode speed)
     # walk speed set to 3 mph
     # mode_transaction_df.loc[mode_transaction_df['mode'] == 'w', 'speed'] = 3
     # mode_transaction_df.loc[mode_transaction_df['mode'] == 'a', 'speed'] = 3
@@ -560,11 +561,12 @@ def parse_transit_line_file():
     return transit_line_df, stop_df
 
 
-def set_trantime_based_on_cube_NNTIME(stop_df, link_gdf):
-    # Distributing NNTIME among links according to link length
-    # NNTIME is the time between the current node and the node preceding the last NNTIME keyword
+def setup_NNTIIME_variables(stop_df, link_gdf):
+    # NNTIME is the Cube variable containing station-to-station time
+    # It is set after the network import, but we initialize the variables used here
+
     # backfilling NNTIME to all nodes involved with each NNTIME
-    stop_df['NNTIME_fill'] = stop_df.groupby('LINE')['NNTIME'].bfill().astype(float)
+    # stop_df['NNTIME_fill'] = stop_df.groupby('LINE')['NNTIME'].bfill().astype(float)
 
     # merging link length
     stop_df['next_node_id'] = stop_df.groupby('LINE')['node_id'].shift(-1)
@@ -576,22 +578,27 @@ def set_trantime_based_on_cube_NNTIME(stop_df, link_gdf):
         left_on=['node_id', 'next_node_id'],
         right_on=['i_node', 'j_node'],
         validate='m:1')
-    # finding total length of links for NNTIME segments
-    stop_link_df['nn_tot_length'] = stop_link_df.groupby(
-        ['LINE', 'NNTIME_fill'])['length_mi'].transform('sum')
-    # calculating the portion of each segment compared to total length
-    stop_link_df['nn_time_portion'] = stop_link_df['length_mi'] / stop_link_df['nn_tot_length']
-    # new trantime is the NNTIME * portion of total length
-    stop_link_df['nn_trantime'] = stop_link_df['nn_time_portion'] * stop_link_df['NNTIME_fill']
-    # checking to make sure all nn_trantime's sum to the total NNTIME
-    stop_link_df['nn_tot_trantime'] = stop_link_df.groupby(
-        ['LINE', 'NNTIME_fill'])['nn_trantime'].transform('sum')
-    stop_link_df['nn_check'] = ((stop_link_df['nn_tot_trantime'] - stop_link_df['NNTIME_fill']) < .01)
-    assert all(stop_link_df[stop_link_df['NNTIME_fill'].notna()]['nn_check']), "nn_trantimes do not sum to NNTIME!!"
 
-    # final transit skim time is set to nn_trantime if NNTIME was set, otherwise it is the link TRANTIME
-    stop_link_df['trantime_final'] = np.where(
-        stop_link_df['nn_trantime'].isna(), stop_link_df['TRANTIME'], stop_link_df['nn_trantime'])
+    # these are set in the create_emme_network.py script
+    stop_link_df['nn_trantime'] = 0
+    stop_link_df['tot_nntime'] = 0
+
+    # finding total length of links for NNTIME segments
+    # stop_link_df['nn_tot_length'] = stop_link_df.groupby(
+    #     ['LINE', 'NNTIME_fill'])['length_mi'].transform('sum')
+    # # calculating the portion of each segment compared to total length
+    # stop_link_df['nn_time_portion'] = stop_link_df['length_mi'] / stop_link_df['nn_tot_length']
+    # # new trantime is the NNTIME * portion of total length
+    # stop_link_df['nn_trantime'] = stop_link_df['nn_time_portion'] * stop_link_df['NNTIME_fill']
+    # # checking to make sure all nn_trantime's sum to the total NNTIME
+    # stop_link_df['nn_tot_trantime'] = stop_link_df.groupby(
+    #     ['LINE', 'NNTIME_fill'])['nn_trantime'].transform('sum')
+    # stop_link_df['nn_check'] = ((stop_link_df['nn_tot_trantime'] - stop_link_df['NNTIME_fill']) < .01)
+    # assert all(stop_link_df[stop_link_df['NNTIME_fill'].notna()]['nn_check']), "nn_trantimes do not sum to NNTIME!!"
+    #
+    # # final transit skim time is set to nn_trantime if NNTIME was set, otherwise it is the link TRANTIME
+    # stop_link_df['trantime_final'] = np.where(
+    #     stop_link_df['nn_trantime'].isna(), stop_link_df['TRANTIME'], stop_link_df['nn_trantime'])
     return stop_link_df
 
 
@@ -608,18 +615,18 @@ def create_stop_transaction_variables(stop_df, node_gdf, link_gdf):
         on='N'
     )
 
-    stop_df = set_trantime_based_on_cube_NNTIME(stop_df, link_gdf)
+    stop_df = setup_NNTIIME_variables(stop_df, link_gdf)
 
     stop_df['dwt'] = 'dwt=+0'  # dwell time per line segment (mins), can board or alight
     stop_df.loc[stop_df['can_board'] == 0, 'dwt'] = 'dwt=#0'  # cannot board or alight at this stop
     stop_df.loc[stop_df['ACCESS'] == 1, 'dwt'] = 'dwt=<0'  # boarding only
     stop_df.loc[stop_df['ACCESS'] == 2, 'dwt'] = 'dwt=>0'  # alighting only
-    stop_df['ttf'] = 'ttf=1'  # transit time function, set to ft1 = us1 which is trantime
-    stop_df['us1'] = stop_df['trantime_final'].apply(
+    stop_df['ttf'] = 'ttf=2'  # transit time function, set to ft2 = us1 which is trantime
+    stop_df['us1'] = stop_df['TRANTIME'].apply(
         lambda x: 'us1=0' if pd.isna(x) else 'us1=' + str(round(x, 3)))
 
     # end of line conditions:
-    stop_df.loc[stop_df['next_node_id'].isna(), 'dwt'] = ''
+    # stop_df.loc[stop_df['next_node_id'].isna(), 'dwt'] = ''
     stop_df.loc[stop_df['next_node_id'].isna(), 'ttf'] = ''
     stop_df.loc[stop_df['next_node_id'].isna(), 'us1'] = ''
 
@@ -816,7 +823,8 @@ def create_transit_time_functon_transaction_file():
         file.write('t functions init\n')
         file.write('c Transit time functions (TTF)\n')
         # set transit time function to first user link field which is set to trantime_final
-        file.write('a  ft1 = us1\n')
+        file.write('a  ft1 = 0\n')
+        file.write('a  ft2 = us1\n')
     file.close()
     pass
 
@@ -879,7 +887,7 @@ def write_extra_transit_link_attributes_file(transit_line_df):
 
     # cols = ['line_name'] + extra_transit_line_attributes
     transit_line_df, output_col_type_dict = prepare_transit_link_extra_attributes(transit_line_df, extra_transit_line_attributes)
-
+    transit_line_df.to_csv(all_transit_lines_file, index=False)
 
     with open(extra_transit_line_attr_file, 'w') as file:
         write_extra_attributes_header(file, list(output_col_type_dict.keys()), 'TRANSIT_LINE')
@@ -897,12 +905,13 @@ def write_extra_transit_segment_attributes_file(stop_df, transit_line_df):
     print("Writing transit segment extra attributes file")
 
     stop_attributes_df = pd.merge(stop_df, transit_line_df[['LINE', 'NAME', 'keep_line']], how='left', on='LINE')
-    stop_attributes_df['has_nntime'] = np.where(stop_attributes_df['NNTIME_fill'].notna(), 1, 0)
-    stop_attributes_df['tot_nntime'] = stop_attributes_df['NNTIME_fill'].fillna(0)
-    stop_attributes_df['nn_trantime'] = stop_attributes_df['nn_trantime'].fillna(0)
+    # stop_attributes_df['has_nntime'] = np.where(stop_attributes_df['NNTIME_fill'].notna(), 1, 0)
+    # stop_attributes_df['tot_nntime'] = stop_attributes_df['NNTIME_fill'].fillna(0)
+    # stop_attributes_df['nn_trantime'] = stop_attributes_df['nn_trantime'].fillna(0)
     stop_attributes_df['link_trantime'] = stop_attributes_df['TRANTIME'].fillna(0)
-    stop_attributes_df['trantime_final'] = stop_attributes_df['trantime_final'].fillna(0)
-    stop_attributes_df.to_csv(os.path.join(emme_network_transaction_folder, 'all_stop_attributes.csv'), index=False)
+    # trantime_final is currently set to link_trantime, but NNTIME will replace later if applicable
+    stop_attributes_df['trantime_final'] = stop_attributes_df['TRANTIME'].fillna(0)
+    stop_attributes_df.to_csv(all_stop_attributes_file, index=False)
 
     # filtering out segments that do not match to a link or a transit line (due to line being filtered out)
     stop_attributes_df = stop_attributes_df[stop_attributes_df['j_node'].notna()
@@ -910,7 +919,8 @@ def write_extra_transit_segment_attributes_file(stop_df, transit_line_df):
                                             & (stop_attributes_df['keep_line'] == 1)]
     stop_attributes_df['next_node_id'] = stop_attributes_df['next_node_id'].astype(int)
 
-    extra_transit_segment_attributes = ['trantime_final', 'link_trantime', 'has_nntime', 'tot_nntime', 'nn_trantime']
+    # extra_transit_segment_attributes = ['trantime_final', 'link_trantime', 'has_nntime', 'tot_nntime', 'nn_trantime']
+    extra_transit_segment_attributes = ['trantime_final', 'link_trantime', 'tot_nntime', 'nn_trantime']
 
     with open(extra_transit_segment_attr_file, 'w') as file:
         write_extra_attributes_header(file, extra_transit_segment_attributes, 'TRANSIT_SEGMENT')
@@ -926,6 +936,9 @@ def write_extra_transit_segment_attributes_file(stop_df, transit_line_df):
 # --------------------------------------------- Entry Point ---------------------------------------
 if __name__ == "__main__":
     start_time = time.time()
+
+    if not os.path.exists(emme_network_transaction_folder):
+        os.mkdir(emme_network_transaction_folder)
 
     # ------ reading and processing input -----
     node_gdf, link_gdf = load_input_data()
