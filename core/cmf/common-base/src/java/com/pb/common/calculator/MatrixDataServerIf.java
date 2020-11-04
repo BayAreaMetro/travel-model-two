@@ -21,5 +21,6 @@ public interface MatrixDataServerIf {
     public String testRemote();
     public void clear();
     public void writeMatrixFile(String fileName, Matrix[] m);
+    public void writeMatrixFile(String fileName, Matrix[] m, MatrixType mt);
 }
 

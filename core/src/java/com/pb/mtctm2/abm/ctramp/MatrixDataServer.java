@@ -121,6 +121,19 @@ public class MatrixDataServer
         
     }
         
+    /**
+     * Utility method to write a set of matrices to disk.
+     * 
+     * @param fileName
+     *            The file name to write to.
+     * @param m
+     *            An array of matrices
+     */
+    public void writeMatrixFile(String fileName, Matrix[] m, MatrixType mt)
+    {
+    	writeMatrixFile(fileName, m);
+    }
+
     public void clear()
     {
         if (matrixMap != null) matrixMap.clear();
