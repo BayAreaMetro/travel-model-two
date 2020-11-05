@@ -659,7 +659,7 @@ def run_skims(modeller, scenario, name, period, params, num_processors, network,
             "constraint":{
                 "by_value": {
                     "od_values": 'mf"%s_XFERS"' % skim_name,
-                    "interval_min": 1, "interval_max": 9999999,
+                    "interval_min": 0, "interval_max": 9999999,
                     "condition": "INCLUDE"},
             },
             "result": 'mf"%s_XFERS"' % skim_name,
