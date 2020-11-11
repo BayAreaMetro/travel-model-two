@@ -7,6 +7,8 @@ from copy import deepcopy as _copy
 from collections import defaultdict as _defaultdict, OrderedDict
 import contextlib as _context
 
+from create_emme_network import period_to_scenario_dict
+
 import multiprocessing as _multiprocessing
 import argparse
 import re as _re
@@ -26,10 +28,8 @@ except Exception, e:
     def open_file(file_path, mode):
         return OmxMatrix(_omx.openFile(file_path, mode))
 
-output_omx_file = os.path.join(os.getcwd(), r"omx_test.omx")
-
-_all_periods = ['AM']
-# _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
+# _all_periods = ['EA', 'AM']
+_all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
 _all_components = ['transit_skims']
 
 num_processors = 20
@@ -296,7 +296,7 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
     attrs = {
             "period": period,
             "scenario": scenario.id,
-            "data_table_name": data_table_name,
+            # "data_table_name": data_table_name,
             "assignment_only": assignment_only,
             "skims_only": skims_only,
             "num_processors": num_processors,
@@ -315,10 +315,9 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
     run_assignment(modeller, scenario, period, params, network, skims_only, num_processors)
 
     if not assignment_only:
-        # max_fare = day_pass for local bus and regional_pass for premium modes
-        run_skims(modeller, scenario, "BUS", period, params, max_fare, num_processors, network)
-        run_skims(modeller, scenario, "PREM", period, params, max_fare, num_processors, network)
-        run_skims(modeller, scenario, "ALLPEN", period, params, max_fare, num_processors, network)
+        run_skims(modeller, scenario, "BUS", period, params, num_processors, network)
+        run_skims(modeller, scenario, "PREM", period, params, num_processors, network)
+        run_skims(modeller, scenario, "ALLPEN", period, params, num_processors, network)
         mask_allpen(scenario, period)
         report(scenario, period)
 
@@ -400,7 +399,7 @@ def get_perception_parameters(period):
     return perception_parameters[period]
 
 
-@_m.logbook_trace("Transit assignment by demand set", save_arguments=True)
+# @_m.logbook_trace("Transit assignment by demand set", save_arguments=True)
 def run_assignment(modeller, scenario, period, params, network, skims_only, num_processors, use_fares=False, use_ccr=False):
 
     walk_modes = ["a", "w", "e"]
@@ -418,7 +417,7 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
         "boarding_cost": {"global": {"penalty": 0, "perception_factor": 1}},
         "boarding_time": {"global": {"penalty": 10, "perception_factor": 1}},
         "in_vehicle_cost": None,
-        "in_vehicle_cost": {"penalty": 0, "perception_factor": 1},
+        # "in_vehicle_cost": {"penalty": 0, "perception_factor": 1},
         "in_vehicle_time": {"perception_factor": params["in_vehicle"]},
         "aux_transit_time": {"perception_factor": params["walk"]},
         "aux_transit_cost": None,
@@ -475,7 +474,7 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
             "journey_levels": premium_modes_journey_levels
         }),
         ("ALLPEN", {
-            "modes": walk_modes + local_bus_mode + premium_modes,
+            "modes": walk_modes + local_modes + premium_modes,
             "journey_levels": journey_levels
         }),
     ])
@@ -569,7 +568,7 @@ def filter_journey_levels_by_mode(modes, journey_levels):
     return journey_levels
 
 
-@_m.logbook_trace("Extract skims", save_arguments=True)
+# @_m.logbook_trace("Extract skims", save_arguments=True)
 def run_skims(modeller, scenario, name, period, params, num_processors, network, use_fares=False):
     emmebank = scenario.emmebank
     matrix_calc = modeller.tool(
@@ -956,10 +955,11 @@ class ExportOMX(object):
 
 
 # @_m.logbook_trace("Export transit skims to OMX", save_arguments=True)
-def export_matrices_to_omx(omx_file, periods, scenario, big_to_zero=False):
+def export_matrices_to_omx(omx_file, periods, scenario, big_to_zero=False, max_transfers=None):
     attributes = {"omx_file": omx_file, "periods": periods, "big_to_zero": big_to_zero}
-    # for period in periods:
-    #     mask_transfers(scenario, period, max_transfers=3)
+    if max_transfers is not None:
+        for period in periods:
+            mask_transfers(scenario, period, max_transfers=max_transfers)
     matrices = get_matrix_names("transit_skims", periods, scenario)
     with ExportOMX(omx_file, scenario, omx_key="NAME") as exporter:
         if big_to_zero:
@@ -975,8 +975,8 @@ def export_matrices_to_omx(omx_file, periods, scenario, big_to_zero=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Skim an already created Emme transit network.")
-    parser.add_argument('-r', '--root', help="path to the root ABM folder, default is the working folder",
-                        default=_os.path.abspath(_os.getcwd()))
+    parser.add_argument('-p', '--trn_path', help=r"path to the trn folder, default is the current_working_folder\trn",
+                        default=_os.path.join(_os.getcwd(), 'trn'))
     parser.add_argument('-n', '--name', help="the project folder name",
                         default="mtc_emme")
     args = parser.parse_args()
@@ -987,15 +987,20 @@ if __name__ == "__main__":
     modeller = _m.Modeller(desktop)
 
     # create modeller instance used to import data to project database
-    database_path = _os.path.join(args.root, args.name, "Database")
+    database_path = _os.path.join(args.trn_path, args.name, "Database")
     emmebank_path = _os.path.join(database_path, "emmebank")
     emmebank = _eb.Emmebank(emmebank_path)
-    scenario = emmebank.scenario(1000)
-    network = scenario.get_network()
+    # scenario = emmebank.scenario(1000)
+    # network = scenario.get_network()
 
-    initialize_matrices(components=['transit_skims'], periods=['AM'], scenario=scenario, delete_all_existing=True)
+    for period in _all_periods:
+        scenario_id = period_to_scenario_dict[period] + 2 # scenario_id + 2 has the split tap connectors + fare
+        scenario = emmebank.scenario(scenario_id)
 
-    perform_assignment_and_skim(modeller, scenario, period='AM', data_table_name=None, assignment_only=False,
-                                    skims_only=True, num_processors="MAX-1")
+        initialize_matrices(components=['transit_skims'], periods=[period], scenario=scenario, delete_all_existing=True)
 
-    export_matrices_to_omx(omx_file=output_omx_file, periods=['AM'], scenario=scenario, big_to_zero=True)
+        perform_assignment_and_skim(modeller, scenario, period=period, assignment_only=False,
+                                        skims_only=True, num_processors="MAX-1")
+
+        output_omx_file = _os.path.join(args.trn_path, "transit_skims_{}.omx".format(period))
+        export_matrices_to_omx(omx_file=output_omx_file, periods=[period], scenario=scenario, big_to_zero=True, max_transfers=3)
