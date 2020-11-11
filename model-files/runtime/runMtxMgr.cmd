@@ -3,7 +3,7 @@
 rem 64bit matrix server %2 typically 1191
 
 set HOST_IP_ADDRESS=%1
-set HOST_MATRIX_PORT=1191
+set HOST_MATRIX_PORT=%MATRIX_MANAGER_PORT%
 
 
 :: get the ipaddress of this machine

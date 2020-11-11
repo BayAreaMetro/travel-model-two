@@ -45,7 +45,7 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 ; put kfactors into sequential ordering
- *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\assign\taz_matrix_transfer.py . nonres\truck_kfactors_taz.csv nonres\truck_kfactors_taz_seq.csv
+ *python %BASE_SCRIPTS%\assign\taz_matrix_transfer.py . nonres\truck_kfactors_taz.csv nonres\truck_kfactors_taz_seq.csv
 IF (ReturnCode != 0) ABORT
 
 run pgm = matrix

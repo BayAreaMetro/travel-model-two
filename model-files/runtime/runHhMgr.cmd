@@ -8,7 +8,7 @@ rem ### Note that a jdk is required; a jre is not sufficient, as the UEC class g
 rem ### and compiles code during the model run, and uses javac in the jdk to do this.
 set JAVA_PATH=%1
 set HOST_IP_ADDRESS=%2
-set HOST_PORT=1117
+set HOST_PORT=%HH_MANAGER_PORT%
 CD %~dp0\..\..
 set PROJECT_DIRECTORY=%CD%
 
