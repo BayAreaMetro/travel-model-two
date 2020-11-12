@@ -86,7 +86,7 @@ public class MatrixDataServer
             	
             	//create 64bit matrix reader
                 String fileName = matrixEntry.fileName;
-                MatrixReader mr = MatrixReader.createReader(MatrixType.TPPLUS, new File(fileName));
+                MatrixReader mr = MatrixReader.createReader(fileName);
                 matrix = mr.readMatrix(matrixEntry.matrixName);
                 
                 // Use token name from control file for matrix name (not name from underlying matrix)
@@ -110,7 +110,7 @@ public class MatrixDataServer
     public void writeMatrixFile(String fileName, Matrix[] m){
              
         File outFile = new File(fileName); 
-        MatrixWriter writer = MatrixWriter.createWriter(MatrixType.TPPLUS, outFile); //64bit
+        MatrixWriter writer = MatrixWriter.createWriter(fileName); //64bit
         String[] names = new String[m.length];
         
         for (int i=0; i<m.length; i++) {
