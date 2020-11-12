@@ -3,7 +3,7 @@
 rem 64bit matrix server %2 typically 1191
 
 set HOST_IP_ADDRESS=%1
-set HOST_MATRIX_PORT=1191
+set HOST_MATRIX_PORT=%MATRIX_MANAGER_PORT%
 
 
 :: get the ipaddress of this machine
@@ -28,7 +28,7 @@ set RUNTIME=%PROJECT_DIRECTORY%
 set CONFIG=%RUNTIME%\CTRAMP\runtime\config
 set JAR_LOCATION=%RUNTIME%\CTRAMP\runtime
 set JPPF_LIB=%JAR_LOCATION%\lib\JPPF-2.5-admin-ui\lib\*
-set LIB_JAR_PATH=%JPPF_LIB%;%JAR_LOCATION%\lib\sandagLib\*;%JAR_LOCATION%\lib\cmfLib\*;%JAR_LOCATION%\lib\log4jLib\*
+set LIB_JAR_PATH=%JPPF_LIB%;%JAR_LOCATION%\lib\sandagLib\*;%JAR_LOCATION%\lib\cmfLib\*;%JAR_LOCATION%\lib\log4jLib\*;%JAR_LOCATION%\lib\*
 
 rem ### Define the CLASSPATH environment variable for the classpath needed in this model run.
 set OLDCLASSPATH=%CLASSPATH%
