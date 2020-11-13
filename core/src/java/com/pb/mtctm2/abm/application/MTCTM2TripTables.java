@@ -67,7 +67,7 @@ public class MTCTM2TripTables {
     
     private int iteration;
 	private String directory;
-	private String matrixFileExtension = "mat";
+	private String matrixFileExtension = "omx";
  	private MatrixDataServerIf ms;
     
     SkimBuilder skimBuilder;
