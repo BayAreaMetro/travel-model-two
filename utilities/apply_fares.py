@@ -41,6 +41,7 @@ class ApplyFares(object):
         self.scenario = None
         self.dot_far_file = None
         self.fare_matrix_file = None
+        self.vot = 1.0
         self.network = None
 
     def execute(self):
@@ -82,6 +83,14 @@ class ApplyFares(object):
                 elif fs_data["STRUCTURE"] == "FROMTO":
                     fare_matrix = fare_matrices[fs_data["FAREMATRIX ID"]]
                     self.generate_fromto_approx(network, lines, fare_matrix, fs_data)
+
+            if self.vot is not None:
+                percep = 60.0 / self.vot
+                self._log.append(
+                    {"type": "text", "content": "Converting costs to minutes with VOT %s, converted to %s min / $" % (self.vot, percep)})
+                for seg in network.transit_segments():
+                    seg["@invehicle_cost"] = seg["@invehicle_cost"] * percep
+                    seg["@board_cost"] = seg["@board_cost"] * percep
 
             faresystem_groups = self.group_faresystems(faresystems, network)
             journey_levels = self.generate_transfer_fares(faresystems, faresystem_groups, network)
@@ -782,7 +791,7 @@ class SPBuilder(object):
         visited = set([])
         visited_add = visited.add
         costs = _defaultdict(lambda : _INF)
-        back_links = {}        
+        back_links = {}
         heap = _services.Heap()
         pop, push = heap.pop, heap.insert
 
