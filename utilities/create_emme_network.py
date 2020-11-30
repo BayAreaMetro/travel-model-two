@@ -558,8 +558,36 @@ def update_link_trantime(network):
             segment.data1 = segment['@trantime_final']
             segment.transit_time_func = 2  # tf2 = us1 (data1)
 
+def calc_link_unreliability(network, period):
+    factor_table = {
+        "PEAK": {
+            "FREEWAY":   {"CBD": 0.24, "UBD": 0.24, "URBAN": 0.16, "SUBURBAN": 0.08, "RURAL": 0.00},
+            "PRIMARY":   {"CBD": 0.22, "UBD": 0.15, "URBAN": 0.10, "SUBURBAN": 0.05, "RURAL": 0.00},
+            "SECONDARY": {"CBD": 0.11, "UBD": 0.08, "URBAN": 0.05, "SUBURBAN": 0.03, "RURAL": 0.00},
+            "ROW":       {"CBD": 0.09, "UBD": 0.06, "URBAN": 0.04, "SUBURBAN": 0.02, "RURAL": 0.00},
+            "RAIL":      {"CBD": 0.05, "UBD": 0.03, "URBAN": 0.02, "SUBURBAN": 0.01, "RURAL": 0.00},
+        },
+        "OFF_PEAK": {
+            "FREEWAY":   {"CBD": 0.33, "UBD": 0.33, "URBAN": 0.22, "SUBURBAN": 0.11, "RURAL": 0.00},
+            "PRIMARY":   {"CBD": 0.33, "UBD": 0.24, "URBAN": 0.16, "SUBURBAN": 0.08, "RURAL": 0.00},
+            "SECONDARY": {"CBD": 0.17, "UBD": 0.12, "URBAN": 0.08, "SUBURBAN": 0.04, "RURAL": 0.00},
+            "ROW":       {"CBD": 0.13, "UBD": 0.10, "URBAN": 0.06, "SUBURBAN": 0.03, "RURAL": 0.00},
+            "RAIL":      {"CBD": 0.07, "UBD": 0.05, "URBAN": 0.03, "SUBURBAN": 0.02, "RURAL": 0.00},
+        }
+    }
+    if period in ["AM", "PM"]:
+        factor_table = factor_table["PEAK"]
+    else:
+        factor_table = factor_table["OFFPEAK"]
+    for link in network.links():
+        #facility_type = ?
+        #area_type = ?
+        # NOTE: 
+        #link.data1 = factor_table[facility_type][area_type]
+        pass
 
-def create_time_period_scenario(modeller, scenario_id, root, project_name):
+
+def create_time_period_scenario(modeller, scenario_id, root, project_name, period):
     input_dir = os.path.join(root, "emme_network_transaction_files_{}".format(period))
     import_modes(input_dir, modeller, scenario_id)
     import_network(input_dir, modeller, scenario_id)
@@ -567,7 +595,7 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name):
     import_extra_link_attributes(input_dir, modeller, scenario_id)
     import_vehicles(input_dir, modeller, scenario_id)
     import_transit_time_functions(input_dir, modeller, scenario_id)
-    import_transit_lines(input_dir, modeller, scenario_id)
+    import_transit_lines(input_dir, modeller, scenario_id, include_first_hidden_data=False)
     import_extra_transit_line_attributes(input_dir, modeller, scenario_id)
     import_extra_transit_segment_attributes(input_dir, modeller, scenario_id)
 
@@ -581,6 +609,7 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name):
     fill_transit_times_for_created_segments(network)
     distribute_nntime(network, input_dir)
     update_link_trantime(network)
+    calc_link_unreliability(network, period)
     fix_bad_walktimes(network)
     scenario.publish_network(network)
     if emmebank.scenario(scenario_id + 1):
@@ -647,7 +676,8 @@ if __name__ == "__main__":
         scenario_id = period_to_scenario_dict[period]
         if args.first_iteration == 'yes':
             print "creating %s scenarios" % period
-            create_time_period_scenario(modeller, scenario_id, args.trn_path, args.name)
+            create_time_period_scenario(modeller, scenario_id, args.trn_path, args.name, period)
+
         else:
             print "updating %s scenarios" % period
             update_congested_link_times(modeller, scenario_id, args.trn_path, args.name)
