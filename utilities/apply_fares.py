@@ -123,9 +123,9 @@ class ApplyFares(object):
 
     def temp_network_fixes(self, network):
         pass
-        # network.node(138068)["@farezone"] = 2
-        # network.node(407379)["@farezone"] = 150
-        # network.node(55633)["@farezone"] = 123
+        network.node(138068)["@farezone"] = 2
+        network.node(407379)["@farezone"] = 150
+        network.node(55633)["@farezone"] = 123
 
     def parse_dot_far_file(self):
         data = {}
@@ -150,11 +150,6 @@ class ApplyFares(object):
                         word.append(c)
                 fs_data[key.strip()] = "".join(word)
                 fs_data["NUMBER"] = int(fs_data["FARESYSTEM NUMBER"])
-                # TEMPORARY workaround - manually added MODE to match @line_mode as @faresystem was missing
-                try:
-                    fs_data["MODE"] = int(fs_data["MODE"])
-                except: 
-                    pass
                 if fs_data["STRUCTURE"] != "FREE":
                     fs_data["FAREFROMFS"] = [float(x) for x in fs_data["FAREFROMFS"].split(",")]
                 if fs_data["STRUCTURE"] == "FLAT":

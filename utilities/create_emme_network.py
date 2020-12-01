@@ -47,6 +47,7 @@ emme_transit_time_function_file = "emme_transit_time_function.txt"
 
 # ------------- run parameters ---------
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
+#_all_periods = ['AM']
 # mapping time of day period to emme scenario_id
 period_to_scenario_dict = {
     'EA': 1000,
@@ -238,7 +239,7 @@ def import_transit_lines(input_dir, modeller, scenario_id):
     input_file = os.path.join(input_dir, emme_transit_network_file).replace("\\","/")
     process_transit_lines_tool(transaction_file=input_file,
         revert_on_error=False,
-        scenario=scenario)
+        scenario=scenario, include_first_hidden_data=False)
 
 
 def import_extra_transit_line_attributes(input_dir, modeller, scenario_id):
@@ -582,8 +583,8 @@ def calc_link_unreliability(network, period):
     for link in network.links():
         #facility_type = ?
         #area_type = ?
-        # NOTE: 
-        #link.data1 = factor_table[facility_type][area_type]
+        # NOTE: TBD with new network
+        link.data1 = factor_table[facility_type][area_type]
         pass
 
 
@@ -595,7 +596,7 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
     import_extra_link_attributes(input_dir, modeller, scenario_id)
     import_vehicles(input_dir, modeller, scenario_id)
     import_transit_time_functions(input_dir, modeller, scenario_id)
-    import_transit_lines(input_dir, modeller, scenario_id, include_first_hidden_data=False)
+    import_transit_lines(input_dir, modeller, scenario_id)
     import_extra_transit_line_attributes(input_dir, modeller, scenario_id)
     import_extra_transit_segment_attributes(input_dir, modeller, scenario_id)
 
@@ -609,7 +610,7 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
     fill_transit_times_for_created_segments(network)
     distribute_nntime(network, input_dir)
     update_link_trantime(network)
-    calc_link_unreliability(network, period)
+    # calc_link_unreliability(network, period)
     fix_bad_walktimes(network)
     scenario.publish_network(network)
     if emmebank.scenario(scenario_id + 1):

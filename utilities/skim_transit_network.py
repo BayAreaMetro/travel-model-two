@@ -85,12 +85,14 @@ def calc_eawt(segment, vcr, headway):
     # EAWT_MD = 0. 24223 + 3.40621* (1/Headway) + 0.02709*(Arriving V/C) + 0. 82747 *(Total Offs Share)
     line = segment.line
     prev_segment = line.segment(segment.number - 1)
-    alightings = prev_segment.transit_volume - segment.transit_volume + segment.transit_boardings
+    alightings = 0
     total_offs = 0
     all_segs = iter(line.segments(True))
     prev_seg = next(all_segs)
     for seg in all_segs:
         total_offs += prev_seg.transit_volume - seg.transit_volume + seg.transit_boardings
+        if seg == segment:
+            alightings = total_offs
         prev_seg = seg
     if total_offs == 0:
         total_offs = 9999  # added due to divide by zero error
@@ -796,13 +798,18 @@ def run_skims(modeller, scenario, name, period, params, num_processors, network,
         # TODO: factor this to run once ...
         create_extra("TRANSIT_SEGMENT", "@eawt", "extra added wait time", overwrite=True, scenario=scenario)
         create_extra("TRANSIT_SEGMENT", "@crowding_factor", "crowding factor along segments", overwrite=True, scenario=scenario)
-        create_extra("TRANSIT_SEGMENT", "@capacity_penalty", "capacity penalty at boarding", overwrite=True, scenario=scenario)
+        #create_extra("TRANSIT_SEGMENT", "@capacity_penalty", "capacity penalty at boarding", overwrite=True, scenario=scenario)
         network = scenario.get_partial_network(["TRANSIT_LINE", "TRANSIT_SEGMENT"])
         attr_map = {
             "TRANSIT_SEGMENT": ["@phdwy", "transit_volume", "transit_boardings"],
             "TRANSIT_VEHICLE": ["seated_capacity", "total_capacity"],
-            "TRANSIT_LINE": ["headway"], #["#src_mode"],  # TODO: only if use_fares, otherwise will use .mode.id
+            "TRANSIT_LINE": ["headway"], 
         }
+        if use_fares:
+            attr_map["TRANSIT_LINE"].append("#src_mode")  # only if use_fares, otherwise will use .mode.id
+            mode_name = '["#src_mode"]'
+        else:
+            mode_name = '.mode.id'
         for domain, attrs in attr_map:
             values = scenario.get_attribute_values(domain, attrs)
             network.set_attribute_values(domain, attrs, values)
@@ -810,7 +817,7 @@ def run_skims(modeller, scenario, name, period, params, num_processors, network,
         enclosing_scope = {"network": network, "scenario": scenario}
         # code = compile(_segment_cost_function, "segment_cost_function", "exec")
         # exec(code, enclosing_scope)
-        code = compile(_headway_cost_function, "headway_cost_function", "exec")
+        code = compile(_headway_cost_function.format(mode_name), "headway_cost_function", "exec")
         exec(code, enclosing_scope)
         calc_eawt = enclosing_scope["calc_eawt"]
         hdwy_fraction = 0.5 # fixed in assignment spec
@@ -829,7 +836,6 @@ def run_skims(modeller, scenario, name, period, params, num_processors, network,
         values = network.get_attribute_values(domain, ["@eawt", "@capacity_penalty"])
         scenario.set_attribute_values(domain, attrs, values)
 
-        # skim link reliability: simple strategy analysis
         # # Link unreliability
         spec = get_strat_spec({"in_vehicle": "ul1"}, "%s_LINKREL" % skim_name)
         strategy_analysis(spec, scenario=scenario, num_processors=num_processors)
@@ -838,12 +844,11 @@ def run_skims(modeller, scenario, name, period, params, num_processors, network,
         spec = get_strat_spec({"in_vehicle": "@ccost"}, "%s_CROWD" % skim_name)
         strategy_analysis(spec, scenario=scenario, num_processors=num_processors)
 
-        # skim node reliability (eawt): network calculations and strategy analysis
-        # Extra added wait time (EAWT)
+        # skim node reliability, Extra added wait time (EAWT)
         spec = get_strat_spec({"boarding": "@eawt"}, "%s_EAWT" % skim_name)
         strategy_analysis(spec, scenario=scenario, num_processors=num_processors)
 
-        # skim capacity penalty:
+        # skim capacity penalty
         spec = get_strat_spec({"boarding": "@capacity_penalty"}, "%s_CAPPEN" % skim_name)
         strategy_analysis(spec, scenario=scenario, num_processors=num_processors)
 
