@@ -28,9 +28,16 @@ except Exception, e:
     def open_file(file_path, mode):
         return OmxMatrix(_omx.openFile(file_path, mode))
 
-# _all_periods = ['EA', 'AM']
+# _all_periods = ['AM']
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
 _all_components = ['transit_skims']
+_all_access_modes = ['WLK', 'PNR', 'KNRTNC', 'KNRPRV']
+_all_sets = ['set1', 'set2', 'set3']
+_set_dict = {
+     'BUS': 'set1',
+     'PREM': 'set2',
+     'ALLPEN': 'set3'}
+
 
 num_processors = 20
 transit_modes = ['b', 'x', 'f', 'l', 'h', 'r']
@@ -85,6 +92,8 @@ def calc_eawt(segment, vcr, headway):
     for seg in all_segs:
         total_offs += prev_seg.transit_volume - seg.transit_volume + seg.transit_boardings
         prev_seg = seg
+    if total_offs == 0:
+        total_offs = 9999  # added due to divide by zero error
     eawt = 0.259625 + 1.612019*(1/headway) + 0.005274*(vcr) + 0.591765*(alightings / total_offs)
     # if mode is LRT / BRT mult eawt * 0.4, if HRT /commuter mult by 0.2
     # use either .mode.id or ["#src_mode"] if fares are used
@@ -245,6 +254,42 @@ def get_transit_skims():
                  for name, desc in tmplt_matrices])
 
 
+def import_demand_matrices(period, scenario, ctramp_output_folder):
+    omx_filename_template = "transit_{period}_{access_mode}_TRN_{set}_{period}.omx"
+    matrix_name_templace = "{access_mode}_TRN_{set}_{period}"
+    create_matrix_tool = _m.Modeller().tool("inro.emme.data.matrix.create_matrix")
+    # delete_matrix_tool = _m.Modeller().tool()
+    import_from_omx_tool = _m.Modeller().tool("inro.emme.data.matrix.import_from_omx")
+
+    with _m.logbook_trace("Importing demand matrices for period %s" % period):
+        for set_num in _all_sets:
+            for access_mode in _all_access_modes:
+        # for set_num in ['set1']:
+        #     for access_mode in ['WLK']:
+                omx_filename = omx_filename_template.format(period=period, access_mode=access_mode, set=set_num)
+                omx_filename_path = _os.path.join(ctramp_output_folder, omx_filename)
+                matrix_name = matrix_name_templace.format(period=period, access_mode=access_mode, set=set_num)
+
+                matrix = scenario.emmebank.matrix('mf' + matrix_name)
+                if matrix is not None:
+                    matrix_id=matrix.id
+                else:
+                    matrix_id='mf'
+
+                create_matrix_tool(
+                    matrix_id=matrix_id,
+                    matrix_name=matrix_name,
+                    matrix_description=omx_filename,
+                    overwrite=True,
+                    default_value=0,
+                    scenario=scenario)
+                import_from_omx_tool(
+                    file_path=omx_filename_path,
+                    matrices={matrix_name: 'mf' + matrix_name},
+                    zone_mapping='NO',
+                    scenario=scenario)
+
+
 def temp_matrices(emmebank, mat_type, total=1, default_value=0.0):
     matrices = []
     try:
@@ -293,7 +338,7 @@ def parse_num_processors(value):
 
 # ---------------------------------------- Skimming ----------------------------------------------
 
-def perform_assignment_and_skim(modeller, scenario, period, assignment_only=False, skims_only=True, num_processors="MAX-1"):
+def perform_assignment_and_skim(modeller, scenario, period, assignment_only=False, skims_only=True, num_processors="MAX-1", use_fares=False, use_ccr=False):
     attrs = {
             "period": period,
             "scenario": scenario.id,
@@ -310,16 +355,16 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
     network = scenario.get_partial_network(
         element_types=["TRANSIT_LINE", "TRANSIT_SEGMENT"], include_attributes=True)
 
+    with _m.logbook_trace("Transit assignment and skims for period %s" % period):
+        # run_assignment(period, params, network, day_pass, skims_only, num_processors)
+        run_assignment(modeller, scenario, period, params, network, skims_only, num_processors, use_fares, use_ccr)
 
-    # run_assignment(period, params, network, day_pass, skims_only, num_processors)
-    run_assignment(modeller, scenario, period, params, network, skims_only, num_processors)
-
-    if not assignment_only:
-        run_skims(modeller, scenario, "BUS", period, params, num_processors, network)
-        run_skims(modeller, scenario, "PREM", period, params, num_processors, network)
-        run_skims(modeller, scenario, "ALLPEN", period, params, num_processors, network)
-        mask_allpen(scenario, period)
-        report(scenario, period)
+        if not assignment_only:
+            run_skims(modeller, scenario, "BUS", period, params, num_processors, network, use_fares)
+            run_skims(modeller, scenario, "PREM", period, params, num_processors, network, use_fares)
+            run_skims(modeller, scenario, "ALLPEN", period, params, num_processors, network, use_fares)
+            mask_allpen(scenario, period)
+            report(scenario, period)
 
 
 def setup(scenario, attrs):
@@ -409,7 +454,7 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
     base_spec = {
         "type": "EXTENDED_TRANSIT_ASSIGNMENT",
         "modes": [],
-        "demand": "",
+        "demand": "",  # demand matrix specified below
         "waiting_time": {
             "effective_headways": params["init_headway"], "headway_fraction": 0.5,
             "perception_factor": params["init_wait"], "spread_factor": 0.5
@@ -486,22 +531,33 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
     if skims_only:
         access_modes = ["WLK"]
     else:
-        access_modes = ["WLK", "PNR", "KNR"]
+        access_modes = _all_access_modes
     if use_ccr:
         assign_transit = modeller.tool(
             "inro.emme.transit_assignment.capacitated_transit_assignment")
-        #  assign all 3 or 9 classes of demand at the same time
+        #  assign all 3 or 12 classes of demand at the same time
         specs = []
         names = []
+        demand_matrix_template = "mf{access_mode}_TRN_{set}_{period}"
         for a_name in access_modes:
             for mode_name, parameters in skim_parameters.iteritems():
                 spec = _copy(base_spec)
                 name = "%s_%s%s" % (period, a_name, mode_name)
                 spec["modes"] = parameters["modes"]
-                spec["demand"] = 'ms1' # zero demand matrix
+                demand_matrix = demand_matrix_template.format(
+                    access_mode=a_name, set=_set_dict[mode_name], period=period)
+                if emmebank.matrix(demand_matrix).get_numpy_data().sum() == 0:
+                    continue   # don't include if no demand
+                    # demand can't be 0, so assigning a trip to an arbitrary OD pair
+                    # didn't work - got infinite impedence
+                    demand_matrix_data = emmebank.matrix(demand_matrix).get_numpy_data()
+                    demand_matrix_data[1][2] = 1
+                    emmebank.matrix(demand_matrix).set_numpy_data(demand_matrix_data)
+                spec["demand"] = demand_matrix
+                # spec["demand"] = 'ms1' # zero demand matrix not allowed!!
                 spec["journey_levels"] = parameters["journey_levels"]
                 specs.append(spec)
-                names.append(names)
+                names.append(name)
             func = {
                 "segment": {
                     "type": "CUSTOM",
@@ -516,11 +572,11 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
                 "assignment_period": 1
             }
             stop = {
-                "max_iterations": 10,
+                "max_iterations": 3,  # changed from 10 for testing
                 "relative_difference": 0.01,
                 "percent_segments_over_capacity": 0.01
             }
-        assign_transit(specs, class_name=names, scenario=scenario)
+        assign_transit(specs, congestion_function=func, stopping_criteria=stop, class_names=names, scenario=scenario)
     else:
         assign_transit = modeller.tool(
             "inro.emme.transit_assignment.extended_transit_assignment")
@@ -1024,8 +1080,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Skim an already created Emme transit network.")
     parser.add_argument('-p', '--trn_path', help=r"path to the trn folder, default is the current_working_folder\trn",
                         default=_os.path.join(_os.getcwd(), 'trn'))
+    parser.add_argument('-s', '--skims_path', help=r"path to the skims folder, default is the current_working_folder\skims",
+                        default=_os.path.join(_os.getcwd(), 'skims'))
     parser.add_argument('-n', '--name', help="the project folder name",
                         default="mtc_emme")
+    parser.add_argument('-c', '--use_ccr', help=r"use capacitated transit assignment? 'yes' or 'no'",
+                        default="no")
     args = parser.parse_args()
 
     # or connect to already open desktop for debugging
@@ -1046,8 +1106,11 @@ if __name__ == "__main__":
 
         initialize_matrices(components=['transit_skims'], periods=[period], scenario=scenario, delete_all_existing=True)
 
-        perform_assignment_and_skim(modeller, scenario, period=period, assignment_only=False,
-                                        skims_only=True, num_processors="MAX-1")
+        ctramp_output_folder = _os.path.join(_os.getcwd(), 'ctramp_output')
+        import_demand_matrices(period, scenario, ctramp_output_folder)
 
-        output_omx_file = _os.path.join(args.trn_path, "transit_skims_{}.omx".format(period))
+        perform_assignment_and_skim(modeller, scenario, period=period, assignment_only=False,
+                                    skims_only=False, num_processors="MAX-1", use_fares=False, use_ccr=True)
+
+        output_omx_file = _os.path.join(args.skims_path, "transit_skims_{}_test.omx".format(period))
         export_matrices_to_omx(omx_file=output_omx_file, periods=[period], scenario=scenario, big_to_zero=True, max_transfers=3)

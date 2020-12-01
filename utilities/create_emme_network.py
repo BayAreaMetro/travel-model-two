@@ -19,7 +19,7 @@
 #///////////////////////////////////////////////////////////////////////////////
 
 
-# import apply_fares as _apply_fares
+import apply_fares as _apply_fares
 
 import inro.emme.desktop.app as _app
 import inro.emme.desktop.types as _ws_types
@@ -616,11 +616,11 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
         emmebank.delete_scenario(scenario_id + 1)
     scenario = emmebank.copy_scenario(scenario, scenario_id + 1)
 
-    # apply_fares = _apply_fares.ApplyFares()
-    # apply_fares.scenario = scenario
-    # apply_fares.dot_far_file = os.path.join(root, "fares.far")
-    # apply_fares.fare_matrix_file = os.path.join(root, "fareMatrix.txt")
-    # apply_fares.execute()
+    apply_fares = _apply_fares.ApplyFares()
+    apply_fares.scenario = scenario
+    apply_fares.dot_far_file = os.path.join(root, "fares.far")
+    apply_fares.fare_matrix_file = os.path.join(root, "fareMatrix.txt")
+    apply_fares.execute()
 
     scenario = emmebank.copy_scenario(scenario_id + 1, scenario_id + 2)
     network = scenario.get_network()
@@ -652,7 +652,7 @@ if __name__ == "__main__":
                         default=os.path.join(os.getcwd(), 'trn'))
     parser.add_argument('-n', '--name', help="the project folder name created in the trn folder, default is mtc_emme",
                         default="mtc_emme")
-    parser.add_argument('-v', '--emmeversion', help='the Emme version', default='4.4.2')
+    parser.add_argument('-v', '--emmeversion', help='the Emme version', default='4.4.5')
     parser.add_argument('-i', '--first_iteration', help='Is this the first iteration? yes or no, default is yes', default='yes')
     args = parser.parse_args()
 
@@ -663,6 +663,7 @@ if __name__ == "__main__":
     if args.first_iteration == 'yes':
         # create emme project
         desktop = init_emme_project(args.trn_path, args.name, args.emmeversion)
+        # desktop = connect_to_running_desktop(port=4242)
     else:
         # or connect to already open desktop
         desktop = connect_to_running_desktop(port=59673)
@@ -671,7 +672,6 @@ if __name__ == "__main__":
     modeller = _m.Modeller(desktop)
 
 
-    # for period in ['EA', 'AM', 'MD', 'PM', 'EV']:
     for period in _all_periods:
         scenario_id = period_to_scenario_dict[period]
         if args.first_iteration == 'yes':
