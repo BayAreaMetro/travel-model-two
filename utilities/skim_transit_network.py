@@ -70,48 +70,47 @@ def calc_segment_cost(transit_volume, capacity, segment):
 
 _headway_cost_function = """
 max_hdwy_growth = 1.5
-# NOTE : max headway could be attribute instead of the same for every line
 max_hdwy = 999.98
-
-#values = scenario.get_attribute_values("LINK", [""])
-#network.set_attribute_values("LINK", [""], values)
 
 
 def calc_eawt(segment, vcr, headway):
-    # EAWT_AM = 0. 259625 + 1. 612019*(1/Headway) + 0. 005274*(Arriving V/C) + 0. 591765*(Total Offs Share)
-    # EAWT_MD = 0. 24223 + 3.40621* (1/Headway) + 0. 02709*(Arriving V/C) + 0. 82747 *(Total Offs Share)
+    # EAWT_AM = 0. 259625 + 1. 612019*(1/Headway) + 0.005274*(Arriving V/C) + 0. 591765*(Total Offs Share)
+    # EAWT_MD = 0. 24223 + 3.40621* (1/Headway) + 0.02709*(Arriving V/C) + 0. 82747 *(Total Offs Share)
     line = segment.line
+    prev_segment = line.segment(segment.number - 1)
+    alightings = prev_segment.transit_volume - segment.transit_volume + segment.transit_boardings
     total_offs = 0
-    alightings = 0
     all_segs = iter(line.segments(True))
     prev_seg = next(all_segs)
     for seg in all_segs:
         total_offs += prev_seg.transit_volume - seg.transit_volume + seg.transit_boardings
-        if seg == segment :
-            alightings = prev_seg.transit_volume - seg.transit_volume + seg.transit_boardings
         prev_seg = seg
     eawt = 0.259625 + 1.612019*(1/headway) + 0.005274*(vcr) + 0.591765*(alightings / total_offs)
-    return eawt
+    # if mode is LRT / BRT mult eawt * 0.4, if HRT /commuter mult by 0.2
+    # use either .mode.id or ["#src_mode"] if fares are used
+    mode_char = line{0}
+    if mode_char in ["l", "x"]:
+        eawt_factor = 0.4
+    elif mode_char in ["h", "c", "f"]:
+        eawt_factor = 0.2
+    else:
+        eawt_factor = 1
+    return eawt * eawt_factor
 
 
-def calc_headway(transit_volume, transit_boardings, headway, capacity, segment):
+def calc_adj_headway(transit_volume, transit_boardings, headway, capacity, segment):
     prev_hdwy = segment["@phdwy"]
     delta_cap = max(capacity - transit_volume + transit_boardings, 0)
     adj_hdwy = min(max_hdwy, prev_hdwy * min((transit_boardings+1) / (delta_cap+1), 1.5))
     adj_hdwy = max(headway, adj_hdwy)
+    return adj_hdwy
+
+def calc_headway(transit_volume, transit_boardings, headway, capacity, segment):
     vcr = transit_volume / capacity
     eawt = calc_eawt(segment, vcr, segment.line.headway)
+    adj_hdwy = calc_adj_headway(transit_volume, transit_boardings, headway, capacity, segment)
+    return adj_hdwy + eawt
 
-    # if mode is LRT / BRT mult eawt * 0.4, if HRT /commuter mult by 0.2
-    # either #src_mode or mode.id
-    if line%s in ["l", "f", "x"]:
-        eawt_factor = 0.4
-    elif line%s in ["h", "c"]:
-        eawt_factor = 0.2
-    else:
-        eawt_factor = 1
-    adj_hdwy = adj_hdwy + eawt_factor*eawt
-    return adj_hdwy
 """
 
 
@@ -228,8 +227,10 @@ def get_transit_skims():
         ("FRDIST",     "ferry IV distance"),
         ("TOTDIST",    "Total transit distance"),
         ("IN_VEHICLE_COST",    "In vehicle cost"),
-        ("LAYOVER_BOARD",    "layover board"),
-        ("PERCEIVED_FARE",    "perceived fare"),
+        ("LINKREL",     "Link reliability"),
+        ("CROWD",       "Crowding penalty"),
+        ("EAWT",        "Extra added wait time"),
+        ("CAPPEN",      "Capacity penalty"),
     ]
     skim_sets = [
         ("BUS",    "Local bus only"),
@@ -296,7 +297,6 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
     attrs = {
             "period": period,
             "scenario": scenario.id,
-            # "data_table_name": data_table_name,
             "assignment_only": assignment_only,
             "skims_only": skims_only,
             "num_processors": num_processors,
@@ -461,8 +461,12 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
             journey_levels = _json.load(f)["journey_levels"]
         local_journey_levels = filter_journey_levels_by_mode(local_modes, journey_levels)
         premium_modes_journey_levels = filter_journey_levels_by_mode(premium_modes, journey_levels)
+        mode_attr = '["#src_mode"]'
     else:
-        local_journey_levels = premium_modes_journey_levels = journey_levels = []
+        local_journey_levels = []
+        premium_modes_journey_levels = []
+        journey_levels = []
+        mode_attr = '.mode.id'
 
     skim_parameters = OrderedDict([
         ("BUS", {
@@ -507,7 +511,7 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
                 },
                 "headway": {
                     "type": "CUSTOM",
-                    "python_function": _headway_cost_function
+                    "python_function": _headway_cost_function.format(mode_attr)
                 },
                 "assignment_period": 1
             }
@@ -568,6 +572,23 @@ def filter_journey_levels_by_mode(modes, journey_levels):
     return journey_levels
 
 
+def get_strat_spec(components, matrix_name):
+    spec = {
+        "trip_components": components,
+        "sub_path_combination_operator": "+",
+        "sub_strategy_combination_operator": "average",
+        "selected_demand_and_transit_volumes": {
+            "sub_strategies_to_retain": "ALL",
+            "selection_threshold": {"lower": -999999, "upper": 999999}
+        },
+        "analyzed_demand": None,
+        "constraint": None,
+        "results": {"strategy_values": matrix_name},
+        "type": "EXTENDED_TRANSIT_STRATEGY_ANALYSIS"
+    }
+    return spec
+
+
 # @_m.logbook_trace("Extract skims", save_arguments=True)
 def run_skims(modeller, scenario, name, period, params, num_processors, network, use_fares=False):
     emmebank = scenario.emmebank
@@ -575,6 +596,8 @@ def run_skims(modeller, scenario, name, period, params, num_processors, network,
         "inro.emme.matrix_calculation.matrix_calculator")
     network_calc = modeller.tool(
         "inro.emme.network_calculation.network_calculator")
+    create_extra = modeller.tool(
+        "inro.emme.data.extra_attribute.create_extra_attribute")
     matrix_results = modeller.tool(
         "inro.emme.transit_assignment.extended.matrix_results")
     path_analysis = modeller.tool(
@@ -597,7 +620,6 @@ def run_skims(modeller, scenario, name, period, params, num_processors, network,
                 "modes": [mode.id for mode in network.modes() if mode.type == "TRANSIT" or mode.type == "AUX_TRANSIT"],
                 "avg_boardings": 'mf"%s_XFERS"' % skim_name,
                 "actual_in_vehicle_times": 'mf"%s_TOTALIVTT"' % skim_name,
-                #"perceived_total_boarding_costs": 'mf"%s_PERCEIVED_FARE"' % skim_name,
                 "actual_aux_transit_times": 'mf"%s_TOTALWALK"' % skim_name,
             },
         }
@@ -665,48 +687,7 @@ def run_skims(modeller, scenario, name, period, params, num_processors, network,
             "expression": '(%s_XFERS - 1).max.0' % skim_name,
         }
         matrix_calc(spec, scenario=scenario, num_processors=num_processors)
-
-        # sum in-vehicle cost and boarding cost to get the fare paid
-    if use_fares:
-        with _m.logbook_trace("Calculate effective fare"):
-            # sum in-vehicle cost and boarding cost to get the fare paid
-            spec = {
-                "type": "MATRIX_CALCULATION",
-                "constraint": None,
-                "result": 'mf"%s_FARE"' % skim_name,
-                "expression": '(%s_FARE + %s_IN_VEHICLE_COST)' % (skim_name, skim_name),
-            }
-            matrix_calc(spec, scenario=scenario, num_processors=num_processors)
-
-    # walk access time - get distance and convert to time with 3 miles / hr
-    # with _m.logbook_trace("Walk time access, egress and xfer"):
-    #     path_spec = {
-    #         "portion_of_path": "ORIGIN_TO_INITIAL_BOARDING",
-    #         "trip_components": {"aux_transit": "length",},
-    #         "path_operator": "+",
-    #         "path_selection_threshold": {"lower": 0, "upper": 999999 },
-    #         "path_to_od_aggregation": {
-    #             "operator": "average",
-    #             "aggregated_path_values": 'mf"%s_ACCWALK"' % skim_name,
-    #         },
-    #         "type": "EXTENDED_TRANSIT_PATH_ANALYSIS"
-    #     }
-    #     path_analysis(path_spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
-    #
-    #     # walk egress time - get distance and convert to time with 3 miles/ hr
-    #     path_spec = {
-    #         "portion_of_path": "FINAL_ALIGHTING_TO_DESTINATION",
-    #         "trip_components": {"aux_transit": "length",},
-    #         "path_operator": "+",
-    #         "path_selection_threshold": {"lower": 0, "upper": 999999 },
-    #         "path_to_od_aggregation": {
-    #             "operator": "average",
-    #             "aggregated_path_values": 'mf"%s_EGRWALK"' % skim_name
-    #         },
-    #         "type": "EXTENDED_TRANSIT_PATH_ANALYSIS"
-    #     }
-    #     path_analysis(path_spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
-    #
+    with _m.logbook_trace("Calculate walk access, egress and total"):
         spec_list = [
         {    # walk access time - convert to time with 3 miles/ hr
             "type": "MATRIX_CALCULATION",
@@ -728,8 +709,7 @@ def run_skims(modeller, scenario, name, period, params, num_processors, network,
             "result": 'mf"%s_XFERWALK"' % skim_name,
             "expression": '({name}_TOTALWALK - {name}_ACCWALK - {name}_EGRWALK).max.0'.format(name=skim_name),
         }]
-        matrix_calc(spec_list, scenario=scenario, num_processors=num_processors)
-
+    matrix_calc(spec_list, scenario=scenario, num_processors=num_processors)
     # transfer wait time
     with _m.logbook_trace("Wait time - xfer"):
         spec = {
@@ -744,6 +724,73 @@ def run_skims(modeller, scenario, name, period, params, num_processors, network,
             "expression": '({name}_TOTALWAIT - {name}_FIRSTWAIT).max.0'.format(name=skim_name),
         }
         matrix_calc(spec, scenario=scenario, num_processors=num_processors)
+
+    if use_fares:
+        with _m.logbook_trace("Calculate effective fare"):
+            # sum in-vehicle cost and boarding cost to get the fare paid
+            spec = {
+                "type": "MATRIX_CALCULATION",
+                "constraint": None,
+                "result": 'mf"%s_FARE"' % skim_name,
+                "expression": '(%s_FARE + %s_IN_VEHICLE_COST)' % (skim_name, skim_name),
+            }
+            matrix_calc(spec, scenario=scenario, num_processors=num_processors)
+
+    if use_ccr:
+        # TODO: factor this to run once ...
+        create_extra("TRANSIT_SEGMENT", "@eawt", "extra added wait time", overwrite=True, scenario=scenario)
+        create_extra("TRANSIT_SEGMENT", "@crowding_factor", "crowding factor along segments", overwrite=True, scenario=scenario)
+        create_extra("TRANSIT_SEGMENT", "@capacity_penalty", "capacity penalty at boarding", overwrite=True, scenario=scenario)
+        network = scenario.get_partial_network(["TRANSIT_LINE", "TRANSIT_SEGMENT"])
+        attr_map = {
+            "TRANSIT_SEGMENT": ["@phdwy", "transit_volume", "transit_boardings"],
+            "TRANSIT_VEHICLE": ["seated_capacity", "total_capacity"],
+            "TRANSIT_LINE": ["headway"], #["#src_mode"],  # TODO: only if use_fares, otherwise will use .mode.id
+        }
+        for domain, attrs in attr_map:
+            values = scenario.get_attribute_values(domain, attrs)
+            network.set_attribute_values(domain, attrs, values)
+                
+        enclosing_scope = {"network": network, "scenario": scenario}
+        # code = compile(_segment_cost_function, "segment_cost_function", "exec")
+        # exec(code, enclosing_scope)
+        code = compile(_headway_cost_function, "headway_cost_function", "exec")
+        exec(code, enclosing_scope)
+        calc_eawt = enclosing_scope["calc_eawt"]
+        hdwy_fraction = 0.5 # fixed in assignment spec
+
+        # NOTE: assume assignment period is 1 hour
+        for segment in network.transit_segments():
+            headway = segment.line.headway
+            veh_cap = line.vehicle.total_capacity
+            capacity = 60.0 * veh_cap / line.headway
+            transit_volume = segment.transit_volume
+            vcr = transit_volume / capacity
+            segment["@eawt"] = calc_eawt(segment, vcr, headway)
+            # segment["@crowding_penalty"] = calc_segment_cost(transit_volume, capacity, segment)
+            segment["@capacity_penalty"] = max(segment["@phdwy"] - segment["@eawt"] - headway, 0) * hdwy_fraction
+
+        values = network.get_attribute_values(domain, ["@eawt", "@capacity_penalty"])
+        scenario.set_attribute_values(domain, attrs, values)
+
+        # skim link reliability: simple strategy analysis
+        # # Link unreliability
+        spec = get_strat_spec({"in_vehicle": "ul1"}, "%s_LINKREL" % skim_name)
+        strategy_analysis(spec, scenario=scenario, num_processors=num_processors)
+
+        # Crowding penalty
+        spec = get_strat_spec({"in_vehicle": "@ccost"}, "%s_CROWD" % skim_name)
+        strategy_analysis(spec, scenario=scenario, num_processors=num_processors)
+
+        # skim node reliability (eawt): network calculations and strategy analysis
+        # Extra added wait time (EAWT)
+        spec = get_strat_spec({"boarding": "@eawt"}, "%s_EAWT" % skim_name)
+        strategy_analysis(spec, scenario=scenario, num_processors=num_processors)
+
+        # skim capacity penalty:
+        spec = get_strat_spec({"boarding": "@capacity_penalty"}, "%s_CAPPEN" % skim_name)
+        strategy_analysis(spec, scenario=scenario, num_processors=num_processors)
+
     return
 
 
