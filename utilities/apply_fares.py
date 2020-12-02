@@ -259,11 +259,11 @@ class ApplyFares(object):
            "found on line %s at node %s (using @farezone from previous segment in itinerary)"
         farezone_warning2 = "Error in fromto faresystem %s estimation on line %s: first node %s "\
             "does not have a valid @farezone ID"
-        farezone_warning3 = "Warning: board cost set to %s at %s (no entry in farematrix %s "\
-            "for farezones %s-%s). This is an issue if there is a subsequent alighting in the same "\
-            "zone (if this message occures more than once per line with the same farezone ID)"
-        farezone_warning4 = "Error in fromto faresystem %s estimation on line %s: no entry in "\
-            "farematrix %s for farezones %s-%s and multiple stops found inside this farezone"
+        farezone_warning3 = "Warning: no entry in farematrix %s for farezones %s-%s: board cost "\
+            "set to %s at %s."
+        farezone_warning4 = "WARNING: the above issue has occured more than once for the same line. "\
+            "There is a feasible boarding-alighting on the this line with no fare defined in "\
+            "the fare matrix."
 
         self._log.append(
             {"type": "text2", "content": "Using zone boundary crossings approximation"})
@@ -289,9 +289,9 @@ class ApplyFares(object):
                     board_cost = min(fare_matrix[farezone].itervalues())
                     self._log.append({
                         "type": "text2", 
-                        "content": farezone_warning3 % (board_cost, seg, fs_data["FAREMATRIX ID"], farezone, farezone)})
+                        "content": farezone_warning3 % (fs_data["FAREMATRIX ID"], farezone, farezone, board_cost, seg)})
                     if same_farezone_missing_cost == farezone:
-                        raise Exception(farezone_warning4 % (fs_data["NUMBER"], line, fs_data["FAREMATRIX ID"], farezone, farezone))
+                        self._log.append({"type": "text2", "content": farezone_warning4})
                     same_farezone_missing_cost = farezone
                     
                 seg.link["board_cost"] = board_cost
