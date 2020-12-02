@@ -548,15 +548,9 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
                 spec["modes"] = parameters["modes"]
                 demand_matrix = demand_matrix_template.format(
                     access_mode=a_name, set=_set_dict[mode_name], period=period)
-                if emmebank.matrix(demand_matrix).get_numpy_data().sum() == 0:
+                if emmebank.matrix(demand_matrix).get_numpy_data(scenario.id).sum() == 0:
                     continue   # don't include if no demand
-                    # demand can't be 0, so assigning a trip to an arbitrary OD pair
-                    # didn't work - got infinite impedence
-                    demand_matrix_data = emmebank.matrix(demand_matrix).get_numpy_data()
-                    demand_matrix_data[1][2] = 1
-                    emmebank.matrix(demand_matrix).set_numpy_data(demand_matrix_data)
                 spec["demand"] = demand_matrix
-                # spec["demand"] = 'ms1' # zero demand matrix not allowed!!
                 spec["journey_levels"] = parameters["journey_levels"]
                 specs.append(spec)
                 names.append(name)

@@ -584,7 +584,7 @@ def calc_link_unreliability(network, period):
         #facility_type = ?
         #area_type = ?
         # NOTE: TBD with new network
-        link.data1 = factor_table[facility_type][area_type]
+        link.data3 = factor_table[facility_type][area_type]
         pass
 
 

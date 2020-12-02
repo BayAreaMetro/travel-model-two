@@ -841,7 +841,7 @@ class emme_network_conversion:
             file.write('c Transit time functions (TTF)\n')
             # set transit time function to first user link field which is set to trantime_final
             file.write('a  ft1 = 0\n')
-            file.write('a  ft2 = us1*(1+ul1)\n')  # link unreliability stored in ul1 / link.data1
+            file.write('a  ft2 = us1*(1+ul3)\n')  # link unreliability stored in ul3 / link.data3
         file.close()
         pass
 
