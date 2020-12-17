@@ -44,14 +44,31 @@ RUN PGM=NETWORK
             CAPCLASS = 15*AT + FT
         ENDIF
 
-        SPEED = FFS * SPD_FAC
-	    FFS = SPEED
-	
+        ; temporary FFS assumptions based on facility type
+        ; TODO: update assumptions based on facility type - area type lookup table
+        IF (FT = 1)
+            FFS = 50
+        ELSEIF (FT = 2)
+            FFS = 50
+        ELSEIF (FT = 3)
+            FFS = 30
+        ELSEIF (FT = 4)
+            FFS = 40
+        ELSEIF (FT = 5)
+            FFS = 40
+        ELSEIF (FT = 6)
+            FFS = 30
+        ELSEIF (FT = 7)
+            FFS = 30
+        ELSEIF (FT = 8)
+            FFS = 25
+        ENDIF
+    
         if (FFS > 0)
-          FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
+          FFT = 60.0 * DISTANCE / FFS ; (60 minutes / 1 hour) * (mile) * (miles / hour) => minutes
         else
-          FFT = (60.0 / 5280.0) * FEET / 25 ; put a default of 25 mph
-	    endif
+          FFT = 60.0  * DISTANCE / 25 ; put a default of 25 mph
+        endif
  
     ENDPHASE
 ENDRUN

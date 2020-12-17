@@ -69,7 +69,9 @@ loop period = 1, 5
             B_NEW_NODE = B.NEW_NODE
             OLD_B = B
             
-            IF (CNTYPE = 'TAZ' | CNTYPE = 'TANA' | CNTYPE = 'USE' | CNTYPE = 'EXT')
+            IF (CNTYPE = 'TAZ' | CNTYPE = 'TANA')
+                ;keep
+            ELSEIF (USECLASS_EA + USECLASS_AM + USECLASS_MD + USECLASS_PM + USECLASS_EV > 0)
                 ;keep
             ELSE
                 DELETE

@@ -29,7 +29,7 @@ RUN PGM = CUBE Parameters ='/Command /CloseWhenDone /Minimize /NoSplash'
      MaxPathCost = 1531680
      PRINTMODE=SUMMARY
      Origin = '(N < 900000) & (N % 100000 > 90000)'
-     AddTrace='FEET'
+     AddTrace='DISTANCE' ; unit: mile
      Destination = '(N < 900000) & (N % 100000 < 10000)'
      CLOSE
  ENDFUNCTION
