@@ -421,7 +421,8 @@ public class MandatoryAccessibilitiesCalculator
                 {
                     logger.fatal("Error:  Best walk transit alt " + bestAlt + " found for origin mgra "
                         + oMgra + " to destination mgra " + dMgra + " but Utility = "
-                        + walkTransitWalkUtilities[bestAlt]);
+                        + walkTransitWalkUtilities[bestAlt] +" for oTap pos "
+                        + oTapPosition + " and dTap pos " + dTapPosition + " set "+set);
                     throw new RuntimeException();
                 }
                 accessibilities[5] = Math.log(walkTransitWalkUtilities[bestAlt]);
@@ -495,7 +496,8 @@ public class MandatoryAccessibilitiesCalculator
                 {
                     logger.fatal("Error:  Best drive transit alt " + bestAlt + " found for origin mgra "
                         + oMgra + " to destination mgra " + dMgra + " but Utility = "
-                        + driveTransitWalkUtilities[bestAlt]);
+                        + driveTransitWalkUtilities[bestAlt] +" for oTap pos "
+                        + oTapPosition + " and dTap pos " + dTapPosition + " set "+set);
                     throw new RuntimeException();
                 }
 
