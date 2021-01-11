@@ -8,7 +8,7 @@
 #////                                                                        ///
 #//// apply_fares.py                                                         ///
 #////                                                                        ///
-#////     Usage:                                                             /// 
+#////     Usage:                                                             ///
 #////                                                                        ///
 #////                                                                        ///
 #////                                                                        ///
@@ -41,7 +41,7 @@ class ApplyFares(object):
         self.scenario = None
         self.dot_far_file = None
         self.fare_matrix_file = None
-        self.vot = 1.0
+        self.vot = None
         self.network = None
 
     def execute(self):
@@ -84,13 +84,13 @@ class ApplyFares(object):
                     fare_matrix = fare_matrices[fs_data["FAREMATRIX ID"]]
                     self.generate_fromto_approx(network, lines, fare_matrix, fs_data)
 
-            if self.vot is not None:
-                percep = 60.0 / self.vot
-                self._log.append(
-                    {"type": "text", "content": "Converting costs to minutes with VOT %s, converted to %s min / $" % (self.vot, percep)})
-                for seg in network.transit_segments():
-                    seg["@invehicle_cost"] = seg["@invehicle_cost"] * percep
-                    seg["@board_cost"] = seg["@board_cost"] * percep
+            # if self.vot is not None:
+            #     percep = 60.0 / self.vot
+            #     self._log.append(
+            #         {"type": "text", "content": "Converting costs to minutes with VOT %s, converted to %s min / $" % (self.vot, percep)})
+            #     for seg in network.transit_segments():
+            #         seg["@invehicle_cost"] = seg["@invehicle_cost"] * percep
+            #         seg["@board_cost"] = seg["@board_cost"] * percep
 
             faresystem_groups = self.group_faresystems(faresystems, network)
             journey_levels = self.generate_transfer_fares(faresystems, faresystem_groups, network)
@@ -210,8 +210,12 @@ class ApplyFares(object):
                     farezone = int(seg.i_node["@farezone"])
                     if farezone not in valid_farezones:
                         if prev_farezone == 0:
-                            raise Exception("Error in fromto faresystem %s estimation: on line %s first node %s "
-                                            "does not have a valid @farezone ID" % (fs_data["NUMBER"], line, seg.i_node))
+                            # DH added first farezone fix instead of exception
+                            prev_farezone = list(valid_farezones)[0]
+                            print "Error in fromto faresystem %s estimation: on line %s first node %s \
+                                does not have a valid @farezone ID. Using first valid farezone." % (fs_data["NUMBER"], line, seg.i_node)
+                            # raise Exception("Error in fromto faresystem %s estimation: on line %s first node %s "
+                            #                 "does not have a valid @farezone ID" % (fs_data["NUMBER"], line, seg.i_node))
                         farezone = prev_farezone
                     else:
                         prev_farezone = farezone
@@ -228,7 +232,7 @@ class ApplyFares(object):
         #         handle as an isolated system with the same costs on for all segments on a link
         #         and from boarding nodes by direction.
         #         Used mostly for BART, but also used Amtrack, some ferries and express buses
-        #         Can support multiple boarding stops with same farezone provided it is an isolated leg, 
+        #         Can support multiple boarding stops with same farezone provided it is an isolated leg,
         #         e.g. BART zone 85 Oakland airport connector (when operated a bus with multiple stops).
 
         count_single_node_zones = 0.0
@@ -282,18 +286,21 @@ class ApplyFares(object):
                     if prev_farezone != 0:
                         farezone = prev_farezone
                     else:
-                        raise Exception(farezone_warning2 % (fs_data["NUMBER"], line, seg.i_node))
+                        # DH added first farezone fix instead of exception
+                        farezone = list(valid_farezones)[0]
+                        print farezone_warning2 % (fs_data["NUMBER"], line, seg.i_node)
+                        # raise Exception(farezone_warning2 % (fs_data["NUMBER"], line, seg.i_node))
                 try:
                     board_cost = fare_matrix[farezone][farezone]
                 except KeyError:
                     board_cost = min(fare_matrix[farezone].itervalues())
                     self._log.append({
-                        "type": "text2", 
+                        "type": "text2",
                         "content": farezone_warning3 % (fs_data["FAREMATRIX ID"], farezone, farezone, board_cost, seg)})
                     if same_farezone_missing_cost == farezone:
                         self._log.append({"type": "text2", "content": farezone_warning4})
                     same_farezone_missing_cost = farezone
-                    
+
                 seg.link["board_cost"] = board_cost
                 if prev_farezone != 0 and farezone != prev_farezone:
                     try:
@@ -304,7 +311,7 @@ class ApplyFares(object):
                 prev_farezone = farezone
                 prev_seg = seg
 
-    def station_to_station_approx(self, lines, valid_farezones, fare_matrix, fs_data, zone_nodes, valid_links, network):            
+    def station_to_station_approx(self, lines, valid_farezones, fare_matrix, fs_data, zone_nodes, valid_links, network):
         network.create_attribute("LINK", "board_index", -1)
         network.create_attribute("LINK", "invehicle_index", -1)
         self._log.append(
@@ -320,7 +327,7 @@ class ApplyFares(object):
                 index += 1
                 link.invehicle_index = index
                 index += 1
-            else:  
+            else:
                 # in multiple station cases ALL boardings have the same index
                 if farezone not in farezone_area_index:
                     farezone_area_index[farezone] = index
@@ -358,7 +365,7 @@ class ApplyFares(object):
                     continue
                 b.append(cost)
                 a_indices = [0]*index
-                
+
                 a_indices[path_links[0].board_index] = 1
                 for link in path_links:
                     if link.invehicle_index == -1:
@@ -445,7 +452,7 @@ class ApplyFares(object):
             fs_data["bounding_rect"] = bounding_rect(fs_data["shape"])
             fs_data["NUM STOPS"] = len(fs_data["shape"])
             fs_data["FS_INDEX"] = fs_index
-            
+
         # get distances between every pair of zone systems
         # determine transfer fares which are too far away to be used
         for fs_id, fs_data in faresystems.iteritems():
@@ -516,7 +523,7 @@ class ApplyFares(object):
                     break
             if not is_matched:
                 group_xfer_fares.append(([xfers], [fs_id], fs_mode))
-       
+
         self._log.append(
             {"type": "header", "content": "Faresystems grouped by compatible transfer fares"})
         self._log.append(
@@ -535,7 +542,7 @@ class ApplyFares(object):
                 xfer_fares_table.append([fs_id] + list(faresystems[fs_id]["xfer_fares"].values()))
             i += 1
             self._log.append(
-                {"type": "text2", "content": "Level %s faresystems: %s modes: %s" % 
+                {"type": "text2", "content": "Level %s faresystems: %s modes: %s" %
                     (i, ", ".join([str(x) for x in group]), ", ".join([str(m) for m in modes]))})
 
         self._log.append(
@@ -551,7 +558,7 @@ class ApplyFares(object):
         transit_modes = set([m for m in network.modes() if m.type == "TRANSIT"])
         get_mode_id = network.available_mode_identifier
         get_vehicle_id = network.available_transit_vehicle_identifier
-        
+
         meta_mode = network.create_mode("TRANSIT", get_mode_id())
         meta_mode.description = "Meta mode"
         for link in network.links():

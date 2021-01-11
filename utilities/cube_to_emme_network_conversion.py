@@ -11,7 +11,7 @@ pd.set_option("display.max_columns",250)
 
 # ------------- run parameters ---------
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
-# _all_periods = ['EA', 'AM']
+# _all_periods = ['AM']
 
 
 # maps transit 'Mode Group' defined in TM2 to a single character required by Emme
@@ -250,7 +250,7 @@ class emme_network_conversion:
 
 
     def parse_transit_SET_file(self):
-        faresystem_data = []
+        faresystem_df = pd.DataFrame(columns=['FARESYSTEM', 'MODE'])
         # looping through each line in transit system file.
         with open(self.transit_SET3_file, 'r') as file:
             line = file.readline()
@@ -261,22 +261,17 @@ class emme_network_conversion:
                 if 'FARESYSTEM=' in line:
                     # FARESYSTEM=1, MODE=12-13\n -> FARESYSTEM: 1, MODE: 12;  FARESYSTEM 1, MODE: 13
                     line_segs = line.replace(' ','').replace('\n', '').split(',')
-                    for line_seg in line_segs:
-                        key = line_seg.split('=')[0]
-                        value = line_seg.split('=')[1]
-                        if '-' in value:
-                            first_mode_num = int(value.split('-')[0])
-                            last_mode_num = int(value.split('-')[1])
-                            for num in range(first_mode_num, last_mode_num + 1):
-                                data_dict.update({key: num})
-                        else:
-                            data_dict.update({key: value})
-                    faresystem_data.append(data_dict)
-
+                    faresystem = line_segs[0].split('=')[1]
+                    mode = line_segs[1].split('=')[1]
+                    if '-' in mode:
+                        first_mode_num = mode.split('-')[0]
+                        last_mode_num = mode.split('-')[1]
+                        for mode_num in range(int(first_mode_num), int(last_mode_num) + 1):
+                            faresystem_df.loc[len(faresystem_df)] = [faresystem, str(mode_num)]
+                    else:
+                        faresystem_df.loc[len(faresystem_df)] = [faresystem, mode]
                 # read next line
                 line = file.readline()
-
-        faresystem_df = pd.DataFrame(faresystem_data)
         return faresystem_df
 
 
@@ -980,9 +975,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     assert (args.first_iteration == 'yes') or (args.first_iteration == 'no'), \
         'Please specify "yes" or "no" for the first_iteration (-i) run-time argument'
-
-    cube_network_data_folder = r"F:\Projects\Clients\mtc\TO13_emme_network\TM2_test_run\trn"
-    # cube_network_data_folder = os.path.join(os.getcwd(), "cube_network_data")
 
     for period in _all_periods:
         period_emme_transaction = emme_network_conversion(args.trn_path, period)

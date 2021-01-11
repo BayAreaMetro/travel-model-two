@@ -47,7 +47,7 @@ emme_transit_time_function_file = "emme_transit_time_function.txt"
 
 # ------------- run parameters ---------
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
-#_all_periods = ['AM']
+# _all_periods = ['AM']
 # mapping time of day period to emme scenario_id
 period_to_scenario_dict = {
     'EA': 1000,
@@ -110,6 +110,8 @@ def init_emme_project(root, title, emmeversion, port=59673):
     emmebank.node_number_digits = 6
     emmebank.use_engineering_notation = True
     for period, scenario_id in period_to_scenario_dict.items():
+        if period not in _all_periods:
+            continue
         scenario = emmebank.create_scenario(scenario_id)
         scenario.title = period
     # emmebank.dispose()
@@ -613,9 +615,9 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
     # calc_link_unreliability(network, period)
     fix_bad_walktimes(network)
     scenario.publish_network(network)
-    if emmebank.scenario(scenario_id + 1):
-        emmebank.delete_scenario(scenario_id + 1)
-    scenario = emmebank.copy_scenario(scenario, scenario_id + 1)
+    # if emmebank.scenario(scenario_id + 1):
+    #     emmebank.delete_scenario(scenario_id + 1)
+    # scenario = emmebank.copy_scenario(scenario, scenario_id + 1)
 
     apply_fares = _apply_fares.ApplyFares()
     apply_fares.scenario = scenario
@@ -623,7 +625,7 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
     apply_fares.fare_matrix_file = os.path.join(root, "fareMatrix.txt")
     apply_fares.execute()
 
-    scenario = emmebank.copy_scenario(scenario_id + 1, scenario_id + 2)
+    # scenario = emmebank.copy_scenario(scenario_id + 1, scenario_id + 2)
     network = scenario.get_network()
     split_tap_connectors_to_prevent_walk(network)
     scenario.publish_network(network)
@@ -635,14 +637,22 @@ def update_congested_link_times(modeller, scenario_id, root, project_name):
     emmebank = modeller.emmebank
 
     # loop through all three created scenarios and update link attributes
-    for i in range(0,3):
-        print "updating scenario_id %s" % (scenario_id + i)
-        import_extra_link_attributes(input_dir, modeller, scenario_id + i, update=True)
-        scenario = emmebank.scenario(scenario_id + i)
-        network = scenario.get_network()
-        print "applying updated times to transit segments"
-        update_link_trantime(network)
-        scenario.publish_network(network)
+    # for i in range(0,3):
+    #     print "updating scenario_id %s" % (scenario_id + i)
+    #     import_extra_link_attributes(input_dir, modeller, scenario_id + i, update=True)
+    #     scenario = emmebank.scenario(scenario_id + i)
+    #     network = scenario.get_network()
+    #     print "applying updated times to transit segments"
+    #     update_link_trantime(network)
+    #     scenario.publish_network(network)
+    # emmebank.dispose()
+    print "updating scenario_id %s" % (scenario_id)
+    import_extra_link_attributes(input_dir, modeller, scenario_id, update=True)
+    scenario = emmebank.scenario(scenario_id)
+    network = scenario.get_network()
+    print "applying updated times to transit segments"
+    update_link_trantime(network)
+    scenario.publish_network(network)
     emmebank.dispose()
 
 
@@ -664,12 +674,12 @@ if __name__ == "__main__":
     if args.first_iteration == 'yes':
         # create emme project
         desktop = init_emme_project(args.trn_path, args.name, args.emmeversion)
-        # desktop = connect_to_running_desktop(port=4242)
+        # desktop = connect_to_running_desktop(port=49475)
     else:
         # or connect to already open desktop
         desktop = connect_to_running_desktop(port=59673)
         # desktop = connect_to_running_desktop(port=4242)
-        # create modeller instance used to import data to project database
+    # create modeller instance used to import data to project database
     modeller = _m.Modeller(desktop)
 
 
