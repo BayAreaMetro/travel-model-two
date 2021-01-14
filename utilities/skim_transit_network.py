@@ -43,9 +43,9 @@ num_processors = 20
 # TODO: make global lists tuples
 transit_modes = ['b', 'x', 'f', 'l', 'h', 'r']
 aux_transit_modes = ['w', 'a', 'e']
-walk_modes = ["a", "w", "e"]
-local_modes = ["b"]
-premium_modes = ['x', 'f', 'l', 'h', 'r']
+_walk_modes = ["a", "w", "e"]
+_local_modes = ["b"]
+_premium_modes = ['x', 'f', 'l', 'h', 'r']
 
 # initialize matrix variables
 # TODO: need a proper cache implementation and invalidation
@@ -388,11 +388,11 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
 
         if not assignment_only:
             with _m.logbook_trace("Skims for Local-only (set1)"):
-                run_skims(modeller, scenario, "BUS", period, local_modes, params, num_processors, network, use_fares, use_ccr)
+                run_skims(modeller, scenario, "BUS", period, _local_modes, params, num_processors, network, use_fares, use_ccr)
             with _m.logbook_trace("Skims for Premium-only (set2)"):
-                run_skims(modeller, scenario, "PREM", period, premium_modes, params, num_processors, network, use_fares, use_ccr)
+                run_skims(modeller, scenario, "PREM", period, _premium_modes, params, num_processors, network, use_fares, use_ccr)
             with _m.logbook_trace("Skims for Local+Premium (set3)"):
-                run_skims(modeller, scenario, "ALLPEN", period, local_modes + premium_modes, params, num_processors, network, use_fares, use_ccr)
+                run_skims(modeller, scenario, "ALLPEN", period, _local_modes + _premium_modes, params, num_processors, network, use_fares, use_ccr)
                 mask_allpen(scenario, period)
             #report(scenario, period)
 
@@ -524,8 +524,8 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
                 out_modes.update(fare_modes[mode])
             return list(out_modes)
 
-        local_modes = get_fare_modes(local_modes)
-        premium_modes = get_fare_modes(premium_modes)
+        local_modes = get_fare_modes(_local_modes)
+        premium_modes = get_fare_modes(_premium_modes)
         project_dir = _os.path.dirname(_os.path.dirname(scenario.emmebank.path))
         with open(_os.path.join(project_dir, "Specifications", "journey_levels.ems"), 'r') as f:
             journey_levels = _json.load(f)["journey_levels"]
@@ -533,6 +533,8 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
         premium_modes_journey_levels = filter_journey_levels_by_mode(premium_modes, journey_levels)
         mode_attr = '["#src_mode"]'
     else:
+        local_modes = list(_local_modes)
+        premium_modes = list(_premium_modes)
         local_journey_levels = []
         premium_modes_journey_levels = []
         journey_levels = []
@@ -540,15 +542,15 @@ def run_assignment(modeller, scenario, period, params, network, skims_only, num_
 
     skim_parameters = OrderedDict([
         ("BUS", {
-            "modes": walk_modes + local_modes,
+            "modes": _walk_modes + local_modes,
             "journey_levels": local_journey_levels
         }),
         ("PREM", {
-            "modes": walk_modes + premium_modes,
+            "modes": _walk_modes + premium_modes,
             "journey_levels": premium_modes_journey_levels
         }),
         ("ALLPEN", {
-            "modes": walk_modes + local_modes + premium_modes,
+            "modes": _walk_modes + local_modes + premium_modes,
             "journey_levels": journey_levels
         }),
     ])
@@ -692,7 +694,7 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             "actual_total_waiting_times": 'mf"%s_TOTALWAIT"' % skim_name,
             # "total_impedance": 'mf"%s_GENCOST"' % skim_name,
             "by_mode_subset": {
-                "modes": valid_modes + walk_modes,
+                "modes": valid_modes + _walk_modes,
                 "avg_boardings": 'mf"%s_XFERS"' % skim_name,
                 #"actual_in_vehicle_times": 'mf"%s_TOTALIVTT"' % skim_name,
                 "actual_aux_transit_times": 'mf"%s_TOTALWALK"' % skim_name,
@@ -1110,6 +1112,7 @@ if __name__ == "__main__":
 
     for period in _all_periods:
         scenario_id = period_to_scenario_dict[period]
+        scenario_id = 2002
         scenario = emmebank.scenario(scenario_id)
 
         initialize_matrices(components=['transit_skims'], periods=[period], scenario=scenario, delete_all_existing=True)
