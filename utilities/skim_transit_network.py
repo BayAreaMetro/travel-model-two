@@ -682,7 +682,7 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
     strategy_analysis = modeller.tool(
         "inro.emme.transit_assignment.extended.strategy_based_analysis")
 
-    class_name = "%s_WLK%s" % (period, name)
+    class_name = "%s_%s" % (period, name)
     skim_name = "%s_%s" % (period, name)
     # self.run_skims.logbook_cursor.write(name="Extract skims for %s, using assignment class %s" % (name, class_name))
 
