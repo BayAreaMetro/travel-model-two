@@ -233,13 +233,6 @@ def get_transit_skims():
         ("HRIVTT",     "heavy rail in-vehicle time"),
         ("CRIVTT",     "commuter rail in-vehicle time"),
         ("FRIVTT",     "ferry in-vehicle time"),
-        # ("LBDIST",     "local bus IV distance"),
-        # ("EBDIST",     "express bus IV distance"),
-        # ("LRDIST",     "light rail IV distance"),
-        # ("HRDIST",     "heavy rail IV distance"),
-        # ("CRDIST",     "commuter rail IV distance"),
-        # ("FRDIST",     "ferry IV distance"),
-        # ("TOTDIST",    "Total transit distance"),
         ("IN_VEHICLE_COST",    "In vehicle cost"),
         ("LINKREL",     "Link reliability"),
         ("CROWD",       "Crowding penalty"),
@@ -365,12 +358,11 @@ def parse_num_processors(value):
 
 # ---------------------------------------- Skimming ----------------------------------------------
 
-def perform_assignment_and_skim(modeller, scenario, period, assignment_only=False, skims_only=True, num_processors="MAX-1", use_fares=False, use_ccr=False):
+def perform_assignment_and_skim(modeller, scenario, period, assignment_only=False, num_processors="MAX-1", use_fares=False, use_ccr=False):
     attrs = {
             "period": period,
             "scenario": scenario.id,
             "assignment_only": assignment_only,
-            "skims_only": skims_only,
             "num_processors": num_processors,
         }
     emmebank = scenario.emmebank
@@ -384,7 +376,7 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
     #     element_types=["TRANSIT_LINE", "TRANSIT_SEGMENT"], include_attributes=True)
 
     with _m.logbook_trace("Transit assignment and skims for period %s" % period):
-        run_assignment(modeller, scenario, period, params, network, skims_only, num_processors, use_fares, use_ccr)
+        run_assignment(modeller, scenario, period, params, network, num_processors, use_fares, use_ccr)
 
         if not assignment_only:
             with _m.logbook_trace("Skims for Local-only (set1)"):
@@ -476,7 +468,7 @@ def get_perception_parameters(period):
 
 
 # @_m.logbook_trace("Transit assignment by demand set", save_arguments=True)
-def run_assignment(modeller, scenario, period, params, network, skims_only, num_processors, use_fares=False, use_ccr=False):
+def run_assignment(modeller, scenario, period, params, network, num_processors, use_fares=False, use_ccr=False):
     base_spec = {
         "type": "EXTENDED_TRANSIT_ASSIGNMENT",
         "modes": [],
@@ -860,6 +852,31 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
     return
 
 
+def save_per_iteration_flows(scenario):
+    strat_data = scenario.transit_strategies.data
+    strat_data["analyze_individual_slices"] = True
+    try:
+        scenario.transit_strategies.data = strat_data
+        create_attr = modeller.tool(
+            "inro.emme.data.extra_attribute.create_extra_attribute")
+        network_results = modeller.tool(
+            "inro.emme.transit_assignment.extended.network_results")
+
+        for strat in scenario.transit_strategies.strat_files():
+            print strat.name
+            _, num, class_name = strat.name.split()
+            attr_name = ("@%s_it%s" % (class_name, num)).lower()
+            create_attr("TRANSIT_SEGMENT", attr_name, scenario=scenario, overwrite=True)
+            spec = {
+                "type": "EXTENDED_TRANSIT_NETWORK_RESULTS",
+                "on_segments": {"transit_volumes": attr_name},
+            }
+            network_results(spec, scenario=scenario, class_name=strat.name)
+    finally:
+        del strat_data["analyze_individual_slices"]
+        scenario.transit_strategies.data = strat_data
+
+
 def mask_allpen(scenario, period):
     # Reset skims to 0 if not both local and premium
     skims = [
@@ -1092,6 +1109,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--skims_path', help=r"path to the skims folder, default is the current_working_folder\skims",
                         default=_os.path.join(_os.getcwd(), 'skims'))
     parser.add_argument('-i', '--first_iteration', help='Is this the first iteration? yes or no, default is yes', default='yes')
+    parser.add_argument('--save_iter_flows', action="store_true", help='Save per-iteration flows in scenarios', default=False)
     args = parser.parse_args()
     assert (args.first_iteration == 'yes') or (args.first_iteration == 'no'), \
         'Please specify "yes" or "no" for the first_iteration (-i) run-time argument'
@@ -1112,7 +1130,6 @@ if __name__ == "__main__":
 
     for period in _all_periods:
         scenario_id = period_to_scenario_dict[period]
-        scenario_id = 2002
         scenario = emmebank.scenario(scenario_id)
 
         initialize_matrices(components=['transit_skims'], periods=[period], scenario=scenario, delete_all_existing=True)
@@ -1127,7 +1144,10 @@ if __name__ == "__main__":
             use_ccr = False
 
         perform_assignment_and_skim(modeller, scenario, period=period, assignment_only=False,
-                                    skims_only=True, num_processors="MAX-4", use_fares=True, use_ccr=use_ccr)
+                                    num_processors="MAX-4", use_fares=True, use_ccr=use_ccr)
 
         output_omx_file = _os.path.join(args.skims_path, "transit_skims_{}.omx".format(period))
         export_matrices_to_omx(omx_file=output_omx_file, periods=[period], scenario=scenario, big_to_zero=True, max_transfers=3)
+
+        if use_ccr and args.save_iter_flows:
+            save_per_iteration_flows(scenario)
