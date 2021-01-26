@@ -686,7 +686,7 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             "actual_total_waiting_times": 'mf"%s_TOTALWAIT"' % skim_name,
             # "total_impedance": 'mf"%s_GENCOST"' % skim_name,
             "by_mode_subset": {
-                "modes": [m.id for m in network.modes()],
+                "modes": [m.id for m in network.modes() if mode.type in ["TRANSIT", "AUX_TRANSIT"]],
                 "avg_boardings": 'mf"%s_XFERS"' % skim_name,
                 #"actual_in_vehicle_times": 'mf"%s_TOTALIVTT"' % skim_name,
                 "actual_aux_transit_times": 'mf"%s_TOTALWALK"' % skim_name,
