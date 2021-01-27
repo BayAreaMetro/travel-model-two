@@ -466,6 +466,7 @@ def split_tap_connectors_to_prevent_walk(network):
 
     line_attributes = network.attributes("TRANSIT_LINE")
     seg_attributes = network.attributes("TRANSIT_SEGMENT")
+    seg_invehicle_attrs = ["@invehicle_cost"]
 
     # re-route the transit lines through the new TAP-stops
     for line in network.transit_lines():
@@ -525,6 +526,8 @@ def split_tap_connectors_to_prevent_walk(network):
                     access_seg.allow_boardings = False
                     access_seg.allow_alightings = False
                     access_seg.transit_time_func = 1  # special 0-cost ttf
+                    for attr_name in seg_invehicle_attrs:
+                        access_seg[attr_name] = 0
                     access_seg.dwell_time = 0
 
                 first_access_seg = new_line.segment(tap_ref["access"][0])
@@ -538,6 +541,8 @@ def split_tap_connectors_to_prevent_walk(network):
                     egress_seg.allow_boardings = real_seg.allow_boardings
                     egress_seg.allow_alightings = real_seg.allow_alightings
                     egress_seg.transit_time_func = 1  # special 0-cost ttf
+                    for attr_name in seg_invehicle_attrs:
+                        egress_seg[attr_name] = 0
                     egress_seg.dwell_time = 0
 
                 real_seg.allow_alightings = False
