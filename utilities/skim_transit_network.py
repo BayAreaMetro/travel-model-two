@@ -2,6 +2,7 @@ import inro.modeller as _m
 import inro.emme.database.emmebank as _eb
 import inro.emme.desktop.app as _app
 import inro.emme.core.exception as _except
+import inro.emme.desktop.worksheet as _worksheet
 import traceback as _traceback
 from copy import deepcopy as _copy
 from collections import defaultdict as _defaultdict, OrderedDict
@@ -28,7 +29,7 @@ except Exception, e:
     def open_file(file_path, mode):
         return OmxMatrix(_omx.openFile(file_path, mode))
 
-# _all_periods = ['AM']
+# _all_periods = ['AM', 'PM']
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
 _all_components = ['transit_skims']
 _all_access_modes = ['WLK', 'PNR', 'KNRTNC', 'KNRPRV']
@@ -38,8 +39,14 @@ _set_dict = {
      'PREM': 'set2',
      'ALLPEN': 'set3'}
 
+_hours_in_period = {
+    'EA': 3,  # 3:00 to 6:00 AM
+    'AM': 3,  # 6:00 to 9:00 AM
+    'MD': 6.5,  # 9:00 AM to 3:30 PM
+    'PM': 3.5,  # 3:30 PM to 7:00 PM
+    'EV': 8,  # 7:00 PM to 3:00 AM
+}
 
-num_processors = 20
 # TODO: make global lists tuples
 transit_modes = ['b', 'x', 'f', 'l', 'h', 'r']
 aux_transit_modes = ['w', 'a', 'e']
@@ -66,7 +73,8 @@ def calc_segment_cost(transit_volume, capacity, segment):
     if transit_volume == 0:
         return 0.0
     line = segment.line
-    seated_capacity = line.vehicle.seated_capacity * 60 / line.headway
+    # need assignment period in seated_capacity calc?
+    seated_capacity = line.vehicle.seated_capacity * {0} * 60 / line.headway
     num_seated = min(transit_volume, seated_capacity)
     num_standing = max(transit_volume - seated_capacity, 0)
 
@@ -573,22 +581,22 @@ def run_assignment(modeller, scenario, period, params, network, num_processors, 
         func = {
             "segment": {
                 "type": "CUSTOM",
-                "python_function": _segment_cost_function,
+                "python_function": _segment_cost_function.format(_hours_in_period[period]),
                 "congestion_attribute": "us3",
                 "orig_func": False
             },
             "headway": {
                 "type": "CUSTOM",
-                "python_function": _headway_cost_function.format(mode_attr)
+                "python_function": _headway_cost_function.format(mode_attr),
             },
-            "assignment_period": 1
+            "assignment_period": _hours_in_period[period]
         }
         stop = {
-            "max_iterations": 1,  # changed from 10 for testing
+            "max_iterations": 3,  # changed from 10 for testing
             "relative_difference": 0.01,
             "percent_segments_over_capacity": 0.01
         }
-        assign_transit(specs, congestion_function=func, stopping_criteria=stop, class_names=names, scenario=scenario)
+        assign_transit(specs, congestion_function=func, stopping_criteria=stop, class_names=names, scenario=scenario, log_worksheets=True)
     else:
         assign_transit = modeller.tool(
             "inro.emme.transit_assignment.extended_transit_assignment")
@@ -686,7 +694,7 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             "actual_total_waiting_times": 'mf"%s_TOTALWAIT"' % skim_name,
             # "total_impedance": 'mf"%s_GENCOST"' % skim_name,
             "by_mode_subset": {
-                "modes": [m.id for m in network.modes() if mode.type in ["TRANSIT", "AUX_TRANSIT"]],
+                "modes": [m.id for m in network.modes() if m.type in ["TRANSIT", "AUX_TRANSIT"]],
                 "avg_boardings": 'mf"%s_XFERS"' % skim_name,
                 #"actual_in_vehicle_times": 'mf"%s_TOTALIVTT"' % skim_name,
                 "actual_aux_transit_times": 'mf"%s_TOTALWALK"' % skim_name,
@@ -793,7 +801,7 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
         with _m.logbook_trace("Calculate CCR skims"):
             # TODO: factor this to run once ...
             create_extra("TRANSIT_SEGMENT", "@eawt", "extra added wait time", overwrite=True, scenario=scenario)
-            create_extra("TRANSIT_SEGMENT", "@crowding_factor", "crowding factor along segments", overwrite=True, scenario=scenario)
+            # create_extra("TRANSIT_SEGMENT", "@crowding_factor", "crowding factor along segments", overwrite=True, scenario=scenario)
             create_extra("TRANSIT_SEGMENT", "@capacity_penalty", "capacity penalty at boarding", overwrite=True, scenario=scenario)
             network = scenario.get_partial_network(["TRANSIT_LINE", "TRANSIT_SEGMENT"], include_attributes=True)
             attr_map = {
@@ -823,7 +831,8 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             for segment in network.transit_segments():
                 headway = segment.line.headway
                 veh_cap = line.vehicle.total_capacity
-                capacity = 60.0 * veh_cap / line.headway
+                # capacity = 60.0 * veh_cap / line.headway
+                capacity = 60.0 * _hours_in_period[period] * veh_cap / line.headway
                 transit_volume = segment.transit_volume
                 vcr = transit_volume / capacity
                 segment["@eawt"] = calc_eawt(segment, vcr, headway)
@@ -1102,6 +1111,32 @@ def export_matrices_to_omx(omx_file, periods, scenario, big_to_zero=False, max_t
             exporter.write_matrices(matrices)
 
 
+def export_boardings_by_line(desktop, output_transit_boardings_file):
+    project = desktop.project
+    table = project.new_network_table("TRANSIT_LINE")
+    column = _worksheet.Column()
+
+    # Creating total boardings by line table
+    column.expression = "line"
+    column.name = "line_name"
+    table.add_column(0, column)
+
+    column.expression = "description"
+    column.name = "description"
+    table.add_column(1, column)
+
+    column.expression = "ca_board_t"
+    column.name = "total_boardings"
+    table.add_column(2, column)
+
+    column.expression = "#src_mode"
+    column.name = "mode"
+    table.add_column(3, column)
+
+    table.export(output_transit_boardings_file)
+    table.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Skim an already created Emme transit network.")
     parser.add_argument('-p', '--trn_path', help=r"path to the trn folder, default is the current_working_folder\trn",
@@ -1142,6 +1177,7 @@ if __name__ == "__main__":
             import_demand_matrices(period, scenario, ctramp_output_folder, num_processors="MAX-4")
         else:
             use_ccr = False
+        # use_ccr = False
 
         perform_assignment_and_skim(modeller, scenario, period=period, assignment_only=False,
                                     num_processors="MAX-4", use_fares=True, use_ccr=use_ccr)
@@ -1151,3 +1187,6 @@ if __name__ == "__main__":
 
         if use_ccr and args.save_iter_flows:
             save_per_iteration_flows(scenario)
+            desktop.data_explorer().replace_primary_scenario(scenario)
+            output_transit_boardings_file = _os.path.join(_os.getcwd(), args.trn_path, "boardings_by_line_{}.csv".format(period))
+            export_boardings_by_line(desktop, output_transit_boardings_file)
