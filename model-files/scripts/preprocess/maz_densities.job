@@ -40,7 +40,7 @@ RUN PGM=NETWORK
     phase=linkmerge
     
         ; increment count for non-freeway, non-connector link nodes
-        ; note: facility type(FT): ; 1 - Freeway; 8 - Connector
+        ; note: facility type(FT): 1 - Freeway; 8 - Connector
         IF (FT != 1 & FT != 8)
             _noden[A] = _noden[A] + 1
             _noden[B] = _noden[B] + 1

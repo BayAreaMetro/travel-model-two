@@ -39,7 +39,7 @@ if __name__ == '__main__':
     sequence_mapping        = pandas.DataFrame.from_csv(zone_seq_mapping_file)
     sequence_mapping.reset_index(inplace=True)
 
-    tap_data                = pandas.read_table(infile, names=['TAP_original','TAZ_original','TAZ2','SP_DISTANCE','FEET'],
+    tap_data                = pandas.read_table(infile, names=['TAP_original','TAZ_original','TAZ2','SP_DISTANCE','MILE'],
                                                 delimiter=',')
     tap_data_grouped        = tap_data.groupby('TAP_original')
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     taps                    = sequence_mapping[sequence_mapping.TAPSEQ > 0]
     for ind,row in taps.iterrows():
         try:
-            sorted_group = tap_data_grouped.get_group(row['N']).sort_values(['FEET','TAZ_original'])
+            sorted_group = tap_data_grouped.get_group(row['N']).sort_values(['MILE','TAZ_original'])
             if tap_data_out_init:
                 tap_data_out = tap_data_out.append(sorted_group.head(1))
             else:
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     tap_data_out.rename(columns={'TAPSEQ':'TAP', 'N':'dropN2'}, inplace=True)
 
     # drop others
-    tap_data_out.drop(['index','FEET','SP_DISTANCE','TAZ_original','TAZ2','dropN1','dropN2'], axis=1, inplace=True)
+    tap_data_out.drop(['index','MILE','SP_DISTANCE','TAZ_original','TAZ2','dropN1','dropN2'], axis=1, inplace=True)
 
     # are these really useful??
     tap_data_out['lotid']       = tap_data_out['TAP']
