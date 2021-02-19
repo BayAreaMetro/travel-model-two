@@ -40,6 +40,7 @@
 ;
 ; ----------------------------------------------------------------------------------------------------------------
 
+
 ;export tap->node (stop) links and node locations so that connector links can be built
 RUN PGM=NETWORK
     NETI = "hwy\mtc_final_network.net"
@@ -65,6 +66,7 @@ IF (RETURNCODE > 0) abort
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_walk_transfer_bypass_links.py hwy\tap_direct_connectors.csv hwy\mtc_tap_to_stop_connectors.txt hwy\mtc_transit_network_node_xy.txt hwy\tap_connector_nodes.csv hwy\tap_connectors.csv
 IF (RETURNCODE > 0) abort
 
+
 ;now build transit network
 RUN PGM=NETWORK
     NETI = "hwy\mtc_final_network.net"
@@ -73,18 +75,20 @@ RUN PGM=NETWORK
     NETO = hwy\mtc_transit_network_temp1.net
 
     PHASE=LINKMERGE
-        IF (CNTYPE='TRWALK')
+        IF (WALK_ACCESS = 1)
             WALKDIST = FEET
             WALKTIME = FEET * (60.0 / 5280.0 / 3.0) ; 3 mph, in minutes
             NTL_MODE = 2
-        ELSEIF (CNTYPE='TAP')
-            WALKDIST = 1                            ; trivial distance for all tap connectors
-            WALKTIME = 60.0 / 5280.0 / 3.0          ; 3 mph, in minutes
-            NTL_MODE = 1
         ELSE
             WALKDIST = 9999                         ; big distance
             WALKTIME = 999                          ; big time
             NTL_MODE = 0
+        ENDIF
+
+        IF (CNTYPE = 'TAP')
+            WALKDIST = 1                            ; trivial distance for all tap connectors
+            WALKTIME = 60.0 / 5280.0 / 3.0          ; 3 mph, in minutes
+            NTL_MODE = 1
         ENDIF
         
         ; changed 2018-03-24 JEF to use FFS for non-fixed guideway
@@ -100,13 +104,27 @@ RUN PGM=NETWORK
             TRANTIME = FEET * (60.0 / 5280.0 / 30.0)    ; default to 30 mph for LRAIL
         ELSEIF (CNTYPE='FERRY')
             TRANTIME = FEET * (60.0 / 5280.0 / 15.0)    ; default to 15 mph for FERRY
-        ELSEIF (FT=1|FT=2)
-            TRANTIME = FEET * (60.0 / 5280.0 / FFS)     ; same as auto time for freeways
-        ELSEIF(FFS>0)
-            TRANTIME = FEET * (60.0 / 5280.0 / FFS) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))    ; TIME + 5 stops/mile * 20 secs/stop
+        ELSEIF (FT = 1)
+            TRANTIME = FEET * (60.0 / 5280.0 / 50)     ; same as auto time for freeways
+        ELSEIF (FT = 2)
+            TRANTIME = FEET * (60.0 / 5280.0 / 50) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
+        ELSEIF (FT = 3)
+            TRANTIME = FEET * (60.0 / 5280.0 / 30) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
+        ELSEIF (FT = 4)
+            TRANTIME = FEET * (60.0 / 5280.0 / 40) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
+        ELSEIF (FT = 5)
+            TRANTIME = FEET * (60.0 / 5280.0 / 40) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
+        ELSEIF (FT = 6)
+            TRANTIME = FEET * (60.0 / 5280.0 / 30) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
+        ELSEIF (FT = 7)
+            TRANTIME = FEET * (60.0 / 5280.0 / 30) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
+        ELSEIF (FT = 8)
+            TRANTIME = FEET * (60.0 / 5280.0 / 25) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))    ; TIME + 5 stops/mile * 20 secs/stop
         ENDIF
 
-        IF (CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='PED' | CNTYPE='BIKE' | CNTYPE='EXT')
+        IF (CNTYPE='MAZ' | CNTYPE='TAZ')
+            DELETE
+        ELSEIF (CNTYPE != 'TAP' & DRIVE_ACCESS = 0 & RAIL_ONLY = 0 & BUS_ONLY = 0)
             DELETE
         ELSE
             ;keep
@@ -200,7 +218,7 @@ LOOP PERIOD = 1,5
             LINKO = "hwy\link_times_@TOKEN_PERIOD@_temp1.csv" FORMAT=TXT DELIMITER=',' INCLUDE=A,B,CTIM
 
             PHASE=LINKMERGE
-                IF (CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='PED' | CNTYPE='BIKE' | CNTYPE='EXT')
+                IF (CNTYPE='MAZ' | CNTYPE='TAZ' | WALK_ACCESS = 1 | BIKE_ACCESS = 1)
                     DELETE
                 ELSE
                     ;keep

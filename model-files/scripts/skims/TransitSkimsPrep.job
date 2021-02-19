@@ -131,7 +131,7 @@ Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM
 RUN PGM=NETWORK
     NETI = hwy\mtc_final_network_with_tolls.net
     LINKO = hwy\mtc_final_network_tap_links.csv FORMAT=SDF DELIMITER=',' INCLUDE=A,B
-    NODEO = hwy\mtc_final_network_tap_nodes.csv FORMAT=SDF DELIMITER=',' INCLUDE=N,MODE
+    NODEO = hwy\mtc_final_network_tap_nodes.csv FORMAT=SDF DELIMITER=',' INCLUDE=N ;,MODE
     
     PHASE = NODEMERGE
         IF ((N < 900000) & (N % 100000 > 90000))
@@ -152,6 +152,7 @@ ENDRUN
 
 ;call python program to build transit drive access skims
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
+
 IF (RETURNCODE > 0) abort
 ;*del skims\DA_*_taz_time.csv
 
@@ -217,7 +218,7 @@ LOOP PERIOD = 1,5
       PHASE = LINKMERGE
          
           CTIM = li.2.CTIM
-          IF (CTIM>0 & (li.1.FT=1|li.1.FT=2))
+          IF (CTIM>0 & li.1.FT=1)
             TRANTIME = CTIM    ; same as auto time for freeways
           ELSEIF (CTIM>0)
             TRANTIME = CTIM + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))    ; TIME + 5 stops/mile * 20 secs/stop
