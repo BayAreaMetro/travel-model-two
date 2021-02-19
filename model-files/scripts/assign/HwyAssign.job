@@ -164,37 +164,36 @@ loop period = 1,3
 	
         PHASE=LINKMERGE
 
-	;
+        ;
         ; Capacity and Speed Lookups
         ;
         ; Set based on CAPCLASS
-	;
-        
-	LOOKUP  NAME= Cap,LOOKUP[1]=1,RESULT=2,
-        FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
-        CAP_HRLN = Cap(1,CAPCLASS)
-	CAP_LANE = CAP_HRLN * @token_capfacnum@
-	CAP_TOTAL = CAP_LANE * NUMLANES
-	CAP_TOTFAC = CAP_TOTAL * CAP_FAC
+        ;
+            LOOKUP  NAME= Cap,LOOKUP[1]=1,RESULT=2,
+            FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
+            CAP_HRLN = Cap(1,CAPCLASS)
+            CAP_LANE = CAP_HRLN * @token_capfacnum@
+            CAP_TOTAL = CAP_LANE * LANES_@token_period@
+            CAP_TOTFAC = CAP_TOTAL
 
-;F&P added if statement to only use speed lookup if inside Marin (Marin=1) and not a freeway (FT<>2)
-      IF (MARIN = 1 && FT <> 2)    
-        LOOKUP  NAME= Spd,LOOKUP[2]=1,RESULT=3,
-        FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
-        SPEED = Spd(2,CAPCLASS)
-	FFS = SPEED * SPD_FAC
-      ELSE
-	FFS = FFS * SPD_FAC
-      ENDIF
-	
-        if (FFS > 0)
-        FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
-        else
-        FFT = (60.0 / 5280.0) * FEET / 25 ; put a default of 25 mph
-	endif
+            ;F&P added if statement to only use speed lookup if inside Marin (Marin=1) and not a freeway (FT<>2)
+            IF (COUNTY = 'Marin' & FT <> 1) ; non-freeway in Marin County
+                LOOKUP  NAME= Spd,LOOKUP[2]=1,RESULT=3,
+                FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
+                SPEED = Spd(2,CAPCLASS)
+                FFS = SPEED
+            ELSE
+                SPEED = FFS
+            ENDIF
 
-	IF(DELETE=1) DELETE
-        
+            if (FFS > 0)
+                FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
+            else
+                FFT = (60.0 / 5280.0) * FEET / 25 ; put a default of 25 mph
+            endif
+
+            IF (DRIVE_ACCESS <> 1) DELETE
+
         ENDPHASE
     endrun
     
@@ -244,12 +243,12 @@ loop period = 1,3
         ; set the working variables
 
          phase = linkread
-         
+
             ; the time variable is congested time specific to each time period
             lw.time = li.CTIM 
-            
+
             ; distance is coded as "distance" in the networks
-            
+
             IF (li.FEET = 0)
                 lw.dist = 1.0 / 5280.0
                 distance = 1.0 / 5280.0
@@ -257,10 +256,10 @@ loop period = 1,3
                 lw.dist = li.FEET / 5280.0
                 distance = li.FEET / 5280.0
             ENDIF
-            
+
             t0 = li.FFT
             t1 = li.CTIM
-            
+
             ; facility type is the linkclass (linkclass needs to be defined, but it's not used)
             linkclass = li.FT 
 
@@ -276,7 +275,7 @@ loop period = 1,3
 
 	    ; capacity
 	    c = li.CAP_TOTFAC
-            
+
             ; free flow time
             fft = li.FFT
 
@@ -284,9 +283,9 @@ loop period = 1,3
             ;lanes = li.NUMLANES
 
             read file = @free_flow_block_param@
-          
+
             ; set the generalized cost, which is the combination of three tokens
-         
+
             lw.gencost_da  = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_DA)
             ;lw.gencost_s2 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S2 / sr2costShare) + @token_hov_xfer_pen@
             ;lw.gencost_s3 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S3 / sr3costShare) + @token_hov_xfer_pen@
@@ -296,18 +295,18 @@ loop period = 1,3
             lw.gencost_sml = lw.time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_SML)
             lw.gencost_med = lw.time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_MED)
             lw.gencost_lrg = lw.time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_LRG)
-                              
-              
+
+
             ; the USE variable defines what type of vehicles can use the roadway
-           
+
             ; Group 23 defines HOV 2 and 3+ facilities
-            if (li.USECLASS = 2,3)  addtogroup = 23
-           
+            if (li.USECLASS_@token_period@ = 2,3)  addtogroup = 23
+
             ; Group 3 defines HOV 3+ facilities
-            if (li.USECLASS = 3) addtogroup = 3
-            
+            if (li.USECLASS_@token_period@ = 3) addtogroup = 3
+
             ; Group 4 defines facilities not available to trucks
-            if (li.USECLASS = 2,3,4) addtogroup = 4
+            if (li.USECLASS_@token_period@ = 2,3,4) addtogroup = 4
                        
             ; Group 11 defines the value toll links the non-value-toll-paying users are prohibited from using
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_DA > 0) addtogroup = 11
@@ -478,27 +477,27 @@ loop period = 1,2
 	LOOKUP  NAME= Cap,LOOKUP[1]=1,RESULT=2,
         FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
         CAP_HRLN = Cap(1,CAPCLASS)
-	CAP_LANE = CAP_HRLN * @token_capfacnum@
-	CAP_TOTAL = CAP_LANE * NUMLANES
-	CAP_TOTFAC = CAP_TOTAL * CAP_FAC
+        CAP_LANE = CAP_HRLN * @token_capfacnum@
+        CAP_TOTAL = CAP_LANE * LANES_@token_period@
+        CAP_TOTFAC = CAP_TOTAL
     
 ;F&P added if statement to only use speed lookup if inside Marin (Marin=1) and not a freeway (FT<>2)
-      IF (MARIN = 1 && FT <> 2)    
+      IF (COUNTY = 'Marin' & FT <> 1) ; non-freeway in Marin County
         LOOKUP  NAME= Spd,LOOKUP[2]=1,RESULT=3,
         FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
         SPEED = Spd(2,CAPCLASS)
-	FFS = SPEED * SPD_FAC
+        FFS = SPEED
       ELSE
-	FFS = FFS * SPD_FAC
+        SPEED = FFS
       ENDIF
-	
+
         if (FFS > 0)
         FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
         else
         FFT = (60.0 / 5280.0) * FEET / 25 ; put a default of 25 mph
 	endif
 
-	IF(DELETE=1) DELETE
+    IF (DRIVE_ACCESS <> 1) DELETE
         
         ENDPHASE
     endrun
@@ -586,7 +585,7 @@ loop period = 1,2
             fft = li.FFT
 
             ; link capacity is a function of the number of lanes
-            ;lanes = li.NUMLANES
+            ;lanes = li.LANES_@token_period@ ;li.NUMLANES
 
             read file = @free_flow_block_param@
           
@@ -606,13 +605,13 @@ loop period = 1,2
             ; the USE variable defines what type of vehicles can use the roadway
            
             ; Group 23 defines HOV 2 and 3+ facilities
-            if (li.USECLASS = 2,3)  addtogroup = 23
+            if (li.USECLASS_@token_period@ = 2,3)  addtogroup = 23
            
             ; Group 3 defines HOV 3+ facilities
-            if (li.USECLASS = 3) addtogroup = 3
+            if (li.USECLASS_@token_period@ = 3) addtogroup = 3
             
             ; Group 4 defines facilities not available to trucks
-            if (li.USECLASS = 2,3,4) addtogroup = 4
+            if (li.USECLASS_@token_period@ = 2,3,4) addtogroup = 4
                        
             ; Group 11 defines the value toll links the non-value-toll-paying users are prohibited from using
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_DA > 0) addtogroup = 11
@@ -745,90 +744,90 @@ loop period = 1,5
 		
       PHASE=LINKMERGE
 
-		  V_1 =   LI.2.V_1   
-			CAP_HRLN= LI.2.CAP_HRLN
-			CAP_TOTFAC= LI.2.CAP_TOTFAC
-			FFS= LI.2.FFS
-			FFT= LI.2.FFT
-			VC_1=   LI.2.VC_1 
-			VDT_1=  LI.2.VDT_1
-			VHT_1=  LI.2.VHT_1
-			V1_1=   LI.2.V1_1 
-			V2_1=   LI.2.V2_1 
-			V3_1=   LI.2.V3_1 
-		  V4_1=   LI.2.V4_1 
-			V5_1=   LI.2.V5_1 
-			V6_1=   LI.2.V6_1 
-			V7_1=   LI.2.V7_1 
-			V8_1=   LI.2.V8_1 
-			V9_1=   LI.2.V9_1 
-			V10_1=  LI.2.V10_1
-			VT_1 =  LI.2.VT_1 
-			V1T_1=  LI.2.V1T_1
-			V2T_1=  LI.2.V2T_1
-			V3T_1=  LI.2.V3T_1
-		  V4T_1=  LI.2.V4T_1
-			V5T_1=  LI.2.V5T_1
-			V6T_1=  LI.2.V6T_1
-			V7T_1=  LI.2.V7T_1
-			V8T_1=  LI.2.V8T_1
-			V9T_1=  LI.2.V9T_1
-			V10T_1= LI.2.V10T_1
+            V_1 = LI.2.V_1
+            CAP_HRLN= LI.2.CAP_HRLN
+            CAP_TOTFAC= LI.2.CAP_TOTFAC
+            FFS= LI.2.FFS
+            FFT= LI.2.FFT
+            VC_1=   LI.2.VC_1
+            VDT_1=  LI.2.VDT_1
+            VHT_1=  LI.2.VHT_1
+            V1_1=   LI.2.V1_1
+            V2_1=   LI.2.V2_1
+            V3_1=   LI.2.V3_1
+            V4_1=   LI.2.V4_1
+            V5_1=   LI.2.V5_1
+            V6_1=   LI.2.V6_1
+            V7_1=   LI.2.V7_1
+            V8_1=   LI.2.V8_1
+            V9_1=   LI.2.V9_1
+            V10_1=  LI.2.V10_1
+            VT_1 =  LI.2.VT_1
+            V1T_1=  LI.2.V1T_1
+            V2T_1=  LI.2.V2T_1
+            V3T_1=  LI.2.V3T_1
+            V4T_1=  LI.2.V4T_1
+            V5T_1=  LI.2.V5T_1
+            V6T_1=  LI.2.V6T_1
+            V7T_1=  LI.2.V7T_1
+            V8T_1=  LI.2.V8T_1
+            V9T_1=  LI.2.V9T_1
+            V10T_1= LI.2.V10T_1
 
 	LOOKUP  NAME= Cap,LOOKUP[1]=1,RESULT=2,
         FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
         CAP_HRLN = Cap(1,CAPCLASS)
 	CAP_LANE = CAP_HRLN * @token_capfacnum@
-	CAP_TOTAL = CAP_LANE * NUMLANES
-	CAP_TOTFAC = CAP_TOTAL * CAP_FAC
+	CAP_TOTAL = CAP_LANE * LANES_@token_period@
+	CAP_TOTFAC = CAP_TOTAL
     
 ;F&P added if statement to only use speed lookup if inside Marin (Marin=1) and not a freeway (FT<>2)
-      IF (MARIN = 1 && FT <> 2)    
+      IF (COUNTY = 'Marin' & FT <> 1) ; non-freeway in Marin County
         LOOKUP  NAME= Spd,LOOKUP[2]=1,RESULT=3,
         FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
         SPEED = Spd(2,CAPCLASS)
-	FFS = SPEED * SPD_FAC
+        FFS = SPEED
       ELSE
-	FFS = FFS * SPD_FAC
+        SPEED = FFS
       ENDIF
-	
+
         if (FFS > 0)
         FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
         else
         FFT = (60.0 / 5280.0) * FEET / 25 ; put a default of 25 mph
 	endif
-	
-			IF(LI.1.DELETE=1) TIME_1=FFT
-			IF(LI.1.DELETE=1) CSPD_1=FFS
-			IF(LI.1.DELETE=1) CAP_HRLN = CAP_HRLN
-			IF(LI.1.DELETE=1) CAP_TOTFAC = CAP_TOTFAC
-			IF(LI.1.DELETE=1) FFS = FFS
-			IF(LI.1.DELETE=1) FFT = FFT
-			IF(LI.1.DELETE=1) V_1 = li.1.MAZMAZVOL 
-			IF(LI.1.DELETE=1) VC_1= (V_1 + 1) / (CAP_TOTFAC + 1)
-			IF(LI.1.DELETE=1) VDT_1= V_1 * (FEET / 5280)
-			IF(LI.1.DELETE=1) VHT_1= V_1 * FFT / 60
-			IF(LI.1.DELETE=1) V1_1= 0
-			IF(LI.1.DELETE=1) V2_1= 0
-			IF(LI.1.DELETE=1) V3_1= 0
-		  IF(LI.1.DELETE=1) V4_1= 0
-			IF(LI.1.DELETE=1) V5_1= 0
-			IF(LI.1.DELETE=1) V6_1= 0
-			IF(LI.1.DELETE=1) V7_1= 0
-			IF(LI.1.DELETE=1) V8_1= 0
-			IF(LI.1.DELETE=1) V9_1= 0
-			IF(LI.1.DELETE=1) V10_1= 0
-			IF(LI.1.DELETE=1) VT_1 = 0
-			IF(LI.1.DELETE=1) V1T_1= 0
-			IF(LI.1.DELETE=1) V2T_1= 0
-			IF(LI.1.DELETE=1) V3T_1= 0
-		  IF(LI.1.DELETE=1) V4T_1= 0
-			IF(LI.1.DELETE=1) V5T_1= 0
-			IF(LI.1.DELETE=1) V6T_1= 0
-			IF(LI.1.DELETE=1) V7T_1= 0
-			IF(LI.1.DELETE=1) V8T_1= 0
-			IF(LI.1.DELETE=1) V9T_1= 0
-			IF(LI.1.DELETE=1) V10T_1= 0
+
+        IF(LI.1.DRIVE_ACCESS <> 1) TIME_1=FFT
+        IF(LI.1.DRIVE_ACCESS <> 1) CSPD_1=FFS
+        IF(LI.1.DRIVE_ACCESS <> 1) CAP_HRLN = CAP_HRLN
+        IF(LI.1.DRIVE_ACCESS <> 1) CAP_TOTFAC = CAP_TOTFAC
+        IF(LI.1.DRIVE_ACCESS <> 1) FFS = FFS
+        IF(LI.1.DRIVE_ACCESS <> 1) FFT = FFT
+        IF(LI.1.DRIVE_ACCESS <> 1) V_1 = li.1.MAZMAZVOL
+        IF(LI.1.DRIVE_ACCESS <> 1) VC_1= (V_1 + 1) / (CAP_TOTFAC + 1)
+        IF(LI.1.DRIVE_ACCESS <> 1) VDT_1= V_1 * (FEET / 5280)
+        IF(LI.1.DRIVE_ACCESS <> 1) VHT_1= V_1 * FFT / 60
+        IF(LI.1.DRIVE_ACCESS <> 1) V1_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V2_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V3_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V4_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V5_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V6_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V7_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V8_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V9_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V10_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) VT_1 = 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V1T_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V2T_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V3T_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V4T_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V5T_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V6T_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V7T_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V8T_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V9T_1= 0
+        IF(LI.1.DRIVE_ACCESS <> 1) V10T_1= 0
 			
         ENDPHASE
     endrun
