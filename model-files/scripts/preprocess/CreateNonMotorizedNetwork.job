@@ -122,17 +122,17 @@ RUN PGM=NETWORK
     
     PHASE=LINKMERGE
         ;bike links only; FRC != 8 is used to drop off TANA ferry and other non-street links
-        IF ((BIKE_ACCESS=1) | (CNTYPE = '  TAZ' | CNTYPE = '  MAZ' | CNTYPE = '  TAP'))
+        IF ((BIKE_ACCESS=1) | (CNTYPE = 'TAZ' | CNTYPE = 'MAZ' | CNTYPE = 'TAP'))
             ;Keep record
         ELSE
             DELETE
         ENDIF
-        IF ((CNTYPE='  MAZ') | (CNTYPE='  TAP'))
+        IF ((CNTYPE='MAZ') | (CNTYPE='TAP'))
             SP_DISTANCE = @max_bike_short_distance@
-        ELSEIF (CNTYPE='  TAZ')
+        ELSEIF (CNTYPE='TAZ')
             SP_DISTANCE = @nomax_bike_distance@
         ELSE
-            SP_DISTANCE = DISTANCE * 5280
+            SP_DISTANCE = FEET
         ENDIF
     ENDPHASE
 ENDRUN

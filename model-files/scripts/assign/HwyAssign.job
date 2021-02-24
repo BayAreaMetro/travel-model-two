@@ -163,7 +163,6 @@ loop period = 1,3
         NETO = hwy\avgload@token_period@_taz_delete.net
 	
         PHASE=LINKMERGE
-
         ;
         ; Capacity and Speed Lookups
         ;
@@ -176,6 +175,7 @@ loop period = 1,3
             CAP_TOTAL = CAP_LANE * LANES_@token_period@
             CAP_TOTFAC = CAP_TOTAL
 
+            /*
             ;F&P added if statement to only use speed lookup if inside Marin (Marin=1) and not a freeway (FT<>2)
             IF (COUNTY = 'Marin' & FT <> 1) ; non-freeway in Marin County
                 LOOKUP  NAME= Spd,LOOKUP[2]=1,RESULT=3,
@@ -185,6 +185,7 @@ loop period = 1,3
             ELSE
                 SPEED = FFS
             ENDIF
+            */
 
             if (FFS > 0)
                 FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
@@ -196,7 +197,7 @@ loop period = 1,3
 
         ENDPHASE
     endrun
-    
+
      run pgm = highway
         DistributeIntrastep processid = 'MTC_HWYASN', processlist = @intrastep_range@ saveprn = f
     
@@ -480,8 +481,9 @@ loop period = 1,2
         CAP_LANE = CAP_HRLN * @token_capfacnum@
         CAP_TOTAL = CAP_LANE * LANES_@token_period@
         CAP_TOTFAC = CAP_TOTAL
-    
-;F&P added if statement to only use speed lookup if inside Marin (Marin=1) and not a freeway (FT<>2)
+
+      /*
+      ;F&P added if statement to only use speed lookup if inside Marin (Marin=1) and not a freeway (FT<>2)
       IF (COUNTY = 'Marin' & FT <> 1) ; non-freeway in Marin County
         LOOKUP  NAME= Spd,LOOKUP[2]=1,RESULT=3,
         FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
@@ -490,6 +492,7 @@ loop period = 1,2
       ELSE
         SPEED = FFS
       ENDIF
+      */
 
         if (FFS > 0)
         FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
@@ -585,7 +588,7 @@ loop period = 1,2
             fft = li.FFT
 
             ; link capacity is a function of the number of lanes
-            ;lanes = li.LANES_@token_period@ ;li.NUMLANES
+            ;lanes = li.LANES_@token_period@
 
             read file = @free_flow_block_param@
           
@@ -781,7 +784,8 @@ loop period = 1,5
 	CAP_TOTAL = CAP_LANE * LANES_@token_period@
 	CAP_TOTFAC = CAP_TOTAL
     
-;F&P added if statement to only use speed lookup if inside Marin (Marin=1) and not a freeway (FT<>2)
+      /*
+      ;F&P added if statement to only use speed lookup if inside Marin (Marin=1) and not a freeway (FT<>2)
       IF (COUNTY = 'Marin' & FT <> 1) ; non-freeway in Marin County
         LOOKUP  NAME= Spd,LOOKUP[2]=1,RESULT=3,
         FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
@@ -790,6 +794,7 @@ loop period = 1,5
       ELSE
         SPEED = FFS
       ENDIF
+      */
 
         if (FFS > 0)
         FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes

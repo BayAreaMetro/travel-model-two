@@ -69,7 +69,7 @@ IF (RETURNCODE > 0) abort
 
 ;now build transit network
 RUN PGM=NETWORK
-    NETI = "hwy\mtc_final_network.net"
+    NETI = "hwy\mtc_final_network_with_tolls.net"
     NODEI[2] = hwy\tap_connector_nodes.csv VAR=N,X,Y
     LINKI[2] = hwy\tap_connectors.csv VAR=A,B,CNTYPE(C),FEET
     NETO = hwy\mtc_transit_network_temp1.net
@@ -105,21 +105,9 @@ RUN PGM=NETWORK
         ELSEIF (CNTYPE='FERRY')
             TRANTIME = FEET * (60.0 / 5280.0 / 15.0)    ; default to 15 mph for FERRY
         ELSEIF (FT = 1)
-            TRANTIME = FEET * (60.0 / 5280.0 / 50)     ; same as auto time for freeways
-        ELSEIF (FT = 2)
-            TRANTIME = FEET * (60.0 / 5280.0 / 50) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
-        ELSEIF (FT = 3)
-            TRANTIME = FEET * (60.0 / 5280.0 / 30) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
-        ELSEIF (FT = 4)
-            TRANTIME = FEET * (60.0 / 5280.0 / 40) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
-        ELSEIF (FT = 5)
-            TRANTIME = FEET * (60.0 / 5280.0 / 40) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
-        ELSEIF (FT = 6)
-            TRANTIME = FEET * (60.0 / 5280.0 / 30) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
-        ELSEIF (FT = 7)
-            TRANTIME = FEET * (60.0 / 5280.0 / 30) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
-        ELSEIF (FT = 8)
-            TRANTIME = FEET * (60.0 / 5280.0 / 25) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))    ; TIME + 5 stops/mile * 20 secs/stop
+            TRANTIME = FEET * (60.0 / 5280.0 / FFS)     ; same as auto time for freeways
+        ELSEIF (FFS > 0)
+            TRANTIME = FEET * (60.0 / 5280.0 / FFS) + ((FEET/5280.0) * 5.0 * (20.0 / 60.0))   ; TIME + 5 stops/mile * 20 secs/stop
         ENDIF
 
         IF (CNTYPE='MAZ' | CNTYPE='TAZ')

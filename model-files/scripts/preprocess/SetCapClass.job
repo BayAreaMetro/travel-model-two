@@ -48,7 +48,7 @@ RUN PGM=NETWORK
         LOOKUP  NAME= Spd,LOOKUP[1]=1,RESULT=3,
                 FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
         
-        SPEED = Spd(2,CAPCLASS)
+        SPEED = Spd(1,CAPCLASS)
         FFS = SPEED
 	
         if (FFS > 0)
