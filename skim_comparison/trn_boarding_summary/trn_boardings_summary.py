@@ -11,7 +11,7 @@ def get_period_boarding_info(period: str) -> dict:
     Returns:
       A pandas data frame with period and boardings by route info
     """ 
-    boarding_info = {"route": [], f"boardings": []}
+    boarding_info = {"route": [], "boardings": []}
 
     with open(f"TRANSIT_ASSIGN_{period}.prn", "r") as f:
         line = f.readline()
@@ -52,8 +52,10 @@ all_boarding_info = pd.concat([boarding_info_EA, boarding_info_AM, boarding_info
 # add route name info
 route_name_lookup = pd.read_csv("trn_route_name_lookup.csv")
 all_boarding_info = pd.merge(all_boarding_info, route_name_lookup, how="left", on="route")
-all_boarding_info = all_boarding_info[["period", "route_name", "long_name", "boardings"]]
-
+all_boarding_info = all_boarding_info[["period", "route_name", "long_name", "trn_mode", "operator", "direction", "boardings"]]
+print(all_boarding_info.columns)
+print(all_boarding_info.shape)
+print(all_boarding_info.head())
 
 # export result to csv
 all_boarding_info.to_csv("boarding_by_route_and_period.csv", index=False)
