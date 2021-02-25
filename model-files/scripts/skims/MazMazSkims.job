@@ -113,6 +113,7 @@ LOOP CLASS = 1,1
         PHASE=LINKMERGE
             ;highway links, but only maz connectors
             IF (CNTYPE != 'MAZ' & DRIVE_ACCESS != 1) DELETE
+            IF (USECLASS_@TOKEN_PERIOD@ = 3 | USECLASS_@TOKEN_PERIOD@ = 2) DELETE
 
             IF (CNTYPE='MAZ')
                 GENCOST = @max_drive_gencost@

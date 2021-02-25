@@ -174,7 +174,7 @@ IF %SELECT_COUNTY% GTR 0 (
   "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\popsampler.PY landuse\sampleRateByTAZ.csv popsyn\households.csv popsyn\persons.csv
   
   :: RERUN: Build sequential numberings
-runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
+  runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
   if ERRORLEVEL 2 goto done
   
   ::RERUN: Create all necessary input files based on updated sequential zone numbering
