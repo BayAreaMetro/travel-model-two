@@ -2,12 +2,12 @@
 ;
 ; SetCapClass.job
 ;
-; TP+ script to set the CAPCLASS for the network. This field is a combination of functional class (FC) and area 
+; TP+ script to set the CAPCLASS for the network. This field is a combination of functional class (FC) and area
 ; type, the latter of which is callculated in this script via a call to a python program, which maps the area
 ; type of the zone that a link endnode belongs in to the linkn
 ;
 ;
-; Input:  A highway network after HOV transfer penalties have been added.  
+; Input:  A highway network after HOV transfer penalties have been added.
 ;
 ; Output: A highway network containing the following fields: AT,CAPCLASS
 ;
@@ -26,7 +26,9 @@ RUN PGM=NETWORK
 ENDRUN
 
 ;run script to add area type to network links
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\codeLinkAreaType.py .
+;*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\codeLinkAreaType.py .
+;call python from active anaconda environment
+*python %BASE_SCRIPTS%\preprocess\codeLinkAreaType.py .
 IF (RETURNCODE > 0) abort
 
 ;read in link data with area type and calculate capclass
@@ -37,7 +39,7 @@ RUN PGM=NETWORK
 
     PHASE=LINKMERGE
       MAZMAZVOL=0
-       
+
         IF (AT < 0)
             CAPCLASS = -1
         ELSE
@@ -47,16 +49,16 @@ RUN PGM=NETWORK
         ; lookup FFS (FFS) from SpdCap_Lookup.DAT
         LOOKUP  NAME= Spd,LOOKUP[1]=1,RESULT=3,
                 FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
-        
+
         SPEED = Spd(1,CAPCLASS)
         FFS = SPEED
-	
+
         if (FFS > 0)
           FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
         else
           FFT = (60.0 / 5280.0) * FEET / 25 ; put a default of 25 mph
 	    endif
- 
+
     ENDPHASE
 ENDRUN
 

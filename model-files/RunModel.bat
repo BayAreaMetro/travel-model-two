@@ -10,24 +10,24 @@ set ENVTYPE=RSG
 :: RunModel.bat
 ::
 :: MS-DOS batch file to execute the MTC travel model.  Each of the model steps are sequentially
-:: called here.  
+:: called here.
 ::
 :: Travel Model Two
 :: dto (2012 02 15) gde (2009 04 22) crf (2013 09) bts (2013 09 24) rpm (2016 06 22) jef (2017 10 26)
-:: 
+::
 :: RunModel.bat > model_run_out.txt 2>&1
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :: Step 0: Copy over CTRAMP from %GITHUB_DIR%
-:: set GITHUB_DIR=E:\projects\clients\mtc\GitHub\master\rsg\travel-model-two
-:: if not exist CTRAMP (
-::  mkdir CTRAMP\model
-::  mkdir CTRAMP\runtime
-::  mkdir CTRAMP\scripts
-::  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\model"       CTRAMP\model
-::  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\runtime"     CTRAMP\runtime
-::  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\scripts"     CTRAMP\scripts
-::)
+ set GITHUB_DIR=F:\Projects\Clients\mtc\updated_networks\version_06\travel-model-two
+ if not exist CTRAMP (
+  mkdir CTRAMP\model
+  mkdir CTRAMP\runtime
+  mkdir CTRAMP\scripts
+  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\model"       CTRAMP\model
+  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\runtime"     CTRAMP\runtime
+  c:\windows\system32\Robocopy.exe /E "%GITHUB_DIR%\model-files\scripts"     CTRAMP\scripts
+)
 :: ------------------------------------------------------------------------------------------------------
 ::
 :: Step 1:  Set the necessary path and other computer/environment-specific variables
@@ -52,11 +52,11 @@ SET /A MAX_ITERATION=3
 SET /A MAX_INNER_ITERATION=1
 
 ::  Set choice model household sample rate
-SET SAMPLERATE_ITERATION1=0.25
+SET SAMPLERATE_ITERATION1=0.3
 SET SAMPLERATE_ITERATION2=0.5
-SET SAMPLERATE_ITERATION3=1.0
-SET SAMPLERATE_ITERATION4=1.0
-SET SAMPLERATE_ITERATION5=1.0
+SET SAMPLERATE_ITERATION3=1
+SET SAMPLERATE_ITERATION4=0.02
+SET SAMPLERATE_ITERATION5=0.02
 
 :: Set the model run year
 SET MODEL_YEAR=2015
@@ -66,15 +66,24 @@ SET AV_SCENARIO=0
 SET BASE_SCRIPTS=CTRAMP\scripts
 
 :: Add these variables to the PATH environment variable, moving the current path to the back of the list
-set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUBE_PATH%;%CUBE_DLL_PATH%;%PYTHON_PATH%
+set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUBE_PATH%;%CUBE_DLL_PATH%;%PYTHON_PATH%;%PYTHON_PATH%\condabin;%PYTHON_PATH%\envs
+
+CALL conda activate mtc_py2
+
+
+
 
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
-:: SET /A ITERATION=3
-:: SET /A INNER_ITERATION=1
-:: IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
-:: call zoneSystem.bat
-::goto starthere
+SET /A ITERATION=3
+SET /A INNER_ITERATION=1
+IF %ITERATION% EQU 1 SET SAMPLERATE=%SAMPLERATE_ITERATION1%
+IF %ITERATION% EQU 2 SET SAMPLERATE=%SAMPLERATE_ITERATION2%
+IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
+IF %ITERATION% EQU 4 SET SAMPLERATE=%SAMPLERATE_ITERATION4%
+IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
+rem call zoneSystem.bat
+goto createemmenetwork
 :: ------------------------------------------------------------------------------------------------------
 
 
@@ -97,7 +106,7 @@ mkdir database
 mkdir ctramp_output
 
 :: Stamp the feedback report with the date and time of the model start
-echo STARTED MODEL RUN  %DATE% %TIME% >> logs\feedback.rpt 
+echo STARTED MODEL RUN  %DATE% %TIME% >> logs\feedback.rpt
 
 :: Move the input files, which are not accessed by the model, to the working directories
 copy INPUT\hwy\                 hwy\       /Y
@@ -136,6 +145,12 @@ if NOT %MATRIX_SERVER%==localhost (
 
 : Pre-Process
 
+:: preprocess input network to
+:: 1 - fix space issue in CNTYPE
+:: 2 - add a FEET field based on DISTANCE
+runtpp %BASE_SCRIPTS%\preprocess\preprocess_input_net.job
+IF ERRORLEVEL 2 goto done
+
 :: Write a batch file with number of zones, taps, mazs
 runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
 if ERRORLEVEL 2 goto done
@@ -147,11 +162,11 @@ call zoneSystem.bat
 runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
 
 :: Create all necessary input files based on updated sequential zone numbering
-"%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
+python %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
 IF ERRORLEVEL 1 goto done
 
 :: Renumber the TAZ/MAZ in the households file
-"%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\renumber.py popsyn\households.csv popsyn\households_renum.csv --input_col MAZ TAZ --renum_join_col N N --renum_out_col MAZSEQ TAZSEQ --output_rename_col ORIG_MAZ ORIG_TAZ --output_new_col MAZ TAZ
+python %BASE_SCRIPTS%\preprocess\renumber.py popsyn\households.csv popsyn\households_renum.csv --input_col MAZ TAZ --renum_join_col N N --renum_out_col MAZSEQ TAZSEQ --output_rename_col ORIG_MAZ ORIG_TAZ --output_new_col MAZ TAZ
 IF ERRORLEVEL 1 goto done
 move popsyn\households.csv       popsyn\households_original.csv
 move popsyn\households_renum.csv popsyn\households.csv
@@ -161,36 +176,36 @@ IF %SELECT_COUNTY% GTR 0 (
   :: Collapse the mazs outside select county
   runtpp %BASE_SCRIPTS%\preprocess\CreateCollapsedNetwork.job
   if ERRORLEVEL 2 goto done
-  
+
   :: RERUN: Write a batch file with number of zones, taps, mazs
   runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
   if ERRORLEVEL 2 goto done
-  
+
   ::RERUN: Run the batch file
   call zoneSystem.bat
-  
+
   :: Collapse the MAZ data (except county 9 which is Marin)
-  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\CollapseMAZ.PY landuse\maz_data.csv %SELECT_COUNTY%
+  python %BASE_SCRIPTS%\preprocess\CollapseMAZ.PY landuse\maz_data.csv %SELECT_COUNTY%
   if ERRORLEVEL 2 goto done
-  
+
   :: Renumber the household file MAZs
-  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\RenumberHHFileMAZs.PY popsyn\households.csv landuse\maz_data.csv %SELECT_COUNTY%
+  python %BASE_SCRIPTS%\preprocess\RenumberHHFileMAZs.PY popsyn\households.csv landuse\maz_data.csv %SELECT_COUNTY%
 
   :: Sample households according to sample rates by TAZ
-  "%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\popsampler.PY landuse\sampleRateByTAZ.csv popsyn\households.csv popsyn\persons.csv
-  
+  python %BASE_SCRIPTS%\preprocess\popsampler.PY landuse\sampleRateByTAZ.csv popsyn\households.csv popsyn\persons.csv
+
   :: RERUN: Build sequential numberings
   runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
   if ERRORLEVEL 2 goto done
-  
+
   ::RERUN: Create all necessary input files based on updated sequential zone numbering
-  "%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
+  python %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
   IF ERRORLEVEL 1 goto done
 
 )
-goto done
+
 :: RERUN: Renumber the TAZ/MAZ in the households file
-:: "%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\renumber.py popsyn\households.csv popsyn\households_renum.csv --input_col MAZ TAZ --renum_join_col N N --renum_out_col MAZSEQ TAZSEQ --output_rename_col ORIG_MAZ ORIG_TAZ --output_new_col MAZ TAZ
+:: python %BASE_SCRIPTS%\preprocess\renumber.py popsyn\households.csv popsyn\households_renum.csv --input_col MAZ TAZ --renum_join_col N N --renum_out_col MAZSEQ TAZSEQ --output_rename_col ORIG_MAZ ORIG_TAZ --output_new_col MAZ TAZ
 ::  IF ERRORLEVEL 1 goto done
 ::  move popsyn\households.csv       popsyn\households_original_2.csv
 ::  move popsyn\households_renum.csv popsyn\households.csv
@@ -200,7 +215,7 @@ runtpp %BASE_SCRIPTS%\preprocess\maz_densities.job
 if ERRORLEVEL 2 goto done
 
 :: Calculate density fields and append to MAZ file
-"%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\preprocess\createMazDensityFile.py 
+python %BASE_SCRIPTS%\preprocess\createMazDensityFile.py
 IF ERRORLEVEL 1 goto done
 
 :: Build sequential numberings
@@ -215,11 +230,11 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\preprocess\tap_to_taz_for_parking.job
 if ERRORLEVEL 2 goto done
 
-"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
+python %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
 IF ERRORLEVEL 1 goto done
 
 :: Set the prices in the roadway network (convert csv to dbf first)
-"%PYTHON_PATH%\python" %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\tolls.csv hwy\tolls.dbf
+python %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\tolls.csv hwy\tolls.dbf
 IF ERRORLEVEL 1 goto done
 
 runtpp %BASE_SCRIPTS%\preprocess\SetTolls.job
@@ -229,11 +244,12 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\preprocess\SetHovXferPenalties.job
 if ERRORLEVEL 2 goto done
 
+:capclass
 :: Create areatype and capclass fields in network
 runtpp %BASE_SCRIPTS%\preprocess\SetCapClass.job
 if ERRORLEVEL 2 goto done
 
-:: Create time-of-day-specific 
+:: Create time-of-day-specific
 runtpp %BASE_SCRIPTS%\preprocess\CreateFiveHighwayNetworks.job
 if ERRORLEVEL 2 goto done
 
@@ -241,7 +257,7 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\preprocess\BuildTazNetworks.job
 if ERRORLEVEL 2 goto done
 
-echo COMPLETED PREPROCESS  %DATE% %TIME% >> logs\feedback.rpt 
+echo COMPLETED PREPROCESS  %DATE% %TIME% >> logs\feedback.rpt
 
 :: ------------------------------------------------------------------------------------------------------
 ::
@@ -261,7 +277,7 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\skims\MazMazSkims.job
 if ERRORLEVEL 2 goto done
 
-echo COMPLETED NON-MOTORIZED-SKIMS  %DATE% %TIME% >> logs\feedback.rpt 
+echo COMPLETED NON-MOTORIZED-SKIMS  %DATE% %TIME% >> logs\feedback.rpt
 
 :: ------------------------------------------------------------------------------------------------------
 ::
@@ -289,14 +305,35 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
+:transitskimsprep
 runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
 if ERRORLEVEL 2 goto done
 
-runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
-if ERRORLEVEL 2 goto done
+:createemmenetwork
+:: changing to python 3 environment for emme
+CALL conda deactivate
+CALL conda activate mtc
 
-runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
-if ERRORLEVEL 2 goto done
+:: Create emme project from scratch since it's the first iteration
+python %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "yes"
+IF ERRORLEVEL 1 goto done
+
+%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "emme_new_network_test" --first_iteration "yes"
+IF ERRORLEVEL 1 goto done
+
+%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" --first_iteration "yes"
+IF ERRORLEVEL 1 goto done
+
+CALL conda deactivate
+CALL conda activate mtc_py2
+goto done
+:afteremmeskims
+
+REM runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
+REM if ERRORLEVEL 2 goto done
+
+REM runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
+REM if ERRORLEVEL 2 goto done
 
 
 ::Step X: Main model iteration setup
@@ -359,7 +396,7 @@ IF %RUNTYPE%==LOCAL (
   rem (wait 10 seconds between each call because otherwise psXXX sometimes bashes on its own authentication/permissions)
   CTRAMP\runtime\config\pskill %MATRIX_SERVER% u %UN% -p %PWD% java
   ping -n 10 localhost
-  CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d "%MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd" "%MATRIX_SERVER_JAVA_PATH%" 
+  CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d "%MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd" "%MATRIX_SERVER_JAVA_PATH%"
   ping -n 10 localhost
 )
 
@@ -372,6 +409,7 @@ copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
 if ERRORLEVEL 2 goto done
 del mtctm2.properties
+goto done
 
 taskkill /im "java.exe" /F
 
@@ -390,8 +428,9 @@ IF NOT %HH_SERVER%==localhost (
 
 :: copy results back over here
 ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.mat /NDL /NFL
+ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.omx /NDL /NFL
 
-
+:afterrobocopy
 runtpp CTRAMP\scripts\assign\merge_auto_matrices.s
 if ERRORLEVEL 2 goto done
 
@@ -462,10 +501,9 @@ IF %ITERATION% LSS %MAX_ITERATION% (
 
   runtpp %BASE_SCRIPTS%\skims\HwySkims.job
   if ERRORLEVEL 2 goto done
-  
+
 )
 
-:here
 
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
@@ -473,8 +511,22 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
 if ERRORLEVEL 2 goto done
 
+:emmeseconditeration
+:: changing to python 3 environment for emme
+CALL conda deactivate
+CALL conda activate mtc
+:: Emme project already created, just updating congested link times
+python %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "no"
+IF ERRORLEVEL 1 goto done
+%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --first_iteration "no"
+IF ERRORLEVEL 1 goto done
+:: changing back to python 2 environment
+CALL conda deactivate
+CALL conda activate mtc_py2
+REM goto done
+
 :: Create the block file that controls whether the crowding functions are called during transit assignment.
-"%PYTHON_PATH%"\python.exe %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
+python %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
 
 ::Inner iterations with transit assignment and path recalculator
 SET /A INNER_ITERATION=0
@@ -484,13 +536,24 @@ SET /A INNER_ITERATION+=1
 	runtpp CTRAMP\scripts\assign\merge_transit_matrices.s
 	if ERRORLEVEL 2 goto done
 
+:innerskim
+  CALL conda deactivate
+  CALL conda activate mtc
+
+  %EMME_PYTHON_PATH%\python skim_transit_network.py -p "trn" --first_iteration "no"
+  IF ERRORLEVEL 1 goto done
+
+  :: changing back to python 2 environment
+  CALL conda deactivate
+  CALL conda activate mtc_py2
+:afterinnerskim
 
   :: Run Transit Assignment
-  runtpp CTRAMP\scripts\assign\TransitAssign.job
-  if ERRORLEVEL 2 goto done
+  REM runtpp CTRAMP\scripts\assign\TransitAssign.job
+  REM if ERRORLEVEL 2 goto done
 
-  runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
-  if ERRORLEVEL 2 goto done
+  REM runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
+  REM if ERRORLEVEL 2 goto done
 
   :: Start Matrix Server remotely or locally
   IF %RUNTYPE%==LOCAL (
@@ -502,10 +565,10 @@ SET /A INNER_ITERATION+=1
       rem (wait 10 seconds between each call because otherwise psXXX sometimes bashes on its own authentication/permissions)
       CTRAMP\runtime\config\pskill %MATRIX_SERVER% u %UN% -p %PWD% java
       ping -n 10 localhost
-      CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d "%MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd" "%MATRIX_SERVER_JAVA_PATH%" 
+      CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d "%MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd" "%MATRIX_SERVER_JAVA_PATH%"
       ping -n 10 localhost
   )
-   
+
    :: Run Transit Best Path Recalculation (uncomment for transit capacity restraint)
    :: copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
    :: call CTRAMP\runtime\runTransitPathRecalculator.cmd %ITERATION% "%JAVA_PATH%"
@@ -513,11 +576,11 @@ SET /A INNER_ITERATION+=1
    :: del mtctm2.properties
 
 	:: backup the trip files
-	:: copy ctramp_output\indivTripDataResim_%ITERATION%.csv ctramp_output\indivTripDataResim_%ITERATION%_%INNER_ITERATION%.csv 
- 	:: copy ctramp_output\jointTripDataResim_%ITERATION%.csv ctramp_output\jointTripDataResim_%ITERATION%_%INNER_ITERATION%.csv 
+	:: copy ctramp_output\indivTripDataResim_%ITERATION%.csv ctramp_output\indivTripDataResim_%ITERATION%_%INNER_ITERATION%.csv
+ 	:: copy ctramp_output\jointTripDataResim_%ITERATION%.csv ctramp_output\jointTripDataResim_%ITERATION%_%INNER_ITERATION%.csv
 
 	IF %INNER_ITERATION% LSS %MAX_INNER_ITERATION% GOTO inner_iteration_start
-  
+
 IF %ITERATION% LSS %MAX_ITERATION% GOTO iteration_start
 
 :: ------------------------------------------------------------------------------------------------------
@@ -549,4 +612,4 @@ ECHO FINISHED SUCCESSFULLY!
 :: Complete target and message
 :done
 
-ECHO FINISHED.  
+ECHO FINISHED.

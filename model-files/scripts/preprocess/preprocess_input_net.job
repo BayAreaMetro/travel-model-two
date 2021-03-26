@@ -1,6 +1,6 @@
 ; -----------------------------------
 ;
-; preprocess input network to 
+; preprocess input network to
 ; (1) fix space issue in CNTYPE
 ; (2) add a FEET field based on DISTANCE
 ; (3) assign FT=8 to links with FT=0
@@ -9,7 +9,7 @@
 
 
 RUN PGM=NETWORK
-    LINKI[1] = "hwy\mtc_final_network_base_new_v4.net"
+    LINKI[1] = "hwy\complete_network.net"
     NETO = "hwy\mtc_final_network_base.net"
 
     PHASE=LINKMERGE
