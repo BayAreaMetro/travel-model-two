@@ -1,7 +1,7 @@
 rem this file has environment variables for CT-RAMP batch files
 
 :: The location of the 64-bit java development kit or runtime environment
-set JAVA_PATH=C:\Program Files\Java\jre1.8.0_261
+set JAVA_PATH="C:\Program Files\Java\jre1.8.0_261"
 
 :: The location of the RUNTPP executable from Citilabs
 set TPP_PATH=C:\Program Files\Citilabs\CubeVoyager
@@ -10,7 +10,12 @@ set TPP_PATH=C:\Program Files\Citilabs\CubeVoyager
 set CUBE_PATH=C:\Program Files (x86)\Citilabs\Cube
 
 :: Location of Emme python executable
-SET EMME_PYTHON_PATH="C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.2\Python27"
+::SET EMME_PYTHON_PATH="C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.2\Python27"
+SET EMMEPATH=C:\Program Files\INRO\Emme\Emme 4\Emme-test-4.4.5-v1
+SET EMME_PYTHON_PATH="C:\Program Files\INRO\Emme\Emme 4\Emme-test-4.4.5-v1\Python27"
+:: BEWARE path issues with other python installs
+path=%EMMEPATH%\programs;%EMMEPATH%\Python27;%EMMEPATH%\Python27\Scripts\;%PATH%
+SET NUMBER_OF_PROCESSORS=56
 
 :: The location of the Python executable
 :: set PYTHON_PATH=C:\Program Files\anaconda2

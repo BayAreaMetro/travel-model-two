@@ -52,9 +52,9 @@ SET /A MAX_ITERATION=3
 SET /A MAX_INNER_ITERATION=1
 
 ::  Set choice model household sample rate
-SET SAMPLERATE_ITERATION1=0.01
-SET SAMPLERATE_ITERATION2=0.01
-SET SAMPLERATE_ITERATION3=0.02
+SET SAMPLERATE_ITERATION1=0.3
+SET SAMPLERATE_ITERATION2=0.5
+SET SAMPLERATE_ITERATION3=1
 SET SAMPLERATE_ITERATION4=0.02
 SET SAMPLERATE_ITERATION5=0.02
 
@@ -71,13 +71,19 @@ set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUB
 CALL conda activate mtc_py2
 
 
+
+
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
-:: SET /A ITERATION=3
-:: SET /A INNER_ITERATION=1
-:: IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
-:: call zoneSystem.bat
-::goto starthere
+SET /A ITERATION=3
+SET /A INNER_ITERATION=1
+IF %ITERATION% EQU 1 SET SAMPLERATE=%SAMPLERATE_ITERATION1%
+IF %ITERATION% EQU 2 SET SAMPLERATE=%SAMPLERATE_ITERATION2%
+IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
+IF %ITERATION% EQU 4 SET SAMPLERATE=%SAMPLERATE_ITERATION4%
+IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
+REM call zoneSystem.bat
+REM goto core
 :: ------------------------------------------------------------------------------------------------------
 
 
@@ -292,14 +298,35 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
+:transitskimsprep
 runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
 if ERRORLEVEL 2 goto done
 
-runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
-if ERRORLEVEL 2 goto done
+:createemmenetwork
+:: changing to python 3 environment for emme
+CALL conda deactivate
+CALL conda activate mtc
 
-runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
-if ERRORLEVEL 2 goto done
+:: Create emme project from scratch since it's the first iteration
+python cube_to_emme_network_conversion.py -p "trn" --first_iteration "yes"
+IF ERRORLEVEL 1 goto done
+
+%EMME_PYTHON_PATH%\python create_emme_network.py -p "trn" --name "mtc_emme_full_run_no_ccr" --first_iteration "yes"
+IF ERRORLEVEL 1 goto done
+
+%EMME_PYTHON_PATH%\python skim_transit_network.py -p "trn" --first_iteration "yes"
+IF ERRORLEVEL 1 goto done
+
+CALL conda deactivate
+CALL conda activate mtc_py2
+REM goto done
+:afteremmeskims
+
+REM runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
+REM if ERRORLEVEL 2 goto done
+
+REM runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
+REM if ERRORLEVEL 2 goto done
 
 
 ::Step X: Main model iteration setup
@@ -375,6 +402,7 @@ copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
 if ERRORLEVEL 2 goto done
 del mtctm2.properties
+goto done
 
 taskkill /im "java.exe" /F
 
@@ -393,8 +421,9 @@ IF NOT %HH_SERVER%==localhost (
 
 :: copy results back over here
 ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.mat /NDL /NFL
+ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.omx /NDL /NFL
 
-
+:afterrobocopy
 runtpp CTRAMP\scripts\assign\merge_auto_matrices.s
 if ERRORLEVEL 2 goto done
 
@@ -468,13 +497,26 @@ IF %ITERATION% LSS %MAX_ITERATION% (
 
 )
 
-:here
 
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
 runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
 if ERRORLEVEL 2 goto done
+
+:emmeseconditeration
+:: changing to python 3 environment for emme
+CALL conda deactivate
+CALL conda activate mtc
+:: Emme project already created, just updating congested link times
+python cube_to_emme_network_conversion.py -p "trn" --first_iteration "no"
+IF ERRORLEVEL 1 goto done
+%EMME_PYTHON_PATH%\python create_emme_network.py -p "trn" --first_iteration "no"
+IF ERRORLEVEL 1 goto done
+:: changing back to python 2 environment
+CALL conda deactivate
+CALL conda activate mtc_py2
+REM goto done
 
 :: Create the block file that controls whether the crowding functions are called during transit assignment.
 python %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
@@ -487,13 +529,24 @@ SET /A INNER_ITERATION+=1
 	runtpp CTRAMP\scripts\assign\merge_transit_matrices.s
 	if ERRORLEVEL 2 goto done
 
+:innerskim
+  CALL conda deactivate
+  CALL conda activate mtc
+
+  %EMME_PYTHON_PATH%\python skim_transit_network.py -p "trn" --first_iteration "no"
+  IF ERRORLEVEL 1 goto done
+
+  :: changing back to python 2 environment
+  CALL conda deactivate
+  CALL conda activate mtc_py2
+:afterinnerskim
 
   :: Run Transit Assignment
-  runtpp CTRAMP\scripts\assign\TransitAssign.job
-  if ERRORLEVEL 2 goto done
+  REM runtpp CTRAMP\scripts\assign\TransitAssign.job
+  REM if ERRORLEVEL 2 goto done
 
-  runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
-  if ERRORLEVEL 2 goto done
+  REM runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
+  REM if ERRORLEVEL 2 goto done
 
   :: Start Matrix Server remotely or locally
   IF %RUNTYPE%==LOCAL (
