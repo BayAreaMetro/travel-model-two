@@ -29,8 +29,8 @@ except Exception, e:
     def open_file(file_path, mode):
         return OmxMatrix(_omx.openFile(file_path, mode))
 
-# _all_periods = ['AM', 'PM']
-_all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
+_all_periods = ['AM']
+# _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
 _all_components = ['transit_skims']
 _all_access_modes = ['WLK', 'PNR', 'KNRTNC', 'KNRPRV']
 _all_sets = ['set1', 'set2', 'set3']
@@ -605,8 +605,8 @@ def run_assignment(modeller, scenario, period, params, network, num_processors, 
             spec = _copy(base_spec)
             name = "%s_%s" % (period, mode_name)
             spec["modes"] = parameters["modes"]
-            # spec["demand"] = 'ms1' # zero demand matrix
-            spec["demand"] = "mfTRN_{set}_{period}".format(set=_set_dict[mode_name], period=period)
+            spec["demand"] = 'ms1' # zero demand matrix
+            # spec["demand"] = "mfTRN_{set}_{period}".format(set=_set_dict[mode_name], period=period)
             # spec['od_results'] = {'total_impedance': 'mf{}_{}_IMPED'.format(period, mode_name)}
             spec["journey_levels"] = parameters["journey_levels"]
             assign_transit(spec, class_name=name, add_volumes=add_volumes, scenario=scenario)
@@ -1154,8 +1154,8 @@ if __name__ == "__main__":
         'Please specify "yes" or "no" for the first_iteration (-i) run-time argument'
 
     # or connect to already open desktop for debugging
-    # desktop = connect_to_desktop(port=59673)
-    desktop = connect_to_desktop(port=59784)
+    desktop = connect_to_desktop(port=59673)
+    # desktop = connect_to_desktop(port=59784)
     # desktop = connect_to_desktop(port=4242)
     modeller = _m.Modeller(desktop)
     emmebank = modeller.emmebank
@@ -1173,8 +1173,8 @@ if __name__ == "__main__":
 
         initialize_matrices(components=['transit_skims'], periods=[period], scenario=scenario, delete_all_existing=False)
 
-        ctramp_output_folder = _os.path.join(_os.getcwd(), 'ctramp_output')
-        import_demand_matrices(period, scenario, ctramp_output_folder, num_processors="MAX-4")
+        # ctramp_output_folder = _os.path.join(_os.getcwd(), 'ctramp_output')
+        # import_demand_matrices(period, scenario, ctramp_output_folder, num_processors="MAX-4")
 
         # Only run ccr assignment if not first run and period in ['AM', 'PM']
         # if args.first_iteration == 'no' and period in ['AM', 'PM']:
@@ -1188,7 +1188,7 @@ if __name__ == "__main__":
 
 
         perform_assignment_and_skim(modeller, scenario, period=period, assignment_only=True,
-                                    num_processors="MAX-4", use_fares=True, use_ccr=use_ccr)
+                                    num_processors="MAX-4", use_fares=False, use_ccr=use_ccr)
 
         output_omx_file = _os.path.join(args.skims_path, "transit_skims_{}.omx".format(period))
         export_matrices_to_omx(omx_file=output_omx_file, periods=[period], scenario=scenario, big_to_zero=True, max_transfers=3)
