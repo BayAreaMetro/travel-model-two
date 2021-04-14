@@ -3,15 +3,24 @@
 #////                                                                        ///
 #//// init_emme_project.py                                                   ///
 #////                                                                        ///
-#////     Usage: init_emme_project.py [-r root] [-t title]                   ///
+#//// Create a new Emme project and database with MTC defaults.              ///
+#//// Create new Emme database (emmebank) and import the network data under  ///
+#//// the \trn directory.                                                    ///
 #////                                                                        ///
-#////         [-r root]: Specifies the root directory in which to create     ///
-#////              the Emme project.                                         ///
-#////              If omitted, defaults to the current working directory     ///
-#////         [-t title]: The title of the Emme project and Emme database.   ///
-#////              If omitted, defaults to SANDAG empty database.            ///
-#////         [-v emmeversion]: Emme version to use to create the project.   ///
-#////              If omitted, defaults to 4.3.7.                            ///
+#//// Usage: init_emme_project.py                                            ///
+#////    [-p, --trn_path]: path to the trn folder, default is the            ///
+#////        current_working_folder\trn                                      ///
+#////    [-n, --name]: project folder name created in the trn folder,        /// 
+#////        default is mtc_emme                                             ///
+#////    [-i, --first_iteration]: Is this the first iteration? yes or no,    /// 
+#////        default is yes                                                  ///
+#////    [-t, --time_periods]: List of time periods as EA,AM,MD,PM,EV or     ///
+#////        ALL, default is ALL                                             ///
+#////    [-o, --port]: Port to connect to Emme desktop session, default      ///
+#////        is 59673                                                        ///
+#////    [-d, --delete]: delete / overwrite existing Emme project folder     ///
+#////                                                                        ///
+#////                                                                        ///
 #////                                                                        ///
 #////                                                                        ///
 #////                                                                        ///
@@ -19,19 +28,28 @@
 #///////////////////////////////////////////////////////////////////////////////
 
 
+import os as _os
+import sys as _sys
+
+_join, _dir = _os.path.join, _os.path.dirname
+root = _dir(__file__)
+print("Adding {} to system path to import apply_fares".format(root))
+if root not in _sys.path:
+    _sys.path.append(root)
 import apply_fares as _apply_fares
 
 import inro.emme.desktop.app as _app
 import inro.emme.desktop.types as _ws_types
 import inro.emme.database.emmebank as _eb
 import inro.modeller as _m
+from inro.emme.desktop.exception import TcpConnectFailureError
 
-import argparse
-import os
+import argparse as _argparse
 import shutil as _shutil
 import pandas as pd
-import math
+import math as _math
 from collections import defaultdict as _defaultdict
+
 
 # ------------- input files------------
 emme_mode_transaction_file = "emme_modes.txt"
@@ -46,8 +64,7 @@ extra_transit_segment_attr_file = "emme_extra_segment_attributes.txt"
 emme_transit_time_function_file = "emme_transit_time_function.txt"
 
 # ------------- run parameters ---------
-# _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
-_all_periods = ['AM']
+_all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
 # mapping time of day period to emme scenario_id
 period_to_scenario_dict = {
     'EA': 1000,
@@ -56,15 +73,18 @@ period_to_scenario_dict = {
     'PM': 4000,
     'EV': 5000,
 }
-
-# modeller = _m.Modeller()
 WKT_PROJECTION = 'PROJCS["NAD_1983_StatePlane_California_VI_FIPS_0406_Feet",GEOGCS["GCS_North_American_1983",DATUM["North_American_Datum_1983",SPHEROID["GRS_1980",6378137,298.257222101]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["False_Easting",6561666.666666666],PARAMETER["False_Northing",1640416.666666667],PARAMETER["Central_Meridian",-116.25],PARAMETER["Standard_Parallel_1",32.78333333333333],PARAMETER["Standard_Parallel_2",33.88333333333333],PARAMETER["Latitude_Of_Origin",32.16666666666666],UNIT["Foot_US",0.30480060960121924],AUTHORITY["EPSG","102646"]]'
 
 
-def init_emme_project(root, title, emmeversion, port=59673):
-    # emme_dir = os.path.join(root, emme_project_folder)
-    # if os.path.exists(emme_dir):
-    #     _shutil.rmtree(emme_dir)
+def init_emme_project(root, title, port=59673, overwrite=False):
+    emme_dir = _os.path.join(root, title)
+    if overwrite and _os.path.exists(emme_dir):
+        try:
+            app = _app.connect(port=port)
+            app.close()
+        except TcpConnectFailureError:  # no running desktop
+            pass
+        _shutil.rmtree(emme_dir)
     print "Creating Emme project folder with name: %s" % title
     project_path = _app.create_project(root, title)
     desktop = _app.start(  # will not close desktop when program ends
@@ -73,12 +93,12 @@ def init_emme_project(root, title, emmeversion, port=59673):
     #     project=project_path, user_initials="DH", visible=True)
     project = desktop.project
     project.name = "MTC Emme Project"
-    prj_file_path = os.path.join(root, 'NAD 1983 StatePlane California VI FIPS 0406 Feet.prj')
+    prj_file_path = _join(root, 'NAD 1983 StatePlane California VI FIPS 0406 Feet.prj')
     with open(prj_file_path, 'w') as f:
         f.write(WKT_PROJECTION)
     project.spatial_reference_file = prj_file_path
     project.initial_view = _ws_types.Box(4700000, 3450000, 4970000, 4030000)
-    project_root = os.path.dirname(project_path)
+    project_root = _dir(project_path)
     dimensions = {
         'scalar_matrices': 9999,
         'destination_matrices': 999,
@@ -100,8 +120,8 @@ def init_emme_project(root, title, emmeversion, port=59673):
         'sola_analyses': 240
     }
 
-    os.mkdir(os.path.join(project_root, "Database"))
-    emmebank = _eb.create(os.path.join(project_root, "Database", "emmebank"), dimensions)
+    _os.mkdir(_join(project_root, "Database"))
+    emmebank = _eb.create(_join(project_root, "Database", "emmebank"), dimensions)
     emmebank.title = title
     emmebank.coord_unit_length = 0.000189394  # feet to miles
     emmebank.unit_of_length = "mi"
@@ -125,9 +145,6 @@ def init_emme_project(root, title, emmeversion, port=59673):
         print database.name(), len(database.scenarios())
         database.open()
         break
-
-    # desktop.add_modeller_toolbox(os.path.join(root, "scripts/oregon_metro_abm/resources/import_from_visum_4.4.2.mtbx"))
-    # desktop.add_modeller_toolbox(os.path.join(root, "scripts/oregon_metro_abm/src/emme/toolbox/portland_toolbox_1_0_0.mtbx"))
     project.save()
     return desktop
 
@@ -146,9 +163,9 @@ def import_modes(input_dir, modeller, scenario_id):
     scenario = modeller.emmebank.scenario(scenario_id)
     process_modes_tool_path = "inro.emme.data.network.mode.mode_transaction"
     process_modes_tool = modeller.tool(process_modes_tool_path)
-    input_file = os.path.join(input_dir, emme_mode_transaction_file).replace("\\","/")
+    input_file = _join(input_dir, emme_mode_transaction_file)
     process_modes_tool(transaction_file=input_file,
-        revert_on_error=True,
+        revert_on_error=False,
         scenario=scenario)
 
 
@@ -159,9 +176,9 @@ def import_network(input_dir, modeller, scenario_id):
     scenario = modeller.emmebank.scenario(scenario_id)
     process_network_tool_path = "inro.emme.data.network.base.base_network_transaction"
     process_network_tool = modeller.tool(process_network_tool_path)
-    input_file = os.path.join(input_dir, emme_network_transaction_file).replace("\\","/")
+    input_file = _join(input_dir, emme_network_transaction_file)
     process_network_tool(transaction_file=input_file,
-        revert_on_error=True,
+        revert_on_error=False,
         scenario=scenario)
 
 
@@ -172,7 +189,7 @@ def import_extra_node_attributes(input_dir, modeller, scenario_id):
     scenario = modeller.emmebank.scenario(scenario_id)
     import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
-    input_file = os.path.join(input_dir, extra_node_attr_file)
+    input_file = _join(input_dir, extra_node_attr_file)
     import_extra_attributes_tool(
         file_path=input_file,
         scenario=scenario,
@@ -180,7 +197,7 @@ def import_extra_node_attributes(input_dir, modeller, scenario_id):
         has_header=True,
         column_labels="FROM_HEADER",
         import_definitions=True,
-        revert_on_error=True
+        revert_on_error=False
     )
 
 
@@ -191,9 +208,9 @@ def import_extra_link_attributes(input_dir, modeller, scenario_id, update=False)
     scenario = modeller.emmebank.scenario(scenario_id)
     import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
-    input_file = os.path.join(input_dir, extra_link_attr_file)
+    input_file = _join(input_dir, extra_link_attr_file)
     if update:
-        input_file = os.path.join(input_dir, update_extra_link_attr_file)
+        input_file = _join(input_dir, update_extra_link_attr_file)
     import_extra_attributes_tool(
         file_path=input_file,
         scenario=scenario,
@@ -212,9 +229,9 @@ def import_vehicles(input_dir, modeller, scenario_id):
     scenario = modeller.emmebank.scenario(scenario_id)
     process_vehicles_tool_path = "inro.emme.data.network.transit.vehicle_transaction"
     process_vehicles_tool = modeller.tool(process_vehicles_tool_path)
-    input_file = os.path.join(input_dir, emme_vehicle_transaction_file).replace("\\","/")
+    input_file = _join(input_dir, emme_vehicle_transaction_file)
     process_vehicles_tool(transaction_file=input_file,
-        revert_on_error=True,
+        revert_on_error=False,
         scenario=scenario)
 
 
@@ -225,7 +242,7 @@ def import_transit_time_functions(input_dir, modeller, scenario_id):
     scenario = modeller.emmebank.scenario(scenario_id)
     process_functions_tool_path = "inro.emme.data.function.function_transaction"
     process_functions_tool = modeller.tool(process_functions_tool_path)
-    input_file = os.path.join(input_dir, emme_transit_time_function_file).replace("\\","/")
+    input_file = _join(input_dir, emme_transit_time_function_file)
     process_functions_tool(
         transaction_file=input_file,
         throw_on_error=True)
@@ -238,9 +255,9 @@ def import_transit_lines(input_dir, modeller, scenario_id):
     scenario = modeller.emmebank.scenario(scenario_id)
     process_transit_lines_tool_path = "inro.emme.data.network.transit.transit_line_transaction"
     process_transit_lines_tool = modeller.tool(process_transit_lines_tool_path)
-    input_file = os.path.join(input_dir, emme_transit_network_file).replace("\\","/")
+    input_file = _join(input_dir, emme_transit_network_file)
     process_transit_lines_tool(transaction_file=input_file,
-        revert_on_error=True,
+        revert_on_error=False,
         scenario=scenario,
         include_first_hidden_data=False)
 
@@ -252,7 +269,7 @@ def import_extra_transit_line_attributes(input_dir, modeller, scenario_id):
     scenario = modeller.emmebank.scenario(scenario_id)
     import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
-    input_file = os.path.join(input_dir, extra_transit_line_attr_file)
+    input_file = _join(input_dir, extra_transit_line_attr_file)
     import_extra_attributes_tool(
         file_path=input_file,
         scenario=scenario,
@@ -260,7 +277,7 @@ def import_extra_transit_line_attributes(input_dir, modeller, scenario_id):
         has_header=True,
         column_labels="FROM_HEADER",
         import_definitions=True,
-        revert_on_error=False
+        revert_on_error=True
     )
 
 
@@ -271,7 +288,7 @@ def import_extra_transit_segment_attributes(input_dir, modeller, scenario_id):
     scenario = modeller.emmebank.scenario(scenario_id)
     import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
-    input_file = os.path.join(input_dir, extra_transit_segment_attr_file)
+    input_file = _join(input_dir, extra_transit_segment_attr_file)
     import_extra_attributes_tool(
         file_path=input_file,
         scenario=scenario,
@@ -284,9 +301,9 @@ def import_extra_transit_segment_attributes(input_dir, modeller, scenario_id):
 
 
 def replace_route_for_lines_with_nntime_and_created_segments(network, input_dir):
-    stop_attributes_path = os.path.join(input_dir, 'all_stop_attributes.csv')
+    stop_attributes_path = _join(input_dir, 'all_stop_attributes.csv')
     stop_attributes_df = pd.read_csv(stop_attributes_path)
-    transit_line_path = os.path.join(input_dir, 'lines_that_need_links_created.csv')
+    transit_line_path = _join(input_dir, 'lines_that_need_links_created.csv')
     transit_line_df = pd.read_csv(transit_line_path)
 
     with _m.logbook_trace("Creating links for specified transit lines"):
@@ -361,7 +378,7 @@ def distribute_nntime_among_segments(segments_for_current_nntime, nntime):
 
 
 def distribute_nntime(network, input_dir):
-    stop_attributes_path = os.path.join(input_dir, 'all_stop_attributes.csv')
+    stop_attributes_path = _join(input_dir, 'all_stop_attributes.csv')
     stop_attributes_df = pd.read_csv(stop_attributes_path)
 
     print "Setting transit station-to-station times (NNTIME in Cube)"
@@ -541,7 +558,7 @@ def split_tap_connectors_to_prevent_walk(network):
 
 def init_node_id(network):
     new_node_id = max(n.number for n in network.nodes())
-    new_node_id = math.ceil(new_node_id / 10000.0) * 10000
+    new_node_id = _math.ceil(new_node_id / 10000.0) * 10000
     return new_node_id
 
 
@@ -583,11 +600,10 @@ def calc_link_unreliability(network, period):
         #area_type = ?
         # NOTE: TBD with new network
         link.data3 = factor_table[facility_type][area_type]
-        pass
 
 
 def create_time_period_scenario(modeller, scenario_id, root, project_name, period):
-    input_dir = os.path.join(root, "emme_network_transaction_files_{}".format(period))
+    input_dir = _join(root, "emme_network_transaction_files_{}".format(period))
     import_modes(input_dir, modeller, scenario_id)
     import_network(input_dir, modeller, scenario_id)
     import_extra_node_attributes(input_dir, modeller, scenario_id)
@@ -598,8 +614,8 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
     import_extra_transit_line_attributes(input_dir, modeller, scenario_id)
     import_extra_transit_segment_attributes(input_dir, modeller, scenario_id)
 
-    database_path = os.path.join(root, project_name, "Database")
-    emmebank_path = os.path.join(database_path, "emmebank")
+    database_path = _join(root, project_name, "Database")
+    emmebank_path = _join(database_path, "emmebank")
     emmebank = _eb.Emmebank(emmebank_path)
     scenario = emmebank.scenario(scenario_id)
     network = scenario.get_network()
@@ -613,11 +629,11 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
     # fix_bad_walktimes(network)
     scenario.publish_network(network)
 
-    # apply_fares = _apply_fares.ApplyFares()
-    # apply_fares.scenario = scenario
-    # apply_fares.dot_far_file = os.path.join(root, "fares.far")
-    # apply_fares.fare_matrix_file = os.path.join(root, "fareMatrix.txt")
-    # apply_fares.execute()
+    apply_fares = _apply_fares.ApplyFares()
+    apply_fares.scenario = scenario
+    apply_fares.dot_far_file = _join(root, "fares.far")
+    apply_fares.fare_matrix_file = _join(root, "fareMatrix.txt")
+    apply_fares.execute()
 
     network = scenario.get_network()
     split_tap_connectors_to_prevent_walk(network)
@@ -626,7 +642,7 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
 
 
 def update_congested_link_times(modeller, scenario_id, root, project_name):
-    input_dir = os.path.join(root, "emme_network_transaction_files_{}".format(period))
+    input_dir = _join(root, "emme_network_transaction_files_{}".format(period))
     emmebank = modeller.emmebank
 
     print "updating scenario_id %s" % (scenario_id)
@@ -640,34 +656,34 @@ def update_congested_link_times(modeller, scenario_id, root, project_name):
     emmebank.dispose()
 
 
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Create a new Emme project and database with MTC defaults.")
+    parser = _argparse.ArgumentParser(description="Create a new Emme project and database with MTC defaults.")
     parser.add_argument('-p', '--trn_path', help=r"path to the trn folder, default is the current_working_folder\trn",
-                        default=os.path.join(os.getcwd(), 'trn'))
+                        default=_join(_os.getcwd(), 'trn'))
     parser.add_argument('-n', '--name', help="the project folder name created in the trn folder, default is mtc_emme",
                         default="mtc_emme")
-    parser.add_argument('-v', '--emmeversion', help='the Emme version', default='4.4.5')
     parser.add_argument('-i', '--first_iteration', help='Is this the first iteration? yes or no, default is yes', default='yes')
+    parser.add_argument('-t', '--time_periods', help='List of time periods as EA,AM,MD,PM,EV or ALL', default='ALL')
+    parser.add_argument('-o', '--port', help='Port to connect to Emme desktop session', default=59673, type=int)
+    parser.add_argument('-d', '--delete', help='delete / overwrite existing Emme project folder', action='store_true')
     args = parser.parse_args()
 
     assert (args.first_iteration == 'yes') or (args.first_iteration == 'no'), \
         'Please specify "yes" or "no" for the first_iteration (-i) run-time argument'
-
-
+    if args.time_periods == "ALL":
+        time_periods = _all_periods[:]
+    else:
+        time_periods = args.time_periods.split(",")
     if args.first_iteration == 'yes':
         # create emme project
-        desktop = init_emme_project(args.trn_path, args.name, args.emmeversion)
-        # desktop = connect_to_running_desktop(port=59673)
+        desktop = init_emme_project(args.trn_path, args.name, args.port, args.delete)
     else:
         # or connect to already open desktop
-        desktop = connect_to_running_desktop(port=59673)
-        # desktop = connect_to_running_desktop(port=4242)
+        desktop = connect_to_running_desktop(port=args.port)
     # create modeller instance used to import data to project database
     modeller = _m.Modeller(desktop)
 
-
-    for period in _all_periods:
+    for period in time_periods:
         scenario_id = period_to_scenario_dict[period]
         if args.first_iteration == 'yes':
             print "creating %s scenarios" % period
