@@ -33,7 +33,6 @@ import argparse as _argparse
 import traceback as _traceback
 import json as _json
 
-from string import letters as _letters
 from collections import defaultdict as _defaultdict
 from copy import deepcopy as _copy
 
@@ -756,11 +755,11 @@ class ApplyFares(object):
         journey_levels = _copy(journey_levels)
         for level in journey_levels:
             rules = level["transition_rules"]
-            rules = [r for r in rules if r["mode"] in modes]
+            rules = [_copy(r) for r in rules if r["mode"] in modes]
             level["transition_rules"] = rules
         # count level transition rules references to find unused levels
         num_levels = len(journey_levels)
-        level_count = [0] * len(journey_levels)
+        level_count = [0] * num_levels
 
         def follow_rule(next_level):
             level_count[next_level] += 1
@@ -772,7 +771,7 @@ class ApplyFares(object):
         follow_rule(0)
         # remove unreachable levels
         # and find new index for transition rules for remaining levels
-        level_map = {i:i for i in range(num_levels)}
+        level_map = {i: i for i in range(num_levels)}
         for level_id, count in reversed(list(enumerate(level_count))):
             if count == 0:
                 for index in range(level_id, num_levels):
@@ -998,7 +997,7 @@ if __name__ == "__main__":
     if dst_scen_num:
         if emmebank.scenario(dst_scen_num):
             emmebank.delete_scenario(dst_scen_num)
-        scenario = emmebank.copy_scenario(scen_num, dst_scen_num)
+        scenario = emmebank.copy_scenario(src_scen_num, dst_scen_num)
     else:
         scenario = emmebank.scenario(src_scen_num)
     apply_fares = ApplyFares()
