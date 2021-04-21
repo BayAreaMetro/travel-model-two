@@ -38,8 +38,9 @@ run pgm = hwynet
    ; write out to the same name with the added variables   
    neto = hwy\mtc_final_network_with_tolls_fft.net
    
-   ;drive links only
-   IF ((CNTYPE!='TAZ' & CNTYPE!='MAZ' & CNTYPE!='TAP') & DRIVE_ACCESS = 0) DELETE
+   ;drive links and TAZ/MAZ connectors only
+   IF (CNTYPE = 'TAZ' | CNTYPE = 'MAZ') ASSIGNABLE = 1
+   IF (ASSIGNABLE = 0 | DRIVE_ACCESS = 0) DELETE
    
    if (FFS > 0)
        FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
