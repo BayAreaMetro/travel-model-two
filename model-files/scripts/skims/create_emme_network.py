@@ -10,9 +10,9 @@
 #//// Usage: init_emme_project.py                                            ///
 #////    [-p, --trn_path]: path to the trn folder, default is the            ///
 #////        current_working_folder\trn                                      ///
-#////    [-n, --name]: project folder name created in the trn folder,        /// 
+#////    [-n, --name]: project folder name created in the trn folder,        ///
 #////        default is mtc_emme                                             ///
-#////    [-i, --first_iteration]: Is this the first iteration? yes or no,    /// 
+#////    [-i, --first_iteration]: Is this the first iteration? yes or no,    ///
 #////        default is yes                                                  ///
 #////    [-t, --time_periods]: List of time periods as EA,AM,MD,PM,EV or     ///
 #////        ALL, default is ALL                                             ///
@@ -65,6 +65,7 @@ emme_transit_time_function_file = "emme_transit_time_function.txt"
 
 # ------------- run parameters ---------
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
+# _all_periods = ['AM']
 # mapping time of day period to emme scenario_id
 period_to_scenario_dict = {
     'EA': 1000,
@@ -677,6 +678,7 @@ if __name__ == "__main__":
     if args.first_iteration == 'yes':
         # create emme project
         desktop = init_emme_project(args.trn_path, args.name, args.port, args.delete)
+        # desktop = connect_to_running_desktop(port=args.port)
     else:
         # or connect to already open desktop
         desktop = connect_to_running_desktop(port=args.port)

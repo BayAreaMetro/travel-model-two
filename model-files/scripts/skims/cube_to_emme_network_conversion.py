@@ -10,8 +10,8 @@ import re
 pd.set_option("display.max_columns",250)
 
 # ------------- run parameters ---------
-# _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
-_all_periods = ['AM']
+_all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
+# _all_periods = ['AM']
 
 
 # maps transit 'Mode Group' defined in TM2 to a single character required by Emme
@@ -95,8 +95,7 @@ class emme_network_conversion:
         link_gdf = geopandas.read_file(self.link_shapefile)
 
         # remove all MAZ, TAZ, and PED links.  are CRAIL links needed?
-        link_gdf = link_gdf[link_gdf['CNTYPE'].isin(['TANA', 'TAP', 'CRAIL'])
-                            | (link_gdf['BUS_ONLY'] == 1)]
+        link_gdf = link_gdf[link_gdf['CNTYPE'].isin(['TANA', 'TAP', 'CRAIL', 'TRWALK'])]
 
         print("node columns: ", node_gdf.columns)
         print("link columns: ", link_gdf.columns)
@@ -436,17 +435,20 @@ class emme_network_conversion:
         link_gdf.loc[link_gdf['CNTYPE'] == 'CRAIL']
         link_gdf.loc[link_gdf['A_is_tap'] == 1, 'modes'] = 'a'  # access
         link_gdf.loc[link_gdf['B_is_tap'] == 1, 'modes'] = 'e'  # eggress
-        # NTL_MODE no longer uniquely identifies walk links
-        # link_gdf.loc[link_gdf['NTL_MODE'] == 2, 'modes'] = 'w'  # walk links
-        # link_gdf.loc[link_gdf['FREEWAY'] == 1, 'modes'] = link_gdf[  # remove walk from freeways
-        #     link_gdf['FREEWAY'] == 1]['modes'].apply(lambda x: x.replace('w', ''))
+
+        # TRWALK links are TAP-TAP psuedo links created during BuildTransitNetworks.job
+        # We are using these as tansfer walk links to avoid walking along entire network
+        # this will help runtime and remain consistent with previous TM2 version
+        link_gdf.loc[link_gdf['CNTYPE'] == 'TRWALK', 'modes'] = 'w'  # walk links
         link_gdf['type'] = 1
         # network can have different number of lanes for each time period
         link_gdf['lanes'] = link_gdf['LANES_' + self.period]
-        # NOTE: lanes can't be larger than 9 (there are two links with 16 lanes!)
+        # NOTE: lanes can't be larger than 9 in Emme
         link_gdf.loc[link_gdf['lanes'] > 9, 'lanes'] = 9
         link_gdf['volume_delay_function'] = 1
         link_gdf['user1'] = link_gdf['TRANTIME'].round(4)  # set trantime for transit time function to access
+
+        # walktime set in BuildTransitNetworks.job.  999 for non-TRWALK links.
         link_gdf['user2'] = link_gdf['WALKTIME']  # auxiliariy transit walktime
         link_gdf['user3'] = 0
 
@@ -643,6 +645,48 @@ class emme_network_conversion:
         # stop_link_df['trantime_final'] = np.where(
         #     stop_link_df['nn_trantime'].isna(), stop_link_df['TRANTIME'], stop_link_df['nn_trantime'])
         return stop_link_df
+
+
+    def trim_network(self,link_gdf, node_gdf, transit_line_df, stop_df):
+        # remove links that do not have any transit lines and are local roads
+        link_gdf_trimmed = link_gdf[
+            link_gdf['A'].isin(stop_df['N'])
+            | link_gdf['B'].isin(stop_df['N'])
+            | (link_gdf['FT'] != 7)] # local roads
+
+        # remove nodes that are not on any links or transit stops
+        node_gdf_trimmed = node_gdf[
+            node_gdf['N'].isin(link_gdf_trimmed['A'])
+            | node_gdf['N'].isin(link_gdf_trimmed['B'])]
+
+        # remove stops that do not have links connected
+        in_network = (stop_df['N'].isin(link_gdf_trimmed['A'])
+                      | stop_df['N'].isin(link_gdf_trimmed['B']))
+        stops_missing_links = stop_df[~in_network]
+
+        # remove transit lines that are missing stops
+        lines_missing_stops = transit_line_df[transit_line_df['LINE'].isin(stops_missing_links['LINE'])]
+        transit_line_df_trimmed = transit_line_df[~transit_line_df['LINE'].isin(lines_missing_stops['LINE'])]
+        stop_df_trimmed = stop_df[stop_df['LINE'].isin(transit_line_df_trimmed['LINE'])]
+
+        if len(stops_missing_links > 0):
+            stops_missing_links.to_csv(os.path.join(
+                self.emme_network_transaction_folder, 'stops_without_links.csv'), index=False)
+            lines_missing_stops.to_csv(os.path.join(
+                self.emme_network_transaction_folder, 'lines_missing_stops_from_network.csv'), index=False)
+
+            stop_nodes_without_links = node_gdf[node_gdf['N'].isin(stops_missing_links['N'])]
+            stop_nodes_without_links.to_csv(os.path.join(
+                self.emme_network_transaction_folder, 'stop_nodes_without_links.csv'), index=False)
+
+            print("\nWARNING: stops specified in transit line file are missing from network")
+            print("Stops missing links: ", stops_missing_links['N'].unique())
+            print("Lines Removed: ", lines_missing_stops['NAME'], '\n')
+
+        print("number of links after trimming: ", len(link_gdf))
+        print("number of nodes after trimming: ", len(node_gdf))
+
+        return link_gdf_trimmed, node_gdf_trimmed, transit_line_df_trimmed, stop_df_trimmed
 
 
     def create_stop_transaction_variables(self, stop_df, node_gdf, link_gdf):
@@ -921,19 +965,9 @@ class emme_network_conversion:
         # faresystem_df = self.parse_transit_SET_file()
         # transit_line_df = pd.merge(transit_line_df, faresystem_df, how='left', on='MODE')
 
-        # remove links that do not have any transit lines and are local roads
-        link_gdf = link_gdf[
-            link_gdf['A'].isin(stop_df['N'])
-            | link_gdf['B'].isin(stop_df['N'])
-            | (link_gdf['FT'] != 7)] # local roads
-
-        # remove nodes that are not on any links or transit stops
-        node_gdf = node_gdf[node_gdf['N'].isin(link_gdf['A'])
-                            | node_gdf['N'].isin(link_gdf['B'])
-                            | node_gdf['N'].isin(stop_df['N'])]
-
-        print("number of links: ", len(link_gdf))
-        print("number of nodes: ", len(node_gdf))
+        # removing links and nodes that are not needed
+        link_gdf, node_gdf, transit_line_df, stop_df = self.trim_network(
+            link_gdf, node_gdf, transit_line_df, stop_df)
 
         # ----- writing emme transaction files -----
         # modes and vehicles

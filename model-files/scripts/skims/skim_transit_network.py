@@ -29,8 +29,8 @@ except Exception, e:
     def open_file(file_path, mode):
         return OmxMatrix(_omx.openFile(file_path, mode))
 
-_all_periods = ['AM']
-# _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
+# _all_periods = ['EV']
+_all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
 _all_components = ['transit_skims']
 _all_access_modes = ['WLK', 'PNR', 'KNRTNC', 'KNRPRV']
 _all_sets = ['set1', 'set2', 'set3']
@@ -706,23 +706,36 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
         mode_combinations = [(n, list(fare_modes[m])) for n, m  in mode_combinations if m in valid_modes]
 
         total_ivtt_expr = []
-        scenario.create_extra_attribute("TRANSIT_SEGMENT", "@mode_timtr")
-        try:
+        if use_ccr:
+            scenario.create_extra_attribute("TRANSIT_SEGMENT", "@mode_timtr")
+            try:
+                for mode_name, modes in mode_combinations:
+                    network.create_attribute("TRANSIT_SEGMENT", "@mode_timtr")
+                    for line in network.transit_lines():
+                        if line.mode.id in modes:
+                            for segment in line.segments():
+                                # segment["@mode_timtr"] = segment["@base_timtr"]
+                                # segment["@mode_timtr"] = segment["@trantime_final"]
+                                segment["@mode_timtr"] = segment["@timtr"]
+                    mode_timtr = network.get_attribute_values("TRANSIT_SEGMENT", ["@mode_timtr"])
+                    network.delete_attribute("TRANSIT_SEGMENT", "@mode_timtr")
+                    scenario.set_attribute_values("TRANSIT_SEGMENT", ["@mode_timtr"], mode_timtr)
+                    ivtt = 'mf"%s_%sIVTT"' % (skim_name, mode_name)
+                    total_ivtt_expr.append(ivtt)
+                    spec = get_strat_spec({"in_vehicle": "@mode_timtr"}, ivtt)
+                    strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
+            finally:
+                # scenario.delete_extra_attribute("TRANSIT_SEGMENT", "@mode_timtr")
+                scenario.delete_extra_attribute("@mode_timtr")
+        else:
             for mode_name, modes in mode_combinations:
-                network.create_attribute("TRANSIT_SEGMENT", "@mode_timtr")
-                for line in network.transit_lines():
-                    if line.mode.id in modes:
-                        for segment in line.segments():
-                            segment["@mode_timtr"] = segment["@base_timtr"]
-                mode_timtr = network.get_attribute_values("TRANSIT_SEGMENT", ["@mode_timtr"])
-                network.delete_attribute("TRANSIT_SEGMENT", "@mode_timtr")
-                scenario.set_attribute_values("TRANSIT_SEGMENT", ["@mode_timtr"], mode_timtr)
                 ivtt = 'mf"%s_%sIVTT"' % (skim_name, mode_name)
                 total_ivtt_expr.append(ivtt)
-                spec = get_strat_spec({"in_vehicle": "@mode_timtr"}, ivtt)
-                strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
-        finally:
-            scenario.delete_extra_attribute("TRANSIT_SEGMENT", "@mode_timtr")
+                spec = {
+                    "type": "EXTENDED_TRANSIT_MATRIX_RESULTS",
+                    "by_mode_subset": {"modes": modes, "actual_in_vehicle_times": ivtt},
+                }
+                matrix_results(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
 
     with _m.logbook_trace("Calculate total IVTT, number of transfers, transfer walk and wait times"):
         spec_list = [
@@ -1165,7 +1178,7 @@ if __name__ == "__main__":
         #     use_ccr = False
         use_ccr = False
 
-        perform_assignment_and_skim(modeller, scenario, period=period, assignment_only=True,
+        perform_assignment_and_skim(modeller, scenario, period=period, assignment_only=False,
                                     num_processors=args.num_processors, use_fares=True, use_ccr=use_ccr)
         output_omx_file = _os.path.join(args.skims_path, "transit_skims_{}.omx".format(period))
         export_matrices_to_omx(omx_file=output_omx_file, periods=[period], scenario=scenario,
