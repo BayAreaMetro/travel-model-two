@@ -47,6 +47,7 @@ class ApplyFares(object):
 
     def __init__(self):
         self.scenario = None
+        self.period = ""
         self.dot_far_file = None
         self.fare_matrix_file = None
         self.vot = None
@@ -745,7 +746,8 @@ class ApplyFares(object):
 
     def save_journey_levels(self, name, journey_levels):
         spec_dir = _join(_dir(_dir(self.scenario.emmebank.path)), "Specifications")
-        with open(_join(spec_dir, "%s_journey_levels.ems" % name), 'w') as jl_spec_file:
+        path = _join(spec_dir, "%s_%s_journey_levels.ems" % (self.period, name))
+        with open(path, 'w') as jl_spec_file:
             spec = {"type": "EXTENDED_TRANSIT_ASSIGNMENT", "journey_levels": journey_levels}
             _json.dump(spec, jl_spec_file, indent=4)
 
@@ -828,12 +830,13 @@ class ApplyFares(object):
             report.add_html(unicode(error))
             report.add_html(_traceback.format_exc())
 
-        _m.logbook_write("Apply fares report", report.render())
+        _m.logbook_write("Apply fares report %s" % self.period, report.render())
 
     def log_text_report(self):
         bank_dir = _os.path.dirname(self.scenario.emmebank.path)
         timestamp = _time.strftime("%Y%m%d-%H%M%S")
-        with open(_os.path.join(bank_dir, "apply_fares_report_%s.txt" % timestamp), 'w') as report:
+        path = _os.path.join(bank_dir, "apply_fares_report_%s_%s.txt" % (self.period, timestamp))
+        with open(path, 'w') as report:
             try:
                 for item in self._log:
                     if item["type"] == "header":

@@ -634,6 +634,7 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
     apply_fares.scenario = scenario
     apply_fares.dot_far_file = _join(root, "fares.far")
     apply_fares.fare_matrix_file = _join(root, "fareMatrix.txt")
+    apply_fares.period = period
     apply_fares.execute()
 
     network = scenario.get_network()

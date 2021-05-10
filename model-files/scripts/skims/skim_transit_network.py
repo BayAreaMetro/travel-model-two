@@ -538,11 +538,11 @@ def run_assignment(modeller, scenario, period, params, network, num_processors, 
         local_modes = get_fare_modes(_local_modes)
         premium_modes = get_fare_modes(_premium_modes)
         project_dir = _os.path.dirname(_os.path.dirname(scenario.emmebank.path))
-        with open(_os.path.join(project_dir, "Specifications", "BUS_journey_levels.ems"), 'r') as f:
+        with open(_os.path.join(project_dir, "Specifications", "%s_BUS_journey_levels.ems" % period), 'r') as f:
             local_journey_levels = _json.load(f)["journey_levels"]
-        with open(_os.path.join(project_dir, "Specifications", "PREM_journey_levels.ems"), 'r') as f:
+        with open(_os.path.join(project_dir, "Specifications", "%s_PREM_journey_levels.ems" % period), 'r') as f:
             premium_modes_journey_levels = _json.load(f)["journey_levels"]
-        with open(_os.path.join(project_dir, "Specifications", "ALLPEN_journey_levels.ems"), 'r') as f:
+        with open(_os.path.join(project_dir, "Specifications", "%s_ALLPEN_journey_levels.ems" % period), 'r') as f:
             journey_levels = _json.load(f)["journey_levels"]
         for level in journey_levels:
             if level["boarding_cost"]:
@@ -725,7 +725,6 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
                     spec = get_strat_spec({"in_vehicle": "@mode_timtr"}, ivtt)
                     strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
             finally:
-                # scenario.delete_extra_attribute("TRANSIT_SEGMENT", "@mode_timtr")
                 scenario.delete_extra_attribute("@mode_timtr")
         else:
             for mode_name, modes in mode_combinations:
