@@ -54,97 +54,16 @@ endrun
 loop period = 1, 5
   
    ; a two letter token is used for each time period
-   if (period = 1)   
-   
-      token_period = 'EA' 
-      
-      ; turn HOV into free flow
-      token_hov_to_freeflow = '; do not turn HOV into free flow'
-
-      ; bridge toll fixed time delay links
-      token_benicia_bridge_delay   = '0' 
-      token_richmond_bridge_delay  = '0'
-      token_carquinez_bridge_delay = '0'
-      token_golden_bridge_delay    = '0'      
-      token_bay_bridge_delay       = '0'
-      token_sanmateo_bridge_delay  = '0'
-      token_dumbarton_bridge_delay = '0'
-      token_antioch_bridge_delay   = '0'
-      
-      token_new_bridge_delay       = '0'
-  
-   elseif (period = 2)   
+   if (period = 1)
+      token_period = 'EA'
+   elseif (period = 2)
       token_period = 'AM'
-      
-       ; do not turn HOV into free flow
-      token_hov_to_freeflow = '; do not turn HOV into free flow'
-      
-      ; bridge toll fixed time delay links
-      token_benicia_bridge_delay   = '0' 
-      token_richmond_bridge_delay  = '0'
-      token_carquinez_bridge_delay = '0'
-      token_golden_bridge_delay    = '5'
-      token_bay_bridge_delay       = '15'
-      token_sanmateo_bridge_delay  = '10'
-      token_dumbarton_bridge_delay = '15'
-      token_antioch_bridge_delay   = '0'
-      
-      token_new_bridge_delay       = '10'
-  
-   elseif (period = 3)   
-      token_period = 'MD' 
-      
-      ; turn HOV into free flow
-      token_hov_to_freeflow = '; do not turn HOV into free flow'
-
-      ; bridge toll fixed time delay links
-      token_benicia_bridge_delay   = '0' 
-      token_richmond_bridge_delay  = '0'
-      token_carquinez_bridge_delay = '0'
-      token_golden_bridge_delay    = '0'
-      token_bay_bridge_delay       = '0'
-      token_sanmateo_bridge_delay  = '0'
-      token_dumbarton_bridge_delay = '0'
-      token_antioch_bridge_delay   = '0'  
-      
-      token_new_bridge_delay       = '0'
-  
-   elseif (period = 4)   
+   elseif (period = 3)
+      token_period = 'MD'
+   elseif (period = 4)
       token_period = 'PM'
-      
-       ; do not turn HOV into free flow
-      token_hov_to_freeflow = '; do not turn HOV into free flow'
-      
-      ; bridge toll fixed time delay links
-      token_benicia_bridge_delay   = '0' 
-      token_richmond_bridge_delay  = '5'
-      token_carquinez_bridge_delay = '5'
-      token_golden_bridge_delay    = '0'
-      token_bay_bridge_delay       = '5'
-      token_sanmateo_bridge_delay  = '5'
-      token_dumbarton_bridge_delay = '5'
-      token_antioch_bridge_delay   = '0'
-      
-      token_new_bridge_delay       = '5'
-  
-   elseif (period = 5)   
+   elseif (period = 5)
       token_period = 'EV'
-      
-      ; turn HOV into free flow
-      token_hov_to_freeflow = '; do not turn HOV into free flow'
-      
-      ; bridge toll fixed time delay links
-      token_benicia_bridge_delay   = '0' 
-      token_richmond_bridge_delay  = '0'
-      token_carquinez_bridge_delay = '0'
-      token_golden_bridge_delay    = '0'
-      token_bay_bridge_delay       = '0'
-      token_sanmateo_bridge_delay  = '0'
-      token_dumbarton_bridge_delay = '0'
-      token_antioch_bridge_delay   = '0'
-      
-      token_new_bridge_delay       = '0'
-      
    endif
    
    
@@ -159,76 +78,10 @@ loop period = 1, 5
       ; set the time-period-specific congested times to free-flow times
       CTIM = FFT
       
-      ; turn hov lanes off
-      @token_hov_to_freeflow@
-      
-      ; benecia martinez bridge (no shared ride by-pass link)
-      if (TOLLBOOTH = 1)
-      
-         FFT  = @token_benicia_bridge_delay@
-         CTIM = @token_benicia_bridge_delay@
-         
-      endif
-
-      if (TOLLBOOTH = 2)
-      
-         FFT  = @token_carquinez_bridge_delay@
-         CTIM = @token_carquinez_bridge_delay@
-      
-      endif
-
-      ; richmond san rafael bridge (no shared ride by-pass link)
-      if (TOLLBOOTH = 3)
-      
-         FFT  = @token_richmond_bridge_delay@
-         CTIM = @token_richmond_bridge_delay@
-      
-      endif
-
-      ; golden gate bridge (no shared ride by-pass link)
-      if (TOLLBOOTH = 4)
-      
-         FFT  = @token_golden_bridge_delay@
-         CTIM = @token_golden_bridge_delay@
-      
-      endif
-
-      if (TOLLBOOTH = 5) 
-         
-         FFT  = @token_bay_bridge_delay@
-         CTIM = @token_bay_bridge_delay@ 
-         
-      endif
-
-      if (TOLLBOOTH = 6) 
-      
-         FFT  = @token_sanmateo_bridge_delay@
-         CTIM = @token_sanmateo_bridge_delay@
-      
-      endif
-      
-      if (TOLLBOOTH = 7)
-      
-         FFT  = @token_dumbarton_bridge_delay@
-         CTIM = @token_dumbarton_bridge_delay@
-         
-      endif
-  
-      ; antioch bridge (no shared ride by-pass link)
-      if (TOLLBOOTH = 8)
-      
-         FFT  = @token_antioch_bridge_delay@
-         CTIM = @token_antioch_bridge_delay@
-      
-      endif
-      
-      if (TOLLBOOTH = 10)
-      
-         FFT  = @token_new_bridge_delay@
-         CTIM = @token_new_bridge_delay@
-      
-      endif
-      
+      ; set period-specific lanes and useclass
+      LANES = LANES_@token_period@
+      ML_LANES = ML_LANES_@token_period@
+      USECLASS = USECLASS_@token_period@
         
    endrun
    

@@ -334,19 +334,19 @@ loop period = 1, 5
             lw.hovdist = 0
            
             ; Group 23 defines HOV 2 and 3+ facilities
-            if (li.USECLASS_@token_period@ = 2,3)
+            if (li.USECLASS = 2,3)
                 addtogroup = 23
                 lw.hovdist = li.FEET
             endif
            
             ; Group 3 defines HOV 3+ facilities
-            if (li.USECLASS_@token_period@ = 3)
+            if (li.USECLASS = 3)
                 addtogroup = 3
                 lw.hovdist = li.FEET
             endif
             
             ; Group 4 defines facilities not available to trucks
-            if (li.USECLASS_@token_period@ = 2,3,4) addtogroup = 4
+            if (li.USECLASS = 2,3,4) addtogroup = 4
                        
             ; Group 11 defines the value toll links the non-value-toll-paying users are prohibited from using
             if (lw.tollclass >= firstValue && li.TOLL@token_period@_@token_class@ > 0) addtogroup = 11
