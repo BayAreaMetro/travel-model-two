@@ -34,7 +34,7 @@ CONTENTS
 
 ## Input File List
 
-The table below contains brief descriptions of the input files required to execute the travel model. 
+The table below contains brief descriptions of the input files required to execute the travel model.
 
 | **File name** | **Purpose** | **Folder location** | **File type** | **File format** |
 |---------------|-------------|---------------------|---------------|-----------------|
@@ -66,29 +66,25 @@ Time periods in Travel Model Two are consistent with Travel Model One:
 
 ## Roadway Network
 
-The *all streets highway network* was developed from the [TomTom](http://www.tomtom.com/en_gb/licensing/) (previously TeleAtlas) North America routable network database.  The *projection* is [**NAD 1983 StatePlane California VI FIPS 0406 Feet**](https://epsg.io/102646).
-
-The *bike network* was built from the highway network and the [MTC Bike Mapper](http://gis.mtc.ca.gov/btp/) network. The Bike Mapper network is a framework in which local cities update a master database of bicycle infrastructure and bicycle lane attributes, from which MTC has built and now maintains a trip planner application. 
-
-The *walk network* was built from the highway network and the open source [Open Street Map](http://www.openstreetmap.org/) (OSM) network. 
+The all streets highway network, walk network, and bicycle network were developed from [OpenStreetMap](http://www.openstreetmap.org/).  The *projection* is [**NAD 1983 StatePlane California VI FIPS 0406 Feet**](https://epsg.io/102646).
 
 ### County Node Numbering System
 
 The highway network uses a numbering system whereby each county has a reserved block of nodes. Within each county’s block, nodes 1 through 9,999 are reserved for TAZs, 10,001 through 89,999 are for MAZs, and 90,001 through 99,999 for transit access points or TAPs. The blocks are assigned to the nine counties per MTC’s numbering scheme, as shown in the table below.
 
-TeleAtlas network nodes are numbered by county as well and range from 1,000,000 to 10,000,000 as shown below. HOV lane nodes are those nodes corresponding to general purpose lane nodes.   
+Roadway, walk, bicycle, and transit network nodes are numbered by county as well and range from 1,000,000 to 10,000,000 as shown below.
 
-Code  | County | TAZs | MAZs |  TAPs | Network Node | HOV Lane Node
-|:---:|:-------|:-----|:-----|:------|:-------------|:-------------
-1 | San Francisco |	1 - 9,999 |	10,001 – 89,999 |	90,001 – 99,999 |	1,000,000 – 1,500,000 |	5,500,000 – 6,000,000
-2 |	San Mateo |	100,001 – 109,999 |	110,001 – 189,999 |	190,001 – 199,999 |	1,500,000 – 2,000,000 |	6,000,000 – 6,500,000
-3 |	Santa Clara |	200,001 – 209,999 |	210,001 – 289,999 |	290,001 – 299,999 |	2,000,000 – 2,500,000 |	6,500,000 – 7,000,000
-4 |	Alameda |	300,001 – 309,999 |	310,001 – 389,999 |	390,001 – 399,999 |	2,500,000 – 3,000,000 | 7,000,000 – 7,500,000
-5 |	Contra Costa |	400,001 – 409,999 |	410,001 – 489,999 |	490,001 – 499,999 |	3,000,000 – 3,500,000 |	7,500,000 – 8,000,000
-6 |	Solano |	500,001 – 509,999 |	510,001 – 589,999 |	590,001 – 599,999 |	3,500,000 – 4,000,000 |	8,000,000 – 8,500,000
-7 |	Napa |	600,001 – 609,999 |	610,001 – 689,999 |	690,001 – 699,999 |	4,000,000 – 4,500,000 |	8,500,000 – 9,000,000
-8 |	Sonoma |	700,001 – 709,999 |	710,001 – 789,999 |	790,001 – 799,999 |	4,500,000 – 5,000,000 |	9,000,000 – 9,000,000
-9 |	Marin |	800,001 – 809,999 |	810,001 – 889,999 |	890,001 – 899,999 |	5,000,000 – 5,500,000 |	9,500,000 – 9,999,999 
+Code  | County | TAZs | MAZs |  TAPs | Network Node |
+|:---:|:-------|:-----|:-----|:------|:-------------|
+1 | San Francisco |	1 - 9,999 |	10,001 – 89,999 |	90,001 – 99,999 |	1,000,000 – 1,500,000 |
+2 |	San Mateo |	100,001 – 109,999 |	110,001 – 189,999 |	190,001 – 199,999 |	1,500,000 – 2,000,000 |
+3 |	Santa Clara |	200,001 – 209,999 |	210,001 – 289,999 |	290,001 – 299,999 |	2,000,000 – 2,500,000 |
+4 |	Alameda |	300,001 – 309,999 |	310,001 – 389,999 |	390,001 – 399,999 |	2,500,000 – 3,000,000 |
+5 |	Contra Costa |	400,001 – 409,999 |	410,001 – 489,999 |	490,001 – 499,999 |	3,000,000 – 3,500,000 |
+6 |	Solano |	500,001 – 509,999 |	510,001 – 589,999 |	590,001 – 599,999 |	3,500,000 – 4,000,000 |
+7 |	Napa |	600,001 – 609,999 |	610,001 – 689,999 |	690,001 – 699,999 |	4,000,000 – 4,500,000 |
+8 |	Sonoma |	700,001 – 709,999 |	710,001 – 789,999 |	790,001 – 799,999 |	4,500,000 – 5,000,000 |
+9 |	Marin |	800,001 – 809,999 |	810,001 – 889,999 |	890,001 – 899,999 |	5,000,000 – 5,500,000 |
   | External | 900,001 - 999,999
 
 ### Node Attributes
@@ -100,13 +96,20 @@ The following node attributes are included in the master network.
 |*N* | Node Number | Integer (see [Node Numbering](#county-node-numbering-system))
 |*X* | X coordinate (feet) | Float
 |*Y* | Y coordinate (feet) | Float
-|*COUNTY* | County Code | Integer
+|*OSM_NODE_ID* | OpenStreetMap node identifier | Integer
+|*COUNTY* | County Name | String
+|*DRIVE_ACCESS* | Node is used by automobile and/or bus links | Boolean
+|*WALK_ACCESS* | Node is used by pedestrian links | Boolean
+|*BIKE_ACCESS* | Node is used by bicycle links | Boolean
+|*RAIL_ACCESS* | Node is used by rail links | Boolean
+|*FAREZONE* | Unique sequential fare zone ID for transit skimming and assignment | Integer
+
 |*MODE* | Best transit mode served. {::nomarkdown}<br /><ul><li>1: Local bus</li> <li>2: Express bus</li> <li>3: Ferry</li> <li>4: Light rail</li> <li>5: Heavy rail</li> <li>6: Commuter rail</li> </ul>{:/} Appears to be set for TAPs and nodes with **STOP** set.| Integer
 |*STOP* | Transit stop or terminal name of the node | String
 |*PNR_CAP* |  Number of parking spaces at the stop or terminal if a parking facility is available | Integer
 |*PNR[1-5]* | Is parking available at the stop or terminal by time period? | Integer (1=available)
 |*PNR_FEE[1-5]* | Parking fee at the stop by time period | Float
-|*FAREZONE* | Unique sequential fare zone ID for transit skimming and assignment | Integer
+
 
 ### Link Attributes
 
@@ -155,7 +158,7 @@ The following link attributes are included on the master network.
 
 The transit network is made up of three core components: transit lines, transit modes, and transit fares.  The transit lines were built from MTC’s regional transit database (or RTD).  The lines are coded with a mode (see below) and serve a series of stop nodes.  Transit fares are coded according to Cube's Public Transport program (see below).
 
-Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the [Level of Service Information](#level-of-service-information). 
+Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the [Level of Service Information](#level-of-service-information).
 
 ### Line Attributes
 
@@ -178,7 +181,7 @@ Transit trips are assigned between transit access points (TAPs), which represent
 
 ### Transit Modes
 
-The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology. 
+The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology.
 
 | *Operator/Agency ID* | *Agency Name* | *Mode* | *Mode Group* | *Farezones* |
 |----------------------|---------------|--------|--------------|-------------|
@@ -383,7 +386,7 @@ MTC uses a simple three-step (generation, distribution, and assignment) commerci
 ### Friction Factors
 
 The trip distribution step uses a standard gravity model with a blended travel time impedance measure. This file sets the friction factors, which are vehicle type specific, using an ASCII fixed format text file with the following data:
- 
+
  * Travel time in minutes (integer, starting in column 1, left justified);
  * Friction factors for very small trucks (integer, starting in column 9, left justified);
  * Friction factors for small trucks (integer, starting in column 17, left justified);
