@@ -648,7 +648,8 @@ def update_congested_link_times(modeller, scenario_id, root, project_name):
     emmebank = modeller.emmebank
 
     print "updating scenario_id %s" % (scenario_id)
-    import_extra_link_attributes(input_dir, modeller, scenario_id, update=True)
+    import_extra_link_attributes(input_dir, modeller, scenario_id, update=False)
+    # import_extra_link_attributes(input_dir, modeller, scenario_id, update=True)
     scenario = emmebank.scenario(scenario_id)
     network = scenario.get_network()
 
@@ -656,6 +657,18 @@ def update_congested_link_times(modeller, scenario_id, root, project_name):
     update_link_trantime(network)
     scenario.publish_network(network)
     emmebank.dispose()
+
+
+def connect_to_desktop(port=59673):
+    print("port:", port)
+    desktop = _app.connect(port=port)
+    return desktop
+
+def start_desktop(root, title="emme_full_run", port=59673):
+    emme_project = _os.path.join(root, title, title + ".emp")
+    desktop = _app.start(  # will not close desktop when program ends
+        project=emme_project, user_initials="RSG", visible=True, port=port)
+    return desktop
 
 
 if __name__ == "__main__":
@@ -681,8 +694,11 @@ if __name__ == "__main__":
         desktop = init_emme_project(args.trn_path, args.name, args.port, args.delete)
         # desktop = connect_to_running_desktop(port=args.port)
     else:
-        # or connect to already open desktop
-        desktop = connect_to_running_desktop(port=args.port)
+        # connect to already open desktop
+        try:
+            desktop = connect_to_desktop(port=args.port)
+        except:
+            desktop = start_desktop(args.trn_path, port=args.port)
     # create modeller instance used to import data to project database
     modeller = _m.Modeller(desktop)
 

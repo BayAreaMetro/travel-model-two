@@ -29,7 +29,7 @@ except Exception, e:
     def open_file(file_path, mode):
         return OmxMatrix(_omx.openFile(file_path, mode))
 
-# _all_periods = ['EV']
+# _all_periods = ['AM']
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
 _all_components = ['transit_skims']
 _all_access_modes = ['WLK', 'PNR', 'KNRTNC', 'KNRPRV']
@@ -1119,7 +1119,7 @@ def export_boardings_by_line(desktop, output_transit_boardings_file):
     column.name = "mode"
     table.add_column(3, column)
 
-    column.expression = "@line_mode"
+    column.expression = "@mode"
     column.name = "line_mode"
     table.add_column(4, column)
 
@@ -1138,6 +1138,7 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--time_periods', help='List of time periods as EA,AM,MD,PM,EV or ALL', default='ALL')
     parser.add_argument('-o', '--port', help='Port to connect to Emme desktop session', default=59673, type=int)
     parser.add_argument('-d', '--skip_import_demand', action="store_true", help='Skip import of CT-RAMP demand')
+    parser.add_argument('-b', '--output_transit_boardings', action="store_true", help='Output transit boardings from assignment')
     parser.add_argument('-n', '--num_processors', help='Number of processors to use, can specify MAX-#', default='MAX-4')
 
     args = parser.parse_args()
@@ -1185,8 +1186,8 @@ if __name__ == "__main__":
 
         if use_ccr and args.save_iter_flows:
             save_per_iteration_flows(scenario)
-        output_transit_boardings = False
-        if output_transit_boardings:
+
+        if args.output_transit_boardings:
             desktop.data_explorer().replace_primary_scenario(scenario)
-            output_transit_boardings_file = _os.path.join(args.trn_path, "boardings_by_line_{}.csv".format(period))
+            output_transit_boardings_file = _os.path.join(_os.getcwd(), args.trn_path, "boardings_by_line_{}.csv".format(period))
             export_boardings_by_line(desktop, output_transit_boardings_file)

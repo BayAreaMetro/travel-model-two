@@ -52,6 +52,7 @@ SET /A MAX_ITERATION=3
 SET /A MAX_INNER_ITERATION=1
 
 ::  Set choice model household sample rate
+REM SET SAMPLERATE_ITERATION1=0.005
 SET SAMPLERATE_ITERATION1=0.3
 SET SAMPLERATE_ITERATION2=0.5
 SET SAMPLERATE_ITERATION3=1
@@ -75,15 +76,16 @@ CALL conda activate mtc_py2
 
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
-SET /A ITERATION=3
+SET /A ITERATION=2
 SET /A INNER_ITERATION=1
 IF %ITERATION% EQU 1 SET SAMPLERATE=%SAMPLERATE_ITERATION1%
 IF %ITERATION% EQU 2 SET SAMPLERATE=%SAMPLERATE_ITERATION2%
 IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
 IF %ITERATION% EQU 4 SET SAMPLERATE=%SAMPLERATE_ITERATION4%
 IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
-rem call zoneSystem.bat
-goto createemmenetwork
+call zoneSystem.bat
+REM goto createemmenetwork
+REM goto afteremmeupdate
 :: ------------------------------------------------------------------------------------------------------
 
 
@@ -151,6 +153,7 @@ if NOT %MATRIX_SERVER%==localhost (
 runtpp %BASE_SCRIPTS%\preprocess\preprocess_input_net.job
 IF ERRORLEVEL 2 goto done
 
+:zones
 :: Write a batch file with number of zones, taps, mazs
 runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
 if ERRORLEVEL 2 goto done
@@ -249,6 +252,7 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\preprocess\SetCapClass.job
 if ERRORLEVEL 2 goto done
 
+:createfivehwynets
 :: Create time-of-day-specific
 runtpp %BASE_SCRIPTS%\preprocess\CreateFiveHighwayNetworks.job
 if ERRORLEVEL 2 goto done
@@ -297,11 +301,11 @@ if ERRORLEVEL 2 goto done
 :: ------------------------------------------------------------------------------------------------------
 
 :: Build the initial highway and transit skims
+:hwyskims
 runtpp %BASE_SCRIPTS%\skims\HwySkims.job
 if ERRORLEVEL 2 goto done
 
-:transitskims
-
+:transitnet
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
@@ -318,15 +322,15 @@ CALL conda activate mtc
 python %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
 
-%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "emme_new_network_test" --first_iteration "yes"
+%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "emme_full_run" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
 
-%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" --first_iteration "yes"
+%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "yes" --skip_import_demand
 IF ERRORLEVEL 1 goto done
 
 CALL conda deactivate
 CALL conda activate mtc_py2
-goto done
+REM goto done
 :afteremmeskims
 
 REM runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
@@ -409,7 +413,6 @@ copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
 if ERRORLEVEL 2 goto done
 del mtctm2.properties
-goto done
 
 taskkill /im "java.exe" /F
 
@@ -453,7 +456,7 @@ if ERRORLEVEL 2 goto done
 :: Apply a value toll choice model for the internal/external demand
 runtpp CTRAMP\scripts\nonres\IxTollChoice.job
 if ERRORLEVEL 2 goto done
-:starthere
+
 :: Apply the commercial vehicle generation models
 runtpp CTRAMP\scripts\nonres\TruckTripGeneration.job
 if ERRORLEVEL 2 goto done
@@ -504,7 +507,6 @@ IF %ITERATION% LSS %MAX_ITERATION% (
 
 )
 
-
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
@@ -523,7 +525,7 @@ IF ERRORLEVEL 1 goto done
 :: changing back to python 2 environment
 CALL conda deactivate
 CALL conda activate mtc_py2
-REM goto done
+:afteremmeupdate
 
 :: Create the block file that controls whether the crowding functions are called during transit assignment.
 python %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
@@ -533,14 +535,15 @@ SET /A INNER_ITERATION=0
 :inner_iteration_start
 SET /A INNER_ITERATION+=1
 
-	runtpp CTRAMP\scripts\assign\merge_transit_matrices.s
-	if ERRORLEVEL 2 goto done
+  :: no longer needed
+	REM runtpp CTRAMP\scripts\assign\merge_transit_matrices.s
+	REM if ERRORLEVEL 2 goto done
 
 :innerskim
   CALL conda deactivate
   CALL conda activate mtc
 
-  %EMME_PYTHON_PATH%\python skim_transit_network.py -p "trn" --first_iteration "no"
+  %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "no" --output_transit_boardings
   IF ERRORLEVEL 1 goto done
 
   :: changing back to python 2 environment

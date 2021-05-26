@@ -3,21 +3,21 @@
 ; BuildTransitNetworks.job
 ;
 ; A TP+ script that creates the transit network used for skimming/assignment. The transit skimming procedure is much
-; simpler than in models past, so there only needs to be one base network, based off of the base master network. The only 
-; thing removed from the base network are TAZ and MAZ connectors and bike links, since all skims/assignment is TAP->TAP. (As 
-; a reminder, all drive-to-transit is dealt with at a model level, so park-n-ride and other transit assignment/skimming 
-; sophistications  no longer are needed. Access/egress is automatically carried out by both the TAP-connectors and TAZ/MAZ<->TAP 
+; simpler than in models past, so there only needs to be one base network, based off of the base master network. The only
+; thing removed from the base network are TAZ and MAZ connectors and bike links, since all skims/assignment is TAP->TAP. (As
+; a reminder, all drive-to-transit is dealt with at a model level, so park-n-ride and other transit assignment/skimming
+; sophistications  no longer are needed. Access/egress is automatically carried out by both the TAP-connectors and TAZ/MAZ<->TAP
 ; connections.)
 ;
 ; Five networks are eventually created, one for each time period. They only differ in the congested highway times (which are
 ; used for calculating the (local bus) transit times).
-; 
+;
 ; All walk transfers occur stop->stop, which, to prevent an exponential proliferation of transfer links, is simplified
 ; to be TAP->TAP. That is, every stop is associated (already) with a TAP, and so by building TAP->TAP walk connector
 ; links, the stop->stop transfers can be facilitated along these. The only wrinkle is in keeping the distances between
 ; the TAPs realistic, which requires the setting of (walk transfer) costs on stop->TAP connectors (which already exist)
 ; to zero, and using the straight-line distance between TAPs as the (walk transfer) costs.
-; 
+;
 ; To create the TAP->TAP transfers, a TAP->TAP (walk) distance skim produced in the non-motorized skimming procedure is
 ; used to identify which TAP pairs need transfers built between them. A Python program is used to build these connectors
 ; (and distances) in a text file, which is then added to the final network.
@@ -25,10 +25,10 @@
 ; The actual transit lines are not read in until the PT skimming/assignment procedure. This process just sets up the network
 ; such that the PT process can run without any additional work/preparation.
 ;
-; 
+;
 ;  Input: (1) The base network which contains all highway, transit, pedestrian, and TAP connector links.
 ;         (2) A TAP->TAP walk (distance) skim, in which distance has been capped at some predetermined value.
-; 
+;
 ;  Output: (1) A Cube network containing the TAP->TAP transfer links and the transit lines for each time period.
 ;
 ; See also: (1) NonMotorizedSkims.job -- Creates the TAP->TAP used to build the walk transfer links
@@ -75,7 +75,9 @@ RUN PGM=NETWORK
     NETO = hwy\mtc_transit_network_temp1.net
 
     PHASE=LINKMERGE
-        IF (WALK_ACCESS = 1)
+        ; setting walk time only on created TAP-TAP connectors
+        ;IF (WALK_ACCESS = 1)
+        IF (CNTYPE='TRWALK')
             WALKDIST = FEET
             WALKTIME = FEET * (60.0 / 5280.0 / 3.0) ; 3 mph, in minutes
             NTL_MODE = 2
@@ -90,7 +92,7 @@ RUN PGM=NETWORK
             WALKTIME = 60.0 / 5280.0 / 3.0          ; 3 mph, in minutes
             NTL_MODE = 1
         ENDIF
-        
+
         ; changed 2018-03-24 JEF to use FFS for non-fixed guideway
         ; the freeway and non-freeway speeds should get replaced by auto skimmed times for non-fixed guideway transit
         ; in the transitSkims.job process. This is just a placeholder.
@@ -112,7 +114,7 @@ RUN PGM=NETWORK
 
         IF (CNTYPE='MAZ' | CNTYPE='TAZ')
             DELETE
-        ELSEIF (CNTYPE != 'TAP' & DRIVE_ACCESS = 0 & RAIL_ONLY = 0 & BUS_ONLY = 0)
+        ELSEIF (CNTYPE != 'TAP' & CNTYPE != 'TRWALK' & DRIVE_ACCESS = 0 & RAIL_ONLY = 0 & BUS_ONLY = 0)
             DELETE
         ELSE
             ;keep
@@ -128,18 +130,18 @@ tap_selector = '(N < 900000) & (N % 100000 > 90000)'
 RUN PGM=NETWORK
     NETI = "hwy\mtc_transit_network_temp1.net"
     NETO = "hwy\mtc_transit_network_temp2.net"
-    
+
     PHASE = NODEMERGE
-        IF (@tap_selector@)  
+        IF (@tap_selector@)
             NEW_NODE = TAPSEQ
             OLD_NODE = N
         ELSE
-            _j = _j + 1     
+            _j = _j + 1
             NEW_NODE = _j + @node_start@
             OLD_NODE = N
         ENDIF
     ENDPHASE
-  
+
     PHASE = LINKMERGE
         A_NEW_NODE = A.NEW_NODE
         OLD_A = A
@@ -188,15 +190,15 @@ LOOP PERIOD = 1,5
    DistributeMultistep processid = 'MTC_TRANNET', processNum = @period@
 
         ; a two letter token is used for each time period
-        IF (PERIOD = 1)   
-            TOKEN_PERIOD = 'EA' 
-        ELSEIF (PERIOD = 2)   
-            TOKEN_PERIOD = 'AM' 
-        ELSEIF (PERIOD = 3)   
-            TOKEN_PERIOD = 'MD' 
-        ELSEIF (PERIOD = 4)   
+        IF (PERIOD = 1)
+            TOKEN_PERIOD = 'EA'
+        ELSEIF (PERIOD = 2)
+            TOKEN_PERIOD = 'AM'
+        ELSEIF (PERIOD = 3)
+            TOKEN_PERIOD = 'MD'
+        ELSEIF (PERIOD = 4)
             TOKEN_PERIOD = 'PM'
-        ELSEIF (PERIOD = 5)   
+        ELSEIF (PERIOD = 5)
             TOKEN_PERIOD = 'EV'
         ENDIF
 
@@ -232,10 +234,9 @@ LOOP PERIOD = 1,5
    EndDistributeMultistep
 ENDLOOP
 
-Wait4Files files = MTC_TRANNET1.script.end, MTC_TRANNET2.script.end, MTC_TRANNET3.script.end, MTC_TRANNET4.script.end, MTC_TRANNET5.script.end, 
+Wait4Files files = MTC_TRANNET1.script.end, MTC_TRANNET2.script.end, MTC_TRANNET3.script.end, MTC_TRANNET4.script.end, MTC_TRANNET5.script.end,
            printfiles = merge, deldistribfiles = t, CheckReturnCode = t
 
 
 ;stop cluster nodes
 *Cluster.exe MTC_TRANNET 1-5 close exit
-

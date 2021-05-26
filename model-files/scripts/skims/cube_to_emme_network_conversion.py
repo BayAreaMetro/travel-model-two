@@ -567,7 +567,7 @@ class emme_network_conversion:
                         if key == 'N':
                             # stop data gets put to stop_df
                             stop_data.append({'LINE': line_id, 'stop': int(value)})
-                        elif key == 'NNTIME' or key == 'ACCESS_C':
+                        elif key == 'NNTIME' or key == 'ACCESS_C' or key == 'ACCESS':
                             stop_data[len(stop_data) - 1][key] = value
                         else:
                             data_dict.update({key:value})
@@ -584,10 +584,14 @@ class emme_network_conversion:
         stop_df = pd.DataFrame(stop_data)
         # ACCESS_C specifies whether a mode is for access and exit (0-default), access only (1), or exit only (2)
         #  for all subsequent nodes on the line unitl the line ends or ACCESS_C is specified again
-        # Filling ACCESS explicitly
-        # stop_df['ACCESS'] = stop_df.groupby('LINE')['ACCESS_C'].ffill().fillna(0).astype(int)
-        # Is not set in updated network.  setting ACCESS to default value of 0
-        stop_df['ACCESS'] = 0
+        # ACCESS can also be specified for individual stops
+        if 'ACCESS_C' in stop_df.columns:
+            stop_df['ACCESS'] = stop_df.groupby('LINE')['ACCESS_C'].ffill().fillna(0).astype(int)
+        # If ACCESS not set in transit network, set to default value of 0
+        if 'ACCESS' not in stop_df.columns:
+            stop_df['ACCESS'] = 0
+        stop_df['ACCESS'].fillna(0, inplace=True)
+        stop_df['ACCESS'] = stop_df['ACCESS'].astype(int)
         stop_df['N'] = stop_df['stop'].abs()
 
         transit_line_df['VEHICLETYPE'] = transit_line_df['USERA2'].map(veh_dict)
@@ -1021,7 +1025,11 @@ if __name__ == "__main__":
         if args.first_iteration == 'yes':
             period_emme_transaction.make_all_emme_transaction_files()
         else:
-            period_emme_transaction.make_updated_link_attributes_file()
+            period_emme_transaction.make_all_emme_transaction_files()
+            # TODO: include network trimming code in update only link attributes
+            #  also would need to change the update=False to True in import_extra_link_attributes
+            #  in update_congested_link_times in create_emme_network.py
+            # period_emme_transaction.make_updated_link_attributes_file()
 
     run_time = round(time.time() - start_time, 2)
     print("Run Time: ", run_time, "secs = ", run_time/60, " mins")
