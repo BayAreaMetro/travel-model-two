@@ -54,24 +54,12 @@ token_debug_origin = '1028'
      
 ; set a debug destination
 token_debug_destination = '1'
-     
-;;;;; set a debug filename prefix
-;;;;token_debug_filename = 'logs\IxTollChoice'
 
 ;start cluster nodes
 *Cluster.exe MTC_IX 1-20 start exit
 
 ; loop through each time period
 loop period = 1,5
-
-   ;;;;; set a debug origin
-   ;;;;token_debug_origin = '1474'
-   ;;;;  
-   ;;;;; set a debug destination
-   ;;;;token_debug_destination = '1'
-   ;;;;  
-   ;;;;; set a debug filename prefix
-   ;;;;token_debug_filename = 'logs\IxTollChoice'
   
    ; set the appropriate tokens  
    if (period = 1)   
@@ -187,30 +175,6 @@ loop period = 1,5
             mw[1][j] = tripsNoToll
             mw[2][j] = tripsToll
             
-            ;;;;; print out some debug information
-            ;;;;if (i = @token_debug_origin@ & j = @token_debug_destination@) 
-            ;;;;
-            ;;;;   ; one header
-            ;;;;   if (@period@ = 1 & @class@ = 1)
-            ;;;;   
-            ;;;;      list = 'Debug for origin zone ',@token_debug_origin@(5.0),'  and destination zone ',@token_debug_destination@(5.0),'.', ;;;;file = @token_debug_filename@.@token_period@.debug
-            ;;;;  list = ' ', file = @token_debug_filename@.@token_period@.debug
-            ;;;;      
-            ;;;;      list = ' time period   class    path      time      cost   utility      prob       trips', file = @token_debug_filename@.;;;;@token_class@.@token_period@.debug
-            ;;;;      list = ' ----------- ------- ------- --------- --------- --------- --------- ---------', file = @token_debug_filename@.;;;;@token_class@.@token_period@.debug
-            ;;;;   
-            ;;;;   ; break for everyone else
-            ;;;;   else
-            ;;;;   
-            ;;;;      list = ' ----------- ------- ------- --------- --------- --------- --------- ---------', file = @token_debug_filename@.;;;;@token_class@.@token_period@.debug
-            ;;;;   
-            ;;;;   endif
-            ;;;;   
-            ;;;;   list = '          @token_period@     @token_class@    free', noTollTime(10.2), noTollCost(10.2),           utilityNoToll(10.2);;;;,  probNoToll(10.4),  mw[1][j](10.2), file = @token_debug_filename@.@token_class@.@token_period@.debug               
-            ;;;;   list = '          @token_period@     @token_class@    toll', tollTime(10.2),   (tollCost + tollValue)(10.2), utilityToll(10.2);;;;,    probToll(10.4),  mw[2][j](10.2), file = @token_debug_filename@.@token_class@.@token_period@.debug
-            ;;;;   
-            ;;;;endif ; debug i/j if
-            
          endjloop
          
       endrun
@@ -298,18 +262,6 @@ endloop ; time-of-day
                   
 Wait4Files files = MTC_IX1.script.end, MTC_IX2.script.end, MTC_IX3.script.end, MTC_IX4.script.end, MTC_IX5.script.end, 
            printfiles = merge, deldistribfiles = t, CheckReturnCode = t
-           
-;;;;; combine the debug output
-;;;;* copy @token_debug_filename@.DA.EA.debug+@token_debug_filename@.S2.EA.debug+@token_debug_filename@.S3.EA.debug @token_debug_filename@.EA.debug
-;;;;* copy @token_debug_filename@.DA.AM.debug+@token_debug_filename@.S2.AM.debug+@token_debug_filename@.S3.AM.debug @token_debug_filename@.AM.debug
-;;;;* copy @token_debug_filename@.DA.MD.debug+@token_debug_filename@.S2.MD.debug+@token_debug_filename@.S3.MD.debug @token_debug_filename@.MD.debug
-;;;;* copy @token_debug_filename@.DA.PM.debug+@token_debug_filename@.S2.PM.debug+@token_debug_filename@.S3.PM.debug @token_debug_filename@.PM.debug
-;;;;* copy @token_debug_filename@.DA.EV.debug+@token_debug_filename@.S2.EV.debug+@token_debug_filename@.S3.EV.debug @token_debug_filename@.EV.debug
-;;;;* copy @token_debug_filename@.EA.debug+@token_debug_filename@.AM.debug+@token_debug_filename@.MD.debug+@token_debug_filename@.PM.debug+@token_debug_filename@.EV.debug @token_debug_filename@.debug
-;;;;* copy @token_debug_filename@.debug disco.text
-;;;;* del @token_debug_filename@*.debug
-;;;;* copy disco.text @token_debug_filename@.debug
-;;;;* del disco.text
 
 ;stop cluster nodes
 *Cluster.exe MTC_IX 1-20 close exit
