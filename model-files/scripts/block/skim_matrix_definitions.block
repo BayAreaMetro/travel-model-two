@@ -21,6 +21,12 @@ PHASE=SKIMIJ
 	MW[20] = CWDCOSTP(0, ALLMODES)
 	MW[21] = EXCESSDEMAND
 	MW[22] = EXCESSPROP
+    MW[23] = DIST(0,1,-79)           ;distance - local bus
+    MW[24] = DIST(0,80,-99)          ;distance - express bus
+    MW[25] = DIST(0,100,-109)        ;distance - ferry
+    MW[26] = DIST(0,110,-119)        ;distance - light rail
+    MW[27] = DIST(0,120,-129)        ;distance - heavy rail
+    MW[28] = DIST(0,130,-139)        ;distance - commuter rail
 ENDPHASE
 			
 ;set best mode matrix; hierarchy is implied
