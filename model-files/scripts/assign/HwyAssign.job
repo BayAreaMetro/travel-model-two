@@ -76,10 +76,7 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;read max cost parameters
-;read file = %BASE_SCRIPTS%\block\maxCosts.block
-;read file = %BASE_SCRIPTS%\block\hwyparam.block
 hwy_block_param = '%BASE_SCRIPTS%\block\hwyparam.block'
-speed_cap_block_param = '%BASE_SCRIPTS%\block\SpeedCapacity_1hour.block'
 free_flow_block_param = '%BASE_SCRIPTS%\block\FreeFlowSpeed.block'
 vdf_block_param = '%BASE_SCRIPTS%\block\SpeedFlowCurve.block'
 
@@ -163,11 +160,9 @@ loop period = 1,3
         NETO = hwy\avgload@token_period@_taz_delete.net
 	
         PHASE=LINKMERGE
-        ;
+
         ; Capacity and Speed Lookups
-        ;
         ; Set based on CAPCLASS
-        ;
             LOOKUP  NAME= Cap,LOOKUP[1]=1,RESULT=2,
             FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
             CAP_HRLN = Cap(1,CAPCLASS)
@@ -226,9 +221,6 @@ loop period = 1,3
         ; hwyParam.bock contains variables used in the remainder of the script, particularly in the generalized cost expressions
         read file = @hwy_block_param@
 
-        ; read in the speed/capacity table
-        ;read file = @speed_cap_block_param@ - removed by F&P
-
         ; set the working variables
 
          phase = linkread
@@ -255,10 +247,6 @@ loop period = 1,3
             ; TOLLBOOTH set to distinguish value tolls from bridge tolls
             lw.tollclass = li.TOLLBOOTH
 
-            ; the speed/capacity table and the computation of the volume/delay function parameter (see FreeFlowSpeed.block) uses the capacity class code
-            ; which is area type * 15 + facility type - modified by F&P
-            ;lw.capclass = li.CAPCLASS - removed by F&P
-
             ; free-flow speed is used in the volume/delay functions
             ffs = li.FFS
 
@@ -276,8 +264,6 @@ loop period = 1,3
             ; set the generalized cost, which is the combination of three tokens
 
             lw.gencost_da  = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_DA)
-            ;lw.gencost_s2 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S2 / sr2costShare) + @token_hov_xfer_pen@
-            ;lw.gencost_s3 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S3 / sr3costShare) + @token_hov_xfer_pen@
             lw.gencost_s2 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S2 / sr2costShare)
             lw.gencost_s3 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S3 / sr3costShare)
             lw.gencost_vsm = lw.time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_VSM)
@@ -361,8 +347,6 @@ loop period = 1,3
         
          ; set the generalized cost functions (same as before, only now we start with "time")
          lw.gencost_da  = time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_DA)
-         ;lw.gencost_s2 = time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S2 / sr2costShare) + @token_hov_xfer_pen@
-         ;lw.gencost_s3 = time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S3 / sr3costShare) + @token_hov_xfer_pen@
          lw.gencost_s2 = time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S2 / sr2costShare)
          lw.gencost_s3 = time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S3 / sr3costShare)
          lw.gencost_vsm = time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_VSM)
@@ -444,11 +428,6 @@ loop period = 1,2
 	     		MAZMAZVOL=LI.2.MAZMAZVOL
 	       ENDPHASE
     endrun
-    
-    
-     ; *DEL hwy\avgload@token_period@_taz.net
-     ; *copy hwy\avgload@token_period@_taz_temp2.net hwy\avgload@token_period@_taz.net
-     ; *DEL hwy\avgload@token_period@_taz_temp2.net
 	 
     ;Delete links for assignment and add in speeds and capacities
     run pgm = network
@@ -457,11 +436,8 @@ loop period = 1,2
 	
         PHASE=LINKMERGE
 
-	;
         ; Capacity and Speed Lookups
-        ;
         ; Set based on CAPCLASS
-	;
         
 	LOOKUP  NAME= Cap,LOOKUP[1]=1,RESULT=2,
         FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
@@ -521,9 +497,6 @@ loop period = 1,2
         ; hwyParam.bock contains variables used in the remainder of the script, particularly in the generalized cost expressions
         read file = @hwy_block_param@
 
-        ; read in the speed/capacity table
-        ;read file = @speed_cap_block_param@ - removed by F&P
-
         ; set the working variables
 
          phase = linkread
@@ -550,10 +523,6 @@ loop period = 1,2
             ; TOLLBOOTH set to distinguish value tolls from bridge tolls
             lw.tollclass = li.TOLLBOOTH
 
-            ; the speed/capacity table and the computation of the volume/delay function parameter (see FreeFlowSpeed.block) uses the capacity class code
-            ; which is area type * 15 + facility type - modified by F&P
-            ;lw.capclass = li.CAPCLASS - removed by F&P
-
             ; free-flow speed is used in the volume/delay functions
             ffs = li.FFS
 
@@ -563,16 +532,11 @@ loop period = 1,2
             ; free flow time
             fft = li.FFT
 
-            ; link capacity is a function of the number of lanes
-            ;lanes = li.LANES
-
             read file = @free_flow_block_param@
           
             ; set the generalized cost, which is the combination of three tokens
          
             lw.gencost_da  = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_DA)
-            ;lw.gencost_s2 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S2 / sr2costShare) + @token_hov_xfer_pen@
-            ;lw.gencost_s3 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S3 / sr3costShare) + @token_hov_xfer_pen@
             lw.gencost_s2 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S2 / sr2costShare)
             lw.gencost_s3 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S3 / sr3costShare)
             lw.gencost_vsm = lw.time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_VSM)
@@ -756,9 +720,9 @@ loop period = 1,5
 	LOOKUP  NAME= Cap,LOOKUP[1]=1,RESULT=2,
         FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
         CAP_HRLN = Cap(1,CAPCLASS)
-	CAP_LANE = CAP_HRLN * @token_capfacnum@
-	CAP_TOTAL = CAP_LANE * LANES
-	CAP_TOTFAC = CAP_TOTAL
+        CAP_LANE = CAP_HRLN * @token_capfacnum@
+        CAP_TOTAL = CAP_LANE * LANES
+        CAP_TOTFAC = CAP_TOTAL
 
         if (FFS > 0)
         FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
@@ -810,6 +774,5 @@ loop period = 1,5
      *DEL hwy\avgload@token_period@_taz_temp3.net
     
 endloop ; time period loop
- 
 
 
