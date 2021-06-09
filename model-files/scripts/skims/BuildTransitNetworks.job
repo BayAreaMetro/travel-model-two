@@ -75,20 +75,18 @@ RUN PGM=NETWORK
     NETO = hwy\mtc_transit_network_temp1.net
 
     PHASE=LINKMERGE
-        IF (WALK_ACCESS = 1)
+        IF (CNTYPE = 'TRWALK')
             WALKDIST = FEET
             WALKTIME = FEET * (60.0 / 5280.0 / 3.0) ; 3 mph, in minutes
             NTL_MODE = 2
+        ELSEIF (CNTYPE = 'TAP')
+            WALKDIST = 1                            ; trivial distance for all tap connectors
+            WALKTIME = 60.0 / 5280.0 / 3.0          ; 3 mph, in minutes
+            NTL_MODE = 1
         ELSE
             WALKDIST = 9999                         ; big distance
             WALKTIME = 999                          ; big time
             NTL_MODE = 0
-        ENDIF
-
-        IF (CNTYPE = 'TAP')
-            WALKDIST = 1                            ; trivial distance for all tap connectors
-            WALKTIME = 60.0 / 5280.0 / 3.0          ; 3 mph, in minutes
-            NTL_MODE = 1
         ENDIF
         
         ; changed 2018-03-24 JEF to use FFS for non-fixed guideway

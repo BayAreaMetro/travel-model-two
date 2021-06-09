@@ -141,12 +141,6 @@ hwy_block_param = '%BASE_SCRIPTS%\block\hwyparam.block'
 
 ; do, more or less, the same skim procedure for each of the five time periods
 loop period = 1, 5
-  
-   ;; set a debug origin
-   ;token_debug_origin = '844'
-     
-   ;; set a debug destination
-   ;token_debug_destination = '236'
      
    ; set a debug filename prefix
    token_debug_filename = 'logs\HwySkims'
@@ -211,8 +205,6 @@ loop period = 1, 5
          ; shared ride 3+ not excluded from any facilities
          token_excludegrp_free = 'excludegrp = 11,'
          token_excludegrp_toll = ' '
-   
-         token_excludegrp = ' '
          
       elseif (class = 4)
          token_class = 'VSM'
@@ -519,85 +511,7 @@ loop period = 1, 5
       mw[63]  = mi.7.TOLLBTOLLLRG
       mw[64]  = mi.7.TOLLVTOLLLRG
       
-   endrun
-   
-   ;;;not doing this anymore, but leaving it in just in case...
-   ;;;;; build skims without externals
-   ;;;;run pgm = matrix
-   ;;;;    mati = skims\HWYSKM@token_period@_taz_exts.tpp
-   ;;;;    mato = skims\HWYSKM@token_period@_taz.tpp, mo = 1-36, name = TIMEDA,DISTDA,BTOLLDA,FFTDA,HOVDISTDA,
-   ;;;;                                                                 TOLLTIMEDA,TOLLDISTDA,TOLLBTOLLDA,TOLLVTOLLDA,TOLLFFTDA,TOLLHOVDISTDA,TOLLTOLLDISTDA,
-   ;;;;                                                                 TIMES2,DISTS2,BTOLLS2,FFTS2,HOVDISTS2,
-   ;;;;                                                                 TOLLTIMES2,TOLLDISTS2,TOLLBTOLLS2,TOLLVTOLLS2,TOLLFFTS2,TOLLHOVDISTS2,TOLLTOLLDISTS2,
-   ;;;;                                                                 TIMES3,DISTS3,BTOLLS3,FFTS3,HOVDISTS3,
-   ;;;;                                                                 TOLLTIMES3,TOLLDISTS3,TOLLBTOLLS3,TOLLVTOLLS3,TOLLFFTS3,TOLLHOVDISTS3,TOLLTOLLDISTS3
-   ;;;;    ZONES=%TAZ_COUNT%
-   ;;;;    FILLMW MW[1]=mi.1.1(36)
-   ;;;;endrun
-   ;;;;
-   ;;;;run pgm = matrix
-   ;;;;    mati = skims\COM_HWYSKIM@token_period@_taz_exts.tpp
-   ;;;;    mato = skims\COM_HWYSKIM@token_period@_taz.tpp, mo = 1-28, name = TIMEVSM, DISTVSM, BTOLLVSM,
-   ;;;;                                                                      TOLLTIMEVSM, TOLLDISTVSM, TOLLBTOLLVSM, TOLLVTOLLVSM,
-   ;;;;                                                                      TIMESML, DISTSML, BTOLLSML,
-   ;;;;                                                                      TOLLTIMESML, TOLLDISTSML, TOLLBTOLLSML, TOLLVTOLLSML,
-   ;;;;                                                                      TIMEMED, DISTMED, BTOLLMED,
-   ;;;;                                                                      TOLLTIMEMED, TOLLDISTMED, TOLLBTOLLMED, TOLLVTOLLMED,
-   ;;;;                                                                      TIMELRG, DISTLRG, BTOLLLRG,
-   ;;;;                                                                      TOLLTIMELRG, TOLLDISTLRG, TOLLBTOLLLRG, TOLLVTOLLLRG
-   ;;;;    ZONES=%TAZ_COUNT%
-   ;;;;    FILLMW MW[1]=mi.1.1(28)
-   ;;;;endrun
-   
-   ;;;;;; debug bit
-   ;;;;;run pgm = matrix
-   ;;;;;
-   ;;;;;   mati[1] = skims\HWYSKM@token_period@.tpp
-   ;;;;;   mati[2] = skims\COM_HWYSKIM@token_period@.tpp
-   ;;;;;   
-   ;;;;;   jloop
-   ;;;;;   
-   ;;;;;      ; debug print
-   ;;;;;      if (i = @token_debug_origin@ & j = @token_debug_destination@) 
-   ;;;;;      
-   ;;;;;         ; one header
-   ;;;;;         if (@period@ = 1)
-   ;;;;;         
-   ;;;;;            list = 'Debug for origin zone ',@token_debug_origin@(5.0),'  and destination zone ',@token_debug_destination@(5.0),'.', file = @token_debug_filename@.@token_period@.debug
-   ;;;;;            list = ' ', file = @token_debug_filename@.@token_period@.debug
-   ;;;;;         
-   ;;;;;            list = ' time period             class           path           time       distance       bridge toll        value toll', file = @token_debug_filename@.@token_period@.debug
-   ;;;;;            list = ' ----------- ----------------- -------------- -------------- -------------- -------------- --------------', file = @token_debug_filename@.@token_period@.debug
-   ;;;;;         
-   ;;;;;         ; break for everyone else
-   ;;;;;         else
-   ;;;;;         
-   ;;;;;            list = ' ----------- ----------------- -------------- -------------- -------------- -------------- --------------', file = @token_debug_filename@.@token_period@.debug 
-   ;;;;;         
-   ;;;;;         endif
-   ;;;;;         
-   ;;;;;         list = '          @token_period@       drive alone           free', mi.1.TIMEDA(15.2),     mi.1.DISTDA(15.2),     mi.1.BTOLLDA(15),'            ---',         file = @token_debug_filename@.@token_period@.debug 
-   ;;;;;         list = '          @token_period@       drive alone           toll', mi.1.TOLLTIMEDA(15.2), mi.1.TOLLDISTDA(15.2), mi.1.TOLLBTOLLDA(15), mi.1.TOLLVTOLLS2(15), file = @token_debug_filename@.@token_period@.debug
-   ;;;;;         list = '          @token_period@     shared ride 2           free', mi.1.TIMES2(15.2),     mi.1.DISTS2(15.2),     mi.1.BTOLLS2(15),'            ---',         file = @token_debug_filename@.@token_period@.debug 
-   ;;;;;         list = '          @token_period@     shared ride 2           toll', mi.1.TOLLTIMES2(15.2), mi.1.TOLLDISTS2(15.2), mi.1.TOLLBTOLLS2(15), mi.1.TOLLVTOLLS2(15), file = @token_debug_filename@.@token_period@.debug
-   ;;;;;         list = '          @token_period@    shared ride 3+           free', mi.1.TIMES3(15.2),     mi.1.DISTS3(15.2),     mi.1.BTOLLS3(15),'            ---',         file = @token_debug_filename@.@token_period@.debug 
-   ;;;;;         list = '          @token_period@    shared ride 3+           toll', mi.1.TOLLTIMES3(15.2), mi.1.TOLLDISTS3(15.2), mi.1.TOLLBTOLLS3(15), mi.1.TOLLVTOLLS3(15), file = @token_debug_filename@.@token_period@.debug
-   ;;;;;         
-   ;;;;;         list = '          @token_period@    very small trk           free', mi.2.TIMEVSM(15.2),     mi.2.DISTVSM(15.2),     mi.2.BTOLLVSM(15),'            ---',          file = @token_debug_filename@.@token_period@.debug 
-   ;;;;;     list = '          @token_period@    very small trk           toll', mi.2.TOLLTIMEVSM(15.2), mi.2.TOLLDISTVSM(15.2), mi.2.TOLLBTOLLVSM(15), mi.2.TOLLVTOLLVSM(15), file = @token_debug_filename@.@token_period@.debug
-   ;;;;;         list = '          @token_period@         small trk           free', mi.2.TIMESML(15.2),     mi.2.DISTSML(15.2),     mi.2.BTOLLSML(15),'            ---',          file = @token_debug_filename@.@token_period@.debug 
-   ;;;;;     list = '          @token_period@         small trk           toll', mi.2.TOLLTIMESML(15.2), mi.2.TOLLDISTSML(15.2), mi.2.TOLLBTOLLSML(15), mi.2.TOLLVTOLLSML(15), file = @token_debug_filename@.@token_period@.debug
-   ;;;;;         list = '          @token_period@        medium trk           free', mi.2.TIMEMED(15.2),     mi.2.DISTMED(15.2),     mi.2.BTOLLMED(15),'            ---',          file = @token_debug_filename@.@token_period@.debug 
-   ;;;;;     list = '          @token_period@        medium trk           toll', mi.2.TOLLTIMEMED(15.2), mi.2.TOLLDISTMED(15.2), mi.2.TOLLBTOLLMED(15), mi.2.TOLLVTOLLMED(15), file = @token_debug_filename@.@token_period@.debug
-   ;;;;;         list = '          @token_period@         large trk           free', mi.2.TIMELRG(15.2),     mi.2.DISTLRG(15.2),     mi.2.BTOLLLRG(15),'            ---',          file = @token_debug_filename@.@token_period@.debug 
-   ;;;;;     list = '          @token_period@         large trk           toll', mi.2.TOLLTIMELRG(15.2), mi.2.TOLLDISTLRG(15.2), mi.2.TOLLBTOLLLRG(15), mi.2.TOLLVTOLLLRG(15), file = @token_debug_filename@.@token_period@.debug
-   ;;;;;         
-   ;;;;;      
-   ;;;;;      endif
-   ;;;;;   
-   ;;;;;   endjloop
-   ;;;;;
-   ;;;;;endrun
+   ENDRUN
    
    EndDistributeMultistep
 
@@ -605,14 +519,6 @@ endloop ; token_period
 
 Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM3.script.end, MTC_HWYSKIM4.script.end, MTC_HWYSKIM5.script.end, 
            printfiles = merge, deldistribfiles = t, CheckReturnCode = t
-           
-;; combine and delete the debug files
-;* copy @token_debug_filename@.EA.debug+@token_debug_filename@.AM.debug+@token_debug_filename@.MD.debug+@token_debug_filename@.PM.debug+@token_debug_filename@.EV.debug @token_debug_filename@.debug
-;* del @token_debug_filename@.EA.debug
-;* del @token_debug_filename@.AM.debug
-;* del @token_debug_filename@.MD.debug
-;* del @token_debug_filename@.PM.debug
-;* del @token_debug_filename@.EV.debug
 
 *del skims\DA_*_taz.tpp
 *del skims\S2_*_taz.tpp
