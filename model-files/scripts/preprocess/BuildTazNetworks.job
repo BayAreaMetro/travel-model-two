@@ -71,7 +71,7 @@ loop period = 1, 5
             
             IF (CNTYPE = 'TAZ' | CNTYPE = 'TANA')
                 ;keep
-            ELSEIF (USECLASS_EA + USECLASS_AM + USECLASS_MD + USECLASS_PM + USECLASS_EV > 0)
+            ELSEIF (USECLASS > 0)
                 ;keep
             ELSE
                 DELETE

@@ -3,14 +3,13 @@
 ; preprocess input network to 
 ; (1) fix space issue in CNTYPE
 ; (2) add a FEET field based on DISTANCE
-; (3) assign FT=8 to links with FT=0
 ;
 ; -----------------------------------
 
 
 RUN PGM=NETWORK
-    LINKI[1] = "hwy\mtc_final_network_base_new_v4.net"
-    NETO = "hwy\mtc_final_network_base.net"
+    LINKI[1] = "hwy\mtc_final_network_base_new_v10.net"
+    NETO = "hwy\mtc_final_network_base.net", exclude = DISTANCE
 
     PHASE=LINKMERGE
         IF (li.1.CNTYPE = '  TAZ') CNTYPE = 'TAZ'
@@ -21,8 +20,6 @@ RUN PGM=NETWORK
         IF (li.1.CNTYPE = '   NA') CNTYPE = 'TANA'
 
         FEET = DISTANCE * 5280
-
-        IF (li.1.FT = 0) FT = 8
 
     ENDPHASE
 ENDRUN
