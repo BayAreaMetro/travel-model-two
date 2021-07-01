@@ -65,7 +65,7 @@ emme_transit_time_function_file = "emme_transit_time_function.txt"
 
 # ------------- run parameters ---------
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
-# _all_periods = ['AM']
+# _all_periods = ['EA', 'AM']
 # mapping time of day period to emme scenario_id
 period_to_scenario_dict = {
     'EA': 1000,
@@ -210,8 +210,9 @@ def import_extra_link_attributes(input_dir, modeller, scenario_id, update=False)
     import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
     input_file = _join(input_dir, extra_link_attr_file)
-    if update:
-        input_file = _join(input_dir, update_extra_link_attr_file)
+    # currently re-importing all link attributes
+    # if update:
+    #     input_file = _join(input_dir, update_extra_link_attr_file)
     import_extra_attributes_tool(
         file_path=input_file,
         scenario=scenario,
@@ -391,6 +392,9 @@ def distribute_nntime(network, input_dir):
         segments_for_current_nntime = []
         for segment in line.segments(include_hidden=False):
             # i_node = segment.link.i_node
+            # do not include tap connectors in nn_time calculation
+            if (segment.link['@ntl_mode'] != 0) | ((segment.link['length'] == 0)):
+                continue
             j_node = segment.link.j_node
             segments_for_current_nntime.append(segment)
 
@@ -603,7 +607,7 @@ def calc_link_unreliability(network, period):
         link.data3 = factor_table[facility_type][area_type]
 
 
-def create_time_period_scenario(modeller, scenario_id, root, project_name, period):
+def create_time_period_scenario(modeller, scenario_id, root, period):
     input_dir = _join(root, "emme_network_transaction_files_{}".format(period))
     import_modes(input_dir, modeller, scenario_id)
     import_network(input_dir, modeller, scenario_id)
@@ -615,9 +619,7 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
     import_extra_transit_line_attributes(input_dir, modeller, scenario_id)
     import_extra_transit_segment_attributes(input_dir, modeller, scenario_id)
 
-    database_path = _join(root, project_name, "Database")
-    emmebank_path = _join(database_path, "emmebank")
-    emmebank = _eb.Emmebank(emmebank_path)
+    emmebank = modeller.emmebank
     scenario = emmebank.scenario(scenario_id)
     network = scenario.get_network()
 
@@ -626,7 +628,8 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
     distribute_nntime(network, input_dir)
     update_link_trantime(network)
     # calc_link_unreliability(network, period)
-    # walk links no longer included
+    # walktime set in BuildTransitNetworks.job.  999 for non-TRWALK links.
+    # fix here is no longer needed
     # fix_bad_walktimes(network)
     scenario.publish_network(network)
 
@@ -643,17 +646,17 @@ def create_time_period_scenario(modeller, scenario_id, root, project_name, perio
     emmebank.dispose()
 
 
-def update_congested_link_times(modeller, scenario_id, root, project_name):
+def update_congested_link_times(modeller, scenario_id, root, period):
     input_dir = _join(root, "emme_network_transaction_files_{}".format(period))
     emmebank = modeller.emmebank
 
     print "updating scenario_id %s" % (scenario_id)
-    import_extra_link_attributes(input_dir, modeller, scenario_id, update=False)
-    # import_extra_link_attributes(input_dir, modeller, scenario_id, update=True)
+    import_extra_link_attributes(input_dir, modeller, scenario_id)
+    import_extra_transit_segment_attributes(input_dir, modeller, scenario_id)
+
     scenario = emmebank.scenario(scenario_id)
     network = scenario.get_network()
-
-    print "applying updated times to transit segments"
+    distribute_nntime(network, input_dir)
     update_link_trantime(network)
     scenario.publish_network(network)
     emmebank.dispose()
@@ -706,8 +709,8 @@ if __name__ == "__main__":
         scenario_id = period_to_scenario_dict[period]
         if args.first_iteration == 'yes':
             print "creating %s scenarios" % period
-            create_time_period_scenario(modeller, scenario_id, args.trn_path, args.name, period)
+            create_time_period_scenario(modeller, scenario_id, args.trn_path, period)
 
         else:
             print "updating %s scenarios" % period
-            update_congested_link_times(modeller, scenario_id, args.trn_path, args.name)
+            update_congested_link_times(modeller, scenario_id, args.trn_path, period)

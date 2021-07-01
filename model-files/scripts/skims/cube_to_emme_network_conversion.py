@@ -11,8 +11,7 @@ pd.set_option("display.max_columns",250)
 
 # ------------- run parameters ---------
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
-# _all_periods = ['AM']
-
+# _all_periods = ['EA', 'AM']
 
 # maps transit 'Mode Group' defined in TM2 to a single character required by Emme
 emme_transit_modes_dict = {
@@ -23,15 +22,6 @@ emme_transit_modes_dict = {
     'Light rail': 'l',
     'Heavy rail': 'h',
     'Commuter rail': 'r'
-}
-
-veh_dict = {
-    'Local bus': '5', # GGT Bus
-    'Express bus': '6',  # generic express bus
-    'Ferry service': '60', # alameda/oakland ferry
-    'Light rail': '38',  # VTA LRT 2-car train
-    'Heavy rail': '41',  # BART 9-car train
-    'Commuter rail': '50'  # caltrain 6-car
 }
 
 # maps time of day period to correct headway variable
@@ -73,7 +63,7 @@ class emme_network_conversion:
         self.node_shapefile = os.path.join(cube_network_folder, "mtc_transit_network_{}_CONG_nodes.DBF".format(period))
         # transit_lin_file = r"E:\projects\clients\marin\2015_test_2019_02_13\trn\transitLines_new_nodes.lin"
         self.transit_lin_file = os.path.join(cube_network_folder, "transitLines_new_nodes.lin")
-        self.transit_system_file = os.path.join(cube_network_folder, "transitSystem.PTS")
+        self.vehtype_pts_file = os.path.join(cube_network_folder, "vehtype.pts")
         self.transit_SET3_file =  os.path.join(cube_network_folder, "transitFactors_SET3.fac")
         self.node_id_crosswalk_file = os.path.join(self.emme_network_transaction_folder, "node_id_crosswalk.csv")
         self.emme_mode_transaction_file = os.path.join(self.emme_network_transaction_folder, "emme_modes.txt")
@@ -214,38 +204,13 @@ class emme_network_conversion:
         return node_gdf, link_gdf
 
 
-    def parse_transit_system_file(self):
-        operator_data = []
-        mode_data = []
+    def parse_vehtype_pts_file(self):
         vehicletype_data = []
-        # looping through each line in transit system file.
-        with open(self.transit_system_file, 'r') as file:
+        # looping through each line in vehicle type pts file.
+        with open(self.vehtype_pts_file, 'r') as file:
             line = file.readline()
             while line:
                 data_dict = {}
-
-                # parsing operator data
-                if 'OPERATOR NUMBER' in line:
-                    line = line.replace('OPERATOR ', '')
-                    # replace spaces with comma unless inside quote, then remove quotes
-                    line_segs = ','.join(shlex.split(line)).split(',')
-                    for line_seg in line_segs:
-                        key = line_seg.split('=')[0]
-                        value = line_seg.split('=')[1]
-                        data_dict.update({key:value})
-                    operator_data.append(data_dict)
-
-                # parsing mode data
-                if 'MODE NUMBER' in line:
-                    line = line.replace('MODE NUMBER', 'NUMBER')
-                    # replace spaces with comma unless inside quote, then remove quotes
-                    line_segs = ','.join(shlex.split(line)).split(',')
-                    for line_seg in line_segs:
-                        key = line_seg.split('=')[0]
-                        value = line_seg.split('=')[1]
-                        data_dict.update({key:value})
-                    mode_data.append(data_dict)
-
                 # parsing vehicletype data
                 if 'VEHICLETYPE NUMBER' in line:
                     line = line.replace('VEHICLETYPE NUMBER', 'NUMBER')
@@ -260,44 +225,10 @@ class emme_network_conversion:
                 # read next line
                 line = file.readline()
 
-        operator_df = pd.DataFrame(operator_data)
         vehicletype_df = pd.DataFrame(vehicletype_data)
         vehicletype_df.rename(columns={'NUMBER': 'VEHICLETYPE'}, inplace=True)
 
-        transit_system_mode_df = pd.DataFrame(mode_data)
-        # metching NAME to emme_mode.  e.g. Local Bus -> b
-        lower_emme_transit_modes_dict = dict((k.lower(), v) for k, v in emme_transit_modes_dict.items())
-        transit_system_mode_df['emme_mode'] = transit_system_mode_df['NAME'].apply(
-            lambda x: lower_emme_transit_modes_dict[x.lower()])
-        transit_system_mode_df.rename(columns={'NUMBER': 'MODE'}, inplace=True)
-
-        return operator_df, transit_system_mode_df, vehicletype_df
-
-
-    def parse_transit_SET_file(self):
-        faresystem_df = pd.DataFrame(columns=['FARESYSTEM', 'MODE'])
-        # looping through each line in transit system file.
-        with open(self.transit_SET3_file, 'r') as file:
-            line = file.readline()
-            while line:
-                data_dict = {}
-
-                # parsing faresystem data from file
-                if 'FARESYSTEM=' in line:
-                    # FARESYSTEM=1, MODE=12-13\n -> FARESYSTEM: 1, MODE: 12;  FARESYSTEM 1, MODE: 13
-                    line_segs = line.replace(' ','').replace('\n', '').split(',')
-                    faresystem = line_segs[0].split('=')[1]
-                    mode = line_segs[1].split('=')[1]
-                    if '-' in mode:
-                        first_mode_num = mode.split('-')[0]
-                        last_mode_num = mode.split('-')[1]
-                        for mode_num in range(int(first_mode_num), int(last_mode_num) + 1):
-                            faresystem_df.loc[len(faresystem_df)] = [faresystem, str(mode_num)]
-                    else:
-                        faresystem_df.loc[len(faresystem_df)] = [faresystem, mode]
-                # read next line
-                line = file.readline()
-        return faresystem_df
+        return vehicletype_df
 
 
     def create_and_write_mode_transaction_file(self, write_file=True):
@@ -348,13 +279,11 @@ class emme_network_conversion:
         return mode_transaction_df
 
 
-    def create_and_write_vehicle_transaction_file(self, vehicletype_df, transit_line_df, transit_system_mode_df):
+    def create_and_write_vehicle_transaction_file(self, vehicletype_df, transit_line_df):
         print("Writing vehicle transaction file")
         # need to generate crosswalk between vehicletype, mode code, and emme mode
         mode_vehtype_xwalk = transit_line_df.groupby(
-            ['MODE', 'VEHICLETYPE']).count().reset_index()[['MODE', 'VEHICLETYPE']]
-        # emme mode is already in transit_system_mode_df
-        mode_vehtype_xwalk = pd.merge(mode_vehtype_xwalk, transit_system_mode_df, how='left', on='MODE')
+            ['MODE', 'VEHICLETYPE', 'emme_mode']).count().reset_index()[['MODE', 'VEHICLETYPE', 'emme_mode']]
 
         # not a one-to-one correspondence between vehicletype and emme_mode.
         # Emme requires a vehicle to belong to only one mode.
@@ -562,7 +491,7 @@ class emme_network_conversion:
                         data_dict = {'LINE': line_id}
                     elif '=' in seg:
                         key = seg.split('=')[0].replace(' ','')
-                        value = seg.split('=')[1]
+                        value = seg.split('=')[1].replace("'", '')
 
                         if key == 'N':
                             # stop data gets put to stop_df
@@ -594,7 +523,6 @@ class emme_network_conversion:
         stop_df['ACCESS'] = stop_df['ACCESS'].astype(int)
         stop_df['N'] = stop_df['stop'].abs()
 
-        transit_line_df['VEHICLETYPE'] = transit_line_df['USERA2'].map(veh_dict)
         transit_line_df['emme_mode'] = transit_line_df['USERA2'].map(emme_transit_modes_dict)
 
         assert all(transit_line_df['emme_mode'].notna()), 'Emme Mode missing for: \n{}'.format(
@@ -670,8 +598,12 @@ class emme_network_conversion:
 
         # remove transit lines that are missing stops
         lines_missing_stops = transit_line_df[transit_line_df['LINE'].isin(stops_missing_links['LINE'])]
-        transit_line_df_trimmed = transit_line_df[~transit_line_df['LINE'].isin(lines_missing_stops['LINE'])]
-        stop_df_trimmed = stop_df[stop_df['LINE'].isin(transit_line_df_trimmed['LINE'])]
+
+        # can uncomment if you do not want emme to crash on these lines
+        transit_line_df_trimmed = transit_line_df
+        stop_df_trimmed = stop_df
+        # transit_line_df_trimmed = transit_line_df[~transit_line_df['LINE'].isin(lines_missing_stops['LINE'])]
+        # stop_df_trimmed = stop_df[stop_df['LINE'].isin(transit_line_df_trimmed['LINE'])]
 
         if len(stops_missing_links > 0):
             stops_missing_links.to_csv(os.path.join(
@@ -736,17 +668,7 @@ class emme_network_conversion:
         return stop_df, stop_transaction_cols
 
 
-    def create_transit_line_transaction_variables(self, transit_line_df, transit_system_mode_df, mode_vehtype_xwalk, headway_var):
-        # transit_line_df['mode'] = transit_line_df['MODE'].astype(int)
-        # need to assign emme_mode for each transit line. this comes from transitSystem.PTS file
-        #    new network has it in transit line file
-        # transit_line_df = pd.merge(
-        #     transit_line_df,
-        #     transit_system_mode_df[['MODE', 'emme_mode']],
-        #     how='left',
-        #     on='MODE',
-        #     validate='many_to_one'
-        # )
+    def create_transit_line_transaction_variables(self, transit_line_df, mode_vehtype_xwalk, headway_var):
         # need to assign emme_vehicle for each transit line
         # this comes from mode_vehtype_xwalk generated during vehicle transaction file creation
         transit_line_df = pd.merge(
@@ -849,12 +771,12 @@ class emme_network_conversion:
         return transit_line_df, stop_df
 
 
-    def write_transit_line_transaction_file(self, node_gdf, link_gdf, transit_line_df, stop_df, transit_system_mode_df, mode_vehtype_xwalk, headway_var):
+    def write_transit_line_transaction_file(self, node_gdf, link_gdf, transit_line_df, stop_df, mode_vehtype_xwalk, headway_var):
         print("Parsing input transit line file")
 
         stop_df, stop_transaction_cols  = self.create_stop_transaction_variables(stop_df, node_gdf, link_gdf)
         transit_line_df = self.create_transit_line_transaction_variables(
-            transit_line_df, transit_system_mode_df, mode_vehtype_xwalk, headway_var)
+            transit_line_df, mode_vehtype_xwalk, headway_var)
 
         # transit_line_df, stop_df = self.find_lines_with_created_segments(transit_line_df, stop_df)
 
@@ -962,12 +884,8 @@ class emme_network_conversion:
         node_gdf = self.determine_centroid_nodes(node_gdf)
         node_gdf, link_gdf = self.renumber_nodes_for_emme(node_gdf, link_gdf)
 
-        operator_df, transit_system_mode_df, vehicletype_df = self.parse_transit_system_file()
+        vehicletype_df = self.parse_vehtype_pts_file()
         transit_line_df, stop_df = self.parse_transit_line_file()
-        # merge FARESYSTEM to transit_lines
-        # faresystem is already included in new transitline file
-        # faresystem_df = self.parse_transit_SET_file()
-        # transit_line_df = pd.merge(transit_line_df, faresystem_df, how='left', on='MODE')
 
         # removing links and nodes that are not needed
         link_gdf, node_gdf, transit_line_df, stop_df = self.trim_network(
@@ -977,7 +895,7 @@ class emme_network_conversion:
         # modes and vehicles
         mode_transaction_df = self.create_and_write_mode_transaction_file()
         mode_vehtype_xwalk = self.create_and_write_vehicle_transaction_file(
-            vehicletype_df, transit_line_df, transit_system_mode_df)
+            vehicletype_df, transit_line_df)
 
         # network
         node_gdf, link_gdf = self.write_links_and_nodes_transaction_file(node_gdf, link_gdf, mode_transaction_df)
@@ -986,7 +904,7 @@ class emme_network_conversion:
         # transit network
         self.create_transit_time_functon_transaction_file()
         transit_line_df, stop_df = self.write_transit_line_transaction_file(
-            node_gdf, link_gdf, transit_line_df, stop_df, transit_system_mode_df, mode_vehtype_xwalk, headway_var=period_to_headway_dict[self.period])
+            node_gdf, link_gdf, transit_line_df, stop_df, mode_vehtype_xwalk, headway_var=period_to_headway_dict[self.period])
         self.write_extra_transit_line_attributes_file(transit_line_df)
         self.write_extra_transit_segment_attributes_file(stop_df, transit_line_df)
 
