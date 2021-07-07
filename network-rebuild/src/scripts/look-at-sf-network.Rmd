@@ -1,0 +1,132 @@
+---
+title: "Look at SF Network"
+output: html_notebook
+---
+
+# Overhead
+```{r overhead, include = FALSE}
+packages_vector <- c("tidyverse",
+                     "jsonlite",
+                     "sf")
+
+need_to_install <- packages_vector[!(packages_vector %in% installed.packages()[,"Package"])]
+
+if (length(need_to_install)) install.packages(need_to_install)
+
+for (package in packages_vector) {
+  library(package, character.only = TRUE)
+}
+
+```
+
+# Remote I/O
+```{r remote-io}
+input_shape_file_name <- "../../data/processed/step1_roadway/sf_shape.geojson"
+input_link_data_file_name <- "../../data/processed/step1_roadway/sf_link.json"
+output_file_name <- "working_networks/simple_sf_tomtom_osm.geojson"
+```
+
+# Data Reads
+```{r read}
+shapes_sf <- st_read(input_file_name, stringsAsFactors = FALSE)
+links_df <- read_json(input_link_data_file_name, simplifyVector = TRUE)
+```
+
+# Reductions
+```{r reductions}
+osm_lanes_df <- links_df  %>%
+  select(id, lanes) %>%
+  unnest() %>%
+  filter(!lanes == "nan") %>%
+  filter(!lanes == "") %>%
+  group_by(id) %>%
+  summarise(min_osm_lanes = min(lanes), max_osm_lanes = max(lanes)) %>%
+  ungroup() %>%
+  mutate(osm_lanes_ambiguous = min_osm_lanes != max_osm_lanes)
+
+osm_names_df <- links_df  %>%
+  select(id, name) %>%
+  unnest() %>%
+  filter(!name == "nan") %>%
+  filter(!name == "") %>%
+  group_by(id) %>%
+  summarise(osm_name = first(name)) %>%
+  ungroup() %>%
+  filter(!osm_name == "nan")
+
+osm_highway_df <- links_df  %>%
+  select(id, highway) %>%
+  unnest() %>%
+  filter(!highway == "nan") %>%
+  filter(!highway == "") %>%
+  group_by(id) %>%
+  summarise(osm_highway = first(highway)) %>%
+  ungroup() %>%
+  filter(!osm_highway == "nan")
+
+output_sf <- left_join(shapes_sf, osm_lanes_df, by = c("id")) %>%
+  left_join(., osm_names_df, by = c("id")) %>%
+  left_join(., osm_highway_df, by = c("id")) %>%
+  left_join(., select(links_df, id, LANES, tomtom_id, tomtom_t_jnctid, tomtom_f_jnctid), by = c("id")) %>%
+  mutate(lanes_match = FALSE) %>%
+  mutate(tom_lanes = replace_na(LANES, -9)) %>%
+  mutate(min_osm_lanes = replace_na(min_osm_lanes, -9)) %>%
+  mutate(max_osm_lanes = replace_na(max_osm_lanes, -9)) %>%
+  mutate(lanes_match = tom_lanes > 0 & tom_lanes <= max_osm_lanes & tom_lanes >= min_osm_lanes) %>%
+  mutate(tomtom_id = if_else(is.na(tomtom_id), -9, tomtom_id)) %>%
+  mutate(tomtom_f_jnctid = replace_na(tomtom_f_jnctid), -9) %>%
+  mutate(tomtom_t_jnctid = replace_na(tomtom_t_jnctid), -9) %>%
+  mutate(lanes_match = replace_na(lanes_match, FALSE))
+
+```
+
+# Diagnostics
+```{r diagnostics-match}
+tom_tom_by_highway_df <- output_sf %>%
+  st_set_geometry(NULL) %>%
+  mutate(tom_tom_match = tomtom_id > 0) %>%
+  filter(!is.na(osm_highway)) %>%
+  group_by(osm_highway, tom_tom_match) %>%
+  summarise(count = n()) %>%
+  group_by(osm_highway) %>%
+  mutate(match_rate = count / sum(count)) %>%
+  ungroup() %>%
+  filter(tom_tom_match) %>%
+  select(osm_highway, match_rate, count) %>%
+  arrange(match_rate)
+  
+
+tom_tom_by_highway_df
+```
+
+```{r diagnostics-lane}
+osm_highway_roads_vector <- c("primary", "secondary", "motorway_link", "tertiary",
+                              "motorway", "trunk", "residential", "tertiary_link",
+                              "trunk_link", "secondary_link", "primary_link")
+
+lanes_by_highway_df <- output_sf %>%
+  st_set_geometry(NULL) %>%
+  filter(!is.na(osm_highway)) %>%
+  filter(osm_highway %in% osm_highway_roads_vector) %>%
+  mutate(osm_lanes_present = min_osm_lanes > 0) %>%
+  mutate(tom_lanes_present = tom_lanes > 0) %>%
+  mutate(osm_or_tom_lanes_present = osm_lanes_present | tom_lanes_present) %>%
+  group_by(osm_highway, osm_or_tom_lanes_present) %>%
+  summarise(count = n()) %>%
+  group_by(osm_highway) %>%
+  mutate(match_rate = count / sum(count)) %>%
+  ungroup() %>%
+  filter(osm_or_tom_lanes_present) %>%
+  select(osm_highway, match_rate, count) %>%
+  arrange(match_rate)
+
+lanes_by_highway_df
+```
+
+
+
+# Write
+```{r write}
+st_write(output_sf, output_file_name, delete_dsn = TRUE)
+```
+
