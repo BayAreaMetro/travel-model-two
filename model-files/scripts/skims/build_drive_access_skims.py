@@ -103,7 +103,7 @@ for line in open(maz_to_taz_mapping_file):
         col_maz = header.index('MAZ_ORIGINAL')
         continue
     mazn_tazn_mapping[int(data[col_maz])] = int(data[col_taz])
-    
+
 #read param block
 print 'reading hwy parameter block data'
 block_data = {}
@@ -115,7 +115,7 @@ for line in open(hwy_parameter_block_file):
     key = line[0].strip()
     value = float(line[1].split(';')[0].strip())
     block_data[key] = value
-    
+
 global auto_op_cost
 global vot
 global walk_rate
@@ -157,7 +157,7 @@ for temp_line in open(transit_line_file):
     semicolon_index = temp_line.find(";")
     if semicolon_index >= 0:
         temp_line = temp_line[:semicolon_index].strip()
-    
+
     # skip blank lines
     if len(temp_line)==0: continue
 
@@ -165,13 +165,13 @@ for temp_line in open(transit_line_file):
     trn_line = trn_line + temp_line
 
     # if it ends in a comma, continue until we find the end
-    if temp_line[-1]==",":
+    if temp_line[-1] == "," or temp_line[-2] == "N":
         continue
 
     # print("trn_line={}".format(trn_line))
 
     # split it on equals or comma
-    split_line = map(str.strip,re.split('[=,]',trn_line))
+    split_line = list(map(str.strip, re.split("[=,]", trn_line)))
     # print("split_line={}".format(split_line))
 
     if len(split_line) < 3:
@@ -181,7 +181,13 @@ for temp_line in open(transit_line_file):
 
     tod = []
     for i in range(len(periods)):
-        tod.append(float(split_line[split_line.index('HEADWAY[' + str(i+1) + ']') + 1]) > 0.0)
+        if "HEADWAY[{index}]".format(index=i + 1) not in split_line:
+            tod.append(False)
+        else:
+            tod.append(
+                float(split_line[split_line.index("HEADWAY[" + str(i + 1) + "]") + 1])
+                > 0.0
+            )
         period = periods[i]
         if not mode in stops_by_tod_and_mode[period]:
             stops_by_tod_and_mode[period][mode] = {}
@@ -191,7 +197,7 @@ for temp_line in open(transit_line_file):
     stop_nodes = {}
     iter = split_line.index('N') + 1
     while iter < len(split_line):
-        #skip NNTIME,TIME,ACCESS,etc token and value	
+        #skip NNTIME,TIME,ACCESS,etc token and value
         if split_line[iter] in ["NNTIME", "TIME", "ACCESS", "ACCESS_C", "DELAY", "DELAY_C", "DWELL", "DWELL_C"]:
             iter = iter + 2
             continue
@@ -202,7 +208,7 @@ for temp_line in open(transit_line_file):
         n = int(split_line[iter])
         if n > 0:
            stop_nodes[n] = None
-        iter = iter + 1			
+        iter = iter + 1
 #    for i in range(split_line.index('N') + 1,len(split_line)):
 #        n = int(split_line[i])
 #        if n > 0:
@@ -213,7 +219,7 @@ for temp_line in open(transit_line_file):
                 stops_by_tod_and_mode[periods[i]][mode][n] = None
     trn_line = ""
 
-                
+
 id_mode_map = {1:'LOCAL_BUS',
                2:'EXPRESS_BUS',
                3:'FERRY_SERVICE',
@@ -221,12 +227,10 @@ id_mode_map = {1:'LOCAL_BUS',
                5:'HEAVY_RAIL',
                6:'COMMUTER_RAIL'}
 print 'building tap->mode'
-tapn_to_mode = {}
+all_tapn = []
 for line in open(network_tap_nodes_file):
-    tapn,mode = map(int,line.strip().split(','))
-    tapn_to_mode[tapn] = id_mode_map[mode]
+    all_tapn.append(int(line))
 
-    
 print 'building tod->mode->taps'
 tod_mode_tapn = {}
 for period in periods:
@@ -243,18 +247,23 @@ for line in open(network_tap_links_file):
         tapn = b
         stopn = a
     #stops_by_tod_and_mode[periods[i]][mode][n]
-    if not tapn in tapn_to_mode:
+    if not tapn in all_tapn:
         print 'tapn not found in (' + str(a) + ',' + str(b) + ')'
         continue
-    mode = tapn_to_mode[tapn]
-    for period in periods:
-        if not tapn in tod_mode_tapn[period][mode]:
-            #check to see if tap is available in this period
-            if stopn in stops_by_tod_and_mode[periods[i]][mode]:
-                if not tapn in tapn_tazn_lookup:
-                    isolated_tapns[tapn] = None
-                else:
-                    tod_mode_tapn[period][mode][tapn] = tapn_tazn_lookup[tapn] #closest (mazn,tazn,walk_time from mazn to tapn,walk_distance from mazn to tapn)
+    # mode = tapn_to_mode[tapn]
+    for mode_id in id_mode_map:
+        mode = id_mode_map[mode_id]
+        for period in periods:
+            if not tapn in tod_mode_tapn[period][mode]:
+                # check to see if tap is available in this period
+                if stopn in stops_by_tod_and_mode[period][mode]:
+                    if not tapn in tapn_tazn_lookup:
+                        isolated_tapns[tapn] = None
+                    else:
+                        tod_mode_tapn[period][mode][tapn] = tapn_tazn_lookup[
+                            tapn
+                        ]  # closest (mazn,tazn,walk_time from mazn to tapn,walk_distance from mazn to tapn)
+
 print 'taps with no (apparent) walk access: ' + str(isolated_tapns.keys())
 
 print 'building list of tazs with taps by tod'
@@ -265,23 +274,21 @@ for period in periods:
         for tapn in tod_mode_tapn[period][mode]:
             tazs_with_taps[period][tod_mode_tapn[period][mode][tapn][1]] = None
 
-            
 def formCost(time,dist,toll):
     return time + vot*(dist * auto_op_cost + toll)
-
 
 
 # tod_mode_tapn[period][mode][tapn] = (mazn,tazn,distance)
 drive_access_costs = {}
 for period in periods:
-    
+
     print 'reading taz->taz skim for ' + period + ' and building drive access skim'
     #read the taz->taz skim
     #skimtaz_tazn_map = skimtaz_tazn_mapping[period]
     skimtaz_tazn_map = tazseq_mapping
     tazn_tazn_skim = {}
     tazns = {} #unique set of taz nodes
-    
+
     for line in open(skim_taz_taz_time_file.replace(PERIOD_TOKEN,period)):
         line = line.strip().split(',') #1,1,1,0.21,460.5  #I,J,[something],TIMEDA,DISTDA[,BTOLLDA]
         ftazn = skimtaz_tazn_map[int(line[0])]
@@ -298,7 +305,7 @@ for period in periods:
         tazns[ftazn] = None
     tazns = list(tazns.keys())
     tazns.sort()
-    
+
     print 'building drive access skims for period ' + period
     drive_access_costs[period] = {}
     for mode_id in id_mode_map:
@@ -311,7 +318,7 @@ for period in periods:
                 cost = tazn_tazn_skim[tazn][tapn_costs[1]][0] + tapn_costs[2]
                 if (drive_access_costs[period][mode][tazn] is None) or (drive_access_costs[period][mode][tazn][0] > cost):
                     drive_access_costs[period][mode][tazn] = (cost,tapn)
-    
+
 print 'writing drive access skim results'
 f = open(drive_tansit_skim_out_file,'wb')
 f.write(','.join(['FTAZ','MODE','PERIOD','TTAP','TMAZ','TTAZ','DTIME','DDIST','DTOLL','WDIST']) + os.linesep)
@@ -321,12 +328,13 @@ for period in drive_access_costs:
             if not drive_access_costs[period][mode][tazn] is None:
                 tapn = drive_access_costs[period][mode][tazn][1]
                 (tmazn,ttazn,wtime,wdist) = tod_mode_tapn[period][mode][tapn]
-                (fcost,time,dist,toll) = tazn_tazn_skim[tazn][ttazn]
-                f.write(','.join(map(str,[seq_mapping[tazn],mode,period,seq_mapping[tapn],seq_mapping[tmazn],seq_mapping[ttazn],time,dist,toll,wdist])) + os.linesep)
+                try:
+                    (fcost,time,dist,toll) = tazn_tazn_skim[tazn][ttazn]
+                    f.write(','.join(map(str,[seq_mapping[tazn],mode,period,seq_mapping[tapn],seq_mapping[tmazn],seq_mapping[ttazn],time,dist,toll,wdist])) + os.linesep)
+                except:
+                    print "period: {period}; mode: {mode}; tazn: {tazn}; ttazn: {ttazn}".format(period=period, mode=mode, tazn=tazn, ttazn=ttazn)
+                    continue
 f.close()
-    
+
 end_time = pytime.time()
 print 'elapsed time in minutes: ' + str((end_time - start_time) / 60.0)
-
-
-        

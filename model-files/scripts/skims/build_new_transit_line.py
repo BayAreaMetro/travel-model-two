@@ -14,7 +14,7 @@
     crf 8/2013
 
 """
-import csv, os,sys,math
+import csv,os,sys,math,re
 
 line_file = sys.argv[1]
 out_line_file = sys.argv[2]
@@ -49,7 +49,7 @@ for temp_line in open(line_file):
     trn_line = trn_line + temp_line
 
     # if it ends in a comma, continue until we find the end
-    if temp_line[-1]==",":
+    if temp_line[-1]=="," or temp_line[-2] == "N":
         continue
 
     trn_line_count += 1
@@ -64,8 +64,23 @@ for temp_line in open(line_file):
         # f.write(line[0] + os.linesep)
         # continue
 
+    # change line based on time periods available, also remove LONGNAME
+    basic_line_info = list(map(str.strip, re.split("[=,]", line[0])))
+
+    basic_line_info[1] = '"line_{line_count}"'.format(line_count = trn_line_count)
+
+    for i in range(len(basic_line_info) - 1):
+        if i%2 == 0:
+            basic_line_info[i] = str(basic_line_info[i]) + '='
+        else:
+            basic_line_info[i] = str(basic_line_info[i]) + ","
+
+    basic_line_info_str = ''
+    for info in basic_line_info:
+        basic_line_info_str += str(info)
+
     # print the attributes that come before N
-    f.write(line[0] + ' N=')
+    f.write(basic_line_info_str + ' N=')
 
     for i in range(1,len(line)):
         seq = []

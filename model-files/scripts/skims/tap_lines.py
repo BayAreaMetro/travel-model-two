@@ -43,12 +43,12 @@ for temp_line in open(transit_line_file):
   trn_line = trn_line + temp_line
 
   # if it ends in a comma, continue until we find the end
-  if temp_line[-1]==",":
+  if temp_line[-1]=="," or temp_line[-2] == "N":
     continue
 
   # print("trn_line={}".format(trn_line))
 
-  split_line = map(str.strip,re.split('[=,]',trn_line.strip()))
+  split_line = list(map(str.strip,re.split('[=,]',trn_line.strip())))
   if len(split_line) < 3:
     continue
   
