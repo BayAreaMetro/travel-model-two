@@ -56,7 +56,7 @@ RUN PGM=NETWORK
 ENDRUN
 
 ;first, call python program to build walk links
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_walk_transfer_links.py skims\ped_distance_tap_tap.txt hwy\tap_direct_connectors.csv
+*python %BASE_SCRIPTS%\skims\build_walk_transfer_links.py skims\ped_distance_tap_tap.txt hwy\tap_direct_connectors.csv
 IF (RETURNCODE > 0) abort
 
 *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv hwy\tap_direct_connectors.csv 2 TAP TAP
@@ -217,7 +217,7 @@ LOOP PERIOD = 1,5
         ENDRUN
 
         ;run program to renumber nodes in congested time file
-        *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\change_link_node_numbers.py hwy\link_times_@TOKEN_PERIOD@_temp1.csv hwy\link_times_@TOKEN_PERIOD@_temp2.csv hwy\mtc_transit_network_tap_to_node.txt
+        *python %BASE_SCRIPTS%\skims\change_link_node_numbers.py hwy\link_times_@TOKEN_PERIOD@_temp1.csv hwy\link_times_@TOKEN_PERIOD@_temp2.csv hwy\mtc_transit_network_tap_to_node.txt
         IF (RETURNCODE > 0) abort
 
         ;read in congested times for transit network

@@ -52,7 +52,6 @@ SET /A MAX_ITERATION=3
 SET /A MAX_INNER_ITERATION=1
 
 ::  Set choice model household sample rate
-REM SET SAMPLERATE_ITERATION1=0.005
 SET SAMPLERATE_ITERATION1=0.3
 SET SAMPLERATE_ITERATION2=0.5
 SET SAMPLERATE_ITERATION3=1
@@ -411,6 +410,7 @@ copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
 if ERRORLEVEL 2 goto done
 del mtctm2.properties
+goto done
 
 taskkill /im "java.exe" /F
 
