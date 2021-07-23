@@ -41,9 +41,9 @@ _set_dict = {
 
 _hours_in_period = {
     'EA': 3,  # 3:00 to 6:00 AM
-    'AM': 3,  # 6:00 to 9:00 AM
-    'MD': 6.5,  # 9:00 AM to 3:30 PM
-    'PM': 3.5,  # 3:30 PM to 7:00 PM
+    'AM': 4,  # 6:00 to 10:00 AM
+    'MD': 5,  # 10:00 AM to 3:00 PM
+    'PM': 4,  # 3:00 PM to 7:00 PM
     'EV': 8,  # 7:00 PM to 3:00 AM
 }
 

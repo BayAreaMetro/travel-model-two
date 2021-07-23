@@ -1,4 +1,5 @@
 import geopandas
+import shapely
 import pandas as pd
 import numpy as np
 import shlex
@@ -8,10 +9,22 @@ import argparse
 import time
 import re
 pd.set_option("display.max_columns",250)
+cal_state_plane_VI_crs = '+proj=lcc +lat_1=32.78333333333333 +lat_2=33.88333333333333 +lat_0=32.16666666666666 +lon_0=-116.25 +x_0=2000000 +y_0=500000.0000000002 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs'
+
 
 # ------------- run parameters ---------
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
-# _all_periods = ['EA', 'AM']
+# _all_periods = ['AM']
+
+# maps time of day period to correct headway variable
+period_to_headway_dict = {
+    'EA': 'HEADWAY[1]',
+    'AM': 'HEADWAY[2]',
+    'MD': 'HEADWAY[3]',
+    'PM': 'HEADWAY[4]',
+    'EV': 'HEADWAY[5]',
+}
+
 
 # maps transit 'Mode Group' defined in TM2 to a single character required by Emme
 emme_transit_modes_dict = {
@@ -24,14 +37,17 @@ emme_transit_modes_dict = {
     'Commuter rail': 'r'
 }
 
-# maps time of day period to correct headway variable
-period_to_headway_dict = {
-    'EA': 'HEADWAY[1]',
-    'AM': 'HEADWAY[2]',
-    'MD': 'HEADWAY[3]',
-    'PM': 'HEADWAY[4]',
-    'EV': 'HEADWAY[5]',
+# station attributes are only applied to taps that service the corresponding mode
+station_type_to_emme_mode_dict = {
+    'H': ['h'],
+    'C': ['r'],
+    'F': ['f'],
+    'L': ['l'],
+    'B': ['b', 'x']
 }
+station_attribute_use_flags=[2015]
+# stations that match to taps farther than a mile away are not included
+station_to_tap_max_dist = 5280  # feet
 
 # extra attributes from cube script that should be included in the Emme network
 extra_node_attributes = ['OLD_NODE', 'TAPSEQ', 'FAREZONE']
@@ -44,33 +60,37 @@ extra_link_attributes = ['SPEED', 'FEET',
     'OLD_A', 'OLD_B', 'CTIM', 'NTL_MODE']
 extra_transit_line_attributes = ['HEADWAY[1]','HEADWAY[2]','HEADWAY[3]','HEADWAY[4]',
     'HEADWAY[5]', 'MODE', 'FARESYSTEM', 'uses_NNTIME']
+# name is from the raodway attribute names file
+extra_link_network_fields = ['COUNTY', 'CNTYPE', 'modes', 'name']
 
-# old network attributes
-# extra_node_attributes = ['COUNTY', 'MODE', 'OLD_NODE', 'TAPSEQ', 'FAREZONE']
-# extra_link_attributes = ['KPH', 'MINUTES', 'LANES', 'RAMP', 'SPEEDCAT', 'FEET',
-#     'ASSIGNABLE', 'TRANSIT', 'USECLASS', 'FT', 'FFS', 'TRANTIME', 'WALKDIST','WALKTIME',
-#     'OLD_A', 'OLD_B', 'CTIM', 'NTL_MODE']
-# extra_transit_line_attributes = ['HEADWAY[1]','HEADWAY[2]','HEADWAY[3]','HEADWAY[4]',
-#     'HEADWAY[5]', 'MODE', 'FARESYSTEM', 'uses_NNTIME']
+# station attributes
+station_extra_attributes = ['stBikeWalk', 'stBusWalkTime', 'stPNRWalkTime', 'stKNRWalkTime', 'stPNRDriveTime',
+                            'stKNRDriveTime', 'stPlatformTime', 'stFreeSpaces', 'stPaidSpaces', 'stPermitSpaces',
+                            'stPrivateSpaces', 'stDailyCost', 'stMonthlyCost', 'stPrivateCost', 'stPNRSplit']
+station_network_field_attributes = ['stName', 'stType', 'stParkType']
 
 # --------------------------------------------- Methods --------------------------------------------
 class emme_network_conversion:
     def __init__(self, cube_network_folder, period):
         self.period = period
-        self.emme_network_transaction_folder = os.path.join(
-            cube_network_folder,"emme_network_transaction_files_{}".format(period))
+        # input data
         self.link_shapefile = os.path.join(cube_network_folder, "mtc_transit_network_{}_CONG_links.DBF".format(period))
         self.node_shapefile = os.path.join(cube_network_folder, "mtc_transit_network_{}_CONG_nodes.DBF".format(period))
-        # transit_lin_file = r"E:\projects\clients\marin\2015_test_2019_02_13\trn\transitLines_new_nodes.lin"
         self.transit_lin_file = os.path.join(cube_network_folder, "transitLines_new_nodes.lin")
         self.vehtype_pts_file = os.path.join(cube_network_folder, "vehtype.pts")
-        self.transit_SET3_file =  os.path.join(cube_network_folder, "transitFactors_SET3.fac")
+        self.link_names_file = os.path.join(cube_network_folder, "roadway-assignment-names-helper.csv")
+        self.station_attributes_input_file = os.path.join(cube_network_folder, 'station_attribute_data_input.csv')
+        # output data
+        self.emme_network_transaction_folder = os.path.join(
+            cube_network_folder,"emme_network_transaction_files_{}".format(period))
+        self.station_attributes_folder = os.path.join(self.emme_network_transaction_folder, 'station_attributes')
         self.node_id_crosswalk_file = os.path.join(self.emme_network_transaction_folder, "node_id_crosswalk.csv")
         self.emme_mode_transaction_file = os.path.join(self.emme_network_transaction_folder, "emme_modes.txt")
         self.emme_vehicle_transaction_file = os.path.join(self.emme_network_transaction_folder, "emme_vehicles.txt")
         self.emme_network_transaction_file = os.path.join(self.emme_network_transaction_folder, "emme_network.txt")
         self.extra_node_attr_file = os.path.join(self.emme_network_transaction_folder, "emme_extra_node_attributes.txt")
         self.extra_link_attr_file = os.path.join(self.emme_network_transaction_folder, "emme_extra_link_attributes.txt")
+        self.extra_link_network_fields_file = os.path.join(self.emme_network_transaction_folder, "emme_extra_link_network_fields.txt")
         self.update_extra_link_attr_file = os.path.join(self.emme_network_transaction_folder, "emme_update_extra_link_attributes.txt")
         self.emme_transit_network_file = os.path.join(self.emme_network_transaction_folder, "emme_transit_lines.txt")
         self.extra_transit_line_attr_file = os.path.join(self.emme_network_transaction_folder, "emme_extra_line_attributes.txt")
@@ -78,6 +98,8 @@ class emme_network_conversion:
         self.emme_transit_time_function_file = os.path.join(self.emme_network_transaction_folder, "emme_transit_time_function.txt")
         self.all_stop_attributes_file = os.path.join(self.emme_network_transaction_folder, "all_stop_attributes.csv")
         self.all_transit_lines_file = os.path.join(self.emme_network_transaction_folder, "all_transit_lines.csv")
+        self.station_extra_attributes_file = os.path.join(self.emme_network_transaction_folder, "station_extra_attributes.txt")
+        self.station_network_fields_file = os.path.join(self.emme_network_transaction_folder, "station_network_fields.txt")
 
     def load_input_data(self):
         print("Loading input data for", self.period, "period")
@@ -413,8 +435,16 @@ class emme_network_conversion:
         return node_gdf, link_gdf
 
 
-    def write_extra_attributes_header(self, file, extra_attrib_cols, attribute_type):
-        file.write('t extra_attributes\n')
+    def write_extra_attributes_header(self, file, extra_attrib_cols, attribute_type, network_fields=False):
+        if network_fields:
+            parameter_type = 'network_fields'
+            default_value = 'STRING'
+            prefix='#'
+        else:
+            parameter_type = 'extra_attributes'
+            default_value = '0.0'
+            prefix='@'
+        file.write(f't {parameter_type}\n')
         assert attribute_type in ['NODE', 'LINK', 'TRANSIT_LINE', 'TRANSIT_SEGMENT'], "invalid attribute_type"
         col_names_string = ''
         if attribute_type == 'NODE':
@@ -430,10 +460,10 @@ class emme_network_conversion:
             # attribute names in EMME need to be lower case: COUNTY -> @county
             # attribute name also can't have brackets: HEADWAY[1] -> @headway1
             emme_attr = attr.replace('[','').replace(']','').lower()
-            attr_string = '@' + emme_attr + ',' + attribute_type + ",0.0,'" + attr + "'\n"
+            attr_string = prefix + emme_attr + ',' + attribute_type + ","+ default_value + ",'" + attr + "'\n"
             file.write(attr_string)
-            col_names_string = col_names_string + ', @' + emme_attr
-        file.write('end extra_attributes\n')
+            col_names_string = col_names_string + ', ' + prefix + emme_attr
+        file.write(f'end {parameter_type}\n')
         col_names_string += '\n'
         # column names are written before data and after header
         file.write(col_names_string)
@@ -458,6 +488,28 @@ class emme_network_conversion:
             cols = ['A_node_id', 'B_node_id'] + extra_link_attributes
             link_gdf[cols].fillna('NA').to_csv(
                 file, mode='a', sep=',', quoting=csv.QUOTE_NONNUMERIC, header=False, index=False, line_terminator='\n')
+        file.close()
+
+        # extra link attributes including link names
+        roadway_names = pd.read_csv(self.link_names_file, encoding="ISO-8859-1")
+        link_gdf_with_names = pd.merge(
+            link_gdf,
+            roadway_names,
+            how='left',
+            left_on='MODEL_LINK_',
+            right_on='model_link_id'
+        )
+
+        for col in extra_link_network_fields:
+            link_gdf_with_names[col] = link_gdf_with_names[col].str.replace('"', '').replace("'", '')
+
+        extra_link_network_fields_file = os.path.join(self.emme_network_transaction_folder, "emme_extra_link_network_fields.txt")
+        with open(self.extra_link_network_fields_file, 'w', encoding='utf-8') as file:
+            self.write_extra_attributes_header(file, extra_link_network_fields, 'LINK', network_fields=True)
+            cols = ['A_node_id', 'B_node_id'] + extra_link_network_fields
+            link_gdf_with_names[cols].fillna('NA').to_csv(
+                file, mode='a', sep=',', quoting=csv.QUOTE_NONNUMERIC, quotechar="'",
+                header=False, index=False, line_terminator='\n', encoding='utf-8')
         file.close()
         pass
 
@@ -871,8 +923,212 @@ class emme_network_conversion:
                 file, mode='a', sep=',', quoting=csv.QUOTE_NONNUMERIC, header=False, index=False, line_terminator='\n')
         file.close()
 
-
         return stop_attributes_df
+
+
+    def match_station_to_tap(self, sa_gdf, node_gdf, link_gdf, stop_df, transit_line_df):
+        sa_with_taps = []
+        sa_to_tap_connections = []
+
+        for station_type in sa_gdf['Station Type'].unique():
+            # print('Station attributes for Station Type: ', station_type)
+            # find transit lines that have mode of station
+            emme_mode = station_type_to_emme_mode_dict[station_type]
+            mode_lines = transit_line_df.loc[transit_line_df['emme_mode'].isin(emme_mode), 'LINE']
+            # find stops of those transit lines
+            mode_stops = stop_df.loc[stop_df['LINE'].isin(mode_lines), 'node_id'].unique()
+
+            # get the links that service the stops
+            mode_tap_connectors = link_gdf[
+                ((link_gdf['A_is_tap'] == 1) & (link_gdf['j_node'].isin(mode_stops)))
+                | ((link_gdf['B_is_tap'] == 1) & (link_gdf['i_node'].isin(mode_stops)))]
+
+            # get the taps at the end of the links that service the stops
+            mode_taps_df = node_gdf.loc[
+                node_gdf['i_node'].isin(mode_tap_connectors.loc[mode_tap_connectors['A_is_tap'] == 1, 'i_node'])
+                | node_gdf['i_node'].isin(mode_tap_connectors.loc[mode_tap_connectors['B_is_tap'] == 1, 'j_node'])
+            ]
+
+            # select the stations for this mode:
+            mode_sa_gdf = sa_gdf[((sa_gdf['Station Type'] == station_type)
+                                 &  (sa_gdf['Use Flag'].isin(station_attribute_use_flags)))]
+
+            def get_nearest_tap(row, taps_df):
+                taps_df['sa_x'] = row.X
+                taps_df['sa_y'] = row.Y
+                taps_df['dist'] = np.sqrt((taps_df['sa_x'] - taps_df['X'])**2
+                                          + (taps_df['sa_y'] - taps_df['Y'])**2)
+                row['tap'] = taps_df.loc[taps_df['dist'].idxmin(), 'i_node']
+                row['tap_dist'] = taps_df['dist'].min()
+                return row
+
+            # append closet tap id and distance to tap to the station attributes data
+            mode_sa_gdf = mode_sa_gdf.apply(
+                lambda row: get_nearest_tap(row, mode_taps_df), axis=1)
+            mode_sa_gdf['keep_station'] = True
+            mode_sa_gdf.loc[mode_sa_gdf['tap_dist'] > station_to_tap_max_dist, 'keep_station'] = False
+            mode_sa_gdf.crs = sa_gdf.crs
+            sa_with_taps.append(mode_sa_gdf)
+
+            # ------- outputting validation shape files ------
+            sa_filename = os.path.join(self.station_attributes_folder, 'stations_' + station_type + '.shp')
+            mode_sa_gdf.to_file(sa_filename)
+
+            mode_taps_gdf =  geopandas.GeoDataFrame(mode_taps_df,
+                                                    geometry=geopandas.points_from_xy(mode_taps_df.X, mode_taps_df.Y))
+            mode_taps_gdf.crs = mode_sa_gdf.crs
+            taps_filename = os.path.join(self.station_attributes_folder, 'taps_' + station_type + '.shp')
+            mode_taps_gdf.to_file(taps_filename)
+
+            # creating shape file that draws a line from the station to it's matched tap
+            sa_to_tap_connections_mode = pd.merge(
+                mode_sa_gdf.drop(columns='geometry'),
+                mode_taps_gdf.drop(columns='geometry'),
+                how='left',
+                left_on='tap',
+                right_on='node_id',
+                suffixes=('_sa', '_tap'),
+            )
+
+            sa_to_tap_connections_mode['geometry'] = sa_to_tap_connections_mode.apply(
+                lambda row: shapely.geometry.LineString([(row['X_sa'], row['Y_sa']), (row['X_tap'], row['Y_tap'])]),
+                axis=1)
+            sa_to_tap_connections.append(sa_to_tap_connections_mode)
+
+
+        sa_to_tap_connections = pd.concat(sa_to_tap_connections)
+        sa_to_tap_connections.crs = cal_state_plane_VI_crs
+        sa_to_tap_filename = os.path.join(self.station_attributes_folder, 'station_to_tap_connections.csv')
+        sa_to_tap_connections.to_file(sa_to_tap_filename)
+
+        return pd.concat(sa_with_taps)
+
+
+    def prepare_tap_station_attributes(self, sa_with_taps):
+        # ---- functions used to aggregate accross stations attached to the same tap  ----
+        def join_strings(x):
+            x_join = '; '.join(x.fillna('').unique())
+            return (x_join)
+
+        def average_station_attributes(x):
+            return round(x.dropna().mean(), 2)
+
+        def sum_station_attributes(x):
+            return x.dropna().sum()
+
+        def average_costs(x):
+            costs_to_float = x.str.replace('$','').astype(float)
+            return costs_to_float.dropna().mean()
+
+        def waited_average_costs(x, weights):
+            costs_to_float = x.dropna().str.replace('$','').astype(float)
+            if len(costs_to_float) <= 1:
+                return costs_to_float.mean()
+            weights = weights.loc[x.dropna().index]
+            if weights.sum() == 0:
+                return round(costs_to_float.mean(), 2)
+            else:
+                return round(np.average(costs_to_float, weights=weights.loc[x.dropna().index]), 2)
+
+        tap_agg_dict = {
+            'Station Name': lambda x:  join_strings(x),
+            'Station Type': lambda x: join_strings(x),
+            'Bike Walk': lambda x: average_station_attributes(x),
+            'Bus Walk': lambda x: average_station_attributes(x),
+            'PNR Walk': lambda x: average_station_attributes(x),
+            'KNR Walk': lambda x: average_station_attributes(x),
+            'PNR IVT': lambda x: average_station_attributes(x),
+            'KNR IVT': lambda x: average_station_attributes(x),
+            'Station Platform': lambda x: average_station_attributes(x),
+            'Park Type': lambda x: join_strings(x),
+            'Operator Parking Spaces Free': lambda x: sum_station_attributes(x),
+            'Operator Parking Spaces Paid': lambda x: sum_station_attributes(x),
+            'Operator Parking Spaces Permit': lambda x: sum_station_attributes(x),
+            'Private Spaces': lambda x: sum_station_attributes(x),
+            'Parking Cost Daily': lambda x: waited_average_costs(x, weights=sa_with_taps['Operator Parking Spaces Paid']),
+            'Parking Cost Monthly': lambda x: waited_average_costs(x, weights=sa_with_taps['Operator Parking Spaces Paid']),
+            'Private Cost': lambda x: waited_average_costs(x, weights=sa_with_taps['Private Spaces']),
+            'PNR Split': lambda x: average_station_attributes(x),
+        }
+
+        station_attributes_rename_dict = {
+            'Station Name': 'stName',
+            'Station Type': 'stType',
+            'Bike Walk': 'stBikeWalk',
+            'Bus Walk': 'stBusWalkTime',
+            'PNR Walk': 'stPNRWalkTime',
+            'KNR Walk': 'stKNRWalkTime',
+            'PNR IVT': 'stPNRDriveTime',
+            'KNR IVT': 'stKNRDriveTime',
+            'Station Platform': 'stPlatformTime',
+            'Park Type': 'stParkType',
+            'Operator Parking Spaces Free': 'stFreeSpaces',
+            'Operator Parking Spaces Paid': 'stPaidSpaces',
+            'Operator Parking Spaces Permit': 'stPermitSpaces',
+            'Private Spaces': 'stPrivateSpaces',
+            'Parking Cost Daily': 'stDailyCost',
+            'Parking Cost Monthly': 'stMonthlyCost',
+            'Private Cost': 'stPrivateCost',
+            'PNR Split': 'stPNRSplit',
+        }
+        # writing all stations merged to taps file
+        sa_with_taps.to_csv(
+            os.path.join(self.station_attributes_folder, 'all_stations.csv'),
+            index=False)
+        # writing stations are are removed
+        sa_with_taps[sa_with_taps['keep_station'] == False].to_csv(
+            os.path.join(self.station_attributes_folder, 'stations_not_included.csv'),
+            index=False)
+        #writing stations that are matched to the same tap
+        sa_with_taps[sa_with_taps['tap'].duplicated(keep=False)].sort_values('tap').to_csv(
+            os.path.join(self.station_attributes_folder, 'duplicate_taps.csv'),
+            index=False)
+
+        # removing the stations that were matched to taps farther than threshold
+        sa_with_taps = sa_with_taps[sa_with_taps['keep_station']]
+
+        station_tap_attributes = sa_with_taps.groupby('tap').agg(tap_agg_dict).rename(columns=station_attributes_rename_dict).fillna(0)
+        station_tap_attributes.to_csv(os.path.join(self.station_attributes_folder, 'station_tap_attributes.csv'))
+        station_tap_attributes.reset_index(inplace=True)
+        return station_tap_attributes
+
+
+    def write_station_attributes_transaction_files(self, station_tap_attributes):
+
+        with open(self.station_extra_attributes_file, 'w') as file:
+            self.write_extra_attributes_header(file, station_extra_attributes, 'NODE')
+            cols = ['tap'] + station_extra_attributes
+            # Emme does not accept null values in extra attributes
+            station_tap_attributes[cols].fillna('NA').to_csv(
+                file, mode='a', sep=',', quoting=csv.QUOTE_NONNUMERIC, header=False, index=False, line_terminator='\n')
+        file.close()
+
+        with open(self.station_network_fields_file, 'w') as file:
+            self.write_extra_attributes_header(file, station_network_field_attributes, 'NODE', network_fields=True)
+            cols = ['tap'] + station_network_field_attributes
+            # Emme does not accept null values in extra attributes
+            station_tap_attributes[cols].fillna('NA').to_csv(
+                file, mode='a', sep=',', quoting=csv.QUOTE_NONNUMERIC, header=False, index=False, line_terminator='\n')
+        file.close()
+
+
+    def write_station_attributes_files(self, node_gdf, link_gdf, stop_df, transit_line_df):
+        print("writing station attribute transaction files")
+        if not os.path.exists(self.station_attributes_folder):
+            os.mkdir(self.station_attributes_folder)
+
+        # reading station attribute data
+        sa_data = pd.read_csv(self.station_attributes_input_file)
+        sa_gdf = geopandas.GeoDataFrame(sa_data, geometry=geopandas.points_from_xy(sa_data.X, sa_data.Y))
+        sa_gdf.crs = cal_state_plane_VI_crs
+
+        sa_gdf['unique_station_id'] = sa_gdf.index + 1
+
+        sa_with_taps = self.match_station_to_tap(sa_gdf, node_gdf, link_gdf, stop_df, transit_line_df)
+
+        sa_tap_attributes = self.prepare_tap_station_attributes(sa_with_taps)
+
+        self.write_station_attributes_transaction_files(sa_tap_attributes)
 
 
     def make_all_emme_transaction_files(self):
@@ -907,6 +1163,7 @@ class emme_network_conversion:
             node_gdf, link_gdf, transit_line_df, stop_df, mode_vehtype_xwalk, headway_var=period_to_headway_dict[self.period])
         self.write_extra_transit_line_attributes_file(transit_line_df)
         self.write_extra_transit_segment_attributes_file(stop_df, transit_line_df)
+        self.write_station_attributes_files(node_gdf, link_gdf, stop_df, transit_line_df)
 
 
     def make_updated_link_attributes_file(self):

@@ -72,20 +72,18 @@ set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUB
 CALL conda activate mtc_py2
 
 
-
-
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
-SET /A ITERATION=2
+SET /A ITERATION=1
 SET /A INNER_ITERATION=1
 IF %ITERATION% EQU 1 SET SAMPLERATE=%SAMPLERATE_ITERATION1%
 IF %ITERATION% EQU 2 SET SAMPLERATE=%SAMPLERATE_ITERATION2%
 IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
 IF %ITERATION% EQU 4 SET SAMPLERATE=%SAMPLERATE_ITERATION4%
 IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
-call zoneSystem.bat
+REM call zoneSystem.bat
+REM goto emmeseconditeration
 REM goto createemmenetwork
-REM goto afteremmeupdate
 :: ------------------------------------------------------------------------------------------------------
 
 
@@ -324,13 +322,13 @@ IF ERRORLEVEL 1 goto done
 
 %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "emme_full_run" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
+REM goto done
 
 %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "yes" --skip_import_demand
 IF ERRORLEVEL 1 goto done
 
 CALL conda deactivate
 CALL conda activate mtc_py2
-REM goto done
 :afteremmeskims
 
 REM runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
@@ -528,7 +526,7 @@ CALL conda activate mtc_py2
 :afteremmeupdate
 
 :: Create the block file that controls whether the crowding functions are called during transit assignment.
-python %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
+REM python %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
 
 ::Inner iterations with transit assignment and path recalculator
 SET /A INNER_ITERATION=0

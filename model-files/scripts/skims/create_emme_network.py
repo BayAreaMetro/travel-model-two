@@ -62,10 +62,18 @@ emme_transit_network_file = "emme_transit_lines.txt"
 extra_transit_line_attr_file = "emme_extra_line_attributes.txt"
 extra_transit_segment_attr_file = "emme_extra_segment_attributes.txt"
 emme_transit_time_function_file = "emme_transit_time_function.txt"
+emme_node_network_fields_file = "emme_extra_node_network_fields.txt"
+emme_link_network_fields_file = "emme_extra_link_network_fields.txt"
+station_extra_attributes_file = "station_extra_attributes.txt"
+station_network_fields_file= "station_network_fields.txt"
+emme_node_id_xwalk_file = 'node_id_crosswalk.csv'
+station_tap_attributes_file =  r'station_attributes\station_tap_attributes.csv'
+tap_to_pseudo_tap_xwalk_file = _join(_os.getcwd(), 'hwy', 'tap_to_pseudo_tap_xwalk.csv')
+
 
 # ------------- run parameters ---------
 _all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
-# _all_periods = ['EA', 'AM']
+# _all_periods = ['AM']
 # mapping time of day period to emme scenario_id
 period_to_scenario_dict = {
     'EA': 1000,
@@ -74,6 +82,9 @@ period_to_scenario_dict = {
     'PM': 4000,
     'EV': 5000,
 }
+# max distance in feet to override walk transfer links with station bus walk time
+max_station_walk_distance = 100
+
 WKT_PROJECTION = 'PROJCS["NAD_1983_StatePlane_California_VI_FIPS_0406_Feet",GEOGCS["GCS_North_American_1983",DATUM["North_American_Datum_1983",SPHEROID["GRS_1980",6378137,298.257222101]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["False_Easting",6561666.666666666],PARAMETER["False_Northing",1640416.666666667],PARAMETER["Central_Meridian",-116.25],PARAMETER["Standard_Parallel_1",32.78333333333333],PARAMETER["Standard_Parallel_2",33.88333333333333],PARAMETER["Latitude_Of_Origin",32.16666666666666],UNIT["Foot_US",0.30480060960121924],AUTHORITY["EPSG","102646"]]'
 
 
@@ -207,6 +218,8 @@ def import_extra_link_attributes(input_dir, modeller, scenario_id, update=False)
     if modeller is None:
         modeller = _m.Modeller()
     scenario = modeller.emmebank.scenario(scenario_id)
+
+    # importing numeric attributes
     import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
     input_file = _join(input_dir, extra_link_attr_file)
@@ -222,6 +235,27 @@ def import_extra_link_attributes(input_dir, modeller, scenario_id, update=False)
         import_definitions=True,
         revert_on_error=False
     )
+
+    # importing string attributes
+    if update:
+        # don't need to re-import on update
+        return
+    import_network_fields_tool_path = "inro.emme.data.network_field.import_network_fields"
+    import_network_fields_tool = modeller.tool(import_network_fields_tool_path)
+    input_file = _join(input_dir, emme_link_network_fields_file)
+    # currently re-importing all link attributes
+    # if update:
+    #     input_file = _join(input_dir, update_extra_link_attr_file)
+    import_network_fields_tool(
+        file_path=input_file,
+        scenario=scenario,
+        field_separator=",",
+        has_header=True,
+        column_labels="FROM_HEADER",
+        import_definitions=True,
+        revert_on_error=False
+    )
+
 
 
 def import_vehicles(input_dir, modeller, scenario_id):
@@ -292,6 +326,39 @@ def import_extra_transit_segment_attributes(input_dir, modeller, scenario_id):
     import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
     input_file = _join(input_dir, extra_transit_segment_attr_file)
     import_extra_attributes_tool(
+        file_path=input_file,
+        scenario=scenario,
+        field_separator=",",
+        has_header=True,
+        column_labels="FROM_HEADER",
+        import_definitions=True,
+        revert_on_error=False
+    )
+
+def import_station_attributes(input_dir, modeller, scenario_id):
+    print "importing station attributes"
+    if modeller is None:
+        modeller = _m.Modeller()
+    scenario = modeller.emmebank.scenario(scenario_id)
+
+    # importing numeric attributes
+    import_extra_attributes_tool_path = "inro.emme.data.extra_attribute.import_extra_attributes"
+    import_extra_attributes_tool = modeller.tool(import_extra_attributes_tool_path)
+    input_file = _join(input_dir, station_extra_attributes_file)
+    import_extra_attributes_tool(
+        file_path=input_file,
+        scenario=scenario,
+        field_separator=",",
+        has_header=True,
+        column_labels="FROM_HEADER",
+        import_definitions=True,
+        revert_on_error=False
+    )
+
+    import_network_fields_tool_path = "inro.emme.data.network_field.import_network_fields"
+    import_network_fields_tool = modeller.tool(import_network_fields_tool_path)
+    input_file = _join(input_dir, station_network_fields_file)
+    import_network_fields_tool(
         file_path=input_file,
         scenario=scenario,
         field_separator=",",
@@ -427,6 +494,7 @@ def fix_bad_walktimes(network):
 
 
 def split_tap_connectors_to_prevent_walk(network):
+    print "Splitting Tap Connectors"
     tap_stops = _defaultdict(lambda: [])
     new_node_id = init_node_id(network)
     all_transit_modes = set([mode for mode in network.modes() if mode.type == "TRANSIT"])
@@ -606,6 +674,61 @@ def calc_link_unreliability(network, period):
         # NOTE: TBD with new network
         link.data3 = factor_table[facility_type][area_type]
 
+def apply_station_attributes(input_dir, network):
+    # reading input data
+    station_tap_attributes = pd.read_csv(_join(input_dir, station_tap_attributes_file))
+    emme_node_id_xwalk = pd.read_csv(_join(input_dir, emme_node_id_xwalk_file))
+    tap_to_pseudo_tap_xwalk = pd.read_csv(tap_to_pseudo_tap_xwalk_file, names=['tap', 'pseudo_tap'])
+
+    # buiding crosswalk between emme taps to their pseduo walk taps
+    tap_and_pseudo_tap_nodes = (
+        emme_node_id_xwalk['OLD_NODE'].isin(tap_to_pseudo_tap_xwalk['tap'])
+        | emme_node_id_xwalk['OLD_NODE'].isin(tap_to_pseudo_tap_xwalk['pseudo_tap']))
+
+    emme_node_id_map = emme_node_id_xwalk[tap_and_pseudo_tap_nodes].set_index(
+            ['OLD_NODE'])['node_id'].to_dict()
+
+    tap_to_pseudo_tap_xwalk['emme_tap'] = tap_to_pseudo_tap_xwalk['tap'].map(emme_node_id_map)
+    tap_to_pseudo_tap_xwalk['emme_pseudo_tap'] = tap_to_pseudo_tap_xwalk['pseudo_tap'].map(emme_node_id_map)
+
+    # only need to loop over taps matched to stations
+    station_taps = station_tap_attributes['tap'].unique()
+    stop_nodes_with_platform_time = []
+    walk_links_overridden = []
+
+    for tap_id in station_taps:
+        # modifying station platform times for lines departing from tap
+        tap = network.node(tap_id)
+        for link in tap.outgoing_links():
+            jnode = link.j_node
+            modes_serviced = list(set([str(segment.line['#src_mode']) for segment in jnode.outgoing_segments()]))
+            # setting tap station platform time on tap connector nodes for stops servicing rail
+            if any(x in modes_serviced for x in ['c', 'l', 'h']):
+                jnode['@stplatformtime'] = tap['@stplatformtime']
+                stop_nodes_with_platform_time.append(jnode.id)
+
+        # walk transfer links are separated onto separate pseudo taps created in BuildTransitNetworks.job
+        pseudo_tap_id = tap_to_pseudo_tap_xwalk.loc[tap_to_pseudo_tap_xwalk['emme_tap'] == tap_id, 'emme_pseudo_tap']
+        pseudo_tap = network.node(pseudo_tap_id)
+
+        # setting bus walk times for outgoing walk transfer links
+        for walk_link in pseudo_tap.outgoing_links():
+            if walk_link['@feet'] < max_station_walk_distance:
+                if tap['@stbuswalktime'] > 0:
+                    walk_link['@walktime'] = tap['@stbuswalktime']
+                    walk_link.data2 = tap['@stbuswalktime']  # ul2
+                    walk_links_overridden.append(walk_link.id)
+        # setting for incoming links
+        for walk_link in pseudo_tap.incoming_links():
+            if walk_link['@feet'] < max_station_walk_distance:
+                if tap['@stbuswalktime'] > 0:
+                    walk_link['@walktime'] = tap['@stbuswalktime']
+                    walk_link.data2 = tap['@stbuswalktime']  # ul2
+                    walk_links_overridden.append(walk_link.id)
+
+    print "Number of nodes set with new platform time", len(stop_nodes_with_platform_time)
+    print "Number of walk links set with new walk time", len(walk_links_overridden)
+
 
 def create_time_period_scenario(modeller, scenario_id, root, period):
     input_dir = _join(root, "emme_network_transaction_files_{}".format(period))
@@ -618,6 +741,7 @@ def create_time_period_scenario(modeller, scenario_id, root, period):
     import_transit_lines(input_dir, modeller, scenario_id)
     import_extra_transit_line_attributes(input_dir, modeller, scenario_id)
     import_extra_transit_segment_attributes(input_dir, modeller, scenario_id)
+    import_station_attributes(input_dir, modeller, scenario_id)
 
     emmebank = modeller.emmebank
     scenario = emmebank.scenario(scenario_id)
@@ -633,6 +757,7 @@ def create_time_period_scenario(modeller, scenario_id, root, period):
     # fix_bad_walktimes(network)
     scenario.publish_network(network)
 
+    print "applying fares"
     apply_fares = _apply_fares.ApplyFares()
     apply_fares.scenario = scenario
     apply_fares.dot_far_file = _join(root, "fares.far")
@@ -643,7 +768,12 @@ def create_time_period_scenario(modeller, scenario_id, root, period):
     network = scenario.get_network()
     split_tap_connectors_to_prevent_walk(network)
     scenario.publish_network(network)
+    # necessary to get and publish network again???
+    network = scenario.get_network()
+    apply_station_attributes(input_dir, network)
+    scenario.publish_network(network)
     emmebank.dispose()
+
 
 
 def update_congested_link_times(modeller, scenario_id, root, period):
@@ -651,7 +781,7 @@ def update_congested_link_times(modeller, scenario_id, root, period):
     emmebank = modeller.emmebank
 
     print "updating scenario_id %s" % (scenario_id)
-    import_extra_link_attributes(input_dir, modeller, scenario_id)
+    import_extra_link_attributes(input_dir, modeller, scenario_id, update=True)
     import_extra_transit_segment_attributes(input_dir, modeller, scenario_id)
 
     scenario = emmebank.scenario(scenario_id)
