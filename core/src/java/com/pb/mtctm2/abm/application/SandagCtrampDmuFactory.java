@@ -29,6 +29,7 @@ import com.pb.mtctm2.abm.ctramp.StopFrequencyDMU;
 import com.pb.mtctm2.abm.ctramp.StopLocationDMU;
 import com.pb.mtctm2.abm.ctramp.TourDepartureTimeAndDurationDMU;
 import com.pb.mtctm2.abm.ctramp.TourModeChoiceDMU;
+import com.pb.mtctm2.abm.ctramp.TransitSubsidyAndPassDMU;
 import com.pb.mtctm2.abm.ctramp.TransponderChoiceDMU;
 import com.pb.mtctm2.abm.ctramp.TripModeChoiceDMU;
 
@@ -51,6 +52,13 @@ public class SandagCtrampDmuFactory implements CtrampDmuFactoryIf, Serializable
     public AutoOwnershipChoiceDMU getAutoOwnershipDMU()
     {
         return new SandagAutoOwnershipChoiceDMU();
+    }
+    
+    
+    public TransitSubsidyAndPassDMU getTransitSubsidyAndPassDMU()
+    {
+        return new SandagTransitSubsidyAndPassDMU();
+    	
     }
 
     public TransponderChoiceDMU getTransponderChoiceDMU()

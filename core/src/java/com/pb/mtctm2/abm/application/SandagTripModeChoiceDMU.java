@@ -197,6 +197,19 @@ public class SandagTripModeChoiceDMU
     {
     	return tourModeIsTNC;
     }
+    public double getHasTransitSubsidy() {
+    	
+    	return person.getTransitSubsidyChoice();
+    }
+    public double getTransitSubsidyPercent() {
+    	
+    	return person.getTransitSubsidyPercent();
+    }
+    public double getHasTransitPass(){
+    	
+    	return person.getTransitPassChoice();
+    }
+
     
     private void setupMethodIndexMap()
     {
@@ -265,6 +278,9 @@ public class SandagTripModeChoiceDMU
         methodIndexMap.put("getTourModeIsTNC",502);
         methodIndexMap.put("getWaitTimeTNC",503);
         methodIndexMap.put("getWaitTimeTaxi",504);
+        methodIndexMap.put("getHasTransitSubsidy", 600);
+        methodIndexMap.put("getTransitSubsidyPercent",601);
+        methodIndexMap.put("getHasTransitPass",602);
 
     }
 
@@ -459,7 +475,18 @@ public class SandagTripModeChoiceDMU
             	break;
             case 504:
             	returnValue = getWaitTimeTaxi();
-            	break;            	
+            	break;            
+            case 600:
+            	returnValue = getHasTransitSubsidy();
+            	break;
+            case 601:
+            	returnValue = getTransitSubsidyPercent();
+            	break;
+            case 602:
+            	returnValue = getHasTransitPass();
+            	break;
+	
+            	
             default:
                 logger.error( "method number = " + variableIndex + " not found" );
                 throw new RuntimeException( "method number = " + variableIndex + " not found" );

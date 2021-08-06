@@ -9,6 +9,8 @@ public interface CtrampDmuFactoryIf
 
     public AutoOwnershipChoiceDMU getAutoOwnershipDMU();
 
+    public TransitSubsidyAndPassDMU getTransitSubsidyAndPassDMU();
+
     public ParkingProvisionChoiceDMU getFreeParkingChoiceDMU();
 
     public TransponderChoiceDMU getTransponderChoiceDMU();

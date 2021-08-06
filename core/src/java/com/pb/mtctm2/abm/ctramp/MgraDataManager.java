@@ -71,6 +71,7 @@ public final class MgraDataManager
     private static final String         MGRA_GRADE_SCHOOL_DISTRICT_FIELD_NAME            = "ech_dist";
     private static final String         MGRA_HIGH_SCHOOL_DISTRICT_FIELD_NAME             = "hch_dist";
     public static final String         MGRA_COUNTY_FIELD_NAME                           = "CountyID";
+    public static final String           MGRA_TOTAL_EMPLOYMENT_FIELD_NAME                = "emp_total";
 
     private static final String PROPERTIES_PARKING_COST_OUTPUT_FILE = "mgra.avg.cost.output.file";
     

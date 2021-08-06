@@ -97,6 +97,11 @@ public class Person
     private String               cdapActivity;
     private int                  imtfChoice;
     private int                  inmtfChoice;
+    
+    private short				 transitSubsidyChoice;
+    private float				 transitSubsidyPercent;
+    private short				 transitPassChoice;
+    private short				 naicsCode;
 
     private int                  maxAdultOverlaps;
     private int                  maxChildOverlaps;
@@ -1894,6 +1899,38 @@ public class Person
 
 	public void setSampleRate(float sampleRate) {
 		this.sampleRate = sampleRate;
+	}
+
+	public short getTransitSubsidyChoice() {
+		return transitSubsidyChoice;
+	}
+
+	public void setTransitSubsidyChoice(short transitSubsidyChoice) {
+		this.transitSubsidyChoice = transitSubsidyChoice;
+	}
+
+	public float getTransitSubsidyPercent() {
+		return transitSubsidyPercent;
+	}
+
+	public void setTransitSubsidyPercent(float transitSubsidyPercent) {
+		this.transitSubsidyPercent = transitSubsidyPercent;
+	}
+
+	public short getTransitPassChoice() {
+		return transitPassChoice;
+	}
+
+	public void setTransitPassChoice(short transitPassChoice) {
+		this.transitPassChoice = transitPassChoice;
+	}
+
+	public short getNaicsCode() {
+		return naicsCode;
+	}
+
+	public void setNaicsCode(short naicsCode) {
+		this.naicsCode = naicsCode;
 	}
 
 	public enum EmployStatus

@@ -320,6 +320,10 @@ public class HouseholdDataWriter
         data.add("gender");
         data.add("type");
         data.add("value_of_time");
+        data.add("transitSubsidy_choice");
+        data.add("transitSubsidy_percent");
+        data.add("transitPass_choice");
+        data.add("naicsCode");
         data.add("activity_pattern");
         data.add("imf_choice");
         data.add("inmf_choice");
@@ -341,6 +345,10 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
@@ -362,6 +370,10 @@ public class HouseholdDataWriter
         data.add(string(p.getPersonIsMale() == 1 ? "m" : "f"));
         data.add(string(p.getPersonType()));
         data.add(string(p.getValueOfTime()));
+        data.add(string(p.getTransitSubsidyChoice()));
+        data.add(string(p.getTransitSubsidyPercent()));
+        data.add(string(p.getTransitPassChoice()));
+        data.add(string(p.getNaicsCode()));
         data.add(string(p.getCdapActivity()));
         data.add(string(p.getImtfChoice()));
         data.add(string(p.getInmtfChoice()));

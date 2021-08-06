@@ -58,6 +58,8 @@ public final class AccessibilitiesTable
     private static final int            DISCR_ACCESSIBILITY_SOV_SUFFICIENT_INDEX         = 41;
     private static final int            DISCR_ACCESSIBILITY_SOV_OVERSUFFICIENT_INDEX     = 42;
     private static final int            TOTAL_EMPLOYMENT_ACCESSIBILITY_INDEX             = 45;
+    private static final int            HH_ACCESSIBILITY_WLKTRANSIT_INDEX                = 47;
+    
 
 
     // accessibilities by mgra, accessibility alternative
@@ -132,59 +134,60 @@ public final class AccessibilitiesTable
     
 
     
-    public float getAggregateAccessibility(String type, int homeMgra)
+    public float getAggregateAccessibility(String type, int mgra)
     {
         float returnValue = 0;
 
-        if (type.equalsIgnoreCase("auto")) returnValue = accessibilities[homeMgra][NONMANDATORY_AUTO_ACCESSIBILITY_FIELD_NUMBER - 1];
-        else if (type.equalsIgnoreCase("transit")) returnValue = accessibilities[homeMgra][NONMANDATORY_TRANSIT_ACCESSIBILITY_FIELD_NUMBER - 1];
-        else if (type.equalsIgnoreCase("nonmotor")) returnValue = accessibilities[homeMgra][NONMANDATORY_NONMOTOR_ACCESSIBILITY_FIELD_NUMBER - 1];
-        else if (type.equalsIgnoreCase("sov0")) returnValue = accessibilities[homeMgra][NONMANDATORY_SOV_0_ACCESSIBILITY_FIELD_NUMBER - 1];
-        else if (type.equalsIgnoreCase("sov1")) returnValue = accessibilities[homeMgra][NONMANDATORY_SOV_1_ACCESSIBILITY_FIELD_NUMBER - 1];
-        else if (type.equalsIgnoreCase("sov2")) returnValue = accessibilities[homeMgra][NONMANDATORY_SOV_2_ACCESSIBILITY_FIELD_NUMBER - 1];
-        else if (type.equalsIgnoreCase("hov0")) returnValue = accessibilities[homeMgra][NONMANDATORY_HOV_0_ACCESSIBILITY_FIELD_NUMBER - 1];
-        else if (type.equalsIgnoreCase("hov1")) returnValue = accessibilities[homeMgra][NONMANDATORY_HOV_1_ACCESSIBILITY_FIELD_NUMBER - 1];
-        else if (type.equalsIgnoreCase("hov2")) returnValue = accessibilities[homeMgra][NONMANDATORY_HOV_2_ACCESSIBILITY_FIELD_NUMBER - 1];
-        else if (type.equalsIgnoreCase("shop0")) returnValue = accessibilities[homeMgra][SHOP_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("shop1")) returnValue = accessibilities[homeMgra][SHOP_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("shop2")) returnValue = accessibilities[homeMgra][SHOP_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("maint0")) returnValue = accessibilities[homeMgra][MAINT_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("maint1")) returnValue = accessibilities[homeMgra][MAINT_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("maint2")) returnValue = accessibilities[homeMgra][MAINT_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("eatOut0")) returnValue = accessibilities[homeMgra][EAT_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("eatOut1")) returnValue = accessibilities[homeMgra][EAT_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("eatOut2")) returnValue = accessibilities[homeMgra][EAT_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("visit0")) returnValue = accessibilities[homeMgra][VISIT_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("visit1")) returnValue = accessibilities[homeMgra][VISIT_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("visit2")) returnValue = accessibilities[homeMgra][VISIT_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("discr0")) returnValue = accessibilities[homeMgra][DISCR_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("discr1")) returnValue = accessibilities[homeMgra][DISCR_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("discr2")) returnValue = accessibilities[homeMgra][DISCR_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("escort0")) returnValue = accessibilities[homeMgra][ESCORT_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("escort1")) returnValue = accessibilities[homeMgra][ESCORT_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("escort2")) returnValue = accessibilities[homeMgra][ESCORT_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("totEmp")) returnValue = accessibilities[homeMgra][TOTAL_EMPLOYMENT_ACCESSIBILITY_INDEX - 1];
-        else if (type.equalsIgnoreCase("shopSov0")) returnValue = accessibilities[homeMgra][SHOP_ACCESSIBILITY_SOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("shopSov1")) returnValue = accessibilities[homeMgra][SHOP_ACCESSIBILITY_SOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("shopSov2")) returnValue = accessibilities[homeMgra][SHOP_ACCESSIBILITY_SOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("maintSov0")) returnValue = accessibilities[homeMgra][MAINT_ACCESSIBILITY_SOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("maintSov1")) returnValue = accessibilities[homeMgra][MAINT_ACCESSIBILITY_SOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("maintSov2")) returnValue = accessibilities[homeMgra][MAINT_ACCESSIBILITY_SOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("discrSov0")) returnValue = accessibilities[homeMgra][DISCR_ACCESSIBILITY_SOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("discrSov1")) returnValue = accessibilities[homeMgra][DISCR_ACCESSIBILITY_SOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("discrSov2")) returnValue = accessibilities[homeMgra][DISCR_ACCESSIBILITY_SOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("shopHov0")) returnValue = accessibilities[homeMgra][SHOP_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("shopHov1")) returnValue = accessibilities[homeMgra][SHOP_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("shopHov2")) returnValue = accessibilities[homeMgra][SHOP_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("maintHov0")) returnValue = accessibilities[homeMgra][MAINT_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("maintHov1")) returnValue = accessibilities[homeMgra][MAINT_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("maintHov2")) returnValue = accessibilities[homeMgra][MAINT_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("discrHov0")) returnValue = accessibilities[homeMgra][DISCR_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("discrHov1")) returnValue = accessibilities[homeMgra][DISCR_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
-        else if (type.equalsIgnoreCase("discrHov2")) returnValue = accessibilities[homeMgra][DISCR_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
+        if (type.equalsIgnoreCase("auto")) returnValue = accessibilities[mgra][NONMANDATORY_AUTO_ACCESSIBILITY_FIELD_NUMBER - 1];
+        else if (type.equalsIgnoreCase("transit")) returnValue = accessibilities[mgra][NONMANDATORY_TRANSIT_ACCESSIBILITY_FIELD_NUMBER - 1];
+        else if (type.equalsIgnoreCase("nonmotor")) returnValue = accessibilities[mgra][NONMANDATORY_NONMOTOR_ACCESSIBILITY_FIELD_NUMBER - 1];
+        else if (type.equalsIgnoreCase("sov0")) returnValue = accessibilities[mgra][NONMANDATORY_SOV_0_ACCESSIBILITY_FIELD_NUMBER - 1];
+        else if (type.equalsIgnoreCase("sov1")) returnValue = accessibilities[mgra][NONMANDATORY_SOV_1_ACCESSIBILITY_FIELD_NUMBER - 1];
+        else if (type.equalsIgnoreCase("sov2")) returnValue = accessibilities[mgra][NONMANDATORY_SOV_2_ACCESSIBILITY_FIELD_NUMBER - 1];
+        else if (type.equalsIgnoreCase("hov0")) returnValue = accessibilities[mgra][NONMANDATORY_HOV_0_ACCESSIBILITY_FIELD_NUMBER - 1];
+        else if (type.equalsIgnoreCase("hov1")) returnValue = accessibilities[mgra][NONMANDATORY_HOV_1_ACCESSIBILITY_FIELD_NUMBER - 1];
+        else if (type.equalsIgnoreCase("hov2")) returnValue = accessibilities[mgra][NONMANDATORY_HOV_2_ACCESSIBILITY_FIELD_NUMBER - 1];
+        else if (type.equalsIgnoreCase("shop0")) returnValue = accessibilities[mgra][SHOP_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("shop1")) returnValue = accessibilities[mgra][SHOP_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("shop2")) returnValue = accessibilities[mgra][SHOP_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("maint0")) returnValue = accessibilities[mgra][MAINT_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("maint1")) returnValue = accessibilities[mgra][MAINT_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("maint2")) returnValue = accessibilities[mgra][MAINT_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("eatOut0")) returnValue = accessibilities[mgra][EAT_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("eatOut1")) returnValue = accessibilities[mgra][EAT_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("eatOut2")) returnValue = accessibilities[mgra][EAT_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("visit0")) returnValue = accessibilities[mgra][VISIT_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("visit1")) returnValue = accessibilities[mgra][VISIT_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("visit2")) returnValue = accessibilities[mgra][VISIT_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("discr0")) returnValue = accessibilities[mgra][DISCR_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("discr1")) returnValue = accessibilities[mgra][DISCR_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("discr2")) returnValue = accessibilities[mgra][DISCR_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("escort0")) returnValue = accessibilities[mgra][ESCORT_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("escort1")) returnValue = accessibilities[mgra][ESCORT_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("escort2")) returnValue = accessibilities[mgra][ESCORT_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("totEmp")) returnValue = accessibilities[mgra][TOTAL_EMPLOYMENT_ACCESSIBILITY_INDEX - 1];
+        else if (type.equalsIgnoreCase("shopSov0")) returnValue = accessibilities[mgra][SHOP_ACCESSIBILITY_SOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("shopSov1")) returnValue = accessibilities[mgra][SHOP_ACCESSIBILITY_SOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("shopSov2")) returnValue = accessibilities[mgra][SHOP_ACCESSIBILITY_SOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("maintSov0")) returnValue = accessibilities[mgra][MAINT_ACCESSIBILITY_SOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("maintSov1")) returnValue = accessibilities[mgra][MAINT_ACCESSIBILITY_SOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("maintSov2")) returnValue = accessibilities[mgra][MAINT_ACCESSIBILITY_SOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("discrSov0")) returnValue = accessibilities[mgra][DISCR_ACCESSIBILITY_SOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("discrSov1")) returnValue = accessibilities[mgra][DISCR_ACCESSIBILITY_SOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("discrSov2")) returnValue = accessibilities[mgra][DISCR_ACCESSIBILITY_SOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("shopHov0")) returnValue = accessibilities[mgra][SHOP_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("shopHov1")) returnValue = accessibilities[mgra][SHOP_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("shopHov2")) returnValue = accessibilities[mgra][SHOP_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("maintHov0")) returnValue = accessibilities[mgra][MAINT_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("maintHov1")) returnValue = accessibilities[mgra][MAINT_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("maintHov2")) returnValue = accessibilities[mgra][MAINT_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("discrHov0")) returnValue = accessibilities[mgra][DISCR_ACCESSIBILITY_HOV_INSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("discrHov1")) returnValue = accessibilities[mgra][DISCR_ACCESSIBILITY_HOV_SUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("discrHov2")) returnValue = accessibilities[mgra][DISCR_ACCESSIBILITY_HOV_OVERSUFFICIENT_INDEX - 1];
+        else if (type.equalsIgnoreCase("hhWlkTrn")) returnValue = accessibilities[mgra][HH_ACCESSIBILITY_WLKTRANSIT_INDEX - 1];
         else
         {
-            logger.error("argument type = " + type + ", is not valid.  Must be either 'auto', 'transit', 'nonmotor', or hov0, hov1, or hov2.");
+            logger.error("argument type = " + type + ", is not valid.");
             throw new RuntimeException();
         }
 

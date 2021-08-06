@@ -42,9 +42,10 @@ public class SandagAutoOwnershipChoiceDMU
         methodIndexMap.put("getNumPersons18to35", 25);
         methodIndexMap.put("getNumPersons65plus", 26);
         methodIndexMap.put("getWorkAutoTime", 27);
-        
-        
-
+        methodIndexMap.put("getNumberOfWorkersWithTransitSubsidy",30);       
+        methodIndexMap.put("getNumberOfWorkersWithTransitPass",31);
+        methodIndexMap.put("getNumberOfStudentsWithTransitSubsidy",32);       
+        methodIndexMap.put("getNumberOfStudentsWithTransitPass",33);
     }
 
     public double getValueForIndex(int variableIndex, int arrayIndex)
@@ -100,6 +101,14 @@ public class SandagAutoOwnershipChoiceDMU
             	return getNumPersons65Plus();
             case 27:
             	return getWorkAutoTime();
+            case 30:
+            	return getNumberOfWorkersWithTransitSubsidy();       
+            case 31:
+            	return getNumberOfWorkersWithTransitPass();
+            case 32:
+                return getNumberOfStudentsWithTransitSubsidy();
+            case 33:
+            	return getNumberOfStudentsWithTransitPass();
 
             default:
                 logger.error("method number = " + variableIndex + " not found");

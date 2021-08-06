@@ -139,6 +139,20 @@ public class SandagTourModeChoiceDMU
     {
         return getNmBikeTimeIn();
     }
+    
+    public double getHasTransitSubsidy() {
+    	
+    	return person.getTransitSubsidyChoice();
+    }
+    public double getTransitSubsidyPercent() {
+    	
+    	return person.getTransitSubsidyPercent();
+    }
+    public double getHasTransitPass(){
+    	
+    	return person.getTransitPassChoice();
+    }
+
 
     private void setupMethodIndexMap()
     {
@@ -196,6 +210,10 @@ public class SandagTourModeChoiceDMU
         methodIndexMap.put("getDestTaxiWaitTime", 503);
         methodIndexMap.put("getDestTNCWaitTime", 504);
         
+        methodIndexMap.put("getHasTransitSubsidy", 600);
+        methodIndexMap.put("getTransitSubsidyPercent",601);
+        methodIndexMap.put("getHasTransitPass",602);
+        	        
     }
 
     public double getValueForIndex(int variableIndex, int arrayIndex)
@@ -341,6 +359,15 @@ public class SandagTourModeChoiceDMU
             	break;
             case 504: 
             	returnValue = getDestTNCWaitTime();
+            	break;
+            case 600:
+            	returnValue = getHasTransitSubsidy();
+            	break;
+            case 601:
+            	returnValue = getTransitSubsidyPercent();
+            	break;
+            case 602:
+            	returnValue = getHasTransitPass();
             	break;
                 
             default:
