@@ -38,17 +38,9 @@ run pgm = hwynet
    ; write out to the same name with the added variables   
    neto = hwy\mtc_final_network_with_tolls_fft.net
    
-   ;drive links only; FRC != 8 is used to drop off TANA ferry and other non-street links
-    IF (ASSIGNABLE=0)
-        DELETE
-    ENDIF
-    IF (CNTYPE='TANA' & NUMLANES > 0)
-        ;Keep record
-    ELSEIF (CNTYPE='USE' | CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='TAP' | CNTYPE='EXT')
-        ;keep record
-    ELSE
-        DELETE
-    ENDIF
+   ;drive links and TAZ/MAZ connectors only
+   IF (CNTYPE = 'TAZ' | CNTYPE = 'MAZ') ASSIGNABLE = 1
+   IF (ASSIGNABLE = 0 | DRIVE_ACCESS = 0) DELETE
    
    if (FFS > 0)
        FFT = (60.0 / 5280.0) * FEET / FFS ; (60 minutes / 1 hour) * (1 mile / 5280 feet) * (feet) * (miles / hour) => minutes
@@ -58,6 +50,7 @@ run pgm = hwynet
    
 endrun
 
+/*
 ;these aren't used, but are a reference and if I could figure out how to tokenize them, they will get used
 carquinez_bridge_sr_bypass_link = 'if (a = 8022075 & b = 3524846) delete'
 bay_bridge_sr_bypass_link       = 'if (a = 7089312 & b = 7065303) delete'
@@ -72,6 +65,7 @@ golden_gate_nb_linksb      = '((a = 1014536 & b = 1009788) | (a = 1029277 & b = 
 caldecott_tunnel_wb_links  = '((a = 3036996 & b = 3054315) | (a = 3038776 & b = 3054583) | (a = 3054315 & b = 3057024) | (a = 3054583 & b = 3078026) | (a = 3057024 & b = 3038776) | (a = 3070389 & b = 3036996))'
 caldecott_tunnel_eb_links  = '((a = 3036711 & b = 3071016) | (a = 3056681 & b = 3075174) | (a = 3072293 & b = 3056681) | (a = 3075174 & b = 3036711))'
 sterling_on_ramp_links     = '((a = 1009321 & b = 1029420) | (a = 1013809 & b = 1009321) | (a = 1029420 & b = 1030707) | (a = 1030271 & b = 1013809))'
+*/
 
 ; build a network for each time period
 loop period = 1, 5
@@ -91,7 +85,7 @@ loop period = 1, 5
       token_caldecott_wb_lanes   = '4'
       token_caldecott_eb_lanes   = '2'
       
-      token_sterling_onramp = 'USECLASS = 1'
+      token_sterling_onramp = 'USECLASS_@token_period@ = 1'
       
       ; shared ride bridge delay by-pass links
       token_carquinez_bridge_sr_bypass = 'if (a = 8022075 & b = 3524846) delete'
@@ -125,7 +119,7 @@ loop period = 1, 5
       token_caldecott_wb_lanes   = '4'
       token_caldecott_eb_lanes   = '2'
       
-      token_sterling_onramp = 'USECLASS = 0'
+      token_sterling_onramp = 'USECLASS_@token_period@ = 0'
       
       
       ; shared ride bridge delay by-pass links
@@ -161,7 +155,7 @@ loop period = 1, 5
       token_caldecott_wb_lanes   = '2'
       token_caldecott_eb_lanes   = '2'
       
-      token_sterling_onramp = 'USECLASS = 0'
+      token_sterling_onramp = 'USECLASS_@token_period@ = 0'
       
       ; shared ride bridge delay by-pass links
       token_carquinez_bridge_sr_bypass = 'if (a = 8022075 & b = 3524846) delete'
@@ -195,7 +189,7 @@ loop period = 1, 5
       token_caldecott_wb_lanes   = '2'
       token_caldecott_eb_lanes   = '4'
       
-      token_sterling_onramp = 'USECLASS = 3'
+      token_sterling_onramp = 'USECLASS_@token_period@ = 3'
       
       
       ; shared ride bridge delay by-pass links
@@ -231,7 +225,7 @@ loop period = 1, 5
       token_caldecott_wb_lanes   = '2'
       token_caldecott_eb_lanes   = '4'
       
-      token_sterling_onramp = 'USECLASS = 0'
+      token_sterling_onramp = 'USECLASS_@token_period@ = 0'
       
       ; shared ride bridge delay by-pass links
       token_carquinez_bridge_sr_bypass = 'if (a = 8022075 & b = 3524846) delete'
@@ -271,21 +265,22 @@ loop period = 1, 5
       ; turn hov lanes off
       @token_hov_to_freeflow@
       
+      /*
       ; golden gate bridge reversible lanes
       ; split funny here to avoid going over cube/voyager's lame line length limit
       if (@golden_gate_sb_linksa@ |
-          @golden_gate_sb_linksa@) NUMLANES = @token_golden_gate_sb_lanes@
+          @golden_gate_sb_linksa@) LANES_@token_period@ = @token_golden_gate_sb_lanes@
       if (@golden_gate_nb_linksa@ |
-          @golden_gate_nb_linksa@) NUMLANES = @token_golden_gate_nb_lanes@
+          @golden_gate_nb_linksa@) LANES_@token_period@ = @token_golden_gate_nb_lanes@
       
       ; caldecott tunnel reversible lanes 
-      if @caldecott_tunnel_wb_links@ NUMLANES = @token_caldecott_wb_lanes@
+      if @caldecott_tunnel_wb_links@ LANES_@token_period@ = @token_caldecott_wb_lanes@
       
-      if @caldecott_tunnel_eb_links@ NUMLANES = @token_caldecott_eb_lanes@
+      if @caldecott_tunnel_eb_links@ LANES_@token_period@ = @token_caldecott_eb_lanes@
       
       ; sterling on-ramp
       if @sterling_on_ramp_links@ @token_sterling_onramp@
-      
+      */
       
       ; benecia martinez bridge (no shared ride by-pass link)
       if (TOLLBOOTH = 1)
@@ -374,4 +369,3 @@ loop period = 1, 5
    endrun
    
 endloop ; token_period
-

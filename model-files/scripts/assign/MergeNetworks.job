@@ -135,7 +135,7 @@ loop period = 1, 5
 							  vol@token_period@_maz
                               
       ; compute delay, vehicle-miles traveled, and vehicle-hours traveled (ignore centroid connectors and other dummy links)
-      if ((FT != 6) & (FT != 0))
+      IF ((FT!=8) & (FT!=99))
       
          ; delay is the congested time minus the free-flow time, weighted by the link volume, and converted from minutes to hours
          delay@token_period@ = (TIME_1 - FFT) * vol@token_period@_tot / 60.0
@@ -182,7 +182,7 @@ run pgm = hwynet
    ; output network includes time-period-specific and 24-hour volumes
    neto = hwy\msamerge%ITERATION%_temp.net, 
            include = A,B,F_JNCTID,T_JNCTID,FRC,NAME,FREEWAY,TOLLRD,ONEWAY,KPH,MINUTES,CARRIAGE,LANES,RAMP,
-                     SPEEDCAT,FEET,ASSIGNABLE,CNTYPE,TRANSIT,USECLASS, TOLLBOOTH,FT,FFS,NUMLANES,HIGHWAYT,
+                     SPEEDCAT,DISTANCE,FEET,ASSIGNABLE,CNTYPE,TRANSIT,USECLASS, TOLLBOOTH,FT,FFS,NUMLANES,HIGHWAYT,
                      B_CLASS,REPRIORITIZE,GRADE_CAT,PED_FLAG,BIKEPEDOK,RTEDIR,
                      TOLLEA_DA,TOLLEA_S2,TOLLEA_S3,TOLLEA_VSM,TOLLEA_SML,TOLLEA_MED,TOLLEA_LRG,
                      TOLLAM_DA,TOLLAM_S2,TOLLAM_S3,TOLLAM_VSM,TOLLAM_SML,TOLLAM_MED,TOLLAM_LRG,
@@ -222,7 +222,7 @@ run pgm = hwynet
       vol24hr_tot = volEA_tot + volAM_tot + volMD_tot + volPM_tot + volEV_tot
       
       ; compute delay, vehicle-miles traveled, and vehicle-hours traveled (ignore centroid connectors and other dummy links)
-      if ((FT != 6) & (FT != 0))
+      IF ((FT!=8) & (FT!=99))
       
          ; vehicle delay is the difference between congested time and free flow time, times number of vehicles
          delay24hr = delayEA + delayAM + delayMD + delayPM + delayEV
@@ -276,6 +276,7 @@ run pgm = network
       
          list = "a,",
                 "b,",
+                "distance,",
                 "feet,",
                 "numlanes,",
                 "cntype,",
@@ -317,6 +318,7 @@ run pgm = network
       endif
       list = A(8.0), ",",
              B(8.0), ",",
+             DISTANCE(8.2), ",",
              FEET(8.2), ",",
              NUMLANES(8.2),",",
              CNTYPE,",",

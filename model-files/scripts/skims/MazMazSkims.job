@@ -86,7 +86,7 @@ LOOP CLASS = 1,1
     IF (CLASS = 1)
         TOKEN_CLASS = 'DA'
         COST_SHARE = '1.0'
-        LINK_INCLUSION = '(USECLASS != 3) && (USECLASS != 2)'
+        LINK_INCLUSION = '(USECLASS_@TOKEN_PERIOD@ != 3) && (USECLASS_@TOKEN_PERIOD@ != 2)'
     ELSEIF (CLASS = 2)
         TOKEN_CLASS = 'S2'
         COST_SHARE = STR(sr2costShare,10,5)
@@ -112,11 +112,9 @@ LOOP CLASS = 1,1
         
         PHASE=LINKMERGE
             ;highway links, but only maz connectors
-             IF ((CNTYPE = 'MAZ' | CNTYPE = 'USE' | CNTYPE = 'TANA') & (@LINK_INCLUSION@) & (@LINK_INCLUSION_FREE@))
-                ;Keep record
-            ELSE
-                DELETE
-            ENDIF
+            IF (CNTYPE != 'MAZ' & DRIVE_ACCESS != 1) DELETE
+            IF (USECLASS_@TOKEN_PERIOD@ = 3 | USECLASS_@TOKEN_PERIOD@ = 2) DELETE
+
             IF (CNTYPE='MAZ')
                 GENCOST = @max_drive_gencost@
             ELSE
