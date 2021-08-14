@@ -413,7 +413,7 @@ public class MandatoryAccessibilitiesCalculator
                 {
                     logger.fatal("Error:  Best walk transit alt " + bestAlt + " found for origin mgra "
                         + oMgra + " to destination mgra " + dMgra + " but oTap pos "
-                        + oTapPosition + " and dTap pos " + dTapPosition);
+                        + oTapPosition + " and dTap pos " + dTapPosition + " for set "+set);
                     throw new RuntimeException();
                 }
 
@@ -421,7 +421,8 @@ public class MandatoryAccessibilitiesCalculator
                 {
                     logger.fatal("Error:  Best walk transit alt " + bestAlt + " found for origin mgra "
                         + oMgra + " to destination mgra " + dMgra + " but Utility = "
-                        + walkTransitWalkUtilities[bestAlt]);
+                        + walkTransitWalkUtilities[bestAlt] +" for oTap "
+                        + (int)bestTaps[0] + " and dTap " + (int)bestTaps[1] + " for set "+set);
                     throw new RuntimeException();
                 }
                 accessibilities[5] = Math.log(walkTransitWalkUtilities[bestAlt]);
@@ -487,7 +488,7 @@ public class MandatoryAccessibilitiesCalculator
                 {
                     logger.fatal("Error:  Best drive transit alt " + bestAlt + " found for origin mgra "
                         + oMgra + " to destination mgra " + dMgra + " but oTap pos "
-                        + oTapPosition + " and dTap pos " + dTapPosition);
+                        + oTapPosition + " and dTap pos " + dTapPosition + " for set "+set);
                     throw new RuntimeException();
                 }
 
@@ -495,7 +496,8 @@ public class MandatoryAccessibilitiesCalculator
                 {
                     logger.fatal("Error:  Best drive transit alt " + bestAlt + " found for origin mgra "
                         + oMgra + " to destination mgra " + dMgra + " but Utility = "
-                        + driveTransitWalkUtilities[bestAlt]);
+                        + driveTransitWalkUtilities[bestAlt] +" for oTap "
+                        + (int)bestTaps[0] + " and dTap " + (int)bestTaps[1] + " for set "+set);
                     throw new RuntimeException();
                 }
 

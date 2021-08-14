@@ -67,7 +67,7 @@ public class MTCTM2TripTables {
     
     private int iteration;
 	private String directory;
-	private String matrixFileExtension = "mat";
+	private String matrixFileExtension = "omx";
  	private MatrixDataServerIf ms;
     
     SkimBuilder skimBuilder;
@@ -792,7 +792,7 @@ public class MTCTM2TripTables {
 			int maxMazSet2 = 0;
 			int maxMazSet3 = 0;
 			
-			for(int row = 1; row< mgraDataTable.getRowCount();++row){
+			for(int row = 1; row<= mgraDataTable.getRowCount();++row){
 				
 				int mgra = (int) mgraDataTable.getValueAt(row, "MAZ");
 				int county = (int) mgraDataTable.getValueAt(row,mgraManager.MGRA_COUNTY_FIELD_NAME);

@@ -189,6 +189,9 @@ public abstract class MatrixReader {
         else if (fileName.indexOf(".omx") > 0 || fileName.indexOf(".OMX") > 0) {
             type = MatrixType.OMX;
         }
+        else if (fileName.indexOf(".mat") > 0 || fileName.indexOf(".MAT") > 0) {
+            type = MatrixType.TPPLUS;
+        }
         else {
             throw new RuntimeException("Could not determine type of matrix file, " + file.getAbsolutePath());
         }

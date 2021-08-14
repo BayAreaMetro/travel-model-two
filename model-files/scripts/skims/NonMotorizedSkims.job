@@ -288,22 +288,22 @@ Wait4Files Files=MTC_NONMOT1.script.end, MTC_NONMOT2.script.end, MTC_NONMOT3.scr
 *copy skims\ped_distance_tap_tap_1.txt+skims\ped_distance_tap_tap_2.txt+skims\ped_distance_tap_tap_3.txt+skims\ped_distance_tap_tap_4.txt+skims\ped_distance_tap_tap_5.txt+skims\ped_distance_tap_tap_6.txt+skims\ped_distance_tap_tap_7.txt+skims\ped_distance_tap_tap_8.txt+skims\ped_distance_tap_tap_9.txt skims\ped_distance_tap_tap.txt
 *del skims\ped_distance_tap_tap_*.txt
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_maz.txt 3
+*python %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_maz.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_tap.txt 3
+*python %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_tap.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_maz.txt 3
+*python %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_maz.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_tap.txt 3
+*python %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_tap.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_taz_taz.txt 3
+*python %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_taz_taz.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_tap_tap.txt 3
+*python %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_tap_tap.txt 3
 IF (RETURNCODE > 0) abort
 
 ; clean up generated scripts
