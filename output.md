@@ -14,14 +14,6 @@ CONTENTS
 
 ## Person Type Segmentation
 
-The MTC activity-based model system is implemented in a microsimulation framework. A key advantage of
-using the microsimulation approach is that there are essentially no computational constraints on
-the number of explanatory variables that can be included in a model specification. However, even with
-this flexibility, the model system will include some segmentation of decision‐makers. Segmentation
-is a useful tool to both structure models, such that each person‐type segment could have their own
-model for certain choices, and also to characterize person roles within a household. Segments can be
-created for persons as well as households.
-
 A total of eight segments of person‐types, shown in the below table, are used for the MTC model system.
 The person‐types are mutually exclusive with respect to age, work status, and school status.
 
