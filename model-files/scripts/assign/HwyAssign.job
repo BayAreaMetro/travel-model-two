@@ -2,9 +2,9 @@
 ;
 ; HwyAssign.job
 ;
-; TP+ script to assign vehicle and truck trips to the highway network.  Assignments are performed for each of the 
-; following time periods: (a) early AM, 3 am to 6 am; (b) AM peak period, 6 am to 10 am; (c) midday, 10 am to 3 pm; 
-; (d) PM peak period, 3 pm to 7 pm; and, (e) evening, 7 pm to 3 am.  
+; TP+ script to assign vehicle and truck trips to the highway network.  Assignments are performed for each of the
+; following time periods: (a) early AM, 3 am to 6 am; (b) AM peak period, 6 am to 10 am; (c) midday, 10 am to 3 pm;
+; (d) PM peak period, 3 pm to 7 pm; and, (e) evening, 7 pm to 3 am.
 ;
 ; Ten vehicle classes are tracked in each assignment, with value-toll-eligible and not-value-toll-eligible classes
 ; as follows:
@@ -20,16 +20,16 @@
 ;     (10) large trucks, value toll eligible
 ;
 ; Four types of trips are assigned, as follows: (a) personal, inter-regional travel; (b) personal, intra-regional
-; travel; (c) commercial travel; and, (d) air passenger travel.  Separate trip tables are read in by the script for 
-; each of these travel types. 
+; travel; (c) commercial travel; and, (d) air passenger travel.  Separate trip tables are read in by the script for
+; each of these travel types.
 ;
 ; Input:  (A) A highway network containing the following fields: (a) DISTANCE (miles); (b) FT, which is the facility type
 ;         a code which determines the links' free-flow speed, capacity, and volume/speed relationship; (c) TOLLCLASS,
-;         which is a code, less than FIRSTVALUE - 1 (see hwyParam.block) indicates the link is a bridge toll 
+;         which is a code, less than FIRSTVALUE - 1 (see hwyParam.block) indicates the link is a bridge toll
 ;         and a value higher than FIRSTVALUE indicates the link is a value toll; (d) OT, which is the observed
 ;         travel time for links immune to congestion (generally used to represent toll booth delay and centroid
-;         connector travel time); (e) FFS,which is the free flow speed (in miles per hour); (f) TSIN, which is a 
-;         code, a value of one indicates the link is immune to congestion and has a fixed time coded in the OT 
+;         connector travel time); (e) FFS,which is the free flow speed (in miles per hour); (f) TSIN, which is a
+;         code, a value of one indicates the link is immune to congestion and has a fixed time coded in the OT
 ;         field; (g) CAPCLASS, which is a speed/capacity look-up code (see the "SpeedCapacity.block" file); and
 ;         (h) TOLLXX_CC, where XX is a two-character time-period code and CC is a two or three-character vehicle
 ;         class code, and the value is the dollar value of the toll to go through the link in year 2000 dollars.
@@ -45,29 +45,29 @@
 ;              (8)  V2_1  - volume of vehicles in assigment class two: two-occupant vehicles, no value toll
 ;              (9)  V3_1  - volume of vehicles in assigment class three: three-or-more-occupant vehicles, no value toll
 ;              (10) V4_1  - volume of vehicles in assigment class four: very small, small, and medium trucks, no value toll
-;              (11) V5_1  - volume of vehicles in assigment class five: combination trucks, no value toll 
+;              (11) V5_1  - volume of vehicles in assigment class five: combination trucks, no value toll
 ;              (12) V6_1  - volume of vehicles in assigment class six: drive alone, value toll
 ;              (13) V7_1  - volume of vehicles in assigment class seven: two-occupant vehicles, value toll
 ;              (14) V8_1  - volume of vehicles in assigment class eight: three-or-more-occupant vehicles, value toll
 ;              (15) V9_1  - volume of vehicles in assigment class nine: very small, small, and medium trucks, value toll
-;              (16) V10_1 - volume of vehicles in assigment class ten: combination trucks, value toll 
+;              (16) V10_1 - volume of vehicles in assigment class ten: combination trucks, value toll
 ;              (17) VT_1 and VXT_1, where X is 1 through 10, are the b-to-a volumes
-;                              
+;
 ;
 ; Notes:  (1) Four types of commercial vehicle demand is estimated: very small, small, medium, and large commercial
 ;         trucks.  Two classes of commercial trucks are assigned: (1) very small, small, and medium; and, (2)
 ;         large trucks.  The characteristics of the small trucks (value of time, toll) is used in the assignment
-;         of the very small, small, and medium truck class. 
+;         of the very small, small, and medium truck class.
 ;     (2) Facility type codes are as follows: (i) freeway-to-freeway ramp; (ii) freeway; (iii) expressway; (iv)
 ;         collector; (v) freeway ramp; (vi) centroid connector/dummy link; (vii) major arterial; (viii) metered
 ;         ramp; (ix) freeways with ITS treatments and Golden Gate Bridge; (x) expressways and arterials with
-;         ITS treatments. 
+;         ITS treatments.
 ;     (3) Area type codes are as follows: (0) core; (i) central business district; (ii) urban business district;
-;         (iii) urban; (iv) suburban; (v) rural. 
-;     (4) The capacity class is computed as fifteen times area type plus facility type. 
+;         (iii) urban; (iv) suburban; (v) rural.
+;     (4) The capacity class is computed as fifteen times area type plus facility type.
 ;
 ; See also: (1) CreateFiveHighwayNetworks.job, which creates the time-specific networks;
-;       (2) SetTolls.job, which sets the time- and class-specific bridge and value tools. 
+;       (2) SetTolls.job, which sets the time- and class-specific bridge and value tools.
 ;
 ; version:  Travel Model Zed
 ; authors:  dto (2011 12 13); dto (2010 08 10); gde (2009); crf (2014 02 07)
@@ -90,10 +90,10 @@ vdf_block_param = '%BASE_SCRIPTS%\block\SpeedFlowCurve.block'
 
 ; do, more or less, the same skim procedure for each of the five time periods
 loop period = 1,3
-  
+
     ; a two letter token is used for each time period
-    if (period = 1)   
-      token_period = 'EA'   
+    if (period = 1)
+      token_period = 'EA'
       intrastep_range = '2-6'
       ;switch to use time penalties for transferring to hov lane
       ;token_hov_xfer_pen = '0'
@@ -103,15 +103,15 @@ loop period = 1,3
       ;convergence/stopping criteria
       token_relativegap = 'parameters relativegap = 0.005'
       token_maxiters = 'parameters maxiters = 30'
-    elseif (period = 2)   
-      token_period = 'MD'    
+    elseif (period = 2)
+      token_period = 'MD'
       intrastep_range = '7-26'
       ;token_hov_xfer_pen = '0'
       token_capfac = 'parameters capfac = 5'
       token_capfacnum = 5
       token_relativegap = 'parameters relativegap = 0.005'
       token_maxiters = 'parameters maxiters = 30'
-    elseif (period = 3)   
+    elseif (period = 3)
       token_period = 'EV'
       intrastep_range = '27-31'
       ;token_hov_xfer_pen = '0'
@@ -120,48 +120,48 @@ loop period = 1,3
       token_relativegap = 'parameters relativegap = 0.005'
       token_maxiters = 'parameters maxiters = 30'
     endif
-    
+
 
     ; do each time of day as a separate process
     DistributeMultistep processid = 'MTC_HWYASN', processNum = @period@
-    
+
 	; comment out these steps when trimming the network manually prior to assignment
 	; this is just a temporary step, network should be whole from beginning of process
-    
+
     ;in case mazmazvol already exist
     run pgm = network
         NETI = hwy\avgload@token_period@_taz.net
         NETO = hwy\avgload@token_period@_taz_temp1.net
-        
+
         PHASE=LINKMERGE
             MAZMAZVOL = 0.0
         ENDPHASE
     endrun
-    	
+
     ;transfer maz->maz volumes to new zone system
-    *python %BASE_SCRIPTS%\assign\transfer_maz_maz_vols.py . @token_period@
-    
+    *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\assign\transfer_maz_maz_vols.py . @token_period@
+
     ;merge in maz->maz vols
     run pgm = network
         NETI = hwy\avgload@token_period@_taz_temp1.net
         LINKI[2] = hwy\maz_preload_@token_period@_seq_vols.csv VAR=A,B,MAZMAZVOL
         NETO = hwy\avgload@token_period@_taz_temp2.net
-		
+
         PHASE=LINKMERGE
 	     		MAZMAZVOL=LI.2.MAZMAZVOL
 	       ENDPHASE
     endrun
-    
-    
+
+
      ; *DEL hwy\avgload@token_period@_taz.net
      ; *copy hwy\avgload@token_period@_taz_temp2.net hwy\avgload@token_period@_taz.net
      ; *DEL hwy\avgload@token_period@_taz_temp2.net
-	 
+
     ;Delete links for assignment and add in speeds and capacities
     run pgm = network
         NETI = hwy\avgload@token_period@_taz_temp2.net
         NETO = hwy\avgload@token_period@_taz_delete.net
-	
+
         PHASE=LINKMERGE
         ;
         ; Capacity and Speed Lookups
@@ -200,7 +200,7 @@ loop period = 1,3
 
      run pgm = highway
         DistributeIntrastep processid = 'MTC_HWYASN', processlist = @intrastep_range@ saveprn = f
-    
+
         ; time-specific input highway network
         neti = hwy\avgload@token_period@_taz_delete.net
 
@@ -208,11 +208,11 @@ loop period = 1,3
         mati[1] = ctramp_output\TAZ_Demand_@token_period@.mat
 
         ; internal/external travel demand
-        mati[2] = nonres\tripsIx@token_period@.tpp 
-        
+        mati[2] = nonres\tripsIx@token_period@.tpp
+
         ; commercial travel demand
         mati[3] = nonres\tripsTrk@token_period@.tpp
-        
+
         ; air passenger travel demand
         mati[4] = nonres\tripsAirPax@token_period@.mtx
 
@@ -220,20 +220,20 @@ loop period = 1,3
         neto = hwy\load@token_period@.net
 
         ; set the assignment parameters -- equilibrium assignment, bi-conjugate
-        parameters combine = equi, enhance = 2            
+        parameters combine = equi, enhance = 2
 
         ; set the assignment parameters -- internal zones + ?? external zones
         parameters zones = %TAZ_EXTS_COUNT%
-    
+
         ; set the assignment parameters
-        @token_maxiters@ 
-        @token_relativegap@ 
+        @token_maxiters@
+        @token_relativegap@
 
         ; set the assignment parameters -- other closure criteria (do not use)
         parameters gap = 0, aad = 0, raad = 0, rmse = 0
 
         ; set the number of hours in the assignment (see the loop tokens)
-        @token_capfac@ 
+        @token_capfac@
 
         ; hwyParam.bock contains variables used in the remainder of the script, particularly in the generalized cost expressions
         read file = @hwy_block_param@
@@ -246,7 +246,7 @@ loop period = 1,3
          phase = linkread
 
             ; the time variable is congested time specific to each time period
-            lw.time = li.CTIM 
+            lw.time = li.CTIM
 
             ; distance is coded as "distance" in the networks
 
@@ -262,7 +262,7 @@ loop period = 1,3
             t1 = li.CTIM
 
             ; facility type is the linkclass (linkclass needs to be defined, but it's not used)
-            linkclass = li.FT 
+            linkclass = li.FT
 
             ; TOLLBOOTH set to distinguish value tolls from bridge tolls
             lw.tollclass = li.TOLLBOOTH
@@ -308,7 +308,7 @@ loop period = 1,3
 
             ; Group 4 defines facilities not available to trucks
             if (li.USECLASS_@token_period@ = 2,3,4) addtogroup = 4
-                       
+
             ; Group 11 defines the value toll links the non-value-toll-paying users are prohibited from using
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_DA > 0) addtogroup = 11
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_S2 > 0) addtogroup = 12
@@ -319,7 +319,7 @@ loop period = 1,3
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_SML > 0) addtogroup = 14
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_MED > 0) addtogroup = 14
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_LRG > 0) addtogroup = 15
-            
+
          endphase
 
 
@@ -340,7 +340,7 @@ loop period = 1,3
             ; very small, small, and medium trucks, no value toll, exclude small truck value toll facilities and HOV facilities
             pathload path = lw.gencost_sml, excludegrp = 14, 23, vol[4] = mi.3.vstruck + mi.3.struck + mi.3.mtruck
 
-            ; large trucks, no value toll, exclude large truck toll facilities, HOV facilities, and no commercial truck facilities 
+            ; large trucks, no value toll, exclude large truck toll facilities, HOV facilities, and no commercial truck facilities
             pathload path = lw.gencost_lrg, excludegrp = 15, 4, vol[5] = mi.3.ctruck
 
             ; value toll paying classes second
@@ -360,17 +360,17 @@ loop period = 1,3
             ; large trucks, value toll paying, excluded from HOV facilities and no commercial truck facilities
             pathload path = lw.gencost_lrg, excludegrp = 4, vol[10] = mi.3.ctrucktoll
 
-        endphase 
-    
+        endphase
+
       ; set adjust parameters (volume delay functions)
       phase = adjust
- 
+
          ; very small, small, and medium trucks have a passenger car equivalent of, on average 1.0, large trucks see HwyParam.block for PCE
          function v = vol[1] + vol[2] + vol[3] + vol[4] + trkpce*vol[5] + vol[6] + vol[7] + vol[8] + vol[9] + trkpce*vol[10] + li.MAZMAZVOL
-           
+
          ; the volume delay functions are housed in the SpeedFlowCurve.block file
          read file = @vdf_block_param@
-        
+
          ; set the generalized cost functions (same as before, only now we start with "time")
          lw.gencost_da  = time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_DA)
          ;lw.gencost_s2 = time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S2 / sr2costShare) + @token_hov_xfer_pen@
@@ -381,20 +381,20 @@ loop period = 1,3
          lw.gencost_sml = time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_SML)
          lw.gencost_med = time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_MED)
          lw.gencost_lrg = time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_LRG)
-         
-      endphase
-      
-   endrun  
-   
 
-   
-      
+      endphase
+
+   endrun
+
+
+
+
    EndDistributeMultistep
 
- 
+
 endloop ; time period loop
 
-Wait4Files files = MTC_HWYASN1.script.end, MTC_HWYASN2.script.end, MTC_HWYASN3.script.end, 
+Wait4Files files = MTC_HWYASN1.script.end, MTC_HWYASN2.script.end, MTC_HWYASN3.script.end,
           PrintFiles = merge, DelDistribFiles = t, CheckReturnCode = t
 
 *Cluster.exe MTC_HWYASN 1-31 close exit
@@ -406,17 +406,17 @@ Wait4Files files = MTC_HWYASN1.script.end, MTC_HWYASN2.script.end, MTC_HWYASN3.s
 
 ; do, more or less, the same skim procedure for each of the five time periods
 loop period = 1,2
-  
+
     ; a two letter token is used for each time period
-    if (period = 1)   
-      token_period = 'AM'    
+    if (period = 1)
+      token_period = 'AM'
       intrastep_range = '2-15'
       ;token_hov_xfer_pen = 'li.HOVXPEN'
       token_capfac = 'parameters capfac = 3.65'
       token_capfacnum = 3.65
       token_relativegap = 'parameters relativegap = 0.005'
       token_maxiters = 'parameters maxiters = 30'
-    elseif (period = 2)   
+    elseif (period = 2)
       token_period = 'PM'
       intrastep_range = '16-31'
       ;token_hov_xfer_pen = 'li.HOVXPEN'
@@ -425,48 +425,48 @@ loop period = 1,2
       token_relativegap = 'parameters relativegap = 0.005'
       token_maxiters = 'parameters maxiters = 30'
     endif
-    
+
 
     ; do each time of day as a separate process
     DistributeMultistep processid = 'MTC_HWYASN', processNum = @period@
-    
+
 	; comment out these steps when trimming the network manually prior to assignment
 	; this is just a temporary step, network should be whole from beginning of process
-    
+
     ;in case mazmazvol already exist
     run pgm = network
         NETI = hwy\avgload@token_period@_taz.net
         NETO = hwy\avgload@token_period@_taz_temp1.net
-        
+
         PHASE=LINKMERGE
             MAZMAZVOL = 0.0
         ENDPHASE
     endrun
-    	
+
     ;transfer maz->maz volumes to new zone system
-    *python %BASE_SCRIPTS%\assign\transfer_maz_maz_vols.py . @token_period@
-    
+    *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\assign\transfer_maz_maz_vols.py . @token_period@
+
     ;merge in maz->maz vols
     run pgm = network
         NETI = hwy\avgload@token_period@_taz_temp1.net
         LINKI[2] = hwy\maz_preload_@token_period@_seq_vols.csv VAR=A,B,MAZMAZVOL
         NETO = hwy\avgload@token_period@_taz_temp2.net
-		
+
         PHASE=LINKMERGE
 	     		MAZMAZVOL=LI.2.MAZMAZVOL
 	       ENDPHASE
     endrun
-    
-    
+
+
      ; *DEL hwy\avgload@token_period@_taz.net
      ; *copy hwy\avgload@token_period@_taz_temp2.net hwy\avgload@token_period@_taz.net
      ; *DEL hwy\avgload@token_period@_taz_temp2.net
-	 
+
     ;Delete links for assignment and add in speeds and capacities
     run pgm = network
         NETI = hwy\avgload@token_period@_taz_temp2.net
         NETO = hwy\avgload@token_period@_taz_delete.net
-	
+
         PHASE=LINKMERGE
 
 	;
@@ -474,7 +474,7 @@ loop period = 1,2
         ;
         ; Set based on CAPCLASS
 	;
-        
+
 	LOOKUP  NAME= Cap,LOOKUP[1]=1,RESULT=2,
         FILE = %BASE_SCRIPTS%\block\SPDCAP_LOOKUP.DAT
         CAP_HRLN = Cap(1,CAPCLASS)
@@ -501,13 +501,13 @@ loop period = 1,2
 	endif
 
     IF (DRIVE_ACCESS <> 1) DELETE
-        
+
         ENDPHASE
     endrun
-    
+
      run pgm = highway
         DistributeIntrastep processid = 'MTC_HWYASN', processlist = @intrastep_range@ saveprn = f
-    
+
         ; time-specific input highway network
         neti = hwy\avgload@token_period@_taz_delete.net
 
@@ -515,11 +515,11 @@ loop period = 1,2
         mati[1] = ctramp_output\TAZ_Demand_@token_period@.mat
 
         ; internal/external travel demand
-        mati[2] = nonres\tripsIx@token_period@.tpp 
-        
+        mati[2] = nonres\tripsIx@token_period@.tpp
+
         ; commercial travel demand
         mati[3] = nonres\tripsTrk@token_period@.tpp
-        
+
         ; air passenger travel demand
         mati[4] = nonres\tripsAirPax@token_period@.mtx
 
@@ -527,20 +527,20 @@ loop period = 1,2
         neto = hwy\load@token_period@.net
 
         ; set the assignment parameters -- equilibrium assignment, bi-conjugate
-        parameters combine = equi, enhance = 2            
+        parameters combine = equi, enhance = 2
 
         ; set the assignment parameters -- internal zones + ?? external zones
         parameters zones = %TAZ_EXTS_COUNT%
-    
+
         ; set the assignment parameters
-        @token_maxiters@ 
-        @token_relativegap@ 
+        @token_maxiters@
+        @token_relativegap@
 
         ; set the assignment parameters -- other closure criteria (do not use)
         parameters gap = 0, aad = 0, raad = 0, rmse = 0
 
         ; set the number of hours in the assignment (see the loop tokens)
-        @token_capfac@ 
+        @token_capfac@
 
         ; hwyParam.bock contains variables used in the remainder of the script, particularly in the generalized cost expressions
         read file = @hwy_block_param@
@@ -551,12 +551,12 @@ loop period = 1,2
         ; set the working variables
 
          phase = linkread
-         
+
             ; the time variable is congested time specific to each time period
-            lw.time = li.CTIM 
-            
+            lw.time = li.CTIM
+
             ; distance is coded as "distance" in the networks
-            
+
             IF (li.FEET = 0)
                 lw.dist = 1.0 / 5280.0
                 distance = 1.0 / 5280.0
@@ -564,12 +564,12 @@ loop period = 1,2
                 lw.dist = li.FEET / 5280.0
                 distance = li.FEET / 5280.0
             ENDIF
-            
+
             t0 = li.FFT
             t1 = li.CTIM
-            
+
             ; facility type is the linkclass (linkclass needs to be defined, but it's not used)
-            linkclass = li.FT 
+            linkclass = li.FT
 
             ; TOLLBOOTH set to distinguish value tolls from bridge tolls
             lw.tollclass = li.TOLLBOOTH
@@ -583,7 +583,7 @@ loop period = 1,2
 
 	    ; capacity
 	    c = li.CAP_TOTFAC
-            
+
             ; free flow time
             fft = li.FFT
 
@@ -591,9 +591,9 @@ loop period = 1,2
             ;lanes = li.LANES_@token_period@
 
             read file = @free_flow_block_param@
-          
+
             ; set the generalized cost, which is the combination of three tokens
-         
+
             lw.gencost_da  = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_DA)
             ;lw.gencost_s2 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S2 / sr2costShare) + @token_hov_xfer_pen@
             ;lw.gencost_s3 = lw.time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S3 / sr3costShare) + @token_hov_xfer_pen@
@@ -603,19 +603,19 @@ loop period = 1,2
             lw.gencost_sml = lw.time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_SML)
             lw.gencost_med = lw.time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_MED)
             lw.gencost_lrg = lw.time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_LRG)
-                              
-              
+
+
             ; the USE variable defines what type of vehicles can use the roadway
-           
+
             ; Group 23 defines HOV 2 and 3+ facilities
             if (li.USECLASS_@token_period@ = 2,3)  addtogroup = 23
-           
+
             ; Group 3 defines HOV 3+ facilities
             if (li.USECLASS_@token_period@ = 3) addtogroup = 3
-            
+
             ; Group 4 defines facilities not available to trucks
             if (li.USECLASS_@token_period@ = 2,3,4) addtogroup = 4
-                       
+
             ; Group 11 defines the value toll links the non-value-toll-paying users are prohibited from using
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_DA > 0) addtogroup = 11
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_S2 > 0) addtogroup = 12
@@ -626,7 +626,7 @@ loop period = 1,2
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_SML > 0) addtogroup = 14
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_MED > 0) addtogroup = 14
             if (lw.tollclass >= firstvalue && li.TOLL@token_period@_LRG > 0) addtogroup = 15
-            
+
          endphase
 
 
@@ -647,7 +647,7 @@ loop period = 1,2
             ; very small, small, and medium trucks, no value toll, exclude small truck value toll facilities and HOV facilities
             pathload path = lw.gencost_sml, excludegrp = 14, 23, vol[4] = mi.3.vstruck + mi.3.struck + mi.3.mtruck
 
-            ; large trucks, no value toll, exclude large truck toll facilities, HOV facilities, and no commercial truck facilities 
+            ; large trucks, no value toll, exclude large truck toll facilities, HOV facilities, and no commercial truck facilities
             pathload path = lw.gencost_lrg, excludegrp = 15, 4, vol[5] = mi.3.ctruck
 
             ; value toll paying classes second
@@ -667,17 +667,17 @@ loop period = 1,2
             ; large trucks, value toll paying, excluded from HOV facilities and no commercial truck facilities
             pathload path = lw.gencost_lrg, excludegrp = 4, vol[10] = mi.3.ctrucktoll
 
-        endphase 
-    
+        endphase
+
       ; set adjust parameters (volume delay functions)
       phase = adjust
- 
+
          ; very small, small, and medium trucks have a passenger car equivalent of, on average 1.0, large trucks see HwyParam.block for PCE
          function v = vol[1] + vol[2] + vol[3] + vol[4] + trkpce*vol[5] + vol[6] + vol[7] + vol[8] + vol[9] + trkpce*vol[10] + li.MAZMAZVOL
-           
+
          ; the volume delay functions are housed in the SpeedFlowCurve.block file
          read file = @vdf_block_param@
-        
+
          ; set the generalized cost functions (same as before, only now we start with "time")
          lw.gencost_da  = time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_DA)
          ;lw.gencost_s2 = time + (0.6 / vot) * (lw.dist * autoOpCost + li.TOLL@token_period@_S2 / sr2costShare) + @token_hov_xfer_pen@
@@ -688,40 +688,40 @@ loop period = 1,2
          lw.gencost_sml = time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_SML)
          lw.gencost_med = time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_MED)
          lw.gencost_lrg = time + (0.6 / truckVot) * (lw.dist * truckOpCost + li.TOLL@token_period@_LRG)
-         
-      endphase
-      
-   endrun  
-   
 
-   
-      
+      endphase
+
+   endrun
+
+
+
+
    EndDistributeMultistep
 
- 
+
 endloop ; time period loop
 
-Wait4Files files = MTC_HWYASN1.script.end, MTC_HWYASN2.script.end, 
+Wait4Files files = MTC_HWYASN1.script.end, MTC_HWYASN2.script.end,
           PrintFiles = merge, DelDistribFiles = t, CheckReturnCode = t
 
 *Cluster.exe MTC_HWYASN 1-31 close exit
 
 loop period = 1,5
-  
+
     ; a two letter token is used for each time period
-    if (period = 1)   
-      token_period = 'EA'   
+    if (period = 1)
+      token_period = 'EA'
       token_capfacnum = 3
-    elseif (period = 2)   
-      token_period = 'AM'    
+    elseif (period = 2)
+      token_period = 'AM'
       token_capfacnum = 3.65
-    elseif (period = 3)   
-      token_period = 'MD'    
+    elseif (period = 3)
+      token_period = 'MD'
       token_capfacnum = 5
-    elseif (period = 4)   
+    elseif (period = 4)
       token_period = 'PM'
       token_capfacnum = 3.65
-    elseif (period = 5)   
+    elseif (period = 5)
       token_period = 'EV'
       token_capfacnum = 8
     endif
@@ -731,20 +731,20 @@ loop period = 1,5
       NETI = hwy\load@token_period@.net
       LINKO = hwy\load@token_period@.CSV, FORMAT=SDF DELIMITER=',' INCLUDE=A,B,CAP_HRLN,CAP_TOTFAC,FFS,FFT,V_1,TIME_1,VC_1,CSPD_1,VDT_1,VHT_1,V1_1,V2_1,V3_1,V4_1,V5_1,V6_1,
 		  V7_1,V8_1,V9_1,V10_1,VT_1,V1T_1,V2T_1,V3T_1,V4T_1,V5T_1,V6T_1,V7T_1,V8T_1,V9T_1,V10T_1
-		
+
    ENDRUN
-   
-   
-       
+
+
+
    ; read the volumes back in to the big network
    run pgm = network
       NETI = hwy\avgload@token_period@_taz_temp2.net
       LINKI[2] = hwy\load@token_period@.CSV, VAR=A,B,CAP_HRLN,CAP_TOTFAC,FFS,FFT,V_1,TIME_1,VC_1,CSPD_1,VDT_1,VHT_1,V1_1,V2_1,V3_1,V4_1,V5_1,V6_1,
 		  V7_1,V8_1,V9_1,V10_1,VT_1,V1T_1,V2T_1,V3T_1,V4T_1,V5T_1,V6T_1,V7T_1,V8T_1,V9T_1,V10T_1
-		
-      NETO = hwy\avgload@token_period@_taz_temp3.net 
 
-		
+      NETO = hwy\avgload@token_period@_taz_temp3.net
+
+
       PHASE=LINKMERGE
 
             V_1 = LI.2.V_1
@@ -783,7 +783,7 @@ loop period = 1,5
 	CAP_LANE = CAP_HRLN * @token_capfacnum@
 	CAP_TOTAL = CAP_LANE * LANES_@token_period@
 	CAP_TOTFAC = CAP_TOTAL
-    
+
       /*
       ;F&P added if statement to only use speed lookup if inside Marin (Marin=1) and not a freeway (FT<>2)
       IF (COUNTY = 'Marin' & FT <> 1) ; non-freeway in Marin County
@@ -833,10 +833,65 @@ loop period = 1,5
         IF(LI.1.DRIVE_ACCESS <> 1) V8T_1= 0
         IF(LI.1.DRIVE_ACCESS <> 1) V9T_1= 0
         IF(LI.1.DRIVE_ACCESS <> 1) V10T_1= 0
-			
+
+/*
+        ; V/C based reliability coefficient
+        VC_REL_FAC = 0
+
+        IF(VC_1 >= 0.7 & (FT = 1 | FT = 2) ) ;LOS C Freeway
+          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.7) + 0.01 ) * 0.24290 )
+        ENDIF
+
+        IF(VC_1 >= 0.7 & (FT = 4 | FT = 5) ) ;LOS C Arterial
+          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.7) + 0.01 ) * 0.1561  )
+        ENDIF
+
+        IF(VC_1 >= 0.8 & (FT = 1 | FT = 2) ) ;LOS D Freeway
+          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.8) + 0.01 ) * 0.1705  )
+        ENDIF
+
+        IF(VC_1 >= 0.8 & (FT = 4 | FT = 5) ) ;LOS D Arterial
+          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.8) + 0.01 ) * 0.0     )
+        ENDIF
+
+        IF(VC_1 >= 0.9 & (FT = 1 | FT = 2) ) ;LOS E Freeway
+          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.9) + 0.01 ) * -0.2278 )
+        ENDIF
+
+
+        IF(VC_1 >= 0.9 & (FT = 4 | FT = 5) ) ;LOS E Arterial
+          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.9) + 0.01 ) * 0.0     )
+        ENDIF
+
+
+        IF(VC_1 >= 1.0 & (FT = 1 | FT = 2) ) ;LOS F low Freeway
+          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 1.0) + 0.01 ) * -0.1983 )
+        ENDIF
+
+
+        IF(VC_1 >= 1.0 & (FT = 4 | FT = 5) ) ;LOS F low Arterial
+          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 1.0) + 0.01 ) * -0.1449 )
+        ENDIF
+
+
+        IF(VC_1 >= 1.2 & (FT = 1 | FT = 2) ) ;LOS F high Freeway
+          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 1.2) + 0.01 ) * 1.022   )
+        ENDIF
+
+
+        IF(VC_1 >= 1.2 & (FT = 4 | FT = 5) ) ;LOS F high Arterial
+          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 1.2) + 0.01 ) * 0.0     )
+        ENDIF
+
+
+        ; Add static reliability
+        RELBTY_SD = VC_REL_FAC + STREL
+        ; T_REL = RELBTY_SD *
+        RELBTY_VAR = RELBTY_SD ^ 2
+*/
         ENDPHASE
     endrun
-  
+
     ; delete the output from assignment, rename the merged file to load, and delete the temp files.
      *DEL hwy\load@token_period@.csv
      *DEL hwy\avgload@token_period@_taz_temp1.net
@@ -844,8 +899,5 @@ loop period = 1,5
      *DEL hwy\avgload@token_period@_taz_temp2.net
      *copy hwy\avgload@token_period@_taz_temp3.net hwy\load@token_period@.net
      *DEL hwy\avgload@token_period@_taz_temp3.net
-    
+
 endloop ; time period loop
- 
-
-

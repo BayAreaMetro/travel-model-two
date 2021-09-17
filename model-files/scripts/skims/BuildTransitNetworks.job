@@ -63,7 +63,7 @@ IF (RETURNCODE > 0) abort
 IF (RETURNCODE > 0) abort
 
 ;now build walk connectors that bypass taps
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_walk_transfer_bypass_links.py hwy\tap_direct_connectors.csv hwy\mtc_tap_to_stop_connectors.txt hwy\mtc_transit_network_node_xy.txt hwy\tap_connector_nodes.csv hwy\tap_connectors.csv hwy\tap_to_pseudo_tap_xwalk.csv
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_walk_transfer_bypass_links.py hwy\tap_direct_connectors.csv hwy\mtc_tap_to_stop_connectors.txt hwy\mtc_transit_network_node_xy.txt hwy\tap_connector_nodes.csv hwy\tap_connectors.csv
 IF (RETURNCODE > 0) abort
 
 

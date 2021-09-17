@@ -1,0 +1,29 @@
+; ----------------------------------------------------------------------------------------------------------------
+;
+; SetDistances.job
+;
+; TP+ script to set distances to nearest interchanges for freeway links as part of travel time reliability.
+; Takes output from Python script (CSV to DBF) and merge into new network file.
+;
+; 6/2021, Michael McCarthy, michael.mccarthy@rsginc.com
+;-----------------------------------------------------------------------------------------------------------------
+
+RUN PGM=NETWORK
+
+   ; begin with the standard input network
+   neti = hwy\mtc_final_network_with_tolls.net
+
+   ; the list of freeway links with distances
+   linki[2] = hwy\fwy_interchange_dist.dbf
+
+   ; write out to the same name with the added variables
+   neto = hwy\mtc_final_network_with_dist.net
+
+   MERGE RECORD=T
+
+   phase=linkmerge
+        DOWNDIST = 0 ; LI.2.DOWNDIST ; TODO revert to LI.2.DOWNDIST when major interchanges coded
+        UPDIST = 0 ; LI.2.UPDIST ; TODO revert to LI.2.UPDIST when major interchanges coded
+   endphase
+
+ENDRUN
