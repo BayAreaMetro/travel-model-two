@@ -41,9 +41,11 @@ rem ### Run ABM DISTRIBUTED
 rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientDistributed.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
 rem java -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientDistributed.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
 
-rem ### create demand matrices in Cube matrix format - must restart mtx manager before running?
-del %PROJECT_DIRECTORY%\ctramp_output\*.omx
-del %PROJECT_DIRECTORY%\ctramp_output\*.mat
+rem ### create demand matrices in OMX matrix format - must restart mtx manager before running? - yes
+rem del /f %PROJECT_DIRECTORY%\ctramp_output\*.omx
+rem del /f %PROJECT_DIRECTORY%\ctramp_output\*.mat
+del /f ctramp_output\*.omx
+del /f ctramp_output\*.mat
 java -Xmx100g -cp "%CLASSPATH%" -Dproject.folder=%PROJECT_DIRECTORY% com.pb.mtctm2.abm.application.MTCTM2TripTables mtctm2 -iteration %iteration% -sampleRate %sampleRate%
 rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server -Xmx80g -cp "%CLASSPATH%" -Dproject.folder=%PROJECT_DIRECTORY% com.pb.mtctm2.abm.application.MTCTM2TripTables mtctm2 -iteration %iteration% -sampleRate %sampleRate%
 

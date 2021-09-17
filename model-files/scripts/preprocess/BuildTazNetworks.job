@@ -145,7 +145,7 @@ loop period = 1, 5
     
     
     ;old way of doing externals - keeping for the moment just in case...
-    ;*python %BASE_SCRIPTS%\skims\build_external_stations.py %TAZ_COUNT% . hwy\external_stations.csv hwy\avgload@token_period@_taz_to_node.txt hwy\@token_period@_exts_node.csv hwy\@token_period@_exts_link.csv
+    ;*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_external_stations.py %TAZ_COUNT% . hwy\external_stations.csv hwy\avgload@token_period@_taz_to_node.txt hwy\@token_period@_exts_node.csv hwy\@token_period@_exts_link.csv
     ;
     ;RUN PGM=NETWORK
     ;    PAR NODES=10000000

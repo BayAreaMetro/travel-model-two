@@ -154,7 +154,7 @@ loop period = 1,5
     endrun
     	
     ;transfer maz->maz volumes to new zone system
-    *python %BASE_SCRIPTS%\assign\transfer_maz_maz_vols.py . @token_period@
+    *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\assign\transfer_maz_maz_vols.py . @token_period@
     
     ;merge in maz->maz vols
     run pgm = network

@@ -1,0 +1,61 @@
+;---------------------------------------------------------------------------
+;
+; freeway_interchanges.job
+;
+; This script writes out nodes for freeway (FT = 1 or 2) interchanges
+; and all freeway links to CSV files to process upstream/downstream
+; distances in Python.
+;
+; inputs: network (hwy\mtc_final_network.net)
+;
+; outputs: interchange nodes (hwy\fwy_interchange_nodes.csv) and
+;          freeway links (hwy\fwy_links.csv)
+;
+;---------------------------------------------------------------------------
+
+;create intersections node file with x and y coordinate
+RUN PGM=NETWORK
+    neti      ="hwy\mtc_final_network.net"
+    printo[1] ="hwy\fwy_interchange_nodes.csv"
+    printo[2] ="hwy\fwy_links.csv"
+
+
+    phase=nodemerge
+        IF (N=1) PRINT CSV=T, LIST="N","IN","OUT","LOC", PRINTO=1
+        IF (N=1) PRINT CSV=T, LIST="A","B","FT","DISTANCE","INTXA","INTXB", PRINTO=2
+
+;        IF ((FT=1 | FT=2) & (_N.Inbounds > _N.Outbounds))
+        IF (_N.Inbounds > _N.Outbounds)
+            ; after interchange
+            print CSV=T, list=N(L),"AFTER", PRINTO=1
+        ENDIF
+
+;        IF ((FT=1 | FT=2) & (_N.Outbounds > _N.Inbounds))
+        IF (_N.Outbounds > _N.Inbounds)
+            ; before interchange
+            print CSV=T, list=N(L),"BEFORE", PRINTO=1
+        ENDIF
+
+    endphase
+
+    phase=linkmerge
+        _ANODE = ''
+        _BNODE = ''
+
+        IF (FT=1 | FT=2)
+
+          IF (_A.Outbounds > _A.Inbounds) _ANODE = 'BEFORE'
+          IF (_A.Inbounds > _A.Outbounds) _ANODE = 'AFTER'
+
+          IF (_B.Outbounds > _B.Inbounds) _BNODE = 'BEFORE'
+          IF (_B.Inbounds > _B.Outbounds) _BNODE = 'AFTER'
+
+          print CSV=T, list=A(L),B(L),FT(L),DISTANCE(6.2L),_ANODE(L),_BNODE(L), PRINTO=2
+
+        ENDIF
+
+
+
+    endphase
+
+ENDRUN
