@@ -202,7 +202,8 @@ final <- workingdata %>%
   summarize(  HHINCQ1=sum(HHINCQ1),
               HHINCQ2=sum(HHINCQ2),
               HHINCQ3=sum(HHINCQ3),
-              HHINCQ4=sum(HHINCQ4)) %>% 
+              HHINCQ4=sum(HHINCQ4)) %>%
+  ungroup() %>% 
   mutate(hh_total=rowSums(select(.,all_of(hh_columns)))) %>%              # Sum rows before rounding to get best total
   mutate_at(c(all_of(hh_columns),"hh_total"),~round(.,digits = 0)) %>%    # Round columns
   mutate(hh_subtotal=rowSums(select(.,all_of(hh_columns))),               # Sum rows after rounding to ensure subtotals match totals
