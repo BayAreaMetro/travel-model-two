@@ -1,6 +1,10 @@
 # Create Census 2010 MAZ and TAZ shares of blockgroups.R
+
+# NOTE!!!!!!!!!!!!!!
 # ACS input data year should be set using the last year of a five year range using the ACS_eval_year variable
-# e.g., for 2013-2017 - Sys.setenv(ACS_eval_year="2017")
+# e.g., for 2013-2017 - Sys.setenv(ACS_eval_year="2017"). This will be the default set below. 
+
+Sys.setenv(ACS_eval_year="2017")
 
 # Notes
 
@@ -13,8 +17,11 @@ This script checks ACS year blockgroups against 2010 blockgroups to see if any o
 households where Census 2010 was zero. This is important to ensure full apportionment of ACS data. In cases 
 that ACS block groups are >0 while Census 2010 values were zero, a straight apportionment to blocks is done
 by the number of blocks in that block group. 
-   
+
 "
+
+# ACS input data year should be set using the last year of a five year range using the ACS_eval_year variable
+# e.g., for 2013-2017 - Sys.setenv(ACS_eval_year="2017")
 
 # Import Libraries
 # Remove scientific notation
@@ -44,7 +51,7 @@ if (file.exists(logfile)) {
 }
 
 log_appender(appender_tee(logfile))
-log_info('Bringing in relevant files.')
+log_info('Bringing in Census 2010 block-level total households and then summing to block group.')
 
 # Set input path locations and working directory
 
@@ -93,7 +100,7 @@ block_share <- bg_MAZ_TAZ %>%
   rename(block=GEOID10,block_hhs=hhs,blockgroup=bg,taz2=taz) %>% 
   select(block,block_hhs,blockgroup,total_bg_hhs_2010,sharebg,maz,taz2)
 
-log_info('There are {nrow(block_share)} blocks and {nrow(bg_total)} block groups.')
+log_info('There are {nrow(block_share)} blocks and {nrow(bg_total)} block groups in 2010.')
 
 # Create apportionment for mazs with no households
 # Start by creating a block group file with number block group ID, number of hhs in 2010 and the ACS year
@@ -112,6 +119,7 @@ acs_hhs <- get_acs(geography = "block group", variables = "B19001_001E",
   mutate(bad_sharebg=1/total_blocks)
 
 log_info("BG(s) with no hhs in Census 2010, yet some in ACS {ACS_year}: {acs_hhs$bg} with {acs_hhs$total_blocks} blocks")
+log_info("Any such block groups will be apportioned to constituent blocks proportionately by number of blocks.")
 
 block_share <- block_share %>%
   left_join(.,select(acs_hhs,bg,bad_sharebg),by=c("blockgroup"="bg")) %>% 
