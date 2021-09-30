@@ -19,7 +19,7 @@ apportioned a share of 0.1.
 * Data for 2010 total households is downloaded using the [Census API](https://api.census.gov/data/2010.html) with [R's TidyCensus Package](https://walker-data.com/tidycensus/articles/basic-usage.html)
 * Sum block group total households and calculate block shares
 * Bring in ACS five-year data with the [ACS API](https://www.census.gov/data/developers/data-sets/acs-5year.2017.html) for the relevant year and determine if block group totals are non-zero where they were zero in 2010.
-  + If not block groups fit this criterion, make no changes to the block-level shares
+  + If no block groups fit this criterion, make no changes to the block-level shares
   + For block group that do fit the above description, divide 1/number of blocks to get the respective block shares.
 * Sum block shares for each block group/MAZ and block group/TAZ2 combination to produce final crosswalk files.
 * Output crosswalks for [MAZ](https://github.com/BayAreaMetro/travel-model-two/blob/master/maz_taz/crosswalks/Census%202010%20hhs%20maz%20share%20of%20blockgroups.csv) and [TAZ2](https://github.com/BayAreaMetro/travel-model-two/blob/master/maz_taz/crosswalks/Census%202010%20hhs%20taz2%20share%20of%20blockgroups.csv).
