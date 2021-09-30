@@ -22,5 +22,5 @@ apportioned a share of 0.1.
   + If no block groups fit this criterion, make no changes to the block-level shares
   + For block group that do fit the above description, divide 1/number of blocks to get the respective block shares
 * Sum block shares for each block group/MAZ and block group/TAZ2 combination to produce final crosswalk files
-* Output crosswalks for [MAZ](https://github.com/BayAreaMetro/travel-model-two/blob/master/maz_taz/crosswalks/Census%202010%20hhs%20maz%20share%20of%20blockgroups.csv) and [TAZ2](https://github.com/BayAreaMetro/travel-model-two/blob/master/maz_taz/crosswalks/Census%202010%20hhs%20taz2%20share%20of%20blockgroups.csv).
+* Output crosswalks for [MAZ](https://github.com/BayAreaMetro/travel-model-two/blob/master/maz_taz/crosswalks/Census%202010%20hhs%20maz%20share%20of%20blockgroups.csv) and [TAZ2](https://github.com/BayAreaMetro/travel-model-two/blob/master/maz_taz/crosswalks/Census%202010%20hhs%20taz2%20share%20of%20blockgroups.csv)
 * A log file for the appropriate ACS year is produced to document block groups fitting the above condtions (log not included in the GitHub repository)
