@@ -51,6 +51,7 @@ if (file.exists(logfile)) {
 }
 
 log_appender(appender_tee(logfile))
+log_info('Create Census 2010 MAZ and TAZ shares of blockgroups.R')
 log_info('Bringing in Census 2010 block-level total households and then summing to block group.')
 
 # Set input path locations and working directory
@@ -101,6 +102,7 @@ block_share <- bg_MAZ_TAZ %>%
   select(block,block_hhs,blockgroup,total_bg_hhs_2010,sharebg,maz,taz2)
 
 log_info('There are {nrow(block_share)} blocks and {nrow(bg_total)} block groups in 2010.')
+log_info('Calculate 2010 household block share of block groups for later summing at MAZ/TAZ2 level.')
 
 # Create apportionment for mazs with no households
 # Start by creating a block group file with number block group ID, number of hhs in 2010 and the ACS year
@@ -118,19 +120,26 @@ acs_hhs <- get_acs(geography = "block group", variables = "B19001_001E",
   filter(total_bg_hhs_2010==0 & total_bg_hhs_ACS>0) %>% 
   mutate(bad_sharebg=1/total_blocks)
 
-log_info("BG(s) with no hhs in Census 2010, yet some in ACS {ACS_year}: {acs_hhs$bg} with {acs_hhs$total_blocks} blocks")
+log_info("BG(s) with no hhs in Census 2010, yet some in ACS {ACS_year}: Blockgroup {acs_hhs$bg} with {acs_hhs$total_blocks} blocks")
 log_info("Any such block groups will be apportioned to constituent blocks proportionately by number of blocks.")
 
 block_share <- block_share %>%
   left_join(.,select(acs_hhs,bg,bad_sharebg),by=c("blockgroup"="bg")) %>% 
   mutate(sharebg=if_else(!is.na(bad_sharebg),bad_sharebg,sharebg)) 
-  
+
+log_info('Sum block shares to MAZ and TAZ2, respectively.')
 
 # Create files for maz and taz and output
 
 maz_share_bg <- block_share %>% group_by(blockgroup,maz) %>% summarize(maz_share=sum(sharebg)) 
 taz_share_bg <- block_share %>% group_by(blockgroup,taz2) %>% summarize(taz2_share=sum(sharebg)) 
 
-write.csv(maz_share_bg,file = "Census 2010 hhs maz share of blockgroups.csv",row.names = F)
-write.csv(taz_share_bg,file = "Census 2010 hhs taz2 share of blockgroups.csv",row.names = F)
+maz_output <- paste0("Census 2010 hhs maz share of blockgroups_ACS",ACS_year,".csv")
+taz_output <- paste0("Census 2010 hhs taz share of blockgroups_ACS",ACS_year,".csv")
+
+log_info('Output maz crosswalk: {maz_output}')
+log_info('Output taz crosswalk: {taz_output}')
+
+write.csv(maz_share_bg,maz_output,row.names = F)
+write.csv(taz_share_bg,taz_output,row.names = F)
 
