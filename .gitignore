@@ -2,7 +2,6 @@
 core/build/
 core/release/
 /bin/
-*.log
 *.bak
 *.exe
 *.Rhistory
