@@ -1,7 +1,7 @@
 ## ACS Household Block Group to MAZ and TAZ2 Crosswalks
 
 American Community Survey (ACS) data are available at block group and above geographies. However, TM2 geographies (MAZ/TAZ2) are 
-built on clusters of blocks. The script in this folder creates a block-group-to-MAZ and block-group-to-TAZ2 crosswalks.
+built on [clusters of blocks](https://github.com/BayAreaMetro/travel-model-two/blob/master/maz_taz/blocks_mazs_tazs_v2.2.csv). The script in this folder creates a block-group-to-MAZ and block-group-to-TAZ2 crosswalks.
 This README describes the process for creating a crosswalk to use with household-level variables, though in the future
 other types of crosswalks may be developed. For the HH-level crosswalk files, 2010 decennial census household data at 
 the block level are used to develop the share of households by block group. The block group shares are generated as a 
