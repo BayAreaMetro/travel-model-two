@@ -180,21 +180,6 @@ loop period = 1, 5
           ENDRUN
       
           *del hwy\temp_@mazset@_@token_period@.net
-		  
-		    ;convert from open matrix to cube
-  
-     filename = 'auto_@token_period@_MAZ_AUTO_@mazset@_@token_period@'
-    
-     ;write Cube script since cant pass tokens to RUN PGM = CUBE
-     RUN PGM=MATRIX
-      ZONES=1
-      FILEO PRINTO[1] = convert_omx_tpp.s
-      PRINT LIST="CONVERTMAT FROM='@filename@.omx' TO='@filename@.mat' FORMAT='TPP' COMPRESSION=0" PRINTO=1
-     ENDRUN
-  
-    ;run script
-     *Voyager.exe convert_omx_tpp.s /Start
-
           
           ;run assignment
           run pgm = highway

@@ -52,6 +52,7 @@ SET /A MAX_ITERATION=3
 SET /A MAX_INNER_ITERATION=1
 
 ::  Set choice model household sample rate
+REM SET SAMPLERATE_ITERATION1=0.005
 SET SAMPLERATE_ITERATION1=0.3
 SET SAMPLERATE_ITERATION2=0.5
 SET SAMPLERATE_ITERATION3=1
@@ -71,9 +72,11 @@ set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUB
 CALL conda activate mtc_py2
 
 
+
+
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
-SET /A ITERATION=1
+SET /A ITERATION=2
 SET /A INNER_ITERATION=1
 IF %ITERATION% EQU 1 SET SAMPLERATE=%SAMPLERATE_ITERATION1%
 IF %ITERATION% EQU 2 SET SAMPLERATE=%SAMPLERATE_ITERATION2%
@@ -81,8 +84,9 @@ IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
 IF %ITERATION% EQU 4 SET SAMPLERATE=%SAMPLERATE_ITERATION4%
 IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
 REM call zoneSystem.bat
-REM goto emmeseconditeration
+REM goto iteration_start
 REM goto createemmenetwork
+REM goto afteremmeupdate
 :: ------------------------------------------------------------------------------------------------------
 
 
@@ -150,7 +154,6 @@ if NOT %MATRIX_SERVER%==localhost (
 runtpp %BASE_SCRIPTS%\preprocess\preprocess_input_net.job
 IF ERRORLEVEL 2 goto done
 
-:zones
 :: Write a batch file with number of zones, taps, mazs
 runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
 if ERRORLEVEL 2 goto done
@@ -162,6 +165,7 @@ call zoneSystem.bat
 runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
 
 :: Create all necessary input files based on updated sequential zone numbering
+:zones
 python %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
 IF ERRORLEVEL 1 goto done
 
@@ -249,6 +253,21 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\preprocess\SetCapClass.job
 if ERRORLEVEL 2 goto done
 
+:: Export network for interchange distances
+runtpp %BASE_SCRIPTS%\preprocess\freeway_interchanges.job
+if ERRORLEVEL 2 goto done
+
+:: Process up/downstream interchange distances and convert to DBF
+python %BASE_SCRIPTS%\preprocess\interchange_distance.py hwy\fwy_links.csv hwy\fwy_interchange_dist.csv
+if ERRORLEVEL 2 goto done
+
+python %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\fwy_interchange_dist.csv hwy\fwy_interchange_dist.dbf
+if ERRORLEVEL 2 goto done
+
+:: merge into network
+runtpp %BASE_SCRIPTS%\preprocess\SetDistances.job
+if ERRORLEVEL 2 goto done
+
 :createfivehwynets
 :: Create time-of-day-specific
 runtpp %BASE_SCRIPTS%\preprocess\CreateFiveHighwayNetworks.job
@@ -321,13 +340,13 @@ IF ERRORLEVEL 1 goto done
 
 %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "emme_full_run" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
-REM goto done
 
 %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "yes" --skip_import_demand
 IF ERRORLEVEL 1 goto done
 
 CALL conda deactivate
 CALL conda activate mtc_py2
+REM goto done
 :afteremmeskims
 
 REM runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
@@ -410,7 +429,6 @@ copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
 if ERRORLEVEL 2 goto done
 del mtctm2.properties
-goto done
 
 taskkill /im "java.exe" /F
 
@@ -526,7 +544,7 @@ CALL conda activate mtc_py2
 :afteremmeupdate
 
 :: Create the block file that controls whether the crowding functions are called during transit assignment.
-REM python %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
+python %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
 
 ::Inner iterations with transit assignment and path recalculator
 SET /A INNER_ITERATION=0
