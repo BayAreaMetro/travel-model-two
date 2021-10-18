@@ -173,7 +173,7 @@ public class HouseholdChoiceModels
             if (runAutoOwnershipModel) {
                 aoModel = new HouseholdAutoOwnershipModel(propertyMap, dmuFactory, accTable, mandAcc);
                 tvtcModel = new TourVehicleTypeChoiceModel(propertyMap);
-                ttModel = new TransitSubsidyAndPassModel(propertyMap, dmuFactory, accTable);
+                ttModel = new TransitSubsidyAndPassModel(propertyMap, dmuFactory, accTable, logsumHelper);
                 if ( measureObjectSizes ) logger.info ( "AO size:         " + ObjectUtil.sizeOf( aoModel ) + ObjectUtil.sizeOf(tvtcModel));
             }
 

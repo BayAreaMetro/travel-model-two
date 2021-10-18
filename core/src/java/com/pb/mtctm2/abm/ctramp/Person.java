@@ -92,7 +92,7 @@ public class Person
     private float                schoolLocLogsum;
 
     private int                  freeParkingAvailable;
-    private double               reimbursePercent;
+    private float               reimbursePercent;
     
     private String               cdapActivity;
     private int                  imtfChoice;
@@ -113,7 +113,7 @@ public class Person
 
     // private Scheduler scheduler;
     // windows[] is 1s based - indexed from 1 to number of intervals.
-    private int[]                windows;
+    private short[]                windows;
 
     private int                  windowBeforeFirstMandJointTour;
     private int                  windowBetweenFirstLastMandJointTour;
@@ -138,7 +138,7 @@ public class Person
         initializeWindows();
 
         freeParkingAvailable = ParkingProvisionModel.FP_MODEL_REIMB_ALT;
-        reimbursePercent = 0.43;
+        reimbursePercent = 0.43f;
     }
 
     public Household getHouseholdObject()
@@ -166,7 +166,7 @@ public class Person
         return atWorkSubtourArrayList;
     }
 
-    public int[] getTimeWindows()
+    public short[] getTimeWindows()
     {
         return windows;
     }
@@ -177,7 +177,7 @@ public class Person
 
     public void initializeWindows()
     {
-        windows = new int[modelStructure.getNumberOfTimePeriods()+1];
+        windows = new short[modelStructure.getNumberOfTimePeriods()+1];
     }
 
     public void resetTimeWindow(int startPeriod, int endPeriod)
@@ -341,7 +341,7 @@ public class Person
         freeParkingAvailable = chosenAlt;
     }
     
-    public void setParkingReimbursement(double pct)
+    public void setParkingReimbursement(float pct)
     {
         reimbursePercent = pct;
     }
@@ -786,7 +786,7 @@ public class Person
         return freeParkingAvailable;
     }
     
-    public double getParkingReimbursement()
+    public float getParkingReimbursement()
     {
         return reimbursePercent;
     }
@@ -1415,10 +1415,10 @@ public class Person
      * 
      * @return the length of the maximum pairwise available window in units of time intervals
      */
-    public int getMaximumContinuousPairwiseAvailableWindow( int[] otherWindow )
+    public short getMaximumContinuousPairwiseAvailableWindow( short[] otherWindow )
     {
-        int maxWindow = 0;
-        int currentWindow = 0;
+        short maxWindow = 0;
+        short currentWindow = 0;
         for (int i = 1; i < windows.length; i++){
             if (windows[i] == 0 && otherWindow[i] == 0){
                 currentWindow++;
@@ -1435,7 +1435,7 @@ public class Person
         return maxWindow;
     }
 
-    public void setTimeWindows(int[] win)
+    public void setTimeWindows(short[] win)
     {
         windows = win;
     }

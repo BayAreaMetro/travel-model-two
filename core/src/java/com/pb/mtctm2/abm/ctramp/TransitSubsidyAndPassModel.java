@@ -11,6 +11,7 @@ import com.pb.common.datafile.OLD_CSVFileReader;
 import com.pb.common.datafile.TableDataSet;
 import com.pb.common.model.ModelException;
 import com.pb.mtctm2.abm.accessibilities.AccessibilitiesTable;
+import com.pb.mtctm2.abm.accessibilities.AutoAndNonMotorizedSkimsCalculator;
 import com.pb.mtctm2.abm.accessibilities.AutoTazSkimsCalculator;
 import com.pb.mtctm2.abm.accessibilities.BestTransitPathCalculator;
 import com.pb.mtctm2.abm.accessibilities.WalkTransitWalkSkimsCalculator;
@@ -55,14 +56,14 @@ public class TransitSubsidyAndPassModel
    
    private BestTransitPathCalculator         bestPathCalculator;
    protected WalkTransitWalkSkimsCalculator  wtw;
-   AutoTazSkimsCalculator tazDistanceCalculator;
+   AutoAndNonMotorizedSkimsCalculator anmCalculator;
 	TransitWalkAccessDMU walkDmu;
 	TransitDriveAccessDMU driveDmu;
 
     HashMap<String, String> rbMap;
 
     public TransitSubsidyAndPassModel(HashMap<String, String> rbMap,
-            CtrampDmuFactoryIf dmuFactory, AccessibilitiesTable myAccTable)
+            CtrampDmuFactoryIf dmuFactory, AccessibilitiesTable myAccTable, McLogsumsCalculator logsumHelper)
     {
 
         logger.info("setting up transit subsidy and transit pass ownership models.");
@@ -110,9 +111,8 @@ public class TransitSubsidyAndPassModel
        
         setSubsidyDistribution(subsidyPercentFileName);
 
-        bestPathCalculator = new BestTransitPathCalculator(rbMap);
-        tazDistanceCalculator = new AutoTazSkimsCalculator(rbMap);
-        tazDistanceCalculator.computeTazDistanceArrays();
+        bestPathCalculator = logsumHelper.getBestTransitPathCalculator();
+        anmCalculator = logsumHelper.getAnmSkimCalculator();
 
         wtw = new WalkTransitWalkSkimsCalculator(rbMap);
         wtw.setup(rbMap, logger, bestPathCalculator);
@@ -447,8 +447,9 @@ public class TransitSubsidyAndPassModel
 
 		int originTaz = mgraManager.getTaz(originMaz);
 		int destinationTaz = mgraManager.getTaz(destinationMaz);
+		double[] dist = anmCalculator.getTazDistanceFromTaz(originTaz, ModelStructure.AM_SKIM_PERIOD_INDEX);
 		
-		float odDistance  = (float) tazDistanceCalculator.getTazToTazDistance(ModelStructure.AM_SKIM_PERIOD_INDEX, originTaz, destinationTaz);
+		float odDistance  = (float) dist[destinationTaz];
 		
 		bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.WTW, originMaz, destinationMaz, period, debug, logger, odDistance);
 		double[] bestUtilities = bestPathCalculator.getBestUtilities();
