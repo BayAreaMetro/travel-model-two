@@ -1,3 +1,34 @@
+"""
+cube_to_emme_network_conversion.py
+
+ Script to read in a Cube network shapefile and output Emme transaction files to
+ load the network and attributes into Emme.
+
+ inputs:
+    - congested network files from Cube in DBF format
+    - Cube transit.lin file with updated numbering
+    - vehtype.pts file for vehicle types
+    - Station attribute csv file
+
+ Outputs:
+    - A folder for each time of day period containing all of the emme transaction files
+    - Node crosswalk files and station attribute files for debugging between cube and emme
+
+ Specific input and output file location and names are listed in the __init__ method
+ of the emme_network_conversion class
+
+ Usage: python cube_to_emme_network_conversion.py
+ Run Options:
+        ['-p', '--trn_path'], path to the trn folder, default is the current_working_folder\trn
+        ['-i', '--first_iteration'], Is this the first iteration? yes or no, default is yes.
+            There is currently no difference between first_iteration yes and no, but future
+            improvements could speed up run time by only updating the network attributes that change
+            after the first iteration.
+
+ Date: Oct, 2021
+ Contacts: david.hensle@rsginc.com
+"""
+
 import geopandas
 import shapely
 import pandas as pd
@@ -53,7 +84,6 @@ station_to_tap_max_dist = 5280  # feet
 extra_node_attributes = ['OLD_NODE', 'TAPSEQ', 'FAREZONE']
 extra_link_attributes = ['SPEED', 'FEET',
     'LANES_EA', 'LANES_AM', 'LANES_MD', 'LANES_PM', 'LANES_EV',
-    'ML_LANES_EA', 'ML_LANES_AM', 'ML_LANES_MD', 'ML_LANES_PM', 'ML_LANES_EV',
     'USECLASS_EA', 'USECLASS_AM', 'USECLASS_MD', 'USECLASS_PM', 'USECLASS_EV',
     'ASSIGNABLE', 'TRANSIT', 'FT', 'FFS', 'TRANTIME', 'WALKDIST','WALKTIME',
     'WALK_ACCESS', 'BIKE_ACCESS', 'DRIVE_ACCES', 'BUS_ONLY', 'RAIL_ONLY',
@@ -72,6 +102,16 @@ station_network_field_attributes = ['stName', 'stType', 'stParkType']
 # --------------------------------------------- Methods --------------------------------------------
 class emme_network_conversion:
     def __init__(self, cube_network_folder, period):
+        """
+        Sets the time of day period, and input and output file locations that are
+        used when creating emme transaction files.  The purpose of the class is to keep
+        better track of the specific files for each time period.
+
+        Parameters:
+            - cube_network_folder: folder containing the cube network and transit data.
+                                Is typtically the "trn" folder in the base model directory
+            - period: str to denote the time of day period.
+        """
         self.period = period
         # input data
         self.link_shapefile = os.path.join(cube_network_folder, "mtc_transit_network_{}_CONG_links.DBF".format(period))
@@ -102,11 +142,19 @@ class emme_network_conversion:
         self.station_network_fields_file = os.path.join(self.emme_network_transaction_folder, "station_network_fields.txt")
 
     def load_input_data(self):
+        """
+        Loads in the links and nodes from the Cube network.  Trims all MAZ and TAZ
+        connectors and pedestrian links to reduce network size.
+
+        Returns:
+            - node_gdf: GeoDataFrame containing node information
+            - link_gdf: GeoDataFrame containing link information
+        """
         print("Loading input data for", self.period, "period")
         node_gdf = geopandas.read_file(self.node_shapefile)
         link_gdf = geopandas.read_file(self.link_shapefile)
 
-        # remove all MAZ, TAZ, and PED links.  are CRAIL links needed?
+        # remove all MAZ, TAZ, and PED links.
         link_gdf = link_gdf[link_gdf['CNTYPE'].isin(['TANA', 'TAP', 'CRAIL', 'TRWALK'])]
 
         print("node columns: ", node_gdf.columns)
@@ -121,8 +169,16 @@ class emme_network_conversion:
 
 
     def determine_centroid_nodes(self, node_gdf):
-        # finding centroids using information on wiki:
-        # http://bayareametro.github.io/travel-model-two/input/#county-node-numbering-system
+        """
+        Determines the centroid nodes using the following table:
+        http://bayareametro.github.io/travel-model-two/input/#county-node-numbering-system
+
+        Parameters:
+            - node_gdf: GeoDataFrame of node attributes
+
+        Returns:
+            - node_gdf with centroid node flags
+        """
         node_gdf['is_taz'] = 0
         node_gdf.loc[(node_gdf.OLD_NODE <= 9999)
                         | ((node_gdf.OLD_NODE >= 100001) & (node_gdf.OLD_NODE <= 109999))
@@ -177,6 +233,21 @@ class emme_network_conversion:
 
 
     def renumber_nodes_for_emme(self, node_gdf, link_gdf):
+        """
+        Renumbers node id's for use in Emme.
+        Nodes are numbered starting at one to avoid the node id cap in Emme.
+        Sets new i and j node id's for links to match renumbered nodes.
+
+        Writes the crosswalk file to the output folder.
+
+        Parameters:
+            - node_gdf: GeoDataFrame of node data
+            - link_gdf: GeoDataFrame of link data
+
+        Returns:
+            - node_gdf with renumbered nodes
+            - link_gdf with renumbered links
+        """
         # NOTE: Node ID's need to be less than 1,000,000 for import into Emme
         node_gdf['node_id'] = pd.Series(range(1,len(node_gdf)+1))
 
@@ -227,6 +298,13 @@ class emme_network_conversion:
 
 
     def parse_vehtype_pts_file(self):
+        """
+        Parses the vehicle type information from vehtype.pts
+
+        Returns:
+            - vehicletype_df: pandas datafrane of vehicle type data
+        """
+
         vehicletype_data = []
         # looping through each line in vehicle type pts file.
         with open(self.vehtype_pts_file, 'r') as file:
@@ -254,6 +332,15 @@ class emme_network_conversion:
 
 
     def create_and_write_mode_transaction_file(self, write_file=True):
+        """
+        Creates and writes the emme mode transaction file.  Modes definitions are hard coded here.
+
+        Parameters:
+            - write_file: Boolean on whether to write the Emme transaction file. default True
+        Returns:
+            - mode_transaction_df: dataframe of mode Emme mode definitions
+
+        """
         print("Writing mode transaction file")
         # type options: 1:auto, 2:transit, 3:auxiliary transit or 4:auxiliary auto
         columns=['transaction', 'mode', 'descr', 'type']
@@ -302,6 +389,15 @@ class emme_network_conversion:
 
 
     def create_and_write_vehicle_transaction_file(self, vehicletype_df, transit_line_df):
+        """
+        Creates and writes vehicle information to the Emme transaction file
+
+        Parameters:
+            - vehicletype_df: dataframe of vehicle type data from vehtype.pts file
+            - transit_line_df: dataframe of transit line dataframe matching lines to vehicles
+        Returns:
+            - mode_vehtype_xwalk: dataframe relating vehicle type to the transit line mode
+        """
         print("Writing vehicle transaction file")
         # need to generate crosswalk between vehicletype, mode code, and emme mode
         mode_vehtype_xwalk = transit_line_df.groupby(
@@ -347,6 +443,15 @@ class emme_network_conversion:
 
 
     def create_emme_nodes_input(self, node_gdf):
+        """
+        Creates the variables required for the node transaction into Emme
+
+        Parameters:
+            - node_gdf: GeoDataFrame of node information
+        Returns:
+            - node_gdf with Emme specific columns
+            - node_transaction_cols: list of columns to be written to transaction file
+        """
         # adding required fields for the node transaction file
         node_gdf['i_node'] = node_gdf['node_id']
         node_gdf['transaction'] = 'a'
@@ -367,6 +472,15 @@ class emme_network_conversion:
 
 
     def create_emme_links_input(self, link_gdf, mode_transaction_df):
+        """
+        Creates the variables required for the link transaction into Emme
+
+        Parameters:
+            - linke_gdf: GeoDataFrame of linke information
+        Returns:
+            - linke_gdf with Emme specific columns
+            - linke_transaction_cols: list of columns to be written to transaction file
+        """
         non_walk_modes = ''
         for mode in mode_transaction_df['mode'].values:
             if mode in ['a', 'e', 'w']:
@@ -410,6 +524,16 @@ class emme_network_conversion:
 
 
     def remove_long_walk_links(self, link_gdf, max_length_mi):
+        """
+        Utility function to remove long walk links from network
+
+        Parameters:
+            - link_gdf: GeoDataFrame of links
+            - max_length_mi: float that specifies the max allowed walk link length in miles
+
+        Returns:
+            - link_gdf with no more walk links
+        """
         long_walk_links = ((link_gdf['dist_between_nodes_mi'] > max_length_mi) & (link_gdf['NTL_MODE'] == 2))
         print("Total number of walk links: ", len(link_gdf[link_gdf['NTL_MODE'] == 2]))
         print("Number of long walk links removed: ", long_walk_links.sum())
@@ -419,6 +543,18 @@ class emme_network_conversion:
 
 
     def write_links_and_nodes_transaction_file(self, node_gdf, link_gdf, mode_transaction_df):
+        """
+        Writes the Emme network transaction file
+
+        Parameters:
+            - node_gdf: GeoDataFrame of node information to be written to transaction file
+            - link_gdf: GeoDataFrame of link information to be written to transaction file
+            - mode_transaction_df: dataframe of Emme transit mode data
+        Returns:
+            - node_gdf with additional Emme variables
+            - link_gdf with additional Emme variables
+        """
+
         print("Writing emme network file")
 
         node_gdf, node_transaction_cols = self.create_emme_nodes_input(node_gdf)
@@ -436,6 +572,18 @@ class emme_network_conversion:
 
 
     def write_extra_attributes_header(self, file, extra_attrib_cols, attribute_type, network_fields=False):
+        """
+        Writes the header for network attribute and network field transaction files
+
+        Parameters:
+            - file: an open file to write the header to
+            - extra_attrib_cols: The column names of the extra attributes
+            - attribute_type: string that denotes the type of network object the attribute is for.
+                             allowed values are NODE, LINK, TRANSIT_LINE, and TRANSIT_SEGMENT
+            - network_fields: Boolean to determine if you are writing network fields (strings) or network attributes (numbers)
+        Returns:
+            - None
+        """
         if network_fields:
             parameter_type = 'network_fields'
             default_value = 'STRING'
@@ -471,6 +619,19 @@ class emme_network_conversion:
 
 
     def write_extra_links_and_nodes_attribute_files(self, node_gdf, link_gdf):
+        """
+        Writes the specified extra link and node attributes to the extra link and node
+        attribute transaction files.  This is necessary because the base network transaction file
+        cannot include all of these extra data fields
+
+        Extra attribute files are specifically for numbers, and network fields are for string values
+
+        Input:
+            - node_gdf: GeoDataFrame with node information
+            - link_gdf: GeoDataFrame with link information
+        Returns:
+            - None
+        """
         print("Writing extra link and node attributes file")
 
         # writing node file
@@ -515,6 +676,13 @@ class emme_network_conversion:
 
 
     def parse_transit_line_file(self):
+        """
+        Parses the transit.lin file output by build_new_transit_line.py file
+
+        Returns:
+            - transit_line_df: pandas dataframe with transit line data
+            - stop_df: pandas dataframe with sequential stops for each transit line
+        """
         # initializing variables
         line_data = []
         stop_data =[]
@@ -590,9 +758,20 @@ class emme_network_conversion:
 
 
     def setup_NNTIIME_variables(self, stop_df, link_gdf):
-        # NNTIME is the Cube variable containing station-to-station time
-        # It is set after the network import, but we initialize the variables used here
+        """
+        Initialize the NNTIME variables to set station-to-station time.
+        (NNTIME is the Cube variable name).
+        Actual station to station time is done in the create_emme_network.py script
+        where actual link distances can be used when there are intermediary stops.
 
+        TODO: Is this really necessary now that we have the NNTIME set in network import?
+
+        Parameters:
+            - stop_df: dataframe of transit stops for each transit line
+            - link_gdf:
+        Returns:
+            - stop_link_df: stop_df with link lengths merged and NNTIME setup
+        """
         # backfilling NNTIME to all nodes involved with each NNTIME
         # stop_df['NNTIME_fill'] = stop_df.groupby('LINE')['NNTIME'].bfill().astype(float)
 
@@ -632,6 +811,22 @@ class emme_network_conversion:
 
 
     def trim_network(self,link_gdf, node_gdf, transit_line_df, stop_df):
+        """
+        Removes links and nodes that are not needed in the network.
+        Local rodes without a transit line on them are removed.
+        Nodes that do not belong to any link are removed
+        Additional code exists for debugging routing issues between Cube and Emme.
+
+        This is required to get under the Emme limit for the max number of nodes and links
+
+        Inputs:
+            - link_gdf: GeoDataFrame of link data
+            - node_gdf: GeoDataFrame of node data
+            - transit_line_df: dataframe of transit line data
+            - stop_df: dataframe of stops for each transit line
+        Returns:
+            - The input dataframes trimmed of unnessesary links and nodes
+        """
         # remove links that do not have any transit lines and are local roads
         link_gdf_trimmed = link_gdf[
             link_gdf['A'].isin(stop_df['N'])
@@ -678,6 +873,18 @@ class emme_network_conversion:
 
 
     def create_stop_transaction_variables(self, stop_df, node_gdf, link_gdf):
+        """
+        Create the transit stop variables needed for the Emme transit network transaction file.
+        Includes the call to setup NNTIME (station-to-station time) variables
+
+        Parameters:
+            - stop_df: dataframe of transit stops for each transit line
+            - node_gdf: GeoDataFrame containing node information
+            - link_gdf: GeoDataFrame containing link information
+        Returns:
+            - stop_df with variables for the transaction file
+            - stop_transaction_cols: list of stop_df columns that need to be included in the transaction file
+        """
         # negative stop numbers from cube transit line file denote no boarding or alighting
         stop_df['can_board'] = 1
         stop_df.loc[stop_df['stop'] < 0, 'can_board'] = 0
@@ -721,6 +928,18 @@ class emme_network_conversion:
 
 
     def create_transit_line_transaction_variables(self, transit_line_df, mode_vehtype_xwalk, headway_var):
+        """
+        Create the transit line variables needed for the Emme transit network transaction file.
+        Includes a check to make sure every line has a headway and vehicle type
+
+        Parameters:
+            - transit_line_df: dataframe of transit lines
+            - mode_vehtype_xwalk: dataframe containing map between transit mode and vehicle type
+            - headway_var: column name of transit_line_df containing the headway
+                        (headways change by time of day, so the right one needs to be selected)
+        Returns:
+            - transit_line_df with the transaction variables set
+        """
         # need to assign emme_vehicle for each transit line
         # this comes from mode_vehtype_xwalk generated during vehicle transaction file creation
         transit_line_df = pd.merge(
@@ -753,6 +972,16 @@ class emme_network_conversion:
 
 
     def write_transit_route_to_file(self, row, file, stop_transaction_cols):
+        """
+        Writes a transit stop and it's required data to the transit line transaction file
+
+        Parameters:
+            - row: A row of the stop_df dataframe with the column information
+            - file: transit network transaction file to write data to
+            - stop_transaction_cols: list of columns in the row that should be included
+        Returns:
+            - None
+        """
         route_string = '\n  '
         for col in stop_transaction_cols:
             route_string = route_string + ' ' + str(row[col])
@@ -761,6 +990,17 @@ class emme_network_conversion:
 
 
     def write_transit_line_to_file(self, row, stop_df, file, stop_transaction_cols):
+        """
+        Writes a single transit line to the transit line transaction file including all stops
+
+        Parameters:
+            - row: a row of the transit_line_df dataframe
+            - stop_df: dataframe of stops for each transit line
+            - file: transaction file that the output should be written to
+            - stop_transaction_cols: list of stop variables to write to file
+        Returns:
+            - None
+        """
         line_string = '{transaction} {line_name} {mode} {vehicle} {headway} {speed} {descr} {ut1} {ut2} {ut3}\n'
         line_string = line_string.format(
             transaction=row['transaction'],
@@ -824,6 +1064,22 @@ class emme_network_conversion:
 
 
     def write_transit_line_transaction_file(self, node_gdf, link_gdf, transit_line_df, stop_df, mode_vehtype_xwalk, headway_var):
+        """
+        Writing the tranist line Emme transaction file.  Includes calls to create the necessary variables
+        in the transit line and stops data.
+
+        Parameters:
+            - node_gdf: GeoDataFrame with node info
+            - link_gdf: GeoDataFrame with link info
+            - transit_line_df: dataframe with transit line info
+            - stop_df: dataframe with stop sequence for each transit line
+            - mode_vehtype_xwalk: dataframe containing map between transit mode and vehicle type
+            - headway_var: str containing the column in the transit_line_df that should be used for setting transit line headways
+
+        Returns:
+            - transit_line_df with transaction varibles set
+            - stop_df with transaction variables set
+        """
         print("Parsing input transit line file")
 
         stop_df, stop_transaction_cols  = self.create_stop_transaction_variables(stop_df, node_gdf, link_gdf)
@@ -844,6 +1100,16 @@ class emme_network_conversion:
 
 
     def create_transit_time_functon_transaction_file(self):
+        """
+        Write the transit time function transaction file.
+        There are two transit time functions, ft1 set to 0 for the zero function,
+        and ft2 = trantime_final * (1 + link_unreliability)
+
+        Parameters:
+            - None
+        Returns:
+            - None
+        """
         with open(self.emme_transit_time_function_file, 'w') as file:
             file.write('t functions init\n')
             file.write('c Transit time functions (TTF)\n')
@@ -855,6 +1121,18 @@ class emme_network_conversion:
 
 
     def prepare_transit_line_extra_attributes(self, transit_line_df, extra_attrib_cols):
+        """
+        Some fields in the transit line file can be the same as node or link attributes.
+        This is not allowed an so the names of the columns need to be updated.
+
+        Parameters:
+            - transit_line_df: transit dataframe with the extra attributes
+            - extra_attrib_cols: list of extra transit line attributes to be included in emme network
+        Returns:
+            - transit_line_df with NA's filled (Emme doesn't accept missing values)
+            - output_col_type_dict: dictionary of update column names and their data type
+                (data type is not currently used, could be removed in later versions)
+        """
         # Creating dictionary with attr_column_name: is_float
         output_col_type_dict = {}
         for col in extra_attrib_cols:
@@ -878,9 +1156,17 @@ class emme_network_conversion:
 
 
     def write_extra_transit_line_attributes_file(self, transit_line_df):
+        """
+        Writes extra attribute transaction file for transit lines
+
+        Paramters:
+            - transit_line_df: dataframe of transit line data
+        Returns:
+            - None
+        """
         print("Writing transit line extra attributes file")
 
-        # cols = ['line_name'] + extra_transit_line_attributes
+        # writing transit line file for output checking
         transit_line_df, output_col_type_dict = self.prepare_transit_line_extra_attributes(transit_line_df, extra_transit_line_attributes)
         transit_line_df.to_csv(self.all_transit_lines_file, index=False)
 
@@ -896,6 +1182,15 @@ class emme_network_conversion:
 
 
     def write_extra_transit_segment_attributes_file(self, stop_df, transit_line_df):
+        """
+        Writes the extra attributes transaction file for transit segments
+
+        Parameters:
+            - stop_df: dataframe of transit stops containing the segment information
+            - transit_line_df: dataframe of transit lines needed to match stop with line
+        Returns:
+            - stop_attributes_df: stop_df with the extra attributes appended
+        """
         print("Writing transit segment extra attributes file")
 
         stop_attributes_df = pd.merge(stop_df, transit_line_df[['LINE', 'NAME', 'keep_line']], how='left', on='LINE')
@@ -912,6 +1207,7 @@ class emme_network_conversion:
                                                 & stop_attributes_df['NAME'].notna()
                                                 & (stop_attributes_df['keep_line'] == 1)]
         stop_attributes_df['next_node_id'] = stop_attributes_df['next_node_id'].astype(int)
+        stop_attributes_df['node_id'] = stop_attributes_df['node_id'].astype(int)
 
         # extra_transit_segment_attributes = ['trantime_final', 'link_trantime', 'has_nntime', 'tot_nntime', 'nn_trantime']
         extra_transit_segment_attributes = ['trantime_final', 'link_trantime', 'tot_nntime', 'nn_trantime']
@@ -927,6 +1223,24 @@ class emme_network_conversion:
 
 
     def match_station_to_tap(self, sa_gdf, node_gdf, link_gdf, stop_df, transit_line_df):
+        """
+        Matches stations to the most appropriate tap through the following steps:
+        For each station type / mode:
+            1. Find taps that connect to lines that have the same mode as the station
+            2. Select the tap closest to each station for that given station type
+
+        Creates a station attributes folder containing crosswalks between stations and taps
+        and shape files for validation
+
+        Parameters:
+            - sa_gdf: GeoDataFrame of station attributes
+            - node_gdf: GeoDataFrame of node data
+            - link_gdf: GeoDataFrame of link data
+            - stop_df: dataframe of transit stop data
+            - transit_line_df: dataframe of transit lines
+        Returns:
+            - Dataframe with station attributes matched to taps
+        """
         sa_with_taps = []
         sa_to_tap_connections = []
 
@@ -1005,6 +1319,16 @@ class emme_network_conversion:
 
 
     def prepare_tap_station_attributes(self, sa_with_taps):
+        """
+        Creates the attirbutes that will be written to the transaction file for station attributes.
+        Since multiple stations can match to a single tap, different functions are needed to combine
+        the station attributes for a single network entry.
+
+        Parameters:
+            - sa_with_taps: dataframe of station attributes matched to taps
+        Returns:
+            - station_tap_attributes: dataframe of taps with station attributes
+        """
         # ---- functions used to aggregate accross stations attached to the same tap  ----
         def join_strings(x):
             x_join = '; '.join(x.fillna('').unique())
@@ -1051,6 +1375,7 @@ class emme_network_conversion:
             'PNR Split': lambda x: average_station_attributes(x),
         }
 
+        # station names need to be under 20 characters to fit in Emme
         station_attributes_rename_dict = {
             'Station Name': 'stName',
             'Station Type': 'stType',
@@ -1094,6 +1419,15 @@ class emme_network_conversion:
 
 
     def write_station_attributes_transaction_files(self, station_tap_attributes):
+        """
+        Writes the station attributes transaction file which specifies the station
+        data that should be included in each tap matched to a station.
+
+        Parameters:
+            - station_tap_attributes: dataframe of taps and their station data
+        Returns:
+            - None
+        """
 
         with open(self.station_extra_attributes_file, 'w') as file:
             self.write_extra_attributes_header(file, station_extra_attributes, 'NODE')
@@ -1113,6 +1447,18 @@ class emme_network_conversion:
 
 
     def write_station_attributes_files(self, node_gdf, link_gdf, stop_df, transit_line_df):
+        """
+        Reads in the station attribute data, and calls functions that match stations to taps,
+        prepare the station attribute data, and writes output to the transaction file.
+
+        Parameters:
+            - node_gdf: GeoDataFrame of node data
+            - link_gdf: GeoDataFrame of link data
+            - stop_df: dataframe of transit stop data
+            - transit_line_df: dataframe of transit lines
+        Returns:
+            - None
+        """
         print("writing station attribute transaction files")
         if not os.path.exists(self.station_attributes_folder):
             os.mkdir(self.station_attributes_folder)
@@ -1132,6 +1478,13 @@ class emme_network_conversion:
 
 
     def make_all_emme_transaction_files(self):
+        """
+        Main driver calling all other methods to get transaction files created from cube data.
+
+        Starts by loading in the input data, trimming the network to get under the Emme link and node limits,
+        and then prepares and writes out all of the necessary transaction files
+        """
+
         if not os.path.exists(self.emme_network_transaction_folder):
             os.mkdir(self.emme_network_transaction_folder)
 
@@ -1167,6 +1520,13 @@ class emme_network_conversion:
 
 
     def make_updated_link_attributes_file(self):
+        """
+        Potential improvement to just update link attributes instead of creating the whole network.
+        With the newly created all streets network, there are too many links for Emme to handle,
+        so the network needs to be trimmed.  This network trimming code is only implemented for the full setup.
+
+        This method is currently not being used
+        """
 
         node_gdf, link_gdf = self.load_input_data()
         node_gdf = self.determine_centroid_nodes(node_gdf)
@@ -1196,12 +1556,14 @@ if __name__ == "__main__":
         'Please specify "yes" or "no" for the first_iteration (-i) run-time argument'
 
     for period in _all_periods:
+        # create a class for each period
         period_emme_transaction = emme_network_conversion(args.trn_path, period)
         if args.first_iteration == 'yes':
+            # create all transaction files for the time period
             period_emme_transaction.make_all_emme_transaction_files()
         else:
             period_emme_transaction.make_all_emme_transaction_files()
-            # TODO: include network trimming code in update only link attributes
+            # TODO: could improve run time by including network trimming code in update only link attributes
             #  also would need to change the update=False to True in import_extra_link_attributes
             #  in update_congested_link_times in create_emme_network.py
             # period_emme_transaction.make_updated_link_attributes_file()

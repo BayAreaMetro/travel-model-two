@@ -19,7 +19,7 @@ set ENVTYPE=RSG
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :: Step 0: Copy over CTRAMP from %GITHUB_DIR%
- set GITHUB_DIR=F:\Projects\Clients\mtc\updated_networks\version_06\travel-model-two
+ set GITHUB_DIR=F:\Projects\Clients\mtc\updated_networks\travel-model-two
  if not exist CTRAMP (
   mkdir CTRAMP\model
   mkdir CTRAMP\runtime
@@ -56,7 +56,7 @@ REM SET SAMPLERATE_ITERATION1=0.005
 SET SAMPLERATE_ITERATION1=0.3
 SET SAMPLERATE_ITERATION2=0.5
 SET SAMPLERATE_ITERATION3=1
-SET SAMPLERATE_ITERATION4=0.02
+SET SAMPLERATE_ITERATION4=0.01
 SET SAMPLERATE_ITERATION5=0.02
 
 :: Set the model run year
@@ -71,12 +71,9 @@ set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUB
 
 CALL conda activate mtc_py2
 
-
-
-
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
-SET /A ITERATION=2
+SET /A ITERATION=1
 SET /A INNER_ITERATION=1
 IF %ITERATION% EQU 1 SET SAMPLERATE=%SAMPLERATE_ITERATION1%
 IF %ITERATION% EQU 2 SET SAMPLERATE=%SAMPLERATE_ITERATION2%
@@ -86,7 +83,7 @@ IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
 REM call zoneSystem.bat
 REM goto iteration_start
 REM goto createemmenetwork
-REM goto afteremmeupdate
+REM goto afterrobocopy
 :: ------------------------------------------------------------------------------------------------------
 
 
@@ -170,10 +167,12 @@ python %BASE_SCRIPTS%\preprocess\zone_seq_disseminator.py .
 IF ERRORLEVEL 1 goto done
 
 :: Renumber the TAZ/MAZ in the households file
+:hhrenum
 python %BASE_SCRIPTS%\preprocess\renumber.py popsyn\households.csv popsyn\households_renum.csv --input_col MAZ TAZ --renum_join_col N N --renum_out_col MAZSEQ TAZSEQ --output_rename_col ORIG_MAZ ORIG_TAZ --output_new_col MAZ TAZ
 IF ERRORLEVEL 1 goto done
 move popsyn\households.csv       popsyn\households_original.csv
 move popsyn\households_renum.csv popsyn\households.csv
+
 
 IF %SELECT_COUNTY% GTR 0 (
 
@@ -355,7 +354,6 @@ REM if ERRORLEVEL 2 goto done
 REM runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
 REM if ERRORLEVEL 2 goto done
 
-
 ::Step X: Main model iteration setup
 SET /A ITERATION=0
 :iteration_start
@@ -443,7 +441,6 @@ IF NOT %HH_SERVER%==localhost (
   CTRAMP\runtime\config\pskill %HH_SERVER% -u %UN% -p %PWD% java
   ping -n 10 localhost
 )
-
 
 :: copy results back over here
 ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.mat /NDL /NFL
@@ -617,6 +614,10 @@ del *.s
 del *.job
 del *.prj
 del *.var
+
+:: Generate visualizer
+REM CTRAMP\scripts\visualizer\generateDashboard.bat %ITERATION%
+
 :: ------------------------------------------------------------------------------------------------------
 ::
 :: Done

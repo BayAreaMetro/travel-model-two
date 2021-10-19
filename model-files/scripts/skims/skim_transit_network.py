@@ -1,3 +1,33 @@
+"""
+skim_transit_network.py
+
+This script performs transit skimming and assignment for MTC TM2.  Output skims
+are in OMX format and are used as input into the CT-RAMP model.  Skimming and assignment
+is done with the Emme networks created in create_emme_network.py with options to include
+demand matrices from prior CT-RAMP runs.
+
+Usage: %EMME_PYTHON_PATH%\python skim_transit_network.py
+    Note that the Emme python must be used to have access to the Emme API
+
+    [-p, --trn_path]: path to the trn folder, default is the
+        current_working_folder\trn
+    [-s, --skims_path]:path to the skims folder, default is the
+        current_working_folder\skims
+    [-i, --first_iteration]: Is this the first iteration? yes or no,
+        default is yes
+    [--save_iter_flows]: Save per-iteration flows in scenario
+    [-t, --time_periods]: List of time periods as EA,AM,MD,PM,EV or
+        ALL, default is ALL
+    [-o, --port]: Port to connect to Emme desktop session, default
+        is 59673
+    [-d, --skip_import_demand]: Skip import of CT-RAMP demand
+    [-b, --output_transit_boardings]: Output transit boardings from assignment
+    [-n, --num_processor]: Number of processors to use, can specify MAX-#, default
+        is MAX-4
+
+Date: Oct, 2021
+Contacts: david.hensle@rsginc.com, kevin@inrosoftware.com
+"""
 import inro.modeller as _m
 import inro.emme.database.emmebank as _eb
 import inro.emme.desktop.app as _app
@@ -141,11 +171,32 @@ def calc_headway(transit_volume, transit_boardings, headway, capacity, segment):
 
 
 def connect_to_desktop(port=59673):
+    """
+    Fetches the Emme desktop object for an already open project. This is a useful
+    method when testing a single step or two and you don't want to re-create the entire project.
+
+    Parameters:
+        - port: int of the Emme port.  You can find it in Emme under
+            tools -> Model Applications -> Advanced
+    Returns:
+        - Emme desktop object from the specified port
+    """
+    print("port:", port)
     desktop = _app.connect(port=port)
     return desktop
 
 
-def start_desktop(root, title="mtc_emme", port=59673):
+def start_desktop(root, title="emme_full_run", port=59673):
+    """
+    Open an emme desktop from the specified emme project folder location
+
+    Parameters:
+        - root: str folder location of Emme project
+        - title: str name of Emme project folder
+        - port: int port number to open the desktop on
+    Returns:
+        - Emme desktop object
+    """
     emme_project = _os.path.join(root, title, title + ".emp")
     desktop = _app.start(  # will not close desktop when program ends
         project=emme_project, user_initials="RSG", visible=True, port=port)
@@ -156,6 +207,18 @@ def start_desktop(root, title="mtc_emme", port=59673):
 
 # @_m.logbook_trace("Create and initialize matrices", save_arguments=True)
 def initialize_matrices(components, periods, scenario, delete_all_existing=False):
+    """
+    Determines all necessary matrix names and creates them in emme database
+
+    Parameters:
+        - components: list of str, components to create matrices for
+        - periods: list of str, time of day periods to create matrices for
+        - scenario: emme scenario to create matrices in
+        - delete_all_existing: boolean, if True will delete all existing matrices
+            before initializing new matrices
+    Returns:
+        - list of Emme matrices created
+    """
     attributes = {
         "components": components,
         "periods": periods,
@@ -177,6 +240,17 @@ def initialize_matrices(components, periods, scenario, delete_all_existing=False
 
 
 def create_matrices(component, periods, scenario, create_matrix_tool):
+    """
+    Creates the matrices in the emme databank for the given scenario
+
+    Parameters:
+        - component: str component label for matrix list
+        - periods: list of str, time of day periods to create matrices for
+        - scenario: emme scenario to create matrices in
+        - create_matrix_tool: instance of the emme create_matrix modeller tool
+    Returns:
+        - list of Emme matrix names created
+    """
     with _m.logbook_trace("Create matrices for component %s" % (component.replace("_", " "))):
         emmebank = scenario.emmebank
         matrices = []
@@ -192,6 +266,14 @@ def create_matrices(component, periods, scenario, create_matrix_tool):
 
 
 def generate_matrix_list(scenario):
+    """
+    creates a list of matrix names that need to be initialized in the current scenario
+
+    Parameters:
+        - scenario: Emme scenario to create the matrices in
+    Returns:
+        - Dictionary of matrix names and options to be passed to emme create_matrix tool
+    """
     global _matrices
     global _matrix_count
     _matrices = dict(
@@ -217,6 +299,14 @@ def generate_matrix_list(scenario):
 
 
 def get_matrix_names(component, periods, scenario):
+    """
+    Returns a list of emme matrix names created for given scenario
+
+    Parameters:
+        - component: str component label for matrix list
+        - periods: list of str of time of day periods
+        - scenario: active Emme scenario objct
+    """
     generate_matrix_list(scenario)
     matrices = []
     for period in periods:
@@ -225,12 +315,30 @@ def get_matrix_names(component, periods, scenario):
 
 
 def add_matrices(component, period, matrices):
+    """
+    Fills the maxtrix names and count global variables specifying the created matrices
+
+    Parameters:
+        - component: str component label for matrix list
+        - period: str of time of day period
+        - matrices: list of matrix types, names, and descriptions
+    Returns:
+        - None
+    """
     for ident, name, desc in matrices:
         _matrices[component][period].append([ident+str(_matrix_count[ident]), name, desc])
         _matrix_count[ident] += 1
 
 
 def get_transit_skims():
+    """
+    List of transit matrices that will be filled when performing transit skimming
+
+    Parameters:
+        - None
+    Returns:
+        - multi-dimensional list of matrix names and options for creation
+    """
     tmplt_matrices = [
         # ("GENCOST",    "total impedance"),
         ("FIRSTWAIT",  "first wait time"),
@@ -266,6 +374,16 @@ def get_transit_skims():
                  for name, desc in tmplt_matrices])
 
 def create_full_matrix(matrix_name, matrix_description, scenario):
+    """
+    Creates one full Emme matrix in the current scenario
+
+    Parameters:
+        - matrix_name: str name of Emme matrix that will be created
+        - matrix_description: str description of matrix
+        - scenario: Emme scenario to create matrix in
+    Returns:
+        - None
+    """
     create_matrix_tool = _m.Modeller().tool("inro.emme.data.matrix.create_matrix")
     matrix = scenario.emmebank.matrix('mf' + matrix_name)
     if matrix is not None:
@@ -283,6 +401,14 @@ def create_full_matrix(matrix_name, matrix_description, scenario):
 
 
 def create_empty_demand_matrices(period, scenario):
+    """
+    Creates demand matrices that have zero in all fields that are used in assignment
+    when no demand matrices yet exist or you do not want to use them.
+
+    Parameters:
+        - period: str of time-of-day period
+        - scenario: Emme scenario to create empty matrices in
+    """
     summed_matrix_name_template = "TRN_{set}_{period}"
     with _m.logbook_trace("Create empty demand matrices for period %s" % period):
         for set_num in _all_sets:
@@ -291,6 +417,19 @@ def create_empty_demand_matrices(period, scenario):
 
 
 def import_demand_matrices(period, scenario, ctramp_output_folder, num_processors="MAX-1"):
+    """
+    Imports the TAP-to-TAP transit demand matrices created from CT-RAMP by time of day,
+    access mode, and transit set type (local, premium, local+premium).  Demand matrices
+    are then assigned to transit network
+
+    Parameters:
+        - period: str denoting time of day period
+        - scenario: Emme scenario object to import demand matrices into
+        - ctramp_output_folder: str folder location containing demand matrices
+        - num_processors: Number of processors that can be used in matrix calculations
+    Returns:
+        - None
+    """
     omx_filename_template = "transit_{period}_{access_mode}_TRN_{set}_{period}.omx"
     matrix_name_template = "{access_mode}_TRN_{set}_{period}"
     summed_matrix_name_template = "TRN_{set}_{period}"
@@ -331,37 +470,18 @@ def import_demand_matrices(period, scenario, ctramp_output_folder, num_processor
             matrix_calc_tool(spec, scenario=scenario, num_processors=num_processors)
 
 
-def temp_matrices(emmebank, mat_type, total=1, default_value=0.0):
-    matrices = []
-    try:
-        while len(matrices) != int(total):
-            try:
-                ident = emmebank.available_matrix_identifier(mat_type)
-            except _except.CapacityError:
-                raise _except.CapacityError(
-                    "Insufficient room for %s required temp matrices." % total)
-            matrices.append(emmebank.create_matrix(ident, default_value))
-        yield matrices[:]
-    finally:
-        for matrix in matrices:
-            # In case of transient file conflicts and lag in windows file handles over the network
-            # attempt to delete file 10 times with increasing delays 0.05, 0.2, 0.45, 0.8 ... 5
-            remove_matrix = lambda: emmebank.delete_matrix(matrix)
-            retry(remove_matrix)
-
-
-def retry(fcn, attempts=10, init_wait=0.05, error_types=(RuntimeError, WindowsError)):
-    for attempt in range(1, attempts + 1):
-        try:
-            fcn()
-            return
-        except error_types:
-            if attempt > attempts:
-                raise
-            _time.sleep(init_wait * (attempt**2))
-
-
 def parse_num_processors(value):
+    """
+    Return an int for the number of processors to use for a given task. Input value
+    can include the MAX keywork for number of processors and an expression to use a
+    certain number less than the MAX.  For example, if on a mahcine with 24 cores,
+    a value of "MAX-4" would return 20 processors.
+
+    Parameters:
+        - value: str or int of processors to use
+    Returns:
+        - int for number of processors to use
+    """
     max_processors = _multiprocessing.cpu_count()
     if isinstance(value, int):
         return value
@@ -380,6 +500,24 @@ def parse_num_processors(value):
 # ---------------------------------------- Skimming ----------------------------------------------
 
 def perform_assignment_and_skim(modeller, scenario, period, assignment_only=False, num_processors="MAX-1", use_fares=False, use_ccr=False):
+    """
+    Calls methods to perform transit assignment and transit skimming for network
+    created in the create_emme_network.py script.
+
+    Parameters:
+        - modeller: emme modeller instance
+        - scenario: Emme scenario containing network to assign and skim and
+            matrices to fill
+        - period: str of time of day period
+        - assignment_only: boolean, if True, no skimming will be performed
+        - num_processor: str or int to define number of processors to use
+        - use_fars: boolean, if True will create journey levels to handle transfers
+            and skim fares
+        - use_ccr: boolean, if True will use transit crowding and capacity restraint
+            penalties in assignemnt
+    Returns:
+        - None
+    """
     attrs = {
             "period": period,
             "scenario": scenario.id,
@@ -410,24 +548,16 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
             #report(scenario, period)
 
 
-# def setup(scenario, attrs):
-#     #global _matrix_cache
-#     #_matrix_cache = {}  # initialize cache at beginning of run
-#     emmebank = scenario.emmebank
-#     period = attrs["period"]
-#     with _m.logbook_trace("Transit assignment for period %s" % period, attributes=attrs):
-#         with temp_matrices(emmebank, "FULL", 3) as matrices:
-#             matrices[0].name = "TEMP_IN_VEHICLE_COST"
-#             matrices[1].name = "TEMP_LAYOVER_BOARD"
-#             matrices[2].name = "TEMP_PERCEIVED_FARE"
-#             yield
-#             #try:
-#             #    yield
-#             #finally:
-#             #    _matrix_cache = {}  # clear cache at end of run
-
-
 def get_perception_parameters(period):
+    """
+    Perception parameters to calculate assignment variables and utilities.
+    Parameters can differ by time of day
+
+    Parameters:
+        - period: str time of day period to get perception parameters for
+    Returns:
+        - dict of perception parameters for selected period
+    """
     perception_parameters = {
         "EA": {
             "vot": 0.27,
@@ -490,6 +620,26 @@ def get_perception_parameters(period):
 
 # @_m.logbook_trace("Transit assignment by demand set", save_arguments=True)
 def run_assignment(modeller, scenario, period, params, network, num_processors, use_fares=False, use_ccr=False):
+    """
+    Assigns demand to the transit network. Has the option to use fares and/or
+    transit crowding and capacity restraint.  Assignment is split into three sets:
+    local (bus), premium (express bus, rail, ferry), and local+premium with a transfer.
+
+    Parameters:
+        - modeller: emme modeller instance
+        - scenario: Emme scenario containing network to assign and skim and
+            matrices to fill
+        - period: str of time of day period
+        - params: dict of perception parameter names and values
+        - network: emme network object to assign demand to
+        - num_processor: str or int to define number of processors to use
+        - use_fars: boolean, if True will create journey levels to handle transfers
+            and skim fares
+        - use_ccr: boolean, if True will use transit crowding and capacity restraint
+            penalties in assignemnt
+    Returns:
+        - None
+    """
     base_spec = {
         "type": "EXTENDED_TRANSIT_ASSIGNMENT",
         "modes": [],
@@ -631,6 +781,16 @@ def run_assignment(modeller, scenario, period, params, network, num_processors, 
 
 
 def get_strat_spec(components, matrix_name):
+    """
+    Retrieve the default specification template for strategy analysis in Emme.
+
+    Parameters:
+        - components: trip components to skim and the variable to sum. trip component
+            options are: "boading", "in-vehicle", "alighting", and "aux_transit"
+        - matrix_name: name of the matrix that should contain the skim
+    Returns:
+        - dictionary of the strategy specification
+    """
     spec = {
         "trip_components": components,
         "sub_path_combination_operator": "+",
@@ -649,6 +809,25 @@ def get_strat_spec(components, matrix_name):
 
 # @_m.logbook_trace("Extract skims", save_arguments=True)
 def run_skims(modeller, scenario, name, period, valid_modes, params, num_processors, network, use_fares=False, use_ccr=False):
+    """
+    Performs the transit skimming from the transit assignment results
+
+    Parameters:
+        - modeller: emme modeller instance
+        - scenario: Emme scenario containing network to assign and skim and
+            matrices to fill
+        - name: str of assignment set type. Options are local: "BUS", premium: "PREM",
+            and local+premium: "ALLPEN"
+        - period: str of time of day period
+        - valid_modes: list of emme modes that are allowed in the set type
+        - params: dict of perception parameter names and values
+        - network: emme network object to assign demand to
+        - num_processor: str or int to define number of processors to use
+        - use_fars: boolean, if True will skim transit fare attributes
+        - use_ccr: boolean, if True will add crowding penalty to in vehicle times
+    Returns:
+        - None
+    """
     emmebank = scenario.emmebank
     matrix_calc = modeller.tool(
         "inro.emme.matrix_calculation.matrix_calculator")
@@ -873,6 +1052,16 @@ def save_per_iteration_flows(scenario):
 
 
 def mask_allpen(scenario, period):
+    """
+    Sets the local+premium skim matrices to zero if path does not include both
+    local and premium service.
+
+    Parameters:
+        - scenario: emme scenario object containing local+premium skims
+        - period: str of period name
+    Returns:
+        - None
+    """
     # Reset skims to 0 if not both local and premium
     skims = [
         "FIRSTWAIT", "TOTALWAIT", "XFERS", "TOTALWALK",
@@ -891,6 +1080,17 @@ def mask_allpen(scenario, period):
 
 
 def mask_transfers(scenario, period, max_transfers=3):
+    """
+    Sets all transit matrix cells to zero if path includes more than the specified
+    number of transfers.
+
+    Parameters:
+        - scenario: emme scenario object containing local+premium skims
+        - period: str of period name
+        - max_transfers: max number of transfers to allow between any two TAPs
+    Returns:
+        - None
+    """
     # Reset skims to 0 if number of transfers is greater than max_transfers
     skims = [
         "FIRSTWAIT", "TOTALWAIT", "XFERS", "TOTALWALK",
@@ -909,6 +1109,15 @@ def mask_transfers(scenario, period, max_transfers=3):
 
 
 def get_matrix_data(scenario, name):
+    """
+    Gets the data stored in a matrix
+
+    Parameters:
+        - scenario: emme scenario that contains the matrix
+        - name: str of matrix name to get data from
+    Returns:
+        - numpy array of matrix data
+    """
     # data = _matrix_cache.get(name)
     # if data is None:
     matrix = scenario.emmebank.matrix(name)
@@ -920,6 +1129,16 @@ def get_matrix_data(scenario, name):
 
 
 def set_matrix_data(scenario, name, data):
+    """
+    Sets the data stored in a matrix
+
+    Parameters:
+        - scenario: emme scenario that contains the matrix
+        - name: str of matrix name to store data in
+        - data: numpy array of matrix data
+    Returns:
+        - None
+    """
     matrix = scenario.emmebank.matrix(name)
     #_matrix_cache[name] = data
     matrix.set_numpy_data(data, scenario)
@@ -997,6 +1216,10 @@ class OmxMatrix(object):
 
 
 class ExportOMX(object):
+    """
+    Helper class used to better handle omx specific data when writing
+    out transit skims in omx form.
+    """
     def __init__(self, file_path, scenario, omx_key="NAME"):
         self.file_path = file_path
         self.scenario = scenario
@@ -1080,6 +1303,19 @@ class ExportOMX(object):
 
 # @_m.logbook_trace("Export transit skims to OMX", save_arguments=True)
 def export_matrices_to_omx(omx_file, periods, scenario, big_to_zero=False, max_transfers=None):
+    """
+    Export all created matrices in the scenario to the specified omx_file
+
+    Parameters:
+        - omx_file: str of omx_file name and location
+        - periods: time of day periods to write out matrices for
+        - scenario: emme scenario containing the matrices to write out
+        - big_to_zero: boolean, if true will set all cells with value above 10E6 to zero
+        - max_transfer: If a tap pair has more than three transfers, set all matrix
+            values to zero for that tap pair.  If None, will not set any values to 0.
+    Returns:
+        - None
+    """
     attributes = {"omx_file": omx_file, "periods": periods, "big_to_zero": big_to_zero}
     if max_transfers is not None:
         for period in periods:
@@ -1098,6 +1334,15 @@ def export_matrices_to_omx(omx_file, periods, scenario, big_to_zero=False, max_t
 
 
 def export_boardings_by_line(desktop, output_transit_boardings_file):
+    """
+    Writes out csv file containing the transit boardings by line  for use in
+    validation summaries
+
+    Parameters:
+        - desktop: emme desktop object with an primary scenario that has transit
+            boardings assigned
+        - output_transit_boardings_file: str of file to write transit boardings to
+    """
     project = desktop.project
     table = project.new_network_table("TRANSIT_LINE")
     column = _worksheet.Column()
@@ -1126,7 +1371,7 @@ def export_boardings_by_line(desktop, output_transit_boardings_file):
     table.export(output_transit_boardings_file)
     table.close()
 
-
+# --------------------------------------------- Entry Point ---------------------------------------
 if __name__ == "__main__":
     parser = _argparse.ArgumentParser(description="Skim an already created Emme transit network.")
     parser.add_argument('-p', '--trn_path', help=r"path to the trn folder, default is the current_working_folder\trn",
@@ -1149,13 +1394,15 @@ if __name__ == "__main__":
     else:
         time_periods = args.time_periods.split(",")
 
-    # connect to already open desktop
+    # connect to already created Emme project
     try:
         desktop = connect_to_desktop(port=args.port)
     except:
         desktop = start_desktop(args.trn_path, port=args.port)
     modeller = _m.Modeller(desktop)
     emmebank = modeller.emmebank
+
+    # perform skimming and assignment for each period
     for period in time_periods:
         scenario_id = period_to_scenario_dict[period]
         scenario = emmebank.scenario(scenario_id)

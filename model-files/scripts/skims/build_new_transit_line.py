@@ -1,6 +1,6 @@
 """
     build_new_transit_line.py in_line_file out_line_file node_mapping_file
-    
+
     This is a simple script which uses an existing node mapping file to transfer a transit
     line file with a set node sequence to an updated numbering scheme. All line data (including
     stop/pass-through nodes) is retained in the process.
@@ -41,7 +41,7 @@ for temp_line in open(line_file):
     semicolon_index = temp_line.find(";")
     if semicolon_index >= 0:
         temp_line = temp_line[:semicolon_index].strip()
-    
+
     # skip blank lines
     if len(temp_line)==0: continue
 
@@ -67,7 +67,8 @@ for temp_line in open(line_file):
     # change line based on time periods available, also remove LONGNAME
     basic_line_info = list(map(str.strip, re.split("[=,]", line[0])))
 
-    basic_line_info[1] = '"line_{line_count}"'.format(line_count = trn_line_count)
+    # comment out below to not change name of line
+    # basic_line_info[1] = '"line_{line_count}"'.format(line_count = trn_line_count)
 
     for i in range(len(basic_line_info) - 1):
         if i%2 == 0:
@@ -116,10 +117,10 @@ for temp_line in open(line_file):
         # print(seq)
         f.write(','.join(map(str,seq)))
     f.write(os.linesep)
-    
+
     # just processed the line, rset
     trn_line = ""
 
 f.close()
-        
+
 print("Updated {} nodes in {} lines".format(node_update_count, trn_line_count))

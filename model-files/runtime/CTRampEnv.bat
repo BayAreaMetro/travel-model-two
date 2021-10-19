@@ -11,8 +11,9 @@ set CUBE_PATH=C:\Program Files (x86)\Citilabs\Cube
 
 :: Location of Emme python executable
 ::SET EMME_PYTHON_PATH="C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.2\Python27"
-SET EMMEPATH=C:\Program Files\INRO\Emme\Emme 4\Emme-test-4.4.5-v1
-SET EMME_PYTHON_PATH="C:\Program Files\INRO\Emme\Emme 4\Emme-test-4.4.5-v1\Python27"
+REM SET EMMEPATH=C:\Program Files\INRO\Emme\Emme 4\Emme-test-4.4.5-v1
+SET EMMEPATH=C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.5.1
+SET EMME_PYTHON_PATH="C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.5.1\Python27"
 :: BEWARE path issues with other python installs
 path=%EMMEPATH%\programs;%EMMEPATH%\Python27;%EMMEPATH%\Python27\Scripts\;%PATH%
 SET NUMBER_OF_PROCESSORS=56

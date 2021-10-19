@@ -442,7 +442,7 @@ loop period = 1, 5
                                                                 RLBTYS3,RLBTYTOLLS3,
 
       ; commercial vehicle skims
-      mato[2] = skims\COM_HWYSKIM@token_period@_taz.tpp, mo = 43-71, name = TIMEVSM, DISTVSM, BTOLLVSM,
+      mato[2] = skims\COM_HWYSKIM@token_period@_taz.tpp, mo = 43-78, name = TIMEVSM, DISTVSM, BTOLLVSM,
                                                                               TOLLTIMEVSM, TOLLDISTVSM, TOLLBTOLLVSM, TOLLVTOLLVSM,
                                                                               RLBTYVSM, RLBTYTOLLVSM,
                                                                               TIMESML, DISTSML, BTOLLSML,
