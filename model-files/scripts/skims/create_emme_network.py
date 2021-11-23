@@ -79,7 +79,7 @@ period_to_scenario_dict = {
     'EV': 5000,
 }
 # max distance in feet to override walk transfer links with station bus walk time
-max_station_walk_distance = 100
+max_station_walk_distance = 250
 
 WKT_PROJECTION = 'PROJCS["NAD_1983_StatePlane_California_VI_FIPS_0406_Feet",GEOGCS["GCS_North_American_1983",DATUM["North_American_Datum_1983",SPHEROID["GRS_1980",6378137,298.257222101]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["False_Easting",6561666.666666666],PARAMETER["False_Northing",1640416.666666667],PARAMETER["Central_Meridian",-116.25],PARAMETER["Standard_Parallel_1",32.78333333333333],PARAMETER["Standard_Parallel_2",33.88333333333333],PARAMETER["Latitude_Of_Origin",32.16666666666666],UNIT["Foot_US",0.30480060960121924],AUTHORITY["EPSG","102646"]]'
 
@@ -358,7 +358,7 @@ def import_transit_lines(input_dir, modeller, scenario_id):
     process_transit_lines_tool = modeller.tool(process_transit_lines_tool_path)
     input_file = _join(input_dir, emme_transit_network_file)
     process_transit_lines_tool(transaction_file=input_file,
-        revert_on_error=False,
+        revert_on_error=True,
         scenario=scenario,
         include_first_hidden_data=False)
 
@@ -886,10 +886,17 @@ def apply_station_attributes(input_dir, network):
     tap_to_pseudo_tap_xwalk['emme_tap'] = tap_to_pseudo_tap_xwalk['tap'].map(emme_node_id_map)
     tap_to_pseudo_tap_xwalk['emme_pseudo_tap'] = tap_to_pseudo_tap_xwalk['pseudo_tap'].map(emme_node_id_map)
 
+    # creating station attributes for station platform time skim variables
+    # create_extra = _m.Modeller().tool(
+    #     "inro.emme.data.extra_attribute.create_extra_attribute")
+    # create_extra("NODE", "@stnplatformtime")
+    # create_extra("LINK", "@stnplatformtimewalk")
+
     # only need to loop over taps matched to stations
     station_taps = station_tap_attributes['tap'].unique()
     stop_nodes_with_platform_time = []
-    walk_links_overridden = []
+    bus_transfer_walk_links_overridden = []
+    tap_connectors_with_platform_time = []
 
     for tap_id in station_taps:
         # modifying station platform times for lines departing from tap
@@ -899,30 +906,47 @@ def apply_station_attributes(input_dir, network):
             modes_serviced = list(set([str(segment.line['#src_mode']) for segment in jnode.outgoing_segments()]))
             # setting tap station platform time on tap connector nodes for stops servicing rail
             if any(x in modes_serviced for x in ['c', 'l', 'h']):
-                jnode['@stplatformtime'] = tap['@stplatformtime']
-                stop_nodes_with_platform_time.append(jnode.id)
+                # print "tap: %s, boarding_node: %s, stplatformtime: %s," % (tap, jnode, tap['@stplatformtime'])
+                # jnode['@stnplatformtime'] = tap['@stplatformtime']
+                link['@trantime'] = tap['@stplatformtime']
+                link.data2 = tap['@stplatformtime']  # ul2
+                incoming_link = link.reverse_link
+                incoming_link['@trantime'] = tap['@stplatformtime']
+                incoming_link.data2 = tap['@stplatformtime'] # ul2
+                tap_connectors_with_platform_time.append(jnode.id)
 
         # walk transfer links are separated onto separate pseudo taps created in BuildTransitNetworks.job
-        pseudo_tap_id = tap_to_pseudo_tap_xwalk.loc[tap_to_pseudo_tap_xwalk['emme_tap'] == tap_id, 'emme_pseudo_tap']
-        pseudo_tap = network.node(pseudo_tap_id)
+        # pseudo_tap_id = tap_to_pseudo_tap_xwalk.loc[tap_to_pseudo_tap_xwalk['emme_tap'] == tap_id, 'emme_pseudo_tap']
+        # pseudo_tap = network.node(pseudo_tap_id)
+        #
+        # for walk_link in pseudo_tap.outgoing_links():
+        #     if walk_link['@feet'] < max_station_walk_distance:
+        #         # setting bus walk times for outgoing walk transfer links
+        #         if tap['@stbuswalktime'] > 0:
+        #             walk_link['@walktime'] = tap['@stbuswalktime']
+        #             walk_link.data2 = tap['@stbuswalktime']  # ul2
+        #             bus_transfer_walk_links_overridden.append(walk_link.id)
+        #         # setting station platform time only on incoming transfer link to station to avoid double count
+        #         # jnode = walk_link.j_node
+        #         # modes_serviced = list(set([str(segment.line['#src_mode']) for segment in jnode.outgoing_segments()]))
+        #         # if (any(x in modes_serviced for x in ['c', 'l', 'h']) & (tap['@stplatformtime'] > 0)):
+        #         #     walk_link['@stnplatformtimewalk'] = tap['@stplatformtime']
+        #         #     station_platform_walk_links_set.append(walk_link.id)
+        # # setting for incoming links
+        # for walk_link in pseudo_tap.incoming_links():
+        #     if walk_link['@feet'] < max_station_walk_distance:
+        #         if tap['@stbuswalktime'] > 0:
+        #             walk_link['@walktime'] = tap['@stbuswalktime']
+        #             walk_link.data2 = tap['@stbuswalktime']  # ul2
+        #             bus_transfer_walk_links_overridden.append(walk_link.id)
 
-        # setting bus walk times for outgoing walk transfer links
-        for walk_link in pseudo_tap.outgoing_links():
-            if walk_link['@feet'] < max_station_walk_distance:
-                if tap['@stbuswalktime'] > 0:
-                    walk_link['@walktime'] = tap['@stbuswalktime']
-                    walk_link.data2 = tap['@stbuswalktime']  # ul2
-                    walk_links_overridden.append(walk_link.id)
-        # setting for incoming links
-        for walk_link in pseudo_tap.incoming_links():
-            if walk_link['@feet'] < max_station_walk_distance:
-                if tap['@stbuswalktime'] > 0:
-                    walk_link['@walktime'] = tap['@stbuswalktime']
-                    walk_link.data2 = tap['@stbuswalktime']  # ul2
-                    walk_links_overridden.append(walk_link.id)
+    # print "Number of nodes set with new platform time", len(stop_nodes_with_platform_time)
+    # print "Number of walk links set with new walk time", len(bus_transfer_walk_links_overridden)
+    print "Number of walk links set with station platform time", len(tap_connectors_with_platform_time)
+    # print "Stop nodes with platform time", tap_connectors_with_platform_time
 
-    print "Number of nodes set with new platform time", len(stop_nodes_with_platform_time)
-    print "Number of walk links set with new walk time", len(walk_links_overridden)
+    # test_tap = network.node(4108)
+    # print "tap 4108 stnplatformtime: %s" % test_tap['@stnplatformtime']
 
 
 def create_time_period_scenario(modeller, scenario_id, root, period):
@@ -1069,6 +1093,7 @@ if __name__ == "__main__":
     if args.first_iteration == 'yes':
         # create new emme project folder for the first iteration
         desktop = init_emme_project(args.trn_path, args.name, args.port, args.delete)
+        # desktop = connect_to_desktop(port=args.port)
     else:
         # connect to an already created emme project
         try:
@@ -1081,9 +1106,10 @@ if __name__ == "__main__":
     for period in time_periods:
         scenario_id = period_to_scenario_dict[period]
         if args.first_iteration == 'yes':
-            print "creating %s scenarios" % period
-            create_time_period_scenario(modeller, scenario_id, args.trn_path, period)
-
+            print "creating %s scenario" % period
+            with _m.logbook_trace("Creating network for %s period " % (period)):
+                 create_time_period_scenario(modeller, scenario_id, args.trn_path, period)
         else:
-            print "updating %s scenarios" % period
-            update_congested_link_times(modeller, scenario_id, args.trn_path, period)
+            print "updating %s scenario" % period
+            with _m.logbook_trace("Updating network for %s period " % (period)):
+                update_congested_link_times(modeller, scenario_id, args.trn_path, period)

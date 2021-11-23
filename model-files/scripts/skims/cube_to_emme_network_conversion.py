@@ -155,7 +155,7 @@ class emme_network_conversion:
         link_gdf = geopandas.read_file(self.link_shapefile)
 
         # remove all MAZ, TAZ, and PED links.
-        link_gdf = link_gdf[link_gdf['CNTYPE'].isin(['TANA', 'TAP', 'CRAIL', 'TRWALK'])]
+        # link_gdf = link_gdf[link_gdf['CNTYPE'].isin(['TANA', 'TAP', 'CRAIL', 'TRWALK'])]
 
         print("node columns: ", node_gdf.columns)
         print("link columns: ", link_gdf.columns)
@@ -523,22 +523,125 @@ class emme_network_conversion:
         return link_gdf, link_transaction_cols
 
 
-    def remove_long_walk_links(self, link_gdf, max_length_mi):
+    def get_taps_that_service_modes(self, link_gdf, node_gdf, transit_line_df, stop_df, emme_modes):
         """
-        Utility function to remove long walk links from network
+        Utility function to get all taps and transfer nodes (aka pseudo taps) that service the specified modes
 
         Parameters:
-            - link_gdf: GeoDataFrame of links
-            - max_length_mi: float that specifies the max allowed walk link length in miles
+            - link_gdf: GeoDataFrame of link data
+            - node_gdf: GeoDataFrame of node data
+            - transit_line_df: dataframe of transit line data
+            - stop_df: dataframe of stops for each transit line
+            - emme_modes: array of chars specifying the transit mode in emme,
+                e.g. ['b', 'x'] for bus and express bus
+
+        Returns:
+            - subset of node_gdf containing only tap nodes that connect to a stop servicing the specified modes
+            - subset of node_gdf containing only the transfer nodes (aka the corresponding pseudo taps)
+                that connect to a stop servicing the specified modes
+        """
+        mode_lines = transit_line_df.loc[transit_line_df['emme_mode'].isin(emme_modes), 'LINE']
+        # find stops of those transit lines
+        mode_stops = stop_df.loc[stop_df['LINE'].isin(mode_lines), 'N'].unique()
+
+        # get the walk transfer links that service the stops
+        mode_tap_connectors = link_gdf[
+            ((link_gdf['A_is_tap'] == 1) & (link_gdf['B'].isin(mode_stops)))
+            | ((link_gdf['B_is_tap'] == 1) & (link_gdf['A'].isin(mode_stops)))]
+
+        # get the taps at the end of the links that service the stops
+        mode_taps_df = node_gdf.loc[
+            node_gdf['N'].isin(mode_tap_connectors.loc[mode_tap_connectors['A_is_tap'] == 1, 'A'])
+            | node_gdf['N'].isin(mode_tap_connectors.loc[mode_tap_connectors['B_is_tap'] == 1, 'B'])
+        ]
+
+        # get the transfer nodes (aka pseudo tap) servicing this mode
+        mode_transfer_nodes_df = node_gdf.loc[
+            node_gdf['N'].isin(
+                link_gdf.loc[(link_gdf['CNTYPE'] == 'TRWALK') & link_gdf['B'].isin(mode_stops), 'A'])
+        ]
+
+        return mode_taps_df, mode_transfer_nodes_df
+
+
+    def remove_long_walk_links(self,
+        link_gdf, node_gdf, transit_line_df, stop_df,
+        max_bus_transfer_dist_mi=0.25, max_non_bus_transfer_dist_mi=1.1):
+        """
+        Utility function to remove long walk links from network.  Transfer walk
+        takes place between transfer nodes located at each TAP. These tranfer
+        walk links have CNTYPE == "TRWALK" and are created in the
+        build_walk_transfer_bypass_links.py script.
+
+        Trimming these links decreases the total number of walk transfer paths
+        to help runtime and simplify the network.
+
+        Parameters:
+            - link_gdf: GeoDataFrame of link data
+            - node_gdf: GeoDataFrame of node data
+            - transit_line_df: dataframe of transit line data
+            - stop_df: dataframe of stops for each transit line
+            - max_bus_transfer_dist_mi: float to specify the maximum distance in miles
+                allowed for transfers between two transfer nodes (aka pseudo taps)
+                serving only bus routes
+            - max_non_bus_transfer_dist_mi: float to specify the maximum distance in miles
+                allowed for transfers between two transfer nodes (aka pseudo taps)
+                where at least one tap services rail
 
         Returns:
             - link_gdf with no more walk links
         """
-        long_walk_links = ((link_gdf['dist_between_nodes_mi'] > max_length_mi) & (link_gdf['NTL_MODE'] == 2))
-        print("Total number of walk links: ", len(link_gdf[link_gdf['NTL_MODE'] == 2]))
-        print("Number of long walk links removed: ", long_walk_links.sum())
-        link_gdf = link_gdf[~long_walk_links]
-        print("Walk links remaining: ", len(link_gdf[link_gdf['NTL_MODE'] == 2]))
+
+        print("Total number of walk links: ", len(link_gdf[link_gdf['CNTYPE'] == 'TRWALK']))
+
+        # transfer links that service bus taps
+        bus_taps, bus_transfer_nodes = self.get_taps_that_service_modes(
+            link_gdf, node_gdf, transit_line_df, stop_df, ['b', 'x'])
+
+        bus_transfer_links = (
+            (link_gdf['CNTYPE'] == 'TRWALK')
+            & (link_gdf['A'].isin(bus_transfer_nodes['N'])
+             | link_gdf['B'].isin(bus_transfer_nodes['N']))
+        )
+
+        # transfer links that service non-bus taps
+        non_bus_taps, non_bus_transfer_nodes = self.get_taps_that_service_modes(
+                    link_gdf, node_gdf, transit_line_df, stop_df, ['l', 'h', 'r', 'f'])
+
+        non_bus_transfer_links = (
+            (link_gdf['CNTYPE'] == 'TRWALK')
+            & (link_gdf['A'].isin(non_bus_transfer_nodes['N'])
+             | link_gdf['B'].isin(non_bus_transfer_nodes['N']))
+        )
+
+        # building mutually exclusive set
+        bus_only_transfer_links = (bus_transfer_links & ~non_bus_transfer_links)
+        non_bus_only_transfer_links = (~bus_transfer_links & non_bus_transfer_links)
+        bus_and_non_bus_transfer_links = (bus_transfer_links & non_bus_transfer_links)
+
+        # ------------ trimming bus-to-bus only transfer links
+        print("Total number of bus only transfer links: ", bus_only_transfer_links.sum())
+
+        long_bus_only_transfer_links = (
+            bus_only_transfer_links &
+            (link_gdf['dist_between_nodes_mi'] > max_bus_transfer_dist_mi)
+        )
+        link_gdf = link_gdf[~long_bus_only_transfer_links]
+        print("Number of bus only transfer links removed: ", long_bus_only_transfer_links.sum())
+
+        # ------------ trimming non-bus to non-bus only and bus-to-non-bus transfer links
+        print("Total number of non-bus only transfer links: ", non_bus_only_transfer_links.sum())
+
+        long_bus_to_non_bus_tr_links = (
+            (non_bus_only_transfer_links | bus_and_non_bus_transfer_links)
+            & (link_gdf['dist_between_nodes_mi'] > max_non_bus_transfer_dist_mi)
+        )
+        link_gdf = link_gdf[~long_bus_to_non_bus_tr_links]
+        print("Number of non-bus transfer links removed: ", long_bus_only_transfer_links.sum())
+
+        print("Total number of walk links after trimming: ",
+            len(link_gdf[link_gdf['CNTYPE'] == 'TRWALK']))
+
         return link_gdf
 
 
@@ -559,8 +662,6 @@ class emme_network_conversion:
 
         node_gdf, node_transaction_cols = self.create_emme_nodes_input(node_gdf)
         link_gdf, link_transaction_cols = self.create_emme_links_input(link_gdf, mode_transaction_df)
-
-        # link_gdf = self.remove_long_walk_links(link_gdf, max_length_mi=.25)
 
         with open(self.emme_network_transaction_file, 'w') as file:
             file.write('t nodes init\n')
@@ -810,33 +911,52 @@ class emme_network_conversion:
         return stop_link_df
 
 
-    def trim_network(self,link_gdf, node_gdf, transit_line_df, stop_df):
+    def trim_network(self, link_gdf, node_gdf, transit_line_df, stop_df,
+            max_bus_transfer_dist_mi=0.25, max_non_bus_transfer_dist_mi=1):
         """
         Removes links and nodes that are not needed in the network.
         Local rodes without a transit line on them are removed.
+        Transfer links longer than the specified threshold are removed
         Nodes that do not belong to any link are removed
         Additional code exists for debugging routing issues between Cube and Emme.
 
         This is required to get under the Emme limit for the max number of nodes and links
 
-        Inputs:
+        Parameters:
             - link_gdf: GeoDataFrame of link data
             - node_gdf: GeoDataFrame of node data
             - transit_line_df: dataframe of transit line data
             - stop_df: dataframe of stops for each transit line
+            - max_bus_transfer_dist_mi: float to specify the maximum distance in miles
+                allowed for transfers between two transfer nodes (aka pseudo taps)
+                serving only bus routes
+            - max_non_bus_transfer_dist_mi: float to specify the maximum distance in miles
+                allowed for transfers between two transfer nodes (aka pseudo taps)
+                where at least one tap services a rail or ferry mode
         Returns:
             - The input dataframes trimmed of unnessesary links and nodes
         """
+        print("number of links before trimming: ", len(link_gdf))
+        print("number of nodes before trimming: ", len(node_gdf))
+
         # remove links that do not have any transit lines and are local roads
         link_gdf_trimmed = link_gdf[
             link_gdf['A'].isin(stop_df['N'])
             | link_gdf['B'].isin(stop_df['N'])
-            | (link_gdf['FT'] != 7)] # local roads
+            | ((link_gdf['FT'] >= 1) & (link_gdf['FT'] <= 5)) # Freeways to collectors, no local roads
+            | (link_gdf['CNTYPE'] == 'TAP') # keeping all TAP connectors
+            | (link_gdf['CNTYPE'] == 'TRWALK')]  # keeping all TAP connectors
 
-        # remove nodes that are not on any links or transit stops
+        link_gdf_trimmed = self.remove_long_walk_links(
+            link_gdf_trimmed, node_gdf, transit_line_df, stop_df,
+            max_bus_transfer_dist_mi, max_non_bus_transfer_dist_mi)
+
+        # remove non-tap nodes that are not on any links or transit stops
         node_gdf_trimmed = node_gdf[
-            node_gdf['N'].isin(link_gdf_trimmed['A'])
-            | node_gdf['N'].isin(link_gdf_trimmed['B'])]
+            (node_gdf['N'].isin(link_gdf_trimmed['A'])
+             | node_gdf['N'].isin(link_gdf_trimmed['B']))
+            | (node_gdf['is_tap'] == 1)
+            ]
 
         # remove stops that do not have links connected
         in_network = (stop_df['N'].isin(link_gdf_trimmed['A'])
@@ -866,8 +986,10 @@ class emme_network_conversion:
             print("Stops missing links: ", stops_missing_links['N'].unique())
             print("Lines Removed: ", lines_missing_stops['NAME'], '\n')
 
-        print("number of links after trimming: ", len(link_gdf))
-        print("number of nodes after trimming: ", len(node_gdf))
+        print("number of links after trimming: ", len(link_gdf_trimmed))
+        print("number of nodes after trimming: ", len(node_gdf_trimmed))
+
+        assert (len(link_gdf_trimmed) < 1E6), "Emme can't have more than 1 million links!"
 
         return link_gdf_trimmed, node_gdf_trimmed, transit_line_df_trimmed, stop_df_trimmed
 
@@ -1247,21 +1369,9 @@ class emme_network_conversion:
         for station_type in sa_gdf['Station Type'].unique():
             # print('Station attributes for Station Type: ', station_type)
             # find transit lines that have mode of station
-            emme_mode = station_type_to_emme_mode_dict[station_type]
-            mode_lines = transit_line_df.loc[transit_line_df['emme_mode'].isin(emme_mode), 'LINE']
-            # find stops of those transit lines
-            mode_stops = stop_df.loc[stop_df['LINE'].isin(mode_lines), 'node_id'].unique()
-
-            # get the links that service the stops
-            mode_tap_connectors = link_gdf[
-                ((link_gdf['A_is_tap'] == 1) & (link_gdf['j_node'].isin(mode_stops)))
-                | ((link_gdf['B_is_tap'] == 1) & (link_gdf['i_node'].isin(mode_stops)))]
-
-            # get the taps at the end of the links that service the stops
-            mode_taps_df = node_gdf.loc[
-                node_gdf['i_node'].isin(mode_tap_connectors.loc[mode_tap_connectors['A_is_tap'] == 1, 'i_node'])
-                | node_gdf['i_node'].isin(mode_tap_connectors.loc[mode_tap_connectors['B_is_tap'] == 1, 'j_node'])
-            ]
+            emme_modes = station_type_to_emme_mode_dict[station_type]
+            mode_taps_df, mode_transfer_nodes_df = self.get_taps_that_service_modes(
+                link_gdf, node_gdf, transit_line_df, stop_df, emme_modes)
 
             # select the stations for this mode:
             mode_sa_gdf = sa_gdf[((sa_gdf['Station Type'] == station_type)
@@ -1498,7 +1608,8 @@ class emme_network_conversion:
 
         # removing links and nodes that are not needed
         link_gdf, node_gdf, transit_line_df, stop_df = self.trim_network(
-            link_gdf, node_gdf, transit_line_df, stop_df)
+            link_gdf, node_gdf, transit_line_df, stop_df,
+            max_bus_transfer_dist_mi=0.25, max_non_bus_transfer_dist_mi=1)
 
         # ----- writing emme transaction files -----
         # modes and vehicles

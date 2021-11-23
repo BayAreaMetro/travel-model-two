@@ -14,7 +14,7 @@ Usage: %EMME_PYTHON_PATH%\python skim_transit_network.py
     [-s, --skims_path]:path to the skims folder, default is the
         current_working_folder\skims
     [-i, --first_iteration]: Is this the first iteration? yes or no,
-        default is yes
+        default is yes.  If no, will include CCR in skimming and assignment
     [--save_iter_flows]: Save per-iteration flows in scenario
     [-t, --time_periods]: List of time periods as EA,AM,MD,PM,EV or
         ALL, default is ALL
@@ -360,6 +360,7 @@ def get_transit_skims():
         ("CROWD",       "Crowding penalty"),
         ("EAWT",        "Extra added wait time"),
         ("CAPPEN",      "Capacity penalty"),
+        # ("STPLATTIME",  "Station platform time"),
     ]
     skim_sets = [
         ("BUS",    "Local bus only"),
@@ -1023,6 +1024,10 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             spec = get_strat_spec({"boarding": "@capacity_penalty"}, "%s_CAPPEN" % skim_name)
             strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
 
+            # skim station platform time
+            # spec = get_strat_spec({"boarding": "@stnplatformtime", "aux_transit": "@stnplatformtimewalk"}, "%s_STPLATTIME" % skim_name)
+            # strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
+
     return
 
 
@@ -1066,7 +1071,7 @@ def mask_allpen(scenario, period):
     skims = [
         "FIRSTWAIT", "TOTALWAIT", "XFERS", "TOTALWALK",
         "LBIVTT", "EBIVTT", "LRIVTT", "HRIVTT", "CRIVTT", "FRIVTT",
-        "XFERWAIT", "FARE",
+        "XFERWAIT", "FARE", "IN_VEHICLE_COST",
         "XFERWALK", "TOTALIVTT",
         "LINKREL", "CROWD", "EAWT", "CAPPEN"]
     localivt_skim = get_matrix_data(scenario, period + "_ALLPEN_LBIVTT")
@@ -1095,7 +1100,7 @@ def mask_transfers(scenario, period, max_transfers=3):
     skims = [
         "FIRSTWAIT", "TOTALWAIT", "XFERS", "TOTALWALK",
         "LBIVTT", "EBIVTT", "LRIVTT", "HRIVTT", "CRIVTT", "FRIVTT",
-        "XFERWAIT", "FARE",
+        "XFERWAIT", "FARE", "IN_VEHICLE_COST",
         "XFERWALK", "TOTALIVTT",
         "LINKREL", "CROWD", "EAWT", "CAPPEN"]
 
