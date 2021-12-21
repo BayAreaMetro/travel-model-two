@@ -5,21 +5,21 @@
             block_file_dir - the directory holding the block parameter files
 
     This script builds transit drive access skims. It takes the following inputs:
-    
+
         1) TAZ->TAZ highway skims (time) by time-of-day
         2) MAZ->TAZ correspondence
         3) MAZ->TAP walk access skims
         4) N->(TAZ/MAZ/TAP/EXT) SEQ correspondence
-    
+
     The script builds (by time-of-day), the shortest path from each TAZ->TAP by creating a virtual
-    shortest path from TAZ->TAZ->MAZ->TAP. The first link is given by the highway skim (1), the 
-    second value (zero-cost) is provided by the MAZ-TAZ corresponence (2). The third link is 
+    shortest path from TAZ->TAZ->MAZ->TAP. The first link is given by the highway skim (1), the
+    second value (zero-cost) is provided by the MAZ-TAZ corresponence (2). The third link is
     privided by the MAZ->TAP walk access skim.
-    
+
     The output of this script is a csv file with the following columns:
-    
+
         FTAZ,MODE,PERIOD,TTAP,TMAZ,TTAZ,DTIME,DDIST,DTOLL,WDIST
-    
+
     Where:
         FTAZ - From TAZ (sequential numbering)
         MODE - The (transit) mode
@@ -31,13 +31,15 @@
         DDIST - Drive distance
         DTOLL - Drive bridge toll
         WDIST - Walk access distance
-    
+
     crf 8/2013
+    updated: 12/2021 by david.hensle@rsginc.com
 
 """
 
 import csv,os,sys,re
 import time as pytime
+import pandas as pd
 
 base_dir = sys.argv[1]
 block_dir = sys.argv[2]
@@ -49,6 +51,16 @@ id_mode_map = {1:'LOCAL_BUS',
                4:'LIGHT_RAIL',
                5:'HEAVY_RAIL',
                6:'COMMUTER_RAIL'}
+
+mode_settings_dict = {
+    # mode: maximum taz->tap drive dist in miles, closest number of taps to include
+    'LOCAL_BUS': {'MAX_DIST': 10, 'N_TAPS': 1},
+    'EXPRESS_BUS': {'MAX_DIST': 10, 'N_TAPS': 1},
+    'FERRY_SERVICE': {'MAX_DIST': 30, 'N_TAPS': 1},
+    'LIGHT_RAIL': {'MAX_DIST': 15, 'N_TAPS': 2},
+    'HEAVY_RAIL': {'MAX_DIST': 15, 'N_TAPS': 2},
+    'COMMUTER_RAIL': {'MAX_DIST': 15, 'N_TAPS': 2},
+}
 #input files
 #skim_taz_to_node_file = os.path.join(base_dir,r'hwy\avgload' + PERIOD_TOKEN + '_taz_to_node.txt')
 #taz_to_tazn_mapping_file = os.path.join(base_dir,r'hwy\node_maz_taz_data.csv')
@@ -62,8 +74,6 @@ network_tap_links_file = os.path.join(base_dir,r'hwy\mtc_final_network_tap_links
 skim_taz_taz_time_file = os.path.join(base_dir,r'skims\DA_' + PERIOD_TOKEN + '_taz_time.csv')
 drive_tansit_skim_out_file = os.path.join(base_dir,r'skims\drive_maz_taz_tap.csv')
 n_seq_file = os.path.join(base_dir,r'hwy\mtc_final_network_zone_seq.csv')
-
-
 
 start_time = pytime.time()
 
@@ -220,12 +230,6 @@ for temp_line in open(transit_line_file):
     trn_line = ""
 
 
-id_mode_map = {1:'LOCAL_BUS',
-               2:'EXPRESS_BUS',
-               3:'FERRY_SERVICE',
-               4:'LIGHT_RAIL',
-               5:'HEAVY_RAIL',
-               6:'COMMUTER_RAIL'}
 print 'building tap->mode'
 all_tapn = []
 for line in open(network_tap_nodes_file):
@@ -266,75 +270,98 @@ for line in open(network_tap_links_file):
 
 print 'taps with no (apparent) walk access: ' + str(isolated_tapns.keys())
 
-print 'building list of tazs with taps by tod'
-tazs_with_taps = {} #period -> tazs
+
+# ------------------------------------------
+# modifications to extend number of taps and set maximum distances
+
+# turn above dictionary into pandas dataframe
+tod_mode_tapn_df = pd.DataFrame.from_dict({(i,j,k): tod_mode_tapn[i][j][k]
+                                          for i in tod_mode_tapn.keys()
+                                          for j in tod_mode_tapn[i].keys()
+                                          for k in tod_mode_tapn[i][j].keys()},
+                                         orient='index',
+                                         columns=['TMAZ', 'TTAZ', 'WTIME', 'WDIST'])
+
+tod_mode_tapn_df[['PERIOD', 'MODE', 'TTAP']] = pd.DataFrame(tod_mode_tapn_df.index.to_list(), index=tod_mode_tapn_df.index)
+tod_mode_tapn_df.reset_index(inplace=True, drop=True)
+
+tod_mode_tapn_df['TMAZ'] = tod_mode_tapn_df['TMAZ'].map(seq_mapping)
+tod_mode_tapn_df['TTAZ'] = tod_mode_tapn_df['TTAZ'].map(seq_mapping)
+tod_mode_tapn_df['TTAP'] = tod_mode_tapn_df['TTAP'].map(seq_mapping)
+
+# build each time period separately and concatenate results at the end
+# (building separately because each time period has different skims and network)
+total_table_array = []
 for period in periods:
-    tazs_with_taps[period] = {}
-    for mode in tod_mode_tapn[period]:
-        for tapn in tod_mode_tapn[period][mode]:
-            tazs_with_taps[period][tod_mode_tapn[period][mode][tapn][1]] = None
-
-def formCost(time,dist,toll):
-    return time + vot*(dist * auto_op_cost + toll)
-
-
-# tod_mode_tapn[period][mode][tapn] = (mazn,tazn,distance)
-drive_access_costs = {}
-for period in periods:
-
-    print 'reading taz->taz skim for ' + period + ' and building drive access skim'
-    #read the taz->taz skim
-    #skimtaz_tazn_map = skimtaz_tazn_mapping[period]
-    skimtaz_tazn_map = tazseq_mapping
-    tazn_tazn_skim = {}
-    tazns = {} #unique set of taz nodes
-
-    for line in open(skim_taz_taz_time_file.replace(PERIOD_TOKEN,period)):
-        line = line.strip().split(',') #1,1,1,0.21,460.5  #I,J,[something],TIMEDA,DISTDA[,BTOLLDA]
-        ftazn = skimtaz_tazn_map[int(line[0])]
-        ttazn = skimtaz_tazn_map[int(line[1])]
-        if not ftazn in tazn_tazn_skim:
-            tazn_tazn_skim[ftazn] = {}
-        if ttazn in tazs_with_taps[period]:
-            time = float(line[3])
-            dist = float(line[4])
-            toll = 0.0
-            if len(line) == 6:
-                toll = float(line[5])
-            tazn_tazn_skim[ftazn][ttazn] = (formCost(time,dist,toll),time,dist,toll)
-        tazns[ftazn] = None
-    tazns = list(tazns.keys())
-    tazns.sort()
-
     print 'building drive access skims for period ' + period
-    drive_access_costs[period] = {}
-    for mode_id in id_mode_map:
-        mode = id_mode_map[mode_id]
-        drive_access_costs[period][mode] = {}
-        for tazn in tazns:
-            drive_access_costs[period][mode][tazn] = None
-            for tapn in tod_mode_tapn[period][mode]:
-                tapn_costs = tod_mode_tapn[period][mode][tapn]
-                cost = tazn_tazn_skim[tazn][tapn_costs[1]][0] + tapn_costs[2]
-                if (drive_access_costs[period][mode][tazn] is None) or (drive_access_costs[period][mode][tazn][0] > cost):
-                    drive_access_costs[period][mode][tazn] = (cost,tapn)
+    # grab taps serviced in this period and their tazs
+    taps_for_period = tod_mode_tapn_df.loc[tod_mode_tapn_df['PERIOD'] == period]
+
+    # read the taz->taz skim
+    taz_skim_df = pd.read_csv(skim_taz_taz_time_file.replace(PERIOD_TOKEN,period),
+                              names=['FTAZ', 'TTAZ', 'unknown', 'DTIME', 'DDIST', 'DTOLL'])
+
+    # reduce the size of the file before merge
+    largest_dist = max([mode_settings_dict[mode]['MAX_DIST'] for mode in mode_settings_dict.keys()])
+    taz_skim_df = taz_skim_df[(taz_skim_df['DDIST'] < largest_dist) & taz_skim_df['TTAZ'].isin(taps_for_period['TTAZ'])]
+
+    # set time of day period
+    taz_skim_df['PERIOD'] = period
+
+    # join skim values to taps
+    tod_mode_tapn_costs = pd.merge(
+        taz_skim_df[['FTAZ', 'TTAZ','PERIOD', 'DTIME', 'DDIST', 'DTOLL']],
+        taps_for_period,
+        how='left',
+        on=['TTAZ', 'PERIOD'])
+
+    # discard any tazs that do not contain a tap
+    tod_mode_tapn_costs = tod_mode_tapn_costs[~tod_mode_tapn_costs['TTAP'].isna()]
+
+    # select the nearest N TAPS by mode within the maximum set drive distance
+    all_tod_available_taps = []
+    for mode in mode_settings_dict.keys():
+#         print(mode)
+        max_dist = mode_settings_dict[mode]['MAX_DIST']
+        n_taps = mode_settings_dict[mode]['N_TAPS']
+#         print(f"max_dist: {max_dist}, n_taps: {n_taps}")
+
+        mode_cut = tod_mode_tapn_costs[
+            (tod_mode_tapn_costs['MODE'] == mode)
+            & (tod_mode_tapn_costs['DDIST'] < max_dist)]
+
+        if len(mode_cut) == 0:
+            print "No taps within" + str(max_dist) + "miles for mode" + mode
+            continue
+
+        # select entries for the closest N taps to this TAZ for this mode and this time of day
+        selection = mode_cut.groupby(['FTAZ', 'PERIOD', 'MODE'])['DDIST'].nsmallest(n_taps)
+
+        # get index locations of selection to extract from the full list
+        # groupby can end up with only one index level due to unique values (this happens for ferrys)
+        if selection.index.nlevels == 1:
+            available_taps = selection.index
+        else:
+            available_taps = selection.index.get_level_values(3)
+
+        # create a list of index values for selected taps accross all modes
+        if all_tod_available_taps is None:
+            all_tod_available_taps = available_taps
+        else:
+            all_tod_available_taps = all_tod_available_taps.append(available_taps)
+
+    # create an array of selected taz->tap dataframes, one for each time of day period
+    total_table_array.append(tod_mode_tapn_costs.loc[all_tod_available_taps])
+
+# Join all time periods back together
+final_df = pd.concat(total_table_array)
+
+# fill missing toll values
+final_df['DTOLL'] = final_df['DTOLL'].fillna(0)
 
 print 'writing drive access skim results'
-f = open(drive_tansit_skim_out_file,'wb')
-f.write(','.join(['FTAZ','MODE','PERIOD','TTAP','TMAZ','TTAZ','DTIME','DDIST','DTOLL','WDIST']) + os.linesep)
-for period in drive_access_costs:
-    for mode in drive_access_costs[period]:
-        for tazn in drive_access_costs[period][mode]:
-            if not drive_access_costs[period][mode][tazn] is None:
-                tapn = drive_access_costs[period][mode][tazn][1]
-                (tmazn,ttazn,wtime,wdist) = tod_mode_tapn[period][mode][tapn]
-                try:
-                    (fcost,time,dist,toll) = tazn_tazn_skim[tazn][ttazn]
-                    f.write(','.join(map(str,[seq_mapping[tazn],mode,period,seq_mapping[tapn],seq_mapping[tmazn],seq_mapping[ttazn],time,dist,toll,wdist])) + os.linesep)
-                except:
-                    print "period: {period}; mode: {mode}; tazn: {tazn}; ttazn: {ttazn}".format(period=period, mode=mode, tazn=tazn, ttazn=ttazn)
-                    continue
-f.close()
+output_col_order = ['FTAZ', 'MODE', 'PERIOD', 'TTAP', 'TMAZ', 'TTAZ', 'DTIME', 'DDIST', 'DTOLL', 'WDIST']
+final_df[output_col_order].to_csv(drive_tansit_skim_out_file, index=False)
 
 end_time = pytime.time()
 print 'elapsed time in minutes: ' + str((end_time - start_time) / 60.0)
