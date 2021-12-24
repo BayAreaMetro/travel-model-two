@@ -33,6 +33,8 @@ import com.pb.mtctm2.abm.ctramp.TransitWalkAccessDMU;
 import com.pb.mtctm2.abm.ctramp.Util;
 import com.pb.common.calculator.IndexValues;
 import com.pb.common.calculator.VariableTable;
+import com.pb.common.datafile.OLD_CSVFileReader;
+import com.pb.common.datafile.TableDataSet;
 import com.pb.common.util.Tracer;
 import com.pb.common.newmodel.UtilityExpressionCalculator;
 import com.pb.common.newmodel.Alternative;
@@ -49,6 +51,8 @@ public class BestTransitPathCalculator implements Serializable
 
     private transient Logger                 logger        = Logger.getLogger(BestTransitPathCalculator.class);
 
+    protected static final String transitFareDiscountFileName = "transit.fareDiscount.file";
+    
     //TODO: combine APP_TYPE_xxx constants into a enum structure
     public static final int              APP_TYPE_GENERIC = 0;
     public static final int              APP_TYPE_TOURMC  = 1;
@@ -117,6 +121,10 @@ public class BestTransitPathCalculator implements Serializable
     private double[] expUtilities;							//exponentiated utility array for path choice
       
     private float nestingCoefficient;
+    
+    protected float[][] transitFareDiscounts; //transit fare discounts(mean_discount) by mode(mode) and person type(ptype)
+    
+    HashMap<String, String> rbMap;
     /**
      * Constructor.
      * 
@@ -127,6 +135,8 @@ public class BestTransitPathCalculator implements Serializable
      */
     public BestTransitPathCalculator(HashMap<String, String> rbMap)
     {
+    	
+    	this.rbMap = rbMap;
 
         // read in resource bundle properties
         trace = Util.getBooleanValueFromPropertyMap(rbMap, "Trace");
@@ -174,7 +184,8 @@ public class BestTransitPathCalculator implements Serializable
         driveAccessUEC = createUEC(uecFile, driveAccessPage, dataPage, rbMap, new TransitDriveAccessDMU());
         walkEgressUEC = createUEC(uecFile, walkEgressPage, dataPage, rbMap, new TransitWalkAccessDMU());
         driveEgressUEC = createUEC(uecFile, driveEgressPage, dataPage, rbMap, new TransitDriveAccessDMU());
-        tapToTapUEC = createUEC(uecFile, tapToTapPage, dataPage, rbMap, new TransitWalkAccessDMU());
+        TransitWalkAccessDMU tapToTapDmu = new TransitWalkAccessDMU();
+        tapToTapUEC = createUEC(uecFile, tapToTapPage, dataPage, rbMap, tapToTapDmu);
         driveAccDisutilityUEC = createUEC(uecFile, driveAccDisutilityPage, dataPage, rbMap, new TransitDriveAccessDMU());
         driveEgrDisutilityUEC = createUEC(uecFile, driveEgrDisutilityPage, dataPage, rbMap, new TransitDriveAccessDMU());
         
@@ -207,6 +218,11 @@ public class BestTransitPathCalculator implements Serializable
         expUtilities = new double[numTransitAlts];
         
         nestingCoefficient =  new Float(Util.getStringValueFromPropertyMap(rbMap, "utility.bestTransitPath.nesting.coeff")).floatValue();
+        
+        
+        String fareDiscountFileName = Paths.get(uecPath,rbMap.get(transitFareDiscountFileName)).toString();
+        transitFareDiscounts = readTransitFareDiscounts(fareDiscountFileName);
+        tapToTapDmu.setTransitFareDiscounts(transitFareDiscounts);
         
      }
     
@@ -1518,6 +1534,49 @@ public class BestTransitPathCalculator implements Serializable
 	public UtilityExpressionCalculator getTapToTapUEC() {
 		return tapToTapUEC;
 	}
+	
+    private float[][] readTransitFareDiscounts(String fileName)
+    {
+
+        File discountFile = new File(fileName);
+
+        // read in the csv table
+        TableDataSet discountTable;
+        try
+        {
+            OLD_CSVFileReader reader = new OLD_CSVFileReader();
+            reader.setDelimSet("," + reader.getDelimSet());
+            discountTable = reader.readFile(discountFile);
+
+        } catch (Exception e)
+        {
+            logger.fatal(String.format( "Exception occurred reading transit fare discount data file: %s into TableDataSet object.", fileName ) );
+            throw new RuntimeException();
+        }
+        
+        int ptypes=8;
+        int modes=6;
+        
+        //initialize array to 1 in case the fare is missing from file for a given mode and ptype combo
+        float fareDiscounts[][] = new float[modes][];
+        for(int i = 0; i< modes;++i) {
+        	fareDiscounts[i]=new float[ptypes];
+        	for(int j=0;j<ptypes;++j)
+        		fareDiscounts[i][j]=1;
+        }
+        
+        for(int row=1;row<=discountTable.getRowCount();++row) {
+ 
+        	int mode = (int) discountTable.getValueAt(row,"mode");
+        	int ptype = (int) discountTable.getValueAt(row, "ptype");
+        	float discount = discountTable.getValueAt(row, "mean_discount");
+        	
+        	fareDiscounts[mode-1][ptype-1]=discount;
+        }
+ 
+        return fareDiscounts;
+ 
+    }
 
 
 }
