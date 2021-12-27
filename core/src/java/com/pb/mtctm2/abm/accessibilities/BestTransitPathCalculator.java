@@ -219,8 +219,8 @@ public class BestTransitPathCalculator implements Serializable
         
         nestingCoefficient =  new Float(Util.getStringValueFromPropertyMap(rbMap, "utility.bestTransitPath.nesting.coeff")).floatValue();
         
-        
-        String fareDiscountFileName = Paths.get(uecPath,rbMap.get(transitFareDiscountFileName)).toString();
+        String directoryPath = Util.getStringValueFromPropertyMap(rbMap,CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
+        String fareDiscountFileName = Paths.get(directoryPath,rbMap.get(transitFareDiscountFileName)).toString();
         transitFareDiscounts = readTransitFareDiscounts(fareDiscountFileName);
         tapToTapDmu.setTransitFareDiscounts(transitFareDiscounts);
         
