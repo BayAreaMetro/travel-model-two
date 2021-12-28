@@ -712,6 +712,10 @@ public class TripModeChoiceDMU
 	public void setWaitTimeTaxi(float waitTimeTaxi) {
 		this.waitTimeTaxi = waitTimeTaxi;
 	}
+	
+	public float getFareSubsidy() {
+		return person.getTransitSubsidyPercent();
+	}
 
 
 	public int getIndexValue(String variableName)

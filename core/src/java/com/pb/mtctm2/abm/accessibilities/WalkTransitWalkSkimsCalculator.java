@@ -98,6 +98,7 @@ public class WalkTransitWalkSkimsCalculator
         String uecPath = Util.getStringValueFromPropertyMap(rbMap, CtrampApplication.PROPERTIES_UEC_PATH);
         String uecFileName = Paths.get(uecPath,Util.getStringValueFromPropertyMap(rbMap, "skim.walk.transit.walk.uec.file")).toString();
         File uecFile = new File(uecFileName);
+        dmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
         walkWalkSkimUEC = new UtilityExpressionCalculator(uecFile, skimPage, dataPage, rbMap, dmu);	
 
         //setup index values

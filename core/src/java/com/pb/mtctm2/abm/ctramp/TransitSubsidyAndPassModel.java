@@ -117,6 +117,7 @@ public class TransitSubsidyAndPassModel
         wtw = new WalkTransitWalkSkimsCalculator(rbMap);
         wtw.setup(rbMap, logger, bestPathCalculator);
 	    walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathCalculator.getTransitFareDiscounts());
 	    driveDmu =  new TransitDriveAccessDMU();
 	    
 

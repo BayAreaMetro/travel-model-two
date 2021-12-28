@@ -2,6 +2,7 @@ package com.pb.mtctm2.abm.accessibilities;
 
 import com.pb.common.util.Tracer;
 import com.pb.common.calculator.IndexValues;
+import com.pb.mtctm2.abm.ctramp.CtrampApplication;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.TransitDriveAccessDMU;
 import com.pb.mtctm2.abm.ctramp.TransitWalkAccessDMU;
@@ -11,6 +12,7 @@ import com.pb.common.newmodel.UtilityExpressionCalculator;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 import com.pb.mtctm2.abm.accessibilities.NonTransitUtilities;
@@ -56,6 +58,8 @@ public class MandatoryAccessibilitiesCalculator
     // auto sufficiency (0 autos, autos<adults, autos>=adults),
     // and mode (SOV,HOV,Walk-Transit,Non-Motorized)
     private double[][]                  expConstants;
+    
+    HashMap<String, String> rbMap;
 
     private String[] accNames = {
             "SovTime", // 0
@@ -74,12 +78,13 @@ public class MandatoryAccessibilitiesCalculator
     };
 
     private BestTransitPathCalculator bestPathCalculator;
-    
-
+   
     public MandatoryAccessibilitiesCalculator(HashMap<String, String> rbMap,
             NonTransitUtilities aNtUtilities, double[][] aExpConstants, BestTransitPathCalculator myBestPathCalculator)
     {
 
+    	this.rbMap = rbMap;
+    	
         ntUtilities = aNtUtilities;
         expConstants = aExpConstants;
 
@@ -109,6 +114,7 @@ public class MandatoryAccessibilitiesCalculator
         mgraManager = MgraDataManager.getInstance();
 
         bestPathCalculator = myBestPathCalculator;
+      
     }
     
 
@@ -327,6 +333,7 @@ public class MandatoryAccessibilitiesCalculator
         
         // DMUs for this UEC
         TransitWalkAccessDMU walkDmu = new TransitWalkAccessDMU();
+        walkDmu.setTransitFareDiscounts(bestPathCalculator.getTransitFareDiscounts());
         TransitDriveAccessDMU driveDmu = new TransitDriveAccessDMU();
 
         if (oMgra > 0 && dMgra > 0)

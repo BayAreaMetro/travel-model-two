@@ -2,6 +2,7 @@ package com.pb.mtctm2.abm.accessibilities;
 
 import java.io.File;
 import java.net.UnknownHostException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import com.pb.common.datafile.TableDataSet;
 import com.pb.common.util.Tracer;
+import com.pb.mtctm2.abm.ctramp.CtrampApplication;
 import com.pb.mtctm2.abm.ctramp.CtrampDmuFactoryIf;
 import com.pb.mtctm2.abm.ctramp.HouseholdDataManagerIf;
 import com.pb.mtctm2.abm.ctramp.McLogsumsCalculator;
@@ -270,7 +272,8 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
         
         // DMUs for this UEC
         TransitWalkAccessDMU walkDmu = new TransitWalkAccessDMU();
-        
+        walkDmu.setTransitFareDiscounts(bestPathCalculator.getTransitFareDiscounts());
+
         for (int i = startRange; i <= endRange; i++)
         { // Origin MGRA
 

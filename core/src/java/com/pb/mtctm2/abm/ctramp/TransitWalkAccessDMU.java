@@ -46,6 +46,7 @@ public class TransitWalkAccessDMU
                                                             //possible that it is being called for a drive-access path!
     int                                 tourCategoryIsJoint = 0;
     float                               valueOfTime = (float) 10.0;
+    float								fareSubsidy = 0f;
     
     protected float[][] transitFareDiscounts;
 
@@ -245,7 +246,15 @@ public class TransitWalkAccessDMU
     }
 
     
-    /**
+    public float getFareSubsidy() {
+		return fareSubsidy;
+	}
+
+	public void setFareSubsidy(float fareSubsidy) {
+		this.fareSubsidy = fareSubsidy;
+	}
+
+	/**
      * Log the DMU values.
      * 
      * @param localLogger The logger to use.
@@ -276,6 +285,7 @@ public class TransitWalkAccessDMU
         	localLogger.info(String.format("Heavy fare discount:      %9.4f", getHeavyDiscount()));
         	localLogger.info(String.format("CR fare discount:         %9.4f", getCRDiscount()));
         	localLogger.info(String.format("Ferry fare discount:      %9.4f", getFerryDiscount()));
+        	localLogger.info(String.format("Transit fare subsidy:     %9.4f", getFareSubsidy()));
         }
         
 
@@ -305,6 +315,8 @@ public class TransitWalkAccessDMU
         methodIndexMap.put("getHeavyDiscount",23);
         methodIndexMap.put("getCRDiscount",24);
         methodIndexMap.put("getFerryDiscount",25);
+        
+        methodIndexMap.put("getFareSubsidy", 26);
         
         
         
@@ -352,6 +364,8 @@ public class TransitWalkAccessDMU
             	return getCRDiscount();
             case 25:
             	return getFerryDiscount();
+            case 26:
+            	return getFareSubsidy();
             	
             default:
                 logger.error("method number = " + variableIndex + " not found");

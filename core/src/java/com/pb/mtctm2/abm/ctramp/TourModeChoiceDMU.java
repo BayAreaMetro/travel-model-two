@@ -441,6 +441,10 @@ public class TourModeChoiceDMU
 		this.destTaxiWaitTime = destTaxiWaitTime;
 	}
 
+	public float getFareSubsidy() {
+		return person.getTransitSubsidyPercent();
+	}
+
 	public int getIndexValue(String variableName)
     {
         return methodIndexMap.get(variableName);

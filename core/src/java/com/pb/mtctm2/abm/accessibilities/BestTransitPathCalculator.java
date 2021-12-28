@@ -122,9 +122,9 @@ public class BestTransitPathCalculator implements Serializable
       
     private float nestingCoefficient;
     
-    protected float[][] transitFareDiscounts; //transit fare discounts(mean_discount) by mode(mode) and person type(ptype)
-    
     HashMap<String, String> rbMap;
+    
+    private float[][] fareDiscounts;
     /**
      * Constructor.
      * 
@@ -221,8 +221,8 @@ public class BestTransitPathCalculator implements Serializable
         
         String directoryPath = Util.getStringValueFromPropertyMap(rbMap,CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
         String fareDiscountFileName = Paths.get(directoryPath,rbMap.get(transitFareDiscountFileName)).toString();
-        transitFareDiscounts = readTransitFareDiscounts(fareDiscountFileName);
-        tapToTapDmu.setTransitFareDiscounts(transitFareDiscounts);
+        fareDiscounts = readTransitFareDiscounts(fareDiscountFileName);
+        tapToTapDmu.setTransitFareDiscounts(fareDiscounts);
         
      }
     
@@ -1535,7 +1535,7 @@ public class BestTransitPathCalculator implements Serializable
 		return tapToTapUEC;
 	}
 	
-    private float[][] readTransitFareDiscounts(String fileName)
+    public static float[][] readTransitFareDiscounts(String fileName)
     {
 
         File discountFile = new File(fileName);
@@ -1550,8 +1550,7 @@ public class BestTransitPathCalculator implements Serializable
 
         } catch (Exception e)
         {
-            logger.fatal(String.format( "Exception occurred reading transit fare discount data file: %s into TableDataSet object.", fileName ) );
-            throw new RuntimeException();
+           throw new RuntimeException();
         }
         
         int ptypes=8;
@@ -1577,6 +1576,10 @@ public class BestTransitPathCalculator implements Serializable
         return fareDiscounts;
  
     }
-
-
+    
+    public float[][] getTransitFareDiscounts(){
+    	
+    	return fareDiscounts;
+    }
+   
 }
