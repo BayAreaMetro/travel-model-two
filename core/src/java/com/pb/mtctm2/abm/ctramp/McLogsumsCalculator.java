@@ -398,6 +398,7 @@ public class McLogsumsCalculator implements Serializable
         
         //setup best path dmu variables
     	walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
     	driveDmu  = new TransitDriveAccessDMU();
         
         // walk access, walk egress transit, inbound
@@ -465,6 +466,7 @@ public class McLogsumsCalculator implements Serializable
     	
         //setup best path dmu variables
     	walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
     	driveDmu  = new TransitDriveAccessDMU();
     	
         // walk access, drive egress transit, inbound
