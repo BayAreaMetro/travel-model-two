@@ -442,9 +442,9 @@ public class TourModeChoiceDMU
 	}
 
 	public float getFareSubsidy() {
-		return person.getTransitSubsidyPercent();
-	}
-
+        return (tour.getTourPrimaryPurposeIndex() == ModelStructure.WORK_PRIMARY_PURPOSE_INDEX) ? person.getTransitSubsidyPercent() : 0f;	
+    }
+	
 	public int getIndexValue(String variableName)
     {
         return methodIndexMap.get(variableName);
