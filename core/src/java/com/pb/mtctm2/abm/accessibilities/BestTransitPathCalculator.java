@@ -350,31 +350,27 @@ public class BestTransitPathCalculator implements Serializable
         //create transit path collection
         ArrayList<TransitPath> paths = new ArrayList<TransitPath>();
 
-        float[][][] tapParkingInfo = tapManager.getTapParkingInfo();
-
         int[] pTapArray = tazManager.getParkRideOrKissRideTapsForZone(pTaz, accMode);
         for ( int pTap : pTapArray )
         {
-            // Calculate the pTaz to pTap drive access utility values
-            float accUtil;
-            float accDisutil;
-            if (storedDriveAccessUtils[pTaz][pTap] == StoredUtilityData.default_utility) {
-    			accUtil = calcDriveAccessUtility(driveDmu, pMgra, pTaz, pTap, accMode, writeCalculations, myLogger);
-    			storedDriveAccessUtils[pTaz][pTap] = accUtil;
-            } else {
-            	accUtil = storedDriveAccessUtils[pTaz][pTap];
-        		if(writeCalculations)
-        			myLogger.info("Stored drive access utility from TAZ "+pTaz+" to Tap "+pTap+" is "+accUtil);
-            }
-            
-            int lotID = (int)tapParkingInfo[pTap][0][0]; // lot ID
-            float lotCapacity = tapParkingInfo[pTap][2][0]; // lot capacity
-            
-            if ((accMode == AccessMode.PARK_N_RIDE && tapManager.getLotUse(lotID) < lotCapacity)
-                    || (accMode == AccessMode.KISS_N_RIDE))
+        	if (tapManager.getDriveAccessAllowed(pTap))
             {
+        		// Calculate the pTaz to pTap drive access utility values
+        		float accUtil;
+        		float accDisutil;
+        		if (storedDriveAccessUtils[pTaz][pTap] == StoredUtilityData.default_utility) {
+        			driveDmu.setDriveAccessWalkTime(tapManager.getDriveAccessWalkTime(pTap));
+        			driveDmu.setDriveAccessDriveTime(tapManager.getDriveAccessDriveTime(pTap));
+        			driveDmu.setParkingCost(tapManager.getParkingCost(pTap));
+        			accUtil = calcDriveAccessUtility(driveDmu, pMgra, pTaz, pTap, accMode, writeCalculations, myLogger);
+        			storedDriveAccessUtils[pTaz][pTap] = accUtil;
+        		} else {
+        			accUtil = storedDriveAccessUtils[pTaz][pTap];
+        			if(writeCalculations)
+        				myLogger.info("Stored drive access utility from TAZ "+pTaz+" to Tap "+pTap+" is "+accUtil);
+        		}
 
-                //always calculate the access disutility since it changes based on od
+        		//always calculate the access disutility since it changes based on od
                 accDisutil = calcDriveAccessRatioDisutility(driveDmu, pMgra, pTaz, pTap, odDistance, accMode, writeCalculations, myLogger);
                 for (int aTap : mgraManager.getMgraWlkTapsDistArray()[aMgra][0])
                 {
@@ -462,19 +458,17 @@ public class BestTransitPathCalculator implements Serializable
             for (int aTap : tazManager.getParkRideOrKissRideTapsForZone(aTaz, accMode))
             {
 
-                int lotID = (int) tapManager.getTapParkingInfo()[aTap][0][0]; // lot
-                // ID
-                float lotCapacity = tapManager.getTapParkingInfo()[aTap][2][0]; // lot
-                // capacity
-                if ((accMode == AccessMode.PARK_N_RIDE && tapManager.getLotUse(lotID) < lotCapacity)
-                        || (accMode == AccessMode.KISS_N_RIDE))
+                if (tapManager.getDriveAccessAllowed(aTap))
                 {
 
                 	// Calculate the aTap to aMgra drive egress utility values
                     float egrUtil;
                     float egrDisutil;
                     if (storedDriveEgressUtils[aTap][aTaz] == StoredUtilityData.default_utility) {
-            			egrUtil = calcDriveEgressUtility(driveDmu, aTap, aTaz, aMgra, accMode, writeCalculations, myLogger);
+            			driveDmu.setDriveAccessWalkTime(tapManager.getDriveAccessWalkTime(aTap));
+            			driveDmu.setDriveAccessDriveTime(tapManager.getDriveAccessDriveTime(aTap));
+            			driveDmu.setParkingCost(tapManager.getParkingCost(aTap));
+                    	egrUtil = calcDriveEgressUtility(driveDmu, aTap, aTaz, aMgra, accMode, writeCalculations, myLogger);
             			storedDriveEgressUtils[aTap][aTaz] = egrUtil;
                     } else {
                     	egrUtil = storedDriveEgressUtils[aTap][aTaz];	

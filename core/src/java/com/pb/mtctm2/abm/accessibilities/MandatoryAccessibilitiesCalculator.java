@@ -4,9 +4,9 @@ import com.pb.common.util.Tracer;
 import com.pb.common.calculator.IndexValues;
 import com.pb.mtctm2.abm.ctramp.CtrampApplication;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
+import com.pb.mtctm2.abm.ctramp.ModelStructure;
 import com.pb.mtctm2.abm.ctramp.TransitDriveAccessDMU;
 import com.pb.mtctm2.abm.ctramp.TransitWalkAccessDMU;
-import com.pb.mtctm2.abm.ctramp.TransitWalkAccessUEC;
 import com.pb.mtctm2.abm.ctramp.Util;
 import com.pb.common.newmodel.UtilityExpressionCalculator;
 
@@ -388,7 +388,7 @@ public class MandatoryAccessibilitiesCalculator
             //////////////////////////////////////////////////////////////////////////
             
             // determine the best transit path, which also stores the best utilities array and the best mode
-            bestPathCalculator.findBestWalkTransitWalkTaps(walkDmu, TransitWalkAccessUEC.AM, oMgra, dMgra, debug, aLogger);
+            bestPathCalculator.findBestWalkTransitWalkTaps(walkDmu, ModelStructure.AM_SKIM_PERIOD_INDEX, oMgra, dMgra, debug, aLogger);
             
             // sum the exponentiated utilities over modes
             double sumWlkExpUtilities = 0;
@@ -462,7 +462,7 @@ public class MandatoryAccessibilitiesCalculator
             //////////////////////////////////////////////////////////////////////////
             
             // determine the best transit path, which also stores the best utilities array and the best mode
-            bestPathCalculator.findBestDriveTransitWalkTaps(walkDmu, driveDmu, TransitWalkAccessUEC.AM, oMgra, dMgra, debug, aLogger, (float) autoResults[PEAK_NONTOLL_SOV_DIST_INDEX]);
+            bestPathCalculator.findBestDriveTransitWalkTaps(walkDmu, driveDmu, ModelStructure.AM_SKIM_PERIOD_INDEX, oMgra, dMgra, debug, aLogger, (float) autoResults[PEAK_NONTOLL_SOV_DIST_INDEX]);
             
             // sum the exponentiated utilities over modes
             double sumDrvExpUtilities = 0;

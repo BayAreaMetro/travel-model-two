@@ -9,8 +9,8 @@ import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
 import com.pb.mtctm2.abm.ctramp.McLogsumsCalculator;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
+import com.pb.mtctm2.abm.ctramp.ModelStructure;
 import com.pb.mtctm2.abm.ctramp.TransitWalkAccessDMU;
-import com.pb.mtctm2.abm.ctramp.TransitWalkAccessUEC;
 import com.pb.mtctm2.abm.ctramp.Util;
 import com.pb.common.newmodel.UtilityExpressionCalculator;
 
@@ -38,13 +38,13 @@ public class WalkTransitWalkSkimsCalculator
 
     private transient Logger                        logger;
 
-    private static final int              EA                            = TransitWalkAccessUEC.EA;
-    private static final int              AM                            = TransitWalkAccessUEC.AM;
-    private static final int              MD                            = TransitWalkAccessUEC.MD;
-    private static final int              PM                            = TransitWalkAccessUEC.PM;
-    private static final int              EV                            = TransitWalkAccessUEC.EV;
-    private static final String[]         PERIODS                       = TransitWalkAccessUEC.PERIODS;
-    private static final int              NUM_PERIODS                   = TransitWalkAccessUEC.NUM_PERIODS;
+    private static final int              EA                            = ModelStructure.EA_SKIM_PERIOD_INDEX;
+    private static final int              AM                            = ModelStructure.AM_SKIM_PERIOD_INDEX;
+    private static final int              MD                            = ModelStructure.MD_SKIM_PERIOD_INDEX;
+    private static final int              PM                            = ModelStructure.PM_SKIM_PERIOD_INDEX;
+    private static final int              EV                            = ModelStructure.EV_SKIM_PERIOD_INDEX;
+    private static final int              NUM_PERIODS                   = ModelStructure.SKIM_PERIOD_STRINGS.length;
+    private static final String[]         PERIODS                       = ModelStructure.SKIM_PERIOD_STRINGS;
 
     private static final int              ACCESS_TIME_INDEX             = 0;
     private static final int              EGRESS_TIME_INDEX             = 1;

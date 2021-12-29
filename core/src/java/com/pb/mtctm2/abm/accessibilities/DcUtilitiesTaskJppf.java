@@ -19,7 +19,6 @@ import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.ModelStructure;
 import com.pb.mtctm2.abm.ctramp.TransitDriveAccessDMU;
 import com.pb.mtctm2.abm.ctramp.TransitWalkAccessDMU;
-import com.pb.mtctm2.abm.ctramp.TransitWalkAccessUEC;
 import com.pb.mtctm2.abm.ctramp.Util;
 import com.pb.common.newmodel.UtilityExpressionCalculator;
 
@@ -345,7 +344,7 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
 
                 // calculate walk-transit exponentiated utility
                 // determine the best transit path, which also stores the best utilities array and the best mode
-                bestPathCalculator.findBestWalkTransitWalkTaps(walkDmu, TransitWalkAccessUEC.MD, iMgra, jMgra, false, logger);
+                bestPathCalculator.findBestWalkTransitWalkTaps(walkDmu, ModelStructure.MD_SKIM_PERIOD_INDEX, iMgra, jMgra, false, logger);
                 
                 // sum the exponentiated utilities over modes
                 double opWTExpUtility = 0;
@@ -372,7 +371,7 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
                 }
 
                 // determine the best transit path, which also stores the best utilities array and the best mode
-                bestPathCalculator.findBestWalkTransitWalkTaps(walkDmu, TransitWalkAccessUEC.AM, iMgra, jMgra, false, logger);
+                bestPathCalculator.findBestWalkTransitWalkTaps(walkDmu, ModelStructure.AM_SKIM_PERIOD_INDEX, iMgra, jMgra, false, logger);
                 
                 // sum the exponentiated utilities over modes
                 double pkWTExpUtility = 0;

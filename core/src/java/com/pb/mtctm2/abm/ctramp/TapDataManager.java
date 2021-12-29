@@ -36,6 +36,10 @@ public final class TapDataManager
     public static final String TAP_DATA_TAZ_COLUMN_PROPERTY = "tap.data.taz.column";
     public static final String TAP_DATA_CAPACITY_COLUMN_PROPERTY = "tap.data.capacity.column";
 
+    public static final String STATION_DATA_FILE_PROPERTY = "tap.station.attribute.file";
+    
+    public static final String DEFAULT_PNR_SHARE_PROPERTY = "tap.pnr.default.share";
+
     protected transient Logger       logger = Logger.getLogger(TapDataManager.class);
     private static TapDataManager instance;
 
@@ -48,6 +52,11 @@ public final class TapDataManager
     // an array of taps
     private int[]                  taps;
     private int                   maxTap;
+    
+    private float[]               parkingCost;
+    private float[]               driveAccessWalkTime;
+    private float[]               driveAccessDriveTime;
+    private boolean[]             driveAccessAllowed;
 
     public int getMaxTap() {
 		return maxTap;
@@ -60,6 +69,7 @@ public final class TapDataManager
         readTap(rbMap);
         getTapList(rbMap);
         intializeLotUse();
+        readStationAttributes(rbMap);
         
     }
 
@@ -131,6 +141,73 @@ public final class TapDataManager
         }
         populateTap(map);
     }
+    
+    
+    
+    public void readStationAttributes(HashMap<String, String> rbMap) {
+    	
+        
+    	float defaultPnrShare = Util.getFloatValueFromPropertyMap(rbMap, DEFAULT_PNR_SHARE_PROPERTY);
+    	
+    	File tapDataFile = Paths.get(Util.getStringValueFromPropertyMap(rbMap, "scenario.path"),
+                Util.getStringValueFromPropertyMap(rbMap, STATION_DATA_FILE_PROPERTY)).toFile();    	
+        TableDataFileReader reader = TableDataFileReader.createReader(tapDataFile);
+        TableDataSet data;
+        try {
+        	data = reader.readFile(tapDataFile);
+        } catch (IOException e) {
+        	throw new RuntimeException(e);
+        } finally {
+        	reader.close();
+        }
+        
+        for(int row=1;row<=data.getRowCount();++row) {
+        
+        	int tap = (int) data.getValueAt(row, "tap");
+        	float pnrWalkTime = data.getValueAt(row, "stPNRWalkTime");	
+        	float knrWalkTime = data.getValueAt(row, "stKNRWalkTime");
+        	float pnrDriveTime = data.getValueAt(row, "stPNRDriveTime");
+        	float knrDriveTime = data.getValueAt(row, "stKNRDriveTime");
+        	String parkingType = data.getStringValueAt(row, "stParkType");
+        	float freeSpaces = data.getValueAt(row, "stFreeSpaces");
+        	float paidSpaces = data.getValueAt(row, "stPaidSpaces");
+        	float permitSpaces = data.getValueAt(row, "stPermitSpaces");
+        	float privateSpaces = data.getValueAt(row, "stPrivateSpaces");
+        	float dailyCost = data.getValueAt(row, "stDailyCost");
+        	float monthlyCost = data.getValueAt(row, "stMonthlyCost");
+        	float privateCost = data.getValueAt(row, "stPrivateCost");
+        	float pnrSplit = data.getValueAt(row, "stPNRSplit");
+        
+        	if(pnrSplit==0)
+        		pnrSplit = defaultPnrShare;
+        	
+        	//calculate weighted average times and divide by 60 to convert to minutes
+        	float walkTime = (pnrWalkTime * pnrSplit + knrWalkTime * (1-pnrSplit))/60.0f;
+        	float driveTime = (pnrDriveTime * pnrSplit + knrDriveTime * (1-pnrSplit))/60.0f;
+        	
+        	//calculated weighted average parking cost (convert from dollars to cents)
+        	float avgParkingCost = 
+        			(paidSpaces * dailyCost +
+        			permitSpaces * monthlyCost/22.0f +
+        			privateSpaces * privateCost)
+        			/ (freeSpaces + paidSpaces + permitSpaces + privateSpaces) * pnrSplit * 0.5f * 100f;
+
+        	boolean driveAvailable=true;
+        	if(parkingType.equalsIgnoreCase("W"))
+        		driveAvailable=false;
+        	
+        	parkingCost[tap] = avgParkingCost;
+        	driveAccessWalkTime[tap] = walkTime;
+            driveAccessDriveTime[tap] = driveTime;
+            driveAccessAllowed[tap] = driveAvailable;
+        
+        }
+        
+        
+        
+    }
+
+   
 
     /**
      * The function will get a TreeMap having with iTaps as keys and [][4] arrays.
@@ -180,6 +257,11 @@ public final class TapDataManager
         }
 
         lotUse = new int[(int) maxLotId + 1];
+        parkingCost = new float[(int) maxLotId + 1];
+        driveAccessWalkTime= new float[(int) maxLotId + 1];
+        driveAccessDriveTime= new float[(int) maxLotId + 1];
+        driveAccessAllowed= new boolean[(int) maxLotId + 1];
+
     }
 
     /**
@@ -229,19 +311,33 @@ public final class TapDataManager
         }
     }
 
-    public float getCarToStationWalkTime(int tap)
-    {
-        return 0.0f;
-    }
-
-    public float getEscalatorTime(int tap)
-    {
-        return 0.0f;
-    }
 
     public int[] getTaps()
     {
         return taps;
+    }
+    
+    public float getParkingCost(int tap) {
+    	
+    	return parkingCost[tap];
+    }
+    
+    public float getDriveAccessWalkTime(int tap) {
+    	
+    	return driveAccessWalkTime[tap];
+
+    }
+   
+    public float getDriveAccessDriveTime(int tap) {
+    	
+    	return driveAccessDriveTime[tap];
+
+    }
+
+    public boolean getDriveAccessAllowed(int tap) {
+    	
+    	return driveAccessAllowed[tap];
+
     }
     
     public static void main(String[] args)

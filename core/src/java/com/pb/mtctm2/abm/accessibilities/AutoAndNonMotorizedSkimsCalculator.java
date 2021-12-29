@@ -5,7 +5,7 @@ import com.pb.common.calculator.VariableTable;
 import com.pb.mtctm2.abm.ctramp.Constants;
 import com.pb.mtctm2.abm.ctramp.CtrampApplication;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
-import com.pb.mtctm2.abm.ctramp.TransitWalkAccessUEC;
+import com.pb.mtctm2.abm.ctramp.ModelStructure;
 import com.pb.mtctm2.abm.ctramp.Util;
 import com.pb.common.newmodel.UtilityExpressionCalculator;
 
@@ -27,14 +27,15 @@ import org.apache.log4j.Logger;
 public class AutoAndNonMotorizedSkimsCalculator                                                                                  
         implements Serializable                                                                                                  
 {                                                                                                                                
-                                                                                                                                 
-	private static final int              EA                            = TransitWalkAccessUEC.EA;
-    private static final int              AM                            = TransitWalkAccessUEC.AM;
-    private static final int              MD                            = TransitWalkAccessUEC.MD;
-    private static final int              PM                            = TransitWalkAccessUEC.PM;
-    private static final int              EV                            = TransitWalkAccessUEC.EV;
-    private static final String[]         PERIODS                       = TransitWalkAccessUEC.PERIODS;
-    private static final int              NUM_PERIODS                   = TransitWalkAccessUEC.PERIODS.length;
+ 
+	
+    private static final int              EA                            = ModelStructure.EA_SKIM_PERIOD_INDEX;
+    private static final int              AM                            = ModelStructure.AM_SKIM_PERIOD_INDEX;
+    private static final int              MD                            = ModelStructure.MD_SKIM_PERIOD_INDEX;
+    private static final int              PM                            = ModelStructure.PM_SKIM_PERIOD_INDEX;
+    private static final int              EV                            = ModelStructure.EV_SKIM_PERIOD_INDEX;
+    private static final int              NUM_PERIODS                   = ModelStructure.SKIM_PERIOD_STRINGS.length;
+    private static final String[]         PERIODS                       = ModelStructure.SKIM_PERIOD_STRINGS;
                                                                                                                                  
     // set the indices used for the non-motorized names array and the return skims                                               
     // array                                                                                                                     
