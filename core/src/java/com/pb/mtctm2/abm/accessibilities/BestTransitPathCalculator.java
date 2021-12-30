@@ -351,10 +351,12 @@ public class BestTransitPathCalculator implements Serializable
         ArrayList<TransitPath> paths = new ArrayList<TransitPath>();
 
         int[] pTapArray = tazManager.getParkRideOrKissRideTapsForZone(pTaz, accMode);
+        int connections=0;
         for ( int pTap : pTapArray )
         {
         	if (tapManager.getDriveAccessAllowed(pTap))
             {
+        		++connections;
         		// Calculate the pTaz to pTap drive access utility values
         		float accUtil;
         		float accDisutil;
@@ -409,6 +411,10 @@ public class BestTransitPathCalculator implements Serializable
                 }
             }
             
+        	//no drive accessible taps
+        	if(connections==0)
+        		return;
+        	
             //save N best paths
             trimPaths(paths);
             if (writeCalculations) {
@@ -441,7 +447,7 @@ public class BestTransitPathCalculator implements Serializable
 
         //create transit path collection
         ArrayList<TransitPath> paths = new ArrayList<TransitPath>();
-        
+        int connections=0;
         for (int pTap : mgraManager.getMgraWlkTapsDistArray()[pMgra][0])
         {
             // Calculate the pMgra to pTap walk access utility values
@@ -460,7 +466,7 @@ public class BestTransitPathCalculator implements Serializable
 
                 if (tapManager.getDriveAccessAllowed(aTap))
                 {
-
+                	++connections;
                 	// Calculate the aTap to aMgra drive egress utility values
                     float egrUtil;
                     float egrDisutil;
@@ -502,6 +508,9 @@ public class BestTransitPathCalculator implements Serializable
    
                 }
             }
+            
+            if(connections==0)
+            	return;
             
             //save N best paths
             trimPaths(paths);
