@@ -89,7 +89,7 @@ extra_link_attributes = ['SPEED', 'FEET',
     'WALK_ACCESS', 'BIKE_ACCESS', 'DRIVE_ACCES', 'BUS_ONLY', 'RAIL_ONLY',
     'OLD_A', 'OLD_B', 'CTIM', 'NTL_MODE']
 extra_transit_line_attributes = ['HEADWAY[1]','HEADWAY[2]','HEADWAY[3]','HEADWAY[4]',
-    'HEADWAY[5]', 'MODE', 'FARESYSTEM', 'uses_NNTIME']
+    'HEADWAY[5]', 'MODE', 'FARESYSTEM', 'uses_NNTIME', 'scaled_headway']
 # name is from the raodway attribute names file
 extra_link_network_fields = ['COUNTY', 'CNTYPE', 'modes', 'name']
 
@@ -1072,15 +1072,26 @@ class emme_network_conversion:
             validate='many_to_one'
         )
 
+        def scale_headway(headway):
+            # scales headways such that really large headways are not as high
+            scaled_headway = headway
+            if headway > 10:
+                scaled_headway = headway * (0.275 + 0.788 * np.exp(-0.011*headway))
+            return scaled_headway
+
+        transit_line_df['scaled_headway'] = transit_line_df[headway_var].astype(float).fillna(0).apply(
+            lambda headway: scale_headway(headway))
+
         transit_line_df['transaction'] = 'a'
         transit_line_df['line_name'] = transit_line_df['NAME']
         transit_line_df['vehicle'] = transit_line_df['emme_vehicle_num']
-        transit_line_df['headway'] = transit_line_df[headway_var].astype(float).fillna(0)
+        transit_line_df['headway'] = transit_line_df['scaled_headway']
         transit_line_df['speed'] = 15  # most common XYSPEED in old network used to set default speed
         transit_line_df['descr'] = transit_line_df['LONGNAME'].apply(lambda x: "'" + x + "'")
         transit_line_df['ut1'] = 0
         transit_line_df['ut2'] = 0
         transit_line_df['ut3'] = 0
+
 
         assert all(transit_line_df['vehicle'].notna()), 'Vehicle type missing for: \n{}'.format(
             transit_line_df[transit_line_df['vehicle'].isna()])

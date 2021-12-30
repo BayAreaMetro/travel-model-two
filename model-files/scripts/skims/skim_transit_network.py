@@ -935,7 +935,8 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
                 "result": 'mf"%s_XFERS"' % skim_name,
                 "expression": '(%s_XFERS - 1).max.0' % skim_name,
             },
-            {   # transfer walk time = total - access - egress
+            {   # transfer walk time = total - access - egress,
+                # no longer correct if station attributes are included!  access / egress time at station != 0.66
                 "type": "MATRIX_CALCULATION",
                 "constraint": None,
                 "result": 'mf"%s_XFERWALK"' % skim_name,

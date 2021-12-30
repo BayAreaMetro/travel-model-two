@@ -42,7 +42,8 @@ from inro.emme.desktop.exception import TcpConnectFailureError
 
 import argparse as _argparse
 import shutil as _shutil
-import pandas as pd
+import pandas as _pd
+import numpy as _np
 import math as _math
 from collections import defaultdict as _defaultdict
 
@@ -79,7 +80,7 @@ period_to_scenario_dict = {
     'EV': 5000,
 }
 # max distance in feet to override walk transfer links with station bus walk time
-max_station_walk_distance = 250
+max_station_walk_distance = 500
 
 WKT_PROJECTION = 'PROJCS["NAD_1983_StatePlane_California_VI_FIPS_0406_Feet",GEOGCS["GCS_North_American_1983",DATUM["North_American_Datum_1983",SPHEROID["GRS_1980",6378137,298.257222101]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["False_Easting",6561666.666666666],PARAMETER["False_Northing",1640416.666666667],PARAMETER["Central_Meridian",-116.25],PARAMETER["Standard_Parallel_1",32.78333333333333],PARAMETER["Standard_Parallel_2",33.88333333333333],PARAMETER["Latitude_Of_Origin",32.16666666666666],UNIT["Foot_US",0.30480060960121924],AUTHORITY["EPSG","102646"]]'
 
@@ -476,9 +477,9 @@ def replace_route_for_lines_with_nntime_and_created_segments(network, input_dir)
         - None (the network object is updated)
     """
     stop_attributes_path = _join(input_dir, 'all_stop_attributes.csv')
-    stop_attributes_df = pd.read_csv(stop_attributes_path)
+    stop_attributes_df = _pd.read_csv(stop_attributes_path)
     transit_line_path = _join(input_dir, 'lines_that_need_links_created.csv')
-    transit_line_df = pd.read_csv(transit_line_path)
+    transit_line_df = _pd.read_csv(transit_line_path)
 
     with _m.logbook_trace("Creating links for specified transit lines"):
         for idx, line in transit_line_df.iterrows():
@@ -493,7 +494,7 @@ def replace_route_for_lines_with_nntime_and_created_segments(network, input_dir)
             line_mode = transit_vehicle.mode
 
             for idx, stop in stops_for_line.iterrows():
-                if pd.isna(stop['next_node_id']):
+                if _pd.isna(stop['next_node_id']):
                     # no more stops
                     break
                 link = network.link(stop['node_id'], stop['next_node_id'])
@@ -584,7 +585,7 @@ def distribute_nntime(network, input_dir):
         - None (network object is updated)
     """
     stop_attributes_path = _join(input_dir, 'all_stop_attributes.csv')
-    stop_attributes_df = pd.read_csv(stop_attributes_path)
+    stop_attributes_df = _pd.read_csv(stop_attributes_path)
 
     print "Setting transit station-to-station times (NNTIME in Cube)"
 
@@ -694,7 +695,12 @@ def split_tap_connectors_to_prevent_walk(network):
                 transit_access_link = network.link(real_stop, tap_stop)
                 for link in transit_access_link, transit_access_link.reverse_link:
                     link.modes = all_transit_modes
+                    # set attributes such this link has no transit time or length associated to it
                     link.length = 0
+                    link.data1 = 0
+                    link.data2 = 0
+                    link.data3 = 0
+                    link['@trantime'] = 0
                     # for p in ["ea", "am", "md", "pm", "ev"]:
                     #     link["@time_link_" + p] = 0
                 egress_link = network.link(tap_stop, centroid)
@@ -802,11 +808,23 @@ def init_node_id(network):
     return new_node_id
 
 
-def update_link_trantime(network):
+def update_transit_times(network):
+    """
+    Choosing whether to use the nntime for the segment transit time or use the
+    congested travel time on the link.  Segments on the split tap connectors have
+    length zero and have no transit time.
+
+    Parameters:
+        - network: Emme network object
+    Returns:
+        - None (network object is updated)
+    """
     # if nntime exists, use that for ivtt, else use the link trantime
     for line in network.transit_lines():
         for segment in line.segments(include_hidden=False):
-            if segment['@nn_trantime'] > 0:
+            if segment.link.length == 0:  # exclude routing on slit tap connectors
+                segment['@trantime_final'] = 0
+            elif segment['@nn_trantime'] > 0:
                 segment['@trantime_final'] = segment['@nn_trantime']
             else:
                 segment['@trantime_final'] = segment['@link_trantime']
@@ -859,9 +877,10 @@ def apply_station_attributes(input_dir, network):
     Rail lines with stops at stations have the station platform time set as a
     node attribute.
 
-     Walk transfers are routed onto separate "pseudo taps" created in BuildTransitNetworks.job,
-     and not through the actual taps.  Thus, station attributes that set walk times need to be
-     set on the "pseudo tap" connectors instead of the regular tap connectors.  Walk times for these
+     Walk transfers are routed onto separate transfer nodes (aka "pseudo taps") created
+     in BuildTransitNetworks.job, and not through the actual taps.
+     Thus, station attributes that set walk times need to be set on the transfer node
+     connectors instead of the regular tap connectors.  Walk times for these
      connectors are overwritten with the appropriate station walk times.
 
     Parameters:
@@ -871,9 +890,9 @@ def apply_station_attributes(input_dir, network):
         - None (network object is updated)
     """
     # reading input data
-    station_tap_attributes = pd.read_csv(_join(input_dir, station_tap_attributes_file))
-    emme_node_id_xwalk = pd.read_csv(_join(input_dir, emme_node_id_xwalk_file))
-    tap_to_pseudo_tap_xwalk = pd.read_csv(tap_to_pseudo_tap_xwalk_file, names=['tap', 'pseudo_tap'])
+    station_tap_attributes = _pd.read_csv(_join(input_dir, station_tap_attributes_file))
+    emme_node_id_xwalk = _pd.read_csv(_join(input_dir, emme_node_id_xwalk_file))
+    tap_to_pseudo_tap_xwalk = _pd.read_csv(tap_to_pseudo_tap_xwalk_file, names=['tap', 'pseudo_tap'])
 
     # buiding crosswalk between emme taps to their pseduo walk taps
     tap_and_pseudo_tap_nodes = (
@@ -886,34 +905,137 @@ def apply_station_attributes(input_dir, network):
     tap_to_pseudo_tap_xwalk['emme_tap'] = tap_to_pseudo_tap_xwalk['tap'].map(emme_node_id_map)
     tap_to_pseudo_tap_xwalk['emme_pseudo_tap'] = tap_to_pseudo_tap_xwalk['pseudo_tap'].map(emme_node_id_map)
 
-    # creating station attributes for station platform time skim variables
-    # create_extra = _m.Modeller().tool(
-    #     "inro.emme.data.extra_attribute.create_extra_attribute")
-    # create_extra("NODE", "@stnplatformtime")
-    # create_extra("LINK", "@stnplatformtimewalk")
 
     # only need to loop over taps matched to stations
     station_taps = station_tap_attributes['tap'].unique()
     stop_nodes_with_platform_time = []
     bus_transfer_walk_links_overridden = []
     tap_connectors_with_platform_time = []
+    # getting node attributes for created transfer nodes
+    node_attributes = network.attributes("NODE")
+    node_attributes.remove("x")
+    node_attributes.remove("y")
+    print("Node attributes: ", node_attributes)
+    link_attributes = network.attributes("LINK")
+    print("Link attributes: ", link_attributes)
+    new_node_id = init_node_id(network)
 
     for tap_id in station_taps:
         # modifying station platform times for lines departing from tap
         tap = network.node(tap_id)
+        tap_modes_serviced = []
         for link in tap.outgoing_links():
             jnode = link.j_node
             modes_serviced = list(set([str(segment.line['#src_mode']) for segment in jnode.outgoing_segments()]))
+            tap_modes_serviced += modes_serviced
             # setting tap station platform time on tap connector nodes for stops servicing rail
-            if any(x in modes_serviced for x in ['c', 'l', 'h']):
+            if any(x in modes_serviced for x in ['r', 'l', 'h', 'f']) & (link['@feet'] < max_station_walk_distance):
                 # print "tap: %s, boarding_node: %s, stplatformtime: %s," % (tap, jnode, tap['@stplatformtime'])
                 # jnode['@stnplatformtime'] = tap['@stplatformtime']
-                link['@trantime'] = tap['@stplatformtime']
-                link.data2 = tap['@stplatformtime']  # ul2
+                link['@trantime'] = tap['@stplatformtime'] / 60 # convert to mins
+                link.data2 = tap['@stplatformtime'] / 60  # ul2, set for time seen in transnsit assignment
                 incoming_link = link.reverse_link
-                incoming_link['@trantime'] = tap['@stplatformtime']
-                incoming_link.data2 = tap['@stplatformtime'] # ul2
+                incoming_link['@trantime'] = tap['@stplatformtime'] / 60
+                incoming_link.data2 = tap['@stplatformtime'] / 60 # ul2
                 tap_connectors_with_platform_time.append(jnode.id)
+
+
+        # want to add transfer penalty between different rail modes and bus to rail
+        transfer_node_id = tap_to_pseudo_tap_xwalk.loc[tap_to_pseudo_tap_xwalk['emme_tap'] == tap_id, 'emme_pseudo_tap']
+        transfer_node = network.node(transfer_node_id)
+        new_tnode_mode_dict = {}
+
+        # treaing buses and express busses the same for transfers
+        tap_modes_serviced = ['b' if mode == 'x' else mode for mode in tap_modes_serviced]
+        tap_modes_serviced = list(set(tap_modes_serviced)) # unique entries
+        # only need to split transfer node if tap serves more than one mode and has a station platform time
+        if (len(tap_modes_serviced) > 1) & (tap['@stplatformtime'] > 0):
+            print 'Splitting transfer nodes for tap',  tap_id, 'with modes', tap_modes_serviced
+            for mode_count, mode in enumerate(tap_modes_serviced):
+                # duplicate transfer node with an offset
+                new_node_id += 1
+                new_tnode = network.create_node(new_node_id, is_centroid=False)
+                new_tnode_mode_dict[mode] = new_node_id  # store node to mode xwalk for intra-tap transfers
+                for attr in node_attributes:
+                    new_tnode[attr] = transfer_node[attr]
+
+                def get_new_node_coordinates(point_num, old_x, old_y, radius, total_points):
+                    # distribute points evenly around a sphere
+                    angle_between_points = 2 * _math.pi / total_points
+                    angle_for_point = point_num * angle_between_points
+                    point_x = old_x + (radius * _math.cos(angle_for_point))
+                    point_y = old_y + (radius * _math.sin(angle_for_point))
+                    return list([point_x, point_y])
+
+                new_coords = get_new_node_coordinates(
+                    mode_count, transfer_node.x, transfer_node.y, 7, len(tap_modes_serviced))
+                new_tnode.x = new_coords[0]
+                new_tnode.y = new_coords[1]
+                print 'Created node ', new_node_id, 'at x = ', new_coords[0], 'and y = ', new_coords[1]
+
+                # re-create all relevant outgoing transfer links
+                for transfer_link in transfer_node.outgoing_links():
+                    # see if this transfer link connects to a node that services transit lines
+                    modes_at_stop = [str(segment.line['#src_mode']) for segment in transfer_link.j_node.outgoing_segments()]
+                    modes_at_stop = list(set(['b' if stop_mode == 'x' else stop_mode for stop_mode in modes_at_stop]))
+                    print 'mode: ', mode, ' modes_at_stop: ', modes_at_stop
+                    if (transfer_link.j_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype('string').values):
+                        print 'connects to transfer node'
+                    if (mode in modes_at_stop) | (transfer_link.j_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype('string').values):
+                        # create new link if this tranfer node services the mode or connects to another transfer node
+                        new_transfer_link = network.create_link(new_tnode.id, transfer_link.j_node, transfer_link.modes)
+                        for attr in link_attributes:
+                            new_transfer_link[attr] = transfer_link[attr]
+                        print 'created link'
+
+                # re-create all relevant incoming transfer links
+                for transfer_link in transfer_node.incoming_links():
+                    # see if this transfer link connects to a node that services transit lines
+                    modes_at_stop = [str(segment.line['#src_mode']) for segment in transfer_link.i_node.outgoing_segments()]
+                    modes_at_stop = list(set(['b' if stop_mode == 'x' else stop_mode for stop_mode in modes_at_stop]))
+                    print 'mode: ', mode, ' modes_at_stop: ', modes_at_stop
+                    if (transfer_link.i_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype('string').values):
+                        print 'connects to transfer node'
+                    if (mode in modes_at_stop) | (transfer_link.i_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype('string').values):
+                        # create new link if this tranfer node services the mode or connects to another transfer node
+                        new_transfer_link = network.create_link(transfer_link.i_node, new_tnode.id, transfer_link.modes)
+                        for attr in link_attributes:
+                            new_transfer_link[attr] = transfer_link[attr]
+                        print 'created link'
+
+            # all old transfer links are replaced and need to be deleted
+            for transfer_link in transfer_node.outgoing_links():
+                network.delete_link(transfer_link.i_node, transfer_link.j_node)
+            for transfer_link in transfer_node.incoming_links():
+                network.delete_link(transfer_link.i_node, transfer_link.j_node)
+            network.delete_node(transfer_node_id)
+
+        # need to connect newly created transfer nodes to eachother
+        for mode, tnode_id in new_tnode_mode_dict.iteritems():
+            for next_mode, next_tnode_id in new_tnode_mode_dict.iteritems():
+                if tnode_id == next_tnode_id:
+                    # don't need to connect transfer node to itself
+                    continue
+                new_link = network.create_link(tnode_id, next_tnode_id, set(['w']));
+                new_link.length = 0
+                new_link['@walkdist'] = 0
+                new_link['#cntype'] = 'TRWALK'
+                new_link['#modes'] = 'w'
+                new_link.volume_delay_func = 1
+                if ((mode == 'b') & (next_mode in ['r', 'l', 'h', 'f'])  # excluding 'x' since it was already transformed to 'b'
+                   | (next_mode == 'b') & (mode in ['r', 'l', 'h', 'f'])):
+                    # use station platform time and bus time for transfers between rail service and bus service
+                    new_link.data2 = (tap['@stplatformtime'] + tap['@stbuswalktime']) / 60
+                    new_link['@trantime'] = (tap['@stplatformtime'] + tap['@stbuswalktime']) / 60
+                    new_link['@walktime'] = (tap['@stplatformtime'] + tap['@stbuswalktime']) / 60
+                elif (mode in ['r', 'l', 'h', 'f']) & (next_mode in ['r', 'l', 'h', 'f']):
+                    # use station platform time for transfer between rail modes
+                    new_link.data2 = tap['@stplatformtime'] / 60
+                    new_link['@trantime'] = tap['@stplatformtime'] / 60
+                    new_link['@walktime'] = tap['@stplatformtime'] / 60
+                else:
+                    print 'mode', mode, 'and new_mode', next_mode, "combination doesn't make sense for tap", tap_id
+
 
         # walk transfer links are separated onto separate pseudo taps created in BuildTransitNetworks.job
         # pseudo_tap_id = tap_to_pseudo_tap_xwalk.loc[tap_to_pseudo_tap_xwalk['emme_tap'] == tap_id, 'emme_pseudo_tap']
@@ -979,10 +1101,10 @@ def create_time_period_scenario(modeller, scenario_id, root, period):
     scenario = emmebank.scenario(scenario_id)
     network = scenario.get_network()
 
-    # replace_route_for_lines_with_nntime_and_created_segments(network, input_dir)
-    # fill_transit_times_for_created_segments(network)
+    # # replace_route_for_lines_with_nntime_and_created_segments(network, input_dir)
+    # # fill_transit_times_for_created_segments(network)
     distribute_nntime(network, input_dir)
-    update_link_trantime(network)
+    update_transit_times(network)
     # calc_link_unreliability(network, period)
     # walktime set in BuildTransitNetworks.job.  999 for non-TRWALK links.
     # fix here is no longer needed
@@ -1005,7 +1127,6 @@ def create_time_period_scenario(modeller, scenario_id, root, period):
     apply_station_attributes(input_dir, network)
     scenario.publish_network(network)
     emmebank.dispose()
-
 
 
 def update_congested_link_times(modeller, scenario_id, root, period):
@@ -1033,7 +1154,7 @@ def update_congested_link_times(modeller, scenario_id, root, period):
     scenario = emmebank.scenario(scenario_id)
     network = scenario.get_network()
     distribute_nntime(network, input_dir)
-    update_link_trantime(network)
+    update_transit_times(network)
     scenario.publish_network(network)
     emmebank.dispose()
 
