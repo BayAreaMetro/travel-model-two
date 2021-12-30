@@ -186,7 +186,9 @@ public final class TapDataManager
         	float driveTime = (pnrDriveTime * pnrSplit + knrDriveTime * (1-pnrSplit))/60.0f;
         	
         	//calculated weighted average parking cost (convert from dollars to cents)
-        	float avgParkingCost = 
+        	float avgParkingCost=0.0f;
+        	if((freeSpaces + paidSpaces + permitSpaces + privateSpaces)>0)
+        	     avgParkingCost = 
         			(paidSpaces * dailyCost +
         			permitSpaces * monthlyCost/22.0f +
         			privateSpaces * privateCost)
