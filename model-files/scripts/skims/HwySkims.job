@@ -354,7 +354,7 @@ loop period = 1, 5
             if (lw.tollclass >= firstValue && li.TOLL@token_period@_@token_class@ > 0) addtogroup = 11
 
             ;Reliability (variance)
-            lw.RELBTY_VAR = li.RELBTY_VAR
+            lw.RELBTY_VAR = li.RELBTY_SD ^ 2
 
          endphase
 
@@ -381,7 +381,7 @@ loop period = 1, 5
                mw[14] = pathtrace(lw.RELBTY_VAR)
 
             ; compute time/distance intra-zonal values as 1/2 the nearest neighbor, tolls as zero
-            ; reliability as zero ?
+            ; reliability as zero
             mw[1][i]  = rowmin(1)  * 0.5
             mw[2][i]  = rowmin(2)  * 0.5
             mw[3][i]  = 0.0
@@ -442,18 +442,15 @@ loop period = 1, 5
                                                                 RLBTYS3,RLBTYTOLLS3,
 
       ; commercial vehicle skims
-      mato[2] = skims\COM_HWYSKIM@token_period@_taz.tpp, mo = 43-78, name = TIMEVSM, DISTVSM, BTOLLVSM,
+      mato[2] = skims\COM_HWYSKIM@token_period@_taz.tpp, mo = 43-70, name = TIMEVSM, DISTVSM, BTOLLVSM,
                                                                               TOLLTIMEVSM, TOLLDISTVSM, TOLLBTOLLVSM, TOLLVTOLLVSM,
-                                                                              RLBTYVSM, RLBTYTOLLVSM,
                                                                               TIMESML, DISTSML, BTOLLSML,
                                                                               TOLLTIMESML, TOLLDISTSML, TOLLBTOLLSML, TOLLVTOLLSML,
-                                                                              RLBTYSML, RLBTYTOLLSML,
                                                                               TIMEMED, DISTMED, BTOLLMED,
                                                                               TOLLTIMEMED, TOLLDISTMED, TOLLBTOLLMED, TOLLVTOLLMED,
-                                                                              RLBTYMED, RLBTYTOLLMED,
                                                                               TIMELRG, DISTLRG, BTOLLLRG,
-                                                                              TOLLTIMELRG, TOLLDISTLRG, TOLLBTOLLLRG, TOLLVTOLLLRG,
-                                                                              RLBTYLRG, RLBTYTOLLLRG
+                                                                              TOLLTIMELRG, TOLLDISTLRG, TOLLBTOLLLRG, TOLLVTOLLLRG
+
 
       ; drive alone
       mw[1]   = mi.1.TIMEDA
@@ -468,9 +465,10 @@ loop period = 1, 5
       mw[10]   = mi.1.TOLLFFTDA
       mw[11]   = mi.1.TOLLHOVDISTDA
       mw[12]   = mi.1.TOLLTOLLDISTDA
-      mw[13]   = mi.1.RELBTY_VARDA
-      mw[14]   = mi.1.TOLLRELBTY_VARDA
+      mw[13]   = sqrt(mi.1.RELBTY_VARDA)
+      mw[14]   = sqrt(mi.1.TOLLRELBTY_VARDA)
 
+      ; final reliability skim result is the square root of skimmed reliability (variance)
       ; if there's no DA from any TAZ to TAZ, this will cause problems in the long run
       if (ROWMAX(2) == 1000000) ABORT msg="FATAL: TAZ-pairs exist with no DA path"
 
@@ -487,8 +485,8 @@ loop period = 1, 5
       mw[24]  = mi.2.TOLLFFTS2
       mw[25]  = mi.2.TOLLHOVDISTS2
       mw[26]  = mi.2.TOLLTOLLDISTS2
-      mw[27]  = mi.2.RELBTY_VARS2
-      mw[28]  = mi.2.TOLLRELBTY_VARS2
+      mw[27]  = sqrt(mi.2.RELBTY_VARS2)
+      mw[28]  = sqrt(mi.2.TOLLRELBTY_VARS2)
 
       ; shared ride 3+
       mw[29]  = mi.3.TIMES3
@@ -503,8 +501,8 @@ loop period = 1, 5
       mw[38]  = mi.3.TOLLFFTS3
       mw[39]  = mi.3.TOLLHOVDISTS3
       mw[40]  = mi.3.TOLLTOLLDISTS3
-      mw[41]  = mi.3.RELBTY_VARS3
-      mw[42]  = mi.3.TOLLRELBTY_VARS3
+      mw[41]  = sqrt(mi.3.RELBTY_VARS3)
+      mw[42]  = sqrt(mi.3.TOLLRELBTY_VARS3)
 
       ; very small trucks
       mw[43]  = mi.4.TIMEVSM
@@ -514,41 +512,33 @@ loop period = 1, 5
       mw[47]  = mi.4.TOLLDISTVSM
       mw[48]  = mi.4.TOLLBTOLLVSM
       mw[49]  = mi.4.TOLLVTOLLVSM
-      mw[50]  = mi.4.RELBTY_VARVSM
-      mw[51]  = mi.4.TOLLRELBTY_VARVSM
 
       ; small trucks
-      mw[52]  = mi.5.TIMESML
-      mw[53]  = mi.5.DISTSML
-      mw[54]  = mi.5.BTOLLSML
-      mw[55]  = mi.5.TOLLTIMESML
-      mw[56]  = mi.5.TOLLDISTSML
-      mw[57]  = mi.5.TOLLBTOLLSML
-      mw[58]  = mi.5.TOLLVTOLLSML
-      mw[59]  = mi.5.RELBTY_VARSML
-      mw[60]  = mi.5.TOLLRELBTY_VARSML
+      mw[50]  = mi.5.TIMESML
+      mw[51]  = mi.5.DISTSML
+      mw[52]  = mi.5.BTOLLSML
+      mw[53]  = mi.5.TOLLTIMESML
+      mw[54]  = mi.5.TOLLDISTSML
+      mw[55]  = mi.5.TOLLBTOLLSML
+      mw[56]  = mi.5.TOLLVTOLLSML
 
       ; medium trucks
-      mw[61]  = mi.6.TIMEMED
-      mw[62]  = mi.6.DISTMED
-      mw[63]  = mi.6.BTOLLMED
-      mw[64]  = mi.6.TOLLTIMEMED
-      mw[65]  = mi.6.TOLLDISTMED
-      mw[66]  = mi.6.TOLLBTOLLMED
-      mw[67]  = mi.6.TOLLVTOLLMED
-      mw[68]  = mi.6.RELBTY_VARMED
-      mw[69]  = mi.6.TOLLRELBTY_VARMED
+      mw[57]  = mi.6.TIMEMED
+      mw[58]  = mi.6.DISTMED
+      mw[59]  = mi.6.BTOLLMED
+      mw[60]  = mi.6.TOLLTIMEMED
+      mw[61]  = mi.6.TOLLDISTMED
+      mw[62]  = mi.6.TOLLBTOLLMED
+      mw[63]  = mi.6.TOLLVTOLLMED
 
       ; large trucks
-      mw[70]  = mi.7.TIMELRG
-      mw[71]  = mi.7.DISTLRG
-      mw[72]  = mi.7.BTOLLLRG
-      mw[73]  = mi.7.TOLLTIMELRG
-      mw[74]  = mi.7.TOLLDISTLRG
-      mw[75]  = mi.7.TOLLBTOLLLRG
-      mw[76]  = mi.7.TOLLVTOLLLRG
-      mw[77]  = mi.7.RELBTY_VARLRG
-      mw[78]  = mi.7.TOLLRELBTY_VARLRG
+      mw[64]  = mi.7.TIMELRG
+      mw[65]  = mi.7.DISTLRG
+      mw[66]  = mi.7.BTOLLLRG
+      mw[67]  = mi.7.TOLLTIMELRG
+      mw[68]  = mi.7.TOLLDISTLRG
+      mw[69]  = mi.7.TOLLBTOLLLRG
+      mw[70]  = mi.7.TOLLVTOLLLRG
 
 
    endrun

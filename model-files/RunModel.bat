@@ -53,11 +53,11 @@ SET /A MAX_INNER_ITERATION=1
 
 ::  Set choice model household sample rate
 REM SET SAMPLERATE_ITERATION1=0.005
-SET SAMPLERATE_ITERATION1=0.3
-SET SAMPLERATE_ITERATION2=0.5
-SET SAMPLERATE_ITERATION3=1
-SET SAMPLERATE_ITERATION4=0.01
-SET SAMPLERATE_ITERATION5=0.02
+SET SAMPLERATE_ITERATION1=0.2
+SET SAMPLERATE_ITERATION2=0.3
+SET SAMPLERATE_ITERATION3=0.5
+SET SAMPLERATE_ITERATION4=0.2
+SET SAMPLERATE_ITERATION5=0.005
 
 :: Set the model run year
 SET MODEL_YEAR=2015
@@ -73,7 +73,7 @@ CALL conda activate mtc_py2
 
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
-SET /A ITERATION=1
+SET /A ITERATION=4
 SET /A INNER_ITERATION=1
 IF %ITERATION% EQU 1 SET SAMPLERATE=%SAMPLERATE_ITERATION1%
 IF %ITERATION% EQU 2 SET SAMPLERATE=%SAMPLERATE_ITERATION2%
@@ -81,9 +81,7 @@ IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
 IF %ITERATION% EQU 4 SET SAMPLERATE=%SAMPLERATE_ITERATION4%
 IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
 REM call zoneSystem.bat
-REM goto iteration_start
-REM goto createemmenetwork
-REM goto afterrobocopy
+REM goto core
 :: ------------------------------------------------------------------------------------------------------
 
 
@@ -252,19 +250,7 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\preprocess\SetCapClass.job
 if ERRORLEVEL 2 goto done
 
-:: Export network for interchange distances
-runtpp %BASE_SCRIPTS%\preprocess\freeway_interchanges.job
-if ERRORLEVEL 2 goto done
-
-:: Process up/downstream interchange distances and convert to DBF
-python %BASE_SCRIPTS%\preprocess\interchange_distance.py hwy\fwy_links.csv hwy\fwy_interchange_dist.csv
-if ERRORLEVEL 2 goto done
-
-python %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\fwy_interchange_dist.csv hwy\fwy_interchange_dist.dbf
-if ERRORLEVEL 2 goto done
-
-:: merge into network
-runtpp %BASE_SCRIPTS%\preprocess\SetDistances.job
+runtpp %BASE_SCRIPTS%\preprocess\setInterchangeDistance.job
 if ERRORLEVEL 2 goto done
 
 :createfivehwynets
@@ -337,15 +323,16 @@ CALL conda activate mtc
 python %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
 
-%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "emme_full_run" --first_iteration "yes"
+%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "mtc_emme" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
 
+REM %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "yes"
 %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "yes" --skip_import_demand
 IF ERRORLEVEL 1 goto done
 
 CALL conda deactivate
 CALL conda activate mtc_py2
-REM goto done
+
 :afteremmeskims
 
 REM runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
@@ -448,6 +435,7 @@ ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.omx /NDL /NFL
 
 :afterrobocopy
 runtpp CTRAMP\scripts\assign\merge_auto_matrices.s
+REM runtpp CTRAMP\scripts\assign\merge_demand_matrices.s
 if ERRORLEVEL 2 goto done
 
 :: ------------------------------------------------------------------------------------------------------
@@ -508,16 +496,13 @@ if ERRORLEVEL 2 goto done
 runtpp CTRAMP\scripts\assign\CalculateAverageSpeed.job
 if ERRORLEVEL 2 goto done
 
-
 runtpp CTRAMP\scripts\assign\MergeNetworks.job
 if ERRORLEVEL 2 goto done
 
 :: If another iteration is to be run, run hwy skims
 IF %ITERATION% LSS %MAX_ITERATION% (
-
   runtpp %BASE_SCRIPTS%\skims\HwySkims.job
   if ERRORLEVEL 2 goto done
-
 )
 
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
@@ -533,6 +518,8 @@ CALL conda activate mtc
 :: Emme project already created, just updating congested link times
 python %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "no"
 IF ERRORLEVEL 1 goto done
+
+:emmeseconditerationnetwork
 %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --first_iteration "no"
 IF ERRORLEVEL 1 goto done
 :: changing back to python 2 environment
@@ -541,7 +528,7 @@ CALL conda activate mtc_py2
 :afteremmeupdate
 
 :: Create the block file that controls whether the crowding functions are called during transit assignment.
-python %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
+REM python %BASE_SCRIPTS%\assign\transit_assign_set_type.py CTRAMP\runtime\mtctm2.properties CTRAMP\scripts\block\transit_assign_type.block
 
 ::Inner iterations with transit assignment and path recalculator
 SET /A INNER_ITERATION=0
@@ -572,18 +559,18 @@ SET /A INNER_ITERATION+=1
   REM if ERRORLEVEL 2 goto done
 
   :: Start Matrix Server remotely or locally
-  IF %RUNTYPE%==LOCAL (
-      rem =========== local ========================
-      call CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%JAVA_PATH%"
-      echo Started matrix manager
-  ) ELSE (
-      rem =========== remote ========================
-      rem (wait 10 seconds between each call because otherwise psXXX sometimes bashes on its own authentication/permissions)
-      CTRAMP\runtime\config\pskill %MATRIX_SERVER% u %UN% -p %PWD% java
-      ping -n 10 localhost
-      CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d "%MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd" "%MATRIX_SERVER_JAVA_PATH%"
-      ping -n 10 localhost
-  )
+  REM IF %RUNTYPE%==LOCAL (
+  REM     rem =========== local ========================
+  REM     call CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%JAVA_PATH%"
+  REM     echo Started matrix manager
+  REM ) ELSE (
+  REM     rem =========== remote ========================
+  REM     rem (wait 10 seconds between each call because otherwise psXXX sometimes bashes on its own authentication/permissions)
+  REM     CTRAMP\runtime\config\pskill %MATRIX_SERVER% u %UN% -p %PWD% java
+  REM     ping -n 10 localhost
+  REM     CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d "%MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd" "%MATRIX_SERVER_JAVA_PATH%"
+  REM     ping -n 10 localhost
+  REM )
 
    :: Run Transit Best Path Recalculation (uncomment for transit capacity restraint)
    :: copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
@@ -616,7 +603,8 @@ del *.prj
 del *.var
 
 :: Generate visualizer
-REM CTRAMP\scripts\visualizer\generateDashboard.bat %ITERATION%
+:visualizer
+CTRAMP\scripts\visualizer\generateDashboard.bat %ITERATION%
 
 :: ------------------------------------------------------------------------------------------------------
 ::

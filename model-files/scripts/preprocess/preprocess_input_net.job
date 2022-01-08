@@ -7,9 +7,12 @@
 ;
 ; -----------------------------------
 
+; convert nodes CSV to DBF
+*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\interchange_nodes.csv hwy\interchange_nodes.dbf
 
 RUN PGM=NETWORK
-    LINKI[1] = "hwy\complete_network.net"
+    NETI[1] = "hwy\complete_network.net"
+    NODEI[2] = hwy\interchange_nodes.dbf ; the list of freeway links with distances (copied from input/hwy/nodes.csv)
     NETO = "hwy\mtc_final_network_base.net"
 
     PHASE=LINKMERGE
@@ -24,5 +27,15 @@ RUN PGM=NETWORK
 
         IF (li.1.FT = 0) FT = 8
 
+    ENDPHASE
+
+    MERGE RECORD=T
+
+    PHASE=NODEMERGE
+         IF (NI.2.INTX > 0)
+           MAJINTX = 1
+         ELSE
+           MAJINTX = 0
+         ENDIF
     ENDPHASE
 ENDRUN

@@ -834,61 +834,6 @@ loop period = 1,5
         IF(LI.1.DRIVE_ACCESS <> 1) V9T_1= 0
         IF(LI.1.DRIVE_ACCESS <> 1) V10T_1= 0
 
-/*
-        ; V/C based reliability coefficient
-        VC_REL_FAC = 0
-
-        IF(VC_1 >= 0.7 & (FT = 1 | FT = 2) ) ;LOS C Freeway
-          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.7) + 0.01 ) * 0.24290 )
-        ENDIF
-
-        IF(VC_1 >= 0.7 & (FT = 4 | FT = 5) ) ;LOS C Arterial
-          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.7) + 0.01 ) * 0.1561  )
-        ENDIF
-
-        IF(VC_1 >= 0.8 & (FT = 1 | FT = 2) ) ;LOS D Freeway
-          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.8) + 0.01 ) * 0.1705  )
-        ENDIF
-
-        IF(VC_1 >= 0.8 & (FT = 4 | FT = 5) ) ;LOS D Arterial
-          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.8) + 0.01 ) * 0.0     )
-        ENDIF
-
-        IF(VC_1 >= 0.9 & (FT = 1 | FT = 2) ) ;LOS E Freeway
-          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.9) + 0.01 ) * -0.2278 )
-        ENDIF
-
-
-        IF(VC_1 >= 0.9 & (FT = 4 | FT = 5) ) ;LOS E Arterial
-          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 0.9) + 0.01 ) * 0.0     )
-        ENDIF
-
-
-        IF(VC_1 >= 1.0 & (FT = 1 | FT = 2) ) ;LOS F low Freeway
-          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 1.0) + 0.01 ) * -0.1983 )
-        ENDIF
-
-
-        IF(VC_1 >= 1.0 & (FT = 4 | FT = 5) ) ;LOS F low Arterial
-          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 1.0) + 0.01 ) * -0.1449 )
-        ENDIF
-
-
-        IF(VC_1 >= 1.2 & (FT = 1 | FT = 2) ) ;LOS F high Freeway
-          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 1.2) + 0.01 ) * 1.022   )
-        ENDIF
-
-
-        IF(VC_1 >= 1.2 & (FT = 4 | FT = 5) ) ;LOS F high Arterial
-          VC_REL_FAC = VC_REL_FAC + ( ( (VC_1 - 1.2) + 0.01 ) * 0.0     )
-        ENDIF
-
-
-        ; Add static reliability
-        RELBTY_SD = VC_REL_FAC + STREL
-        ; T_REL = RELBTY_SD *
-        RELBTY_VAR = RELBTY_SD ^ 2
-*/
         ENDPHASE
     endrun
 

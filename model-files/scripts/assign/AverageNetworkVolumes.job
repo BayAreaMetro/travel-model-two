@@ -238,8 +238,12 @@ loop period = 1, 5
           ENDIF
 
           ; calculate total reliability
-          RELBTY_SD = (VC_REL_FAC + li.2.STREL) * li.2.DISTANCE * li.2.CTIM
-          RELBTY_VAR = RELBTY_SD ^ 2
+          ; zero reliability sd on managed lanes and tolled facilities
+          if (MANAGED == 1 | TOLLBOOTH > 0)
+            RELBTY_SD = 0
+          else
+            RELBTY_SD = (VC_REL_FAC + li.2.STREL) * li.2.DISTANCE * li.2.CTIM
+          endif
 
         endrun
 

@@ -176,22 +176,22 @@ loop period = 1,5
     RUN PGM=NETWORK
 ;      PAR  NODES=10000000
       NETI = hwy\msaspeed@token_period@.net
-      LINKO = hwy\msa@token_period@_speeds.csv FORMAT=SDF, FORM=15.5 INCLUDE=A,B,CONTIME,RELBTY_VAR
+      LINKO = hwy\msa@token_period@_speeds.csv FORMAT=SDF, FORM=15.5 INCLUDE=A,B,CONTIME,RELBTY_SD
       PHASE = LINKMERGE
           CONTIME = MAX(TIME_2,FFT)
       ENDPHASE
     ENDRUN
 
     ;overwrite congested time in avgload (base assignment) network
-    ; also write reliability (variance)
+    ; also write reliability SD
     RUN PGM=NETWORK
 ;      PAR  NODES=10000000
       NETI = hwy\avgload@token_period@_taz.net
-      LINKI[2] = hwy\msa@token_period@_speeds.csv VAR=A,B,CTIM,RELBTY_VAR
+      LINKI[2] = hwy\msa@token_period@_speeds.csv VAR=A,B,CTIM,RELBTY_SD
       NETO = hwy\avgload@token_period@_taz_temp.net
       PHASE = LINKMERGE
           CTIM = li.2.CTIM
-          RELBTY_VAR = li.2.RELBTY_VAR
+          RELBTY_SD = li.2.RELBTY_SD
       ENDPHASE
     ENDRUN
 
