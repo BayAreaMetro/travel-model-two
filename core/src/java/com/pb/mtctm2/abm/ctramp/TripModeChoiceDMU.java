@@ -87,6 +87,8 @@ public class TripModeChoiceDMU
     
     protected int[] mgraParkArea;
     
+    protected boolean inbound;
+    
     protected double[]                           lsWgtAvgCostM;
     protected double[]                           lsWgtAvgCostD;
     protected double[]                           lsWgtAvgCostH;
@@ -686,6 +688,15 @@ public class TripModeChoiceDMU
         return max_hh_vot;
     }
     
+
+    public int getInbound() {
+ 		return inbound ? 1 : 0 ;
+ 	}
+
+
+	public void setInbound(boolean inbound) {
+		this.inbound = inbound;
+	}
     /** 
      * Return a 1 if this tour has an AV available else 0
      * @return

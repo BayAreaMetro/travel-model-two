@@ -281,6 +281,7 @@ public class SandagTripModeChoiceDMU
         methodIndexMap.put("getHasTransitSubsidy", 600);
         methodIndexMap.put("getTransitSubsidyPercent",601);
         methodIndexMap.put("getHasTransitPass",602);
+        methodIndexMap.put("getInbound",605);
 
     }
 
@@ -484,6 +485,9 @@ public class SandagTripModeChoiceDMU
             	break;
             case 602:
             	returnValue = getHasTransitPass();
+            	break;
+            case 605:
+            	returnValue = getInbound();
             	break;
 	
             	

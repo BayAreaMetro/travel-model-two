@@ -2786,6 +2786,9 @@ public class IntermediateStopChoiceModels implements Serializable {
         
         mcDmuObject.setFirstTrip( 0 );
         mcDmuObject.setLastTrip( 0 );
+        
+        mcDmuObject.setInbound(s.isInboundStop());
+        
         if ( s.isInboundStop() ) {
             mcDmuObject.setOutboundHalfTourDirection( 0 );        
             // compare stopId (0-based, so add 1) with number of stops (stops array length - 1);  if last stop, set flag to 1, otherwise 0.
