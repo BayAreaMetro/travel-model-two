@@ -113,22 +113,22 @@ The following link attributes are included on the master network.
 | *A* | from node | Integer (see [Node Numbering](#county-node-numbering-system)) |
 | *B* | to node | Integer (see [Node Numbering](#county-node-numbering-system)) |
 | *ASSIGNABLE* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *BIKE_ACCESS* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *BUS_ONLY* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *COUNTY* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *DISTANCE* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *DRIVE_ACCESS* | Is link used for assignment (1=True, 0=False) | Integer |   |
+| *BIKE_ACCESS* | Is the link in the bike network? | Integer | OSM  |
+| *BUS_ONLY* | Is it a bus only link? | Integer |   |
+| *COUNTY* | County name | String | Boundary file referenced in Lasso |
+| *DISTANCE* | Distance | float |   |
+| *DRIVE_ACCESS* | Is the link in the drive network? | Integer |   |
 | *FT* | Facility type{::nomarkdown}<br /> <ul><li>0: Connector</li> <li>1: Freeway to Freeway</li> <li>2: Freeway</li> <li>3:  Expressway</li> <li>4: Collector</li> <li>5: Ramp</li> <li>6: Special Facility</li> <li>7: Major Arterial</li></ul>{:/} | Integer |   |
-| *MANAGED* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *MODEL_LINK_ID* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *NAME* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *RAIL_ONLY* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *SEGMENT_ID* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *SHSTGEOMETR* | Is link used for assignment (1=True, 0=False) | Integer |   |
+| *MANAGED* | Is it a managed lane facility | Integer | Managed Lanes Project Cards  |
+| *MODEL_LINK_ID* | id uniquely identifying each link, managed by modelbot | Integer |   |
+| *NAME* | Road name | String | OSM |
+| *RAIL_ONLY* | Is it a rail link? | Integer | GTFS |
+| *SEGMENT_ID* | Managed facility id | Integer | Managed Lanes Project Cards  |
+| *SHSTGEOMETR* | SharedStreet geometry | Integer |   |
 | *TOLLBOOTH* | Toll link.  Links with values [less than 11](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block) are _bridge tolls_; 11 or above are _value tolls_. {::nomarkdown}<br /> <ul><li>1: Benicia-Martinez Bridge</li> <li>2: Carquinez Bridge</li> <li>3: Richmond Bridge</li> <li>4: Golden Gate Bridge</li> <li>5: San Francisco/Oakland Bay Bridge</li> <li>6: San Mateo Bridge</li> <li>7: Dumbarton Bridge</li> <li>8: Antioch Bridge</li> <li>25: I-680 Sunol Express Lanes (Opened September 2010)</li> <li>28: I-580 Express Lanes EB (Opened February 2016)</li> <li>29: I-580 Express Lanes WB (Opened February 2016)</li> <li>31: SR-237 Express Lanes SB (Opened March 2012)</li> <li>32: SR-237 Express Lanes NB (Opened March 2012)</li> <li>33: I-680 Contra Costa Express Lanes SB (Opened October 2017)</li> <li>34: I-680 Contra Costa Express Lanes NB (Opened October 2017)</li></ul>{:/} | Integer |   |
 | *TOLLSEG* | Toll segments{::nomarkdown}<br /> <ul></ul> <li>For I-680 Sunol Express Lanes SB (TOLLBOOTH=25): <ul><li>1: Andrade Rd to Washington Blvd</li> <li>2: Washington Blvd to Mission Blvd</li> <li>3: Mission Blvd to SR 237</li></ul></li> <li>I-580 Express Lanes EB (TOLLBOOTH=28): <ul><li>1: Hacienda Dr to Airway Blvd</li> <li>2: Airway Blvd to Livermore Ave</li> <li>3: Livermore Ave to Vasco Rd</li> <li>4: Vasco Rd to Greenville Rd	</li></ul>  <li>I-580 Express Lanes WB (TOLLBOOTH=29): <ul><li>1: Greenville Rd to Springtown Blvd</li> <li>2: Springtown to Isabel Ave</li> <li>3: Isabel Ave to Fallon Rd</li> <li>4: Fallon Rd to Hacienda Dr	</li> <li>5: Hacienda Dr to San Ramon Rd</li></ul> <ul></ul> <li>SR-237 Express Lanes SB (TOLLBOOTH=31): <ul><li>1: Dixon Landing Rd to N First Ave (Westbound)</li></ul>  <ul></ul> <li>SR-237 Express Lanes NB (TOLLBOOTH=32): <ul><li>1: N First Ave to Dixon Landing Rd (Eastbound)</li></ul> <ul></ul> <li>I-680 Contra Costa Express Lanes SB (TOLLBOOTH=33): <ul><li>1: Rudgear to Crow Canyon (Crow Canyon SB pricing zone)</li> <li>2: Crow Canyon to Alcosta (Alcosta pricing zone)</li></ul>   <ul></ul> <li>I-680 Contra Costa Express Lanes NB (TOLLBOOTH=34): <ul><li>1: Alcosta to Crow Canyon (Crow Canyon NB pricing zone)</li> <li>2: Crow Canyon to Livorna (Livorna pricing zone)</li> {:/} | Integer |   |
 | *TRANSIT* | Is Transit-only link | Integer | GTFS, Bus Only Lanes Project Cards |
-| *WALK_ACCESS* | Is link used for assignment (1=True, 0=False) | Integer |   |
+| *WALK_ACCESS* | Is the link in the walk network? | Integer | OSM |
 | *CNTYPE* | Link connector type{::nomarkdown}<br /><ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul>{:/} | String |   |
 | *LANES_EA* | TomTom Number of lanes | Integer | TomTom |
 | *LANES_AM* | TomTom Number of lanes | Integer | TomTom |
@@ -140,43 +140,6 @@ The following link attributes are included on the master network.
 | *USECLASS_MD* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
 | *USECLASS_PM* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
 | *USECLASS_EV* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
-| *TOLLBOOTH* | Toll link.  Links with values [less than 11](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block) are _bridge tolls_; 11 or above are _value tolls_. {::nomarkdown}<br /> <ul><li>1: Benicia-Martinez Bridge</li> <li>2: Carquinez Bridge</li> <li>3: Richmond Bridge</li> <li>4: Golden Gate Bridge</li> <li>5: San Francisco/Oakland Bay Bridge</li> <li>6: San Mateo Bridge</li> <li>7: Dumbarton Bridge</li> <li>8: Antioch Bridge</li> <li>25: I-680 Sunol Express Lanes (Opened September 2010)</li> <li>28: I-580 Express Lanes EB (Opened February 2016)</li> <li>29: I-580 Express Lanes WB (Opened February 2016)</li> <li>31: SR-237 Express Lanes SB (Opened March 2012)</li> <li>32: SR-237 Express Lanes NB (Opened March 2012)</li> <li>33: I-680 Contra Costa Express Lanes SB (Opened October 2017)</li> <li>34: I-680 Contra Costa Express Lanes NB (Opened October 2017)</li></ul>{:/} | Integer |   |
-| *TOLLSEG* | Toll segments{::nomarkdown}<br /> <ul></ul> <li>For I-680 Sunol Express Lanes SB (TOLLBOOTH=25): <ul><li>1: Andrade Rd to Washington Blvd</li> <li>2: Washington Blvd to Mission Blvd</li> <li>3: Mission Blvd to SR 237</li></ul></li> <li>I-580 Express Lanes EB (TOLLBOOTH=28): <ul><li>1: Hacienda Dr to Airway Blvd</li> <li>2: Airway Blvd to Livermore Ave</li> <li>3: Livermore Ave to Vasco Rd</li> <li>4: Vasco Rd to Greenville Rd	</li></ul>  <li>I-580 Express Lanes WB (TOLLBOOTH=29): <ul><li>1: Greenville Rd to Springtown Blvd</li> <li>2: Springtown to Isabel Ave</li> <li>3: Isabel Ave to Fallon Rd</li> <li>4: Fallon Rd to Hacienda Dr	</li> <li>5: Hacienda Dr to San Ramon Rd</li></ul> <ul></ul> <li>SR-237 Express Lanes SB (TOLLBOOTH=31): <ul><li>1: Dixon Landing Rd to N First Ave (Westbound)</li></ul>  <ul></ul> <li>SR-237 Express Lanes NB (TOLLBOOTH=32): <ul><li>1: N First Ave to Dixon Landing Rd (Eastbound)</li></ul> <ul></ul> <li>I-680 Contra Costa Express Lanes SB (TOLLBOOTH=33): <ul><li>1: Rudgear to Crow Canyon (Crow Canyon SB pricing zone)</li> <li>2: Crow Canyon to Alcosta (Alcosta pricing zone)</li></ul>   <ul></ul> <li>I-680 Contra Costa Express Lanes NB (TOLLBOOTH=34): <ul><li>1: Alcosta to Crow Canyon (Crow Canyon NB pricing zone)</li> <li>2: Crow Canyon to Livorna (Livorna pricing zone)</li> {:/} | Integer |   |
-| *FT* | Facility type{::nomarkdown}<br /> <ul><li>0: Connector</li> <li>1: Freeway to Freeway</li> <li>2: Freeway</li> <li>3:  Expressway</li> <li>4: Collector</li> <li>5: Ramp</li> <li>6: Special Facility</li> <li>7: Major Arterial</li></ul>{:/} | Integer |   |
-| *F_JNCTID* | TomTom from node | Long integer | TomTom |
-| *T_JNCTID* | TomTom to node | Long integer | TomTom |
-| *FRC* | Functional Road Class{::nomarkdown}<br /> <ul><li>-1: Not Applicable</li> <li>0: Motorway, Freeway, or Other Major Road</li>  <li>1: a Major Road Less Important than a Motorway</li> <li>2: Other Major Road</li> <li>3: Secondary Road</li> <li>4: Local Connecting Road</li> <li>5: Local Road of High Importance</li> <li>6: Local Road</li> <li>7: Local Road of Minor Importance</li> <li>8: Other Road</li> </ul>{:/} | Float | TomTom |
-| *NAME* | Road name | String | TomTom |
-| *FREEWAY* | Freeway{::nomarkdown}<br /> <ul><li>0: No Part of Freeway (default)</li> <li>1: Part of Freeway</li> </ul>{:/} | Integer | TomTom |
-| *TOLLRD* | Toll Road{::nomarkdown}<br /> <ul> <li>Blank: No Toll Road (default)</li> <li>B: Toll Road in Both Directions</li> <li>FT: Toll Road in Positive Direction</li> <li>TF: Toll Road in Negative Direction</li> </ul>{:/} | String | TomTom |
-| *ONEWAY* |  Direction of Traffic Flow{::nomarkdown}<br /> <ul><li>Blank: Open in Both Directions (default)</li> <li>FT: Open in Positive Direction</li> <li>N: Closed in Both Directions</li> <li>TF: Open in Negative Direction</li></ul>{:/} | String | TomTom |
-| *KPH* | Calculated Average Speed (kilometers per hour) | Integer | TomTom |
-| *MINUTES* | Travel Time (minutes) | Integer | TomTom |
-| *CARRIAGE* | Carriageway Type{::nomarkdown}<br /> <ul><li>Blank: Not Applicable</li> <li>1: Car Pool</li> <li>2: Express</li> <li>3: Local</li></ul>{:/} | Integer | TomTom |
-| *LANES* | TomTom Number of lanes | Integer | TomTom |
-| *RAMP* | Exit / Entrance Ramp{::nomarkdown}<br /> <ul><li>0: No Exit/Entrance Ramp - Default</li> <li>1: Exit</li> <li>2: Entrance</li></ul>{:/} | Integer | TomTom |
-| *SPEEDCAT* | Speed Category{::nomarkdown}<br /><ul><li>1: &gt; 130 km/h</li> <li>2: 101 - 130 km/h</li> <li>3: 91 - 100 km/h</li> <li>4: 71 - 90 km/h</li> <li>5: 51 - 70 km/h</li> <li>6: 31 - 50 km/h</li> <li>7: 11 - 30 km/h</li><li>8: &lt; 11 km/h</li></ul>{:/} | Integer | TomTom |
-| *FEET* | Calculated from TomTom Meters field | Integer | TomTom |
-| *RTEDIR* | Route Directional{::nomarkdown}<br /><ul><li>Blank: Not Applicable (default)</li> <li>N: Northbound</li> <li>E: Eastbound</li> <li>S: Southbound</li> <li>O / W: Westbound</li></ul>{:/} | String | TomTom |
-| *ASSIGNABLE* | Is link used for assignment (1=True, 0=False) | Integer |   |
-| *CNTYPE* | Link connector type{::nomarkdown}<br /><ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul>{:/} | String |   |
-| *TRANSIT* | Is Transit link | Integer |   |
-| *USECLASS* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
-| *TOLLBOOTH* | Toll link.  Links with values [less than 11](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block) are _bridge tolls_; 11 or above are _value tolls_. {::nomarkdown}<br /> <ul><li>1: Benicia-Martinez Bridge</li> <li>2: Carquinez Bridge</li> <li>3: Richmond Bridge</li> <li>4: Golden Gate Bridge</li> <li>5: San Francisco/Oakland Bay Bridge</li> <li>6: San Mateo Bridge</li> <li>7: Dumbarton Bridge</li> <li>8: Antioch Bridge</li> <li>25: I-680 Sunol Express Lanes (Opened September 2010)</li> <li>28: I-580 Express Lanes EB (Opened February 2016)</li> <li>29: I-580 Express Lanes WB (Opened February 2016)</li> <li>31: SR-237 Express Lanes SB (Opened March 2012)</li> <li>32: SR-237 Express Lanes NB (Opened March 2012)</li> <li>33: I-680 Contra Costa Express Lanes SB (Opened October 2017)</li> <li>34: I-680 Contra Costa Express Lanes NB (Opened October 2017)</li></ul>{:/} | Integer |   |
-| *TOLLSEG* | Toll segments{::nomarkdown}<br /> <ul></ul> <li>For I-680 Sunol Express Lanes SB (TOLLBOOTH=25): <ul><li>1: Andrade Rd to Washington Blvd</li> <li>2: Washington Blvd to Mission Blvd</li> <li>3: Mission Blvd to SR 237</li></ul></li> <li>I-580 Express Lanes EB (TOLLBOOTH=28): <ul><li>1: Hacienda Dr to Airway Blvd</li> <li>2: Airway Blvd to Livermore Ave</li> <li>3: Livermore Ave to Vasco Rd</li> <li>4: Vasco Rd to Greenville Rd	</li></ul>  <li>I-580 Express Lanes WB (TOLLBOOTH=29): <ul><li>1: Greenville Rd to Springtown Blvd</li> <li>2: Springtown to Isabel Ave</li> <li>3: Isabel Ave to Fallon Rd</li> <li>4: Fallon Rd to Hacienda Dr	</li> <li>5: Hacienda Dr to San Ramon Rd</li></ul> <ul></ul> <li>SR-237 Express Lanes SB (TOLLBOOTH=31): <ul><li>1: Dixon Landing Rd to N First Ave (Westbound)</li></ul>  <ul></ul> <li>SR-237 Express Lanes NB (TOLLBOOTH=32): <ul><li>1: N First Ave to Dixon Landing Rd (Eastbound)</li></ul> <ul></ul> <li>I-680 Contra Costa Express Lanes SB (TOLLBOOTH=33): <ul><li>1: Rudgear to Crow Canyon (Crow Canyon SB pricing zone)</li> <li>2: Crow Canyon to Alcosta (Alcosta pricing zone)</li></ul>   <ul></ul> <li>I-680 Contra Costa Express Lanes NB (TOLLBOOTH=34): <ul><li>1: Alcosta to Crow Canyon (Crow Canyon NB pricing zone)</li> <li>2: Crow Canyon to Livorna (Livorna pricing zone)</li> {:/} | Integer |   |
-| *FT* | Facility type{::nomarkdown}<br /> <ul><li>0: Connector</li> <li>1: Freeway to Freeway</li> <li>2: Freeway</li> <li>3:  Expressway</li> <li>4: Collector</li> <li>5: Ramp</li> <li>6: Special Facility</li> <li>7: Major Arterial</li></ul>{:/} | Integer |   |
-| *FFS* | Free flow speed calculated from TomTom KPH | Integer |   |
-| *NUMLANES* | Model number of lanes | Integer |   |
-| *HIGHWAYT* | Highway type{::nomarkdown}<br /> <ul> <li>footway</li> <li>footway_unconstructed</li> <li>pedestrian</li> <li>steps</li> </ul>{:/} | String | Open Street Map |
-| *B_CLASS* | Bike Class{::nomarkdown}<br /> <ul><li>0 - Unclassified Street</li> <li>1 - Class I Trail</li> <li>2 - Class II Route</li> <li>3 - Class III Route</li></ul>{:/} | Integer | BikeMapper |
-| *REPRIORITIZE* | Priority{::nomarkdown}<br/> <ul><li>2 - Highly Desirable</li> <li>1 - Desirable</li> <li>0 - No Preference</li> <li>-1 - Undesirable</li> <li>-2 - Highly Undesirable</li></ul>{:/} | Integer | BikeMapper |
-| *GRADE_CAT* | Grade class{::nomarkdown}<br /> <ul><li>4 - 18% or High Grade</li> <li>3 - 10-18% Grade</li> <li>2 - 5-10% Grade</li> <li>1 - 0-5% Grade</li></ul>{:/} | Integer | BikeMapper |
-| *PED_FLAG* | Pedestrian access (Y=yes; blank=no) | String | BikeMapper |
-| *BIKEPEDOK* | Bridge that allows bike and peds (1=true, 0=false) | Integer | BikeMapper |
-| *PEMSID* | PEMS ID | Integer | PEMS |
-| *PEMSLANES* | PEMS number of lanes | Integer | PEMS |
-| *PEMSDIST* | Distance from link to PEMS station | Float | PEMS |
-| *TAP_DRIVE* | TAP link to parking lot (1=true) | Int | MTC |
 
 ## Transit Network
 
