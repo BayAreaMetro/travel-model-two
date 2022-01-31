@@ -130,11 +130,11 @@ The following link attributes are included on the master network.
 | *TRANSIT* | Is Transit-only link | Integer | GTFS, Bus Only Lanes Project Cards |
 | *WALK_ACCESS* | Is the link in the walk network? | Integer | OSM |
 | *CNTYPE* | Link connector type{::nomarkdown}<br /><ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA (TeleAtlas North America) - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul>{:/} | String | OSM, GTFS, Managed Lanes Project Cards, Centroid connectors  |
-| *LANES_EA* | TomTom Number of lanes | Integer | TomTom |
-| *LANES_AM* | TomTom Number of lanes | Integer | TomTom |
-| *LANES_MD* | TomTom Number of lanes | Integer | TomTom |
-| *LANES_PM* | TomTom Number of lanes | Integer | TomTom |
-| *LANES_EV* | TomTom Number of lanes | Integer | TomTom |
+| *LANES_EA* | Number of lanes | Integer | OSM, SF-Champ, TomTom. See requirements document for details. |
+| *LANES_AM* | Number of lanes | Integer | OSM, SF-Champ, TomTom. See requirements document for details. |
+| *LANES_MD* | Number of lanes | Integer | OSM, SF-Champ, TomTom. See requirements document for details. |
+| *LANES_PM* | Number of lanes | Integer | OSM, SF-Champ, TomTom. See requirements document for details. |
+| *LANES_EV* | Number of lanes | Integer | OSM, SF-Champ, TomTom. See requirements document for details. |
 | *USECLASS_EA* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
 | *USECLASS_AM* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
 | *USECLASS_MD* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
