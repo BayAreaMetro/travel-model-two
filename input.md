@@ -118,7 +118,7 @@ The following link attributes are included on the master network.
 | *COUNTY* | County name | String | Boundary file referenced in Lasso |
 | *DISTANCE* | Distance | float |   |
 | *DRIVE_ACCESS* | Is the link in the drive network? | Integer | OSM  |
-| *FT* | Facility type{::nomarkdown}<br /> <ul><li>0: Connector</li> <li>1: Freeway</li> <li>2: Expressway</li> <li>3:  Ramp</li> <li>4: Divided Arterial</li> <li>5: Undivided Arterial</li> <li>6: Collector</li> <li>7: Local</li> <li>8: Centroid Connectors and dummy access/egress links for managed lanes </li></ul>{:/} | Integer |   |
+| *FT* | Facility type{::nomarkdown}<br /> <ul><li>1: Freeway</li> <li>2: Expressway</li> <li>3:  Ramp</li> <li>4: Divided Arterial</li> <li>5: Undivided Arterial</li> <li>6: Collector</li> <li>7: Local</li> <li>8: Centroid Connectors and dummy access/egress links for managed lanes </li></ul>{:/} | Integer |   |
 | *MANAGED* | Is it a managed lane facility | Integer | Managed Lanes Project Cards  |
 | *MODEL_LINK_ID* | id uniquely identifying each link, managed by modelbot | Integer |   |
 | *NAME* | Road name | String | OSM |
