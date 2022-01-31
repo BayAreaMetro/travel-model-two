@@ -117,7 +117,7 @@ The following link attributes are included on the master network.
 | *BUS_ONLY* | Is it a bus only link? | Integer |   |
 | *COUNTY* | County name | String | Boundary file referenced in Lasso |
 | *DISTANCE* | Distance | float |   |
-| *DRIVE_ACCESS* | Is the link in the drive network? | Integer |   |
+| *DRIVE_ACCESS* | Is the link in the drive network? | Integer | OSM  |
 | *FT* | Facility type{::nomarkdown}<br /> <ul><li>0: Connector</li> <li>1: Freeway to Freeway</li> <li>2: Freeway</li> <li>3:  Expressway</li> <li>4: Collector</li> <li>5: Ramp</li> <li>6: Special Facility</li> <li>7: Major Arterial</li></ul>{:/} | Integer |   |
 | *MANAGED* | Is it a managed lane facility | Integer | Managed Lanes Project Cards  |
 | *MODEL_LINK_ID* | id uniquely identifying each link, managed by modelbot | Integer |   |
@@ -129,7 +129,7 @@ The following link attributes are included on the master network.
 | *TOLLSEG* | Toll segments{::nomarkdown}<br /> <ul></ul> <li>For I-680 Sunol Express Lanes SB (TOLLBOOTH=25): <ul><li>1: Andrade Rd to Washington Blvd</li> <li>2: Washington Blvd to Mission Blvd</li> <li>3: Mission Blvd to SR 237</li></ul></li> <li>I-580 Express Lanes EB (TOLLBOOTH=28): <ul><li>1: Hacienda Dr to Airway Blvd</li> <li>2: Airway Blvd to Livermore Ave</li> <li>3: Livermore Ave to Vasco Rd</li> <li>4: Vasco Rd to Greenville Rd	</li></ul>  <li>I-580 Express Lanes WB (TOLLBOOTH=29): <ul><li>1: Greenville Rd to Springtown Blvd</li> <li>2: Springtown to Isabel Ave</li> <li>3: Isabel Ave to Fallon Rd</li> <li>4: Fallon Rd to Hacienda Dr	</li> <li>5: Hacienda Dr to San Ramon Rd</li></ul> <ul></ul> <li>SR-237 Express Lanes SB (TOLLBOOTH=31): <ul><li>1: Dixon Landing Rd to N First Ave (Westbound)</li></ul>  <ul></ul> <li>SR-237 Express Lanes NB (TOLLBOOTH=32): <ul><li>1: N First Ave to Dixon Landing Rd (Eastbound)</li></ul> <ul></ul> <li>I-680 Contra Costa Express Lanes SB (TOLLBOOTH=33): <ul><li>1: Rudgear to Crow Canyon (Crow Canyon SB pricing zone)</li> <li>2: Crow Canyon to Alcosta (Alcosta pricing zone)</li></ul>   <ul></ul> <li>I-680 Contra Costa Express Lanes NB (TOLLBOOTH=34): <ul><li>1: Alcosta to Crow Canyon (Crow Canyon NB pricing zone)</li> <li>2: Crow Canyon to Livorna (Livorna pricing zone)</li> {:/} | Integer |   |
 | *TRANSIT* | Is Transit-only link | Integer | GTFS, Bus Only Lanes Project Cards |
 | *WALK_ACCESS* | Is the link in the walk network? | Integer | OSM |
-| *CNTYPE* | Link connector type{::nomarkdown}<br /><ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul>{:/} | String |   |
+| *CNTYPE* | Link connector type{::nomarkdown}<br /><ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA (TeleAtlas North America) - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul>{:/} | String |   |
 | *LANES_EA* | TomTom Number of lanes | Integer | TomTom |
 | *LANES_AM* | TomTom Number of lanes | Integer | TomTom |
 | *LANES_MD* | TomTom Number of lanes | Integer | TomTom |
