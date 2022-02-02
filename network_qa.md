@@ -20,7 +20,7 @@ Currently, these include the 2015 roadway network, TM2 MAZs and TAZs.  The 2015 
 
 ## Resources
 
-* [Roadway Network Documentation](travel-model-two/input/#roadway-network) including node and link attributes
+* [Roadway Network Documentation](/travel-model-two/input/#roadway-network) including node and link attributes
 * [Network Rebuild Requirements](https://mtcdrive.box.com/s/mrunshse2ygf7sfvkt695gzshfpascz5)
 * GitHub repositories related to network tools:
   * [BayAreaMetro/travel-model-two-networks](https://github.com/BayAreaMetro/travel-model-two-networks/tree/develop)
