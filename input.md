@@ -34,7 +34,7 @@ CONTENTS
 
 ## Input File List
 
-The table below contains brief descriptions of the input files required to execute the travel model. 
+The table below contains brief descriptions of the input files required to execute the travel model.
 
 | **File name** | **Purpose** | **Folder location** | **File type** | **File format** |
 |---------------|-------------|---------------------|---------------|-----------------|
@@ -66,25 +66,25 @@ Time periods in Travel Model Two are consistent with Travel Model One:
 
 ## Roadway Network
 
-The *all streets roadway network* was developed from the open source [OpenStreetMap](https://www.openstreetmap.org/) (OSM).  This includes the *bike network* and the *walk network*. The *projection* is [**NAD 1983 StatePlane California VI FIPS 0406 Feet**](https://epsg.io/102646).
+The all streets highway network, walk network, and bicycle network were developed from [OpenStreetMap](http://www.openstreetmap.org/).  The *projection* is [**NAD 1983 StatePlane California VI FIPS 0406 Feet**](https://epsg.io/102646).
 
 ### County Node Numbering System
 
 The highway network uses a numbering system whereby each county has a reserved block of nodes. Within each county’s block, nodes 1 through 9,999 are reserved for TAZs, 10,001 through 89,999 are for MAZs, and 90,001 through 99,999 for transit access points or TAPs. The blocks are assigned to the nine counties per MTC’s numbering scheme, as shown in the table below.
 
-TeleAtlas network nodes are numbered by county as well and range from 1,000,000 to 10,000,000 as shown below. HOV lane nodes are those nodes corresponding to general purpose lane nodes.   
+Roadway, walk, bicycle, and transit network nodes are numbered by county as well and range from 1,000,000 to 10,000,000 as shown below.
 
-Code  | County | TAZs | MAZs |  TAPs | Network Node | HOV Lane Node
-|:---:|:-------|:-----|:-----|:------|:-------------|:-------------
-1 | San Francisco |	1 - 9,999 |	10,001 – 89,999 |	90,001 – 99,999 |	1,000,000 – 1,500,000 |	5,500,000 – 6,000,000
-2 |	San Mateo |	100,001 – 109,999 |	110,001 – 189,999 |	190,001 – 199,999 |	1,500,000 – 2,000,000 |	6,000,000 – 6,500,000
-3 |	Santa Clara |	200,001 – 209,999 |	210,001 – 289,999 |	290,001 – 299,999 |	2,000,000 – 2,500,000 |	6,500,000 – 7,000,000
-4 |	Alameda |	300,001 – 309,999 |	310,001 – 389,999 |	390,001 – 399,999 |	2,500,000 – 3,000,000 | 7,000,000 – 7,500,000
-5 |	Contra Costa |	400,001 – 409,999 |	410,001 – 489,999 |	490,001 – 499,999 |	3,000,000 – 3,500,000 |	7,500,000 – 8,000,000
-6 |	Solano |	500,001 – 509,999 |	510,001 – 589,999 |	590,001 – 599,999 |	3,500,000 – 4,000,000 |	8,000,000 – 8,500,000
-7 |	Napa |	600,001 – 609,999 |	610,001 – 689,999 |	690,001 – 699,999 |	4,000,000 – 4,500,000 |	8,500,000 – 9,000,000
-8 |	Sonoma |	700,001 – 709,999 |	710,001 – 789,999 |	790,001 – 799,999 |	4,500,000 – 5,000,000 |	9,000,000 – 9,000,000
-9 |	Marin |	800,001 – 809,999 |	810,001 – 889,999 |	890,001 – 899,999 |	5,000,000 – 5,500,000 |	9,500,000 – 9,999,999 
+Code  | County | TAZs | MAZs |  TAPs | Network Node |
+|:---:|:-------|:-----|:-----|:------|:-------------|
+1 | San Francisco |	1 - 9,999 |	10,001 – 89,999 |	90,001 – 99,999 |	1,000,000 – 1,500,000 |
+2 |	San Mateo |	100,001 – 109,999 |	110,001 – 189,999 |	190,001 – 199,999 |	1,500,000 – 2,000,000 |
+3 |	Santa Clara |	200,001 – 209,999 |	210,001 – 289,999 |	290,001 – 299,999 |	2,000,000 – 2,500,000 |
+4 |	Alameda |	300,001 – 309,999 |	310,001 – 389,999 |	390,001 – 399,999 |	2,500,000 – 3,000,000 |
+5 |	Contra Costa |	400,001 – 409,999 |	410,001 – 489,999 |	490,001 – 499,999 |	3,000,000 – 3,500,000 |
+6 |	Solano |	500,001 – 509,999 |	510,001 – 589,999 |	590,001 – 599,999 |	3,500,000 – 4,000,000 |
+7 |	Napa |	600,001 – 609,999 |	610,001 – 689,999 |	690,001 – 699,999 |	4,000,000 – 4,500,000 |
+8 |	Sonoma |	700,001 – 709,999 |	710,001 – 789,999 |	790,001 – 799,999 |	4,500,000 – 5,000,000 |
+9 |	Marin |	800,001 – 809,999 |	810,001 – 889,999 |	890,001 – 899,999 |	5,000,000 – 5,500,000 |
   | External | 900,001 - 999,999
 
 ### Node Attributes
@@ -96,13 +96,14 @@ The following node attributes are included in the master network.
 |*N* | Node Number | Integer (see [Node Numbering](#county-node-numbering-system))
 |*X* | X coordinate (feet) | Float
 |*Y* | Y coordinate (feet) | Float
-|*COUNTY* | County Code | Integer
-|*MODE* | Best transit mode served. {::nomarkdown}<br /><ul><li>1: Local bus</li> <li>2: Express bus</li> <li>3: Ferry</li> <li>4: Light rail</li> <li>5: Heavy rail</li> <li>6: Commuter rail</li> </ul>{:/} Appears to be set for TAPs and nodes with **STOP** set.| Integer
-|*STOP* | Transit stop or terminal name of the node | String
-|*PNR_CAP* |  Number of parking spaces at the stop or terminal if a parking facility is available | Integer
-|*PNR[1-5]* | Is parking available at the stop or terminal by time period? | Integer (1=available)
-|*PNR_FEE[1-5]* | Parking fee at the stop by time period | Float
+|*OSM_NODE_ID* | OpenStreetMap node identifier | Integer
+|*COUNTY* | County Name | String
+|*DRIVE_ACCESS* | Node is used by automobile and/or bus links | Boolean
+|*WALK_ACCESS* | Node is used by pedestrian links | Boolean
+|*BIKE_ACCESS* | Node is used by bicycle links | Boolean
+|*RAIL_ACCESS* | Node is used by rail links | Boolean
 |*FAREZONE* | Unique sequential fare zone ID for transit skimming and assignment | Integer
+|*TAP_ID* | Transit access point (TAP) associated connected to this node | Integer
 
 ### Link Attributes
 
@@ -112,63 +113,54 @@ The following link attributes are included on the master network.
 |-------|---------------|-------------|----------|
 | *A* | from node | Integer (see [Node Numbering](#county-node-numbering-system)) |
 | *B* | to node | Integer (see [Node Numbering](#county-node-numbering-system)) |
-| *ASSIGNABLE* | Is link used for assignment (1=True, 0=False) | Integer | See requirements document  |
-| *BIKE_ACCESS* | Is the link in the bike network? | Integer | OSM  |
-| *BUS_ONLY* | Is it a bus only link? | Integer |   |
-| *COUNTY* | County name | String | Boundary file referenced in Lasso |
-| *DISTANCE* | Distance | float |   |
-| *DRIVE_ACCESS* | Is the link in the drive network? | Integer | OSM  |
-| *FT* | Facility type{::nomarkdown}<br /> <ul><li>1: Freeway</li> <li>2: Expressway</li> <li>3:  Ramp</li> <li>4: Divided Arterial</li> <li>5: Undivided Arterial</li> <li>6: Collector</li> <li>7: Local</li> <li>8: Centroid Connectors and dummy access/egress links for managed lanes </li></ul>{:/} | Integer |   |
-| *MANAGED* | Is it a managed lane facility | Integer | Managed Lanes Project Cards  |
-| *MODEL_LINK_ID* | id uniquely identifying each link, managed by modelbot | Integer |   |
-| *NAME* | Road name | String | OSM |
-| *RAIL_ONLY* | Is it a rail link? | Integer | GTFS |
-| *SEGMENT_ID* | Managed facility id | Integer | Managed Lanes Project Cards  |
-| *SHSTGEOMETR* | SharedStreet geometry | Integer |   |
+| *MODEL_LINK_ID* | Unique link identifier | Integer |   |
+| *SHSTGEOMERTRYID* | Unique link shape identifier per SharedStreets approach | String |   |
+| *ASSIGNABLE* | Is link used for assignment (1=True, 0=False) | Integer |   |
+| *DRIVE_ACCESS* | Link is used by automobiles and/or buses (1=True, 0=False) | Integer |   |
+| *BIKE_ACCESS* | Link is used by bicycles (1=True, 0=False) | Integer |   |
+| *WALK_ACCESS* | Link is used by pedestrians (1=True, 0=False) | Integer |   |
+| *BUS_ONLY* | Link is used by buses, but not automobiles (1=True, 0=False) | Integer |   |
+| *RAIL_ONLY* | Link is used by rail vehicles (1=True, 0=False) | Integer |   |
+| *DRIVE_ACCESS* | Link is used by automobiles and/or buses (1=True, 0=False) | Integer |   |
+| *MANAGED* | Link has a parallel managed lane (1=True, 0=False) | Integer |   |
+| *SEGMENT_ID* | Parallel managed lane unique segment identifier (on managed and general purpose lanes) | Integer |   |
+| *COUNTY* | County name | String |   |
+| *CNTYPE* | Link connector type{::nomarkdown}<br /><ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul>{:/} | String |   |
+| *TRANSIT* | Is Transit link | Integer |   |
 | *TOLLBOOTH* | Toll link.  Links with values [less than 11](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block) are _bridge tolls_; 11 or above are _value tolls_. {::nomarkdown}<br /> <ul><li>1: Benicia-Martinez Bridge</li> <li>2: Carquinez Bridge</li> <li>3: Richmond Bridge</li> <li>4: Golden Gate Bridge</li> <li>5: San Francisco/Oakland Bay Bridge</li> <li>6: San Mateo Bridge</li> <li>7: Dumbarton Bridge</li> <li>8: Antioch Bridge</li> <li>25: I-680 Sunol Express Lanes (Opened September 2010)</li> <li>28: I-580 Express Lanes EB (Opened February 2016)</li> <li>29: I-580 Express Lanes WB (Opened February 2016)</li> <li>31: SR-237 Express Lanes SB (Opened March 2012)</li> <li>32: SR-237 Express Lanes NB (Opened March 2012)</li> <li>33: I-680 Contra Costa Express Lanes SB (Opened October 2017)</li> <li>34: I-680 Contra Costa Express Lanes NB (Opened October 2017)</li></ul>{:/} | Integer |   |
 | *TOLLSEG* | Toll segments{::nomarkdown}<br /> <ul></ul> <li>For I-680 Sunol Express Lanes SB (TOLLBOOTH=25): <ul><li>1: Andrade Rd to Washington Blvd</li> <li>2: Washington Blvd to Mission Blvd</li> <li>3: Mission Blvd to SR 237</li></ul></li> <li>I-580 Express Lanes EB (TOLLBOOTH=28): <ul><li>1: Hacienda Dr to Airway Blvd</li> <li>2: Airway Blvd to Livermore Ave</li> <li>3: Livermore Ave to Vasco Rd</li> <li>4: Vasco Rd to Greenville Rd	</li></ul>  <li>I-580 Express Lanes WB (TOLLBOOTH=29): <ul><li>1: Greenville Rd to Springtown Blvd</li> <li>2: Springtown to Isabel Ave</li> <li>3: Isabel Ave to Fallon Rd</li> <li>4: Fallon Rd to Hacienda Dr	</li> <li>5: Hacienda Dr to San Ramon Rd</li></ul> <ul></ul> <li>SR-237 Express Lanes SB (TOLLBOOTH=31): <ul><li>1: Dixon Landing Rd to N First Ave (Westbound)</li></ul>  <ul></ul> <li>SR-237 Express Lanes NB (TOLLBOOTH=32): <ul><li>1: N First Ave to Dixon Landing Rd (Eastbound)</li></ul> <ul></ul> <li>I-680 Contra Costa Express Lanes SB (TOLLBOOTH=33): <ul><li>1: Rudgear to Crow Canyon (Crow Canyon SB pricing zone)</li> <li>2: Crow Canyon to Alcosta (Alcosta pricing zone)</li></ul>   <ul></ul> <li>I-680 Contra Costa Express Lanes NB (TOLLBOOTH=34): <ul><li>1: Alcosta to Crow Canyon (Crow Canyon NB pricing zone)</li> <li>2: Crow Canyon to Livorna (Livorna pricing zone)</li> {:/} | Integer |   |
-| *TRANSIT* | Is Transit-only link | Integer | GTFS, Bus Only Lanes Project Cards |
-| *WALK_ACCESS* | Is the link in the walk network? | Integer | OSM |
-| *CNTYPE* | Link connector type{::nomarkdown}<br /><ul> <li>CRAIL - rail and ferry link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA (TeleAtlas North America) - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> </ul>{:/} | String | OSM, GTFS, Managed Lanes Project Cards, Centroid connectors  |
-| *LANES_EA* | Number of lanes | Integer | OSM, SF-Champ, TomTom. See requirements document for details. |
-| *LANES_AM* | Number of lanes | Integer | OSM, SF-Champ, TomTom. See requirements document for details. |
-| *LANES_MD* | Number of lanes | Integer | OSM, SF-Champ, TomTom. See requirements document for details. |
-| *LANES_PM* | Number of lanes | Integer | OSM, SF-Champ, TomTom. See requirements document for details. |
-| *LANES_EV* | Number of lanes | Integer | OSM, SF-Champ, TomTom. See requirements document for details. |
-| *USECLASS_EA* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
-| *USECLASS_AM* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
-| *USECLASS_MD* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
-| *USECLASS_PM* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
-| *USECLASS_EV* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
+| *FT* | Facility type{::nomarkdown}<br /> <ul><li>1: Freeway</li> <li>2: Expressway</li> <li>3: Ramp</li> <li>4:  Divided Arterial</li> <li>5: Undivided Arterial</li> <li>6: Collector</li> <li>7: Local</li> <li>8: Connector (MAZ, TAZ, TAP)</li></ul>{:/} | Integer |   |
+| *LANES_[EA,AM,MD,PM,EV]* | Model number of lanes by time period | Integer |   |
+| *USECLASS_[EA,AM,MD,PM,EV]* | Link user class by time period{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
 
 ## Transit Network
 
-The transit network is made up of three core components: transit lines, transit modes, and transit fares.  The transit lines were built from MTC’s regional transit database (or RTD).  The lines are coded with a mode (see below) and serve a series of stop nodes.  Transit fares are coded according to Cube's Public Transport program (see below).
+The transit network is made up of three core components: transit lines, transit modes, and transit fares.  The transit lines were built GTFS feeds from raound 2015.  The lines are coded with a mode (see below) and serve a series of stop nodes.  Transit fares are coded according to Cube's Public Transport program (see below).
 
-Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the [Level of Service Information](#level-of-service-information). 
+Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the [Level of Service Information](#level-of-service-information).
 
 ### Line Attributes
 
 | *Field* | *Description* | *Data Type* |
 |---------|---------------|-------------|
-| *NAME* | RTD CPT_AGENCYID and SCH_ROUTEDESIGNATOR | String |
-| *USERA1* | Transit operator | String |
+| *NAME* | agency_id + route_id + time_period + direction_id + shape_id | String |
+| *USERA1* | agency_id or GTFS file name when agency_id is missing | String |
 | *USERA2* | Line haul mode, one of {::nomarkdown}<br/><ul><li>`Local bus`</li> <li>`Express bus`</li> <li>`Ferry service`</li> <li>`Light rail`</li> <li>`Heavy rail`</li> <li>`Commuter rail`</li></ul>{:/} | String |
 | *MODE* | Mode code | Integer |
 | *FARESYSTEM* | Faresystem code. Not necessary if *MODE* corresponds to *FARESYSTEM* in the factors file. | Integer |
-| *OPERATOR* | Operator code | Integer |
+| *OPERATOR* | agency_id or GTFS file name when agency_id is missing | Integer |
 | *ONEWAY* | set to TRUE since each route is coded by direction | Character |
-| *XYSPEED* | set to 15 by default (not used) | Integer |
-| *HEADWAY[1]* | early AM headway (3AM to 6AM) | Float |
+| *HEADWAY[1]* | Early AM headway (3AM to 6AM) | Float |
 | *HEADWAY[2]* | AM peak headway (6AM to 10AM) | Float |
 | *HEADWAY[3]* | Midday headway (10AM to 3PM) | Float |
 | *HEADWAY[4]* | PM peak headway (3PM to 7PM) | Float |
 | *HEADWAY[5]* | Evening headway (7PM to 3AM) | Float |
+| *ACCESS* | pickup_type, dropoff_type translated to Cube coding | Integer |
 | *N* | List of stops served.  Lines are coded through stops, not TAPs (which are like transit TAZs).  A negative stop is not served. | List of Integers |
 
 ### Transit Modes
 
-The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology. 
+The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology.
 
 | *Operator/Agency ID* | *Agency Name* | *Mode* | *Mode Group* | *Farezones* |
 |----------------------|---------------|--------|--------------|-------------|
@@ -197,6 +189,7 @@ The following transit modes are defined based on the [Open511](https://511.org/d
 | HB | Alameda Harbor Bay Ferry | 100 | Ferry service | 122-124 |
 | MA | [Marin Transit](https://marintransit.org/) | 71 | Local bus | |
 | MS | Stanford Marguerite Shuttle | 13 | Local bus | |
+| MV | MVgo (Mountain View) | 16 | Local bus | |
 | PE | Petaluma Transit | 68 | Local bus | |
 | RV | Rio Vista Delta Breeze | 52 | Local bus | 150, 170 |
 | SA | [Sonoma Marin Area Rail Transit (SMART)](https://sonomamarintrain.org/) | 134 | Commuter rail | 97-101 |
@@ -373,7 +366,7 @@ MTC uses a simple three-step (generation, distribution, and assignment) commerci
 ### Friction Factors
 
 The trip distribution step uses a standard gravity model with a blended travel time impedance measure. This file sets the friction factors, which are vehicle type specific, using an ASCII fixed format text file with the following data:
- 
+
  * Travel time in minutes (integer, starting in column 1, left justified);
  * Friction factors for very small trucks (integer, starting in column 9, left justified);
  * Friction factors for small trucks (integer, starting in column 17, left justified);
