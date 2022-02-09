@@ -3,7 +3,7 @@ layout: page
 title: Guide
 ---
 
-*Work in Progress*
+*Work in Progress* -- NOTE: The following is out of date and needs to be updated.  Please disregard.
 
 # Users' Guide
 

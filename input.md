@@ -133,7 +133,6 @@ The following link attributes are included on the master network.
 | *LANES_[EA,AM,MD,PM,EV]* | Model number of lanes by time period | Integer |   |
 | *USECLASS_[EA,AM,MD,PM,EV]* | Link user class by time period{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
 
-
 ## Transit Network
 
 The transit network is made up of three core components: transit lines, transit modes, and transit fares.  The transit lines were built GTFS feeds from raound 2015.  The lines are coded with a mode (see below) and serve a series of stop nodes.  Transit fares are coded according to Cube's Public Transport program (see below).
