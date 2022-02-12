@@ -10,7 +10,7 @@ Currently, these include the 2015 roadway network, TM2 MAZs and TAZs.  The 2015 
 
 * [Geodatabase on Box](https://mtcdrive.box.com/s/j0gd3suiefdlebkn6v2jpws87aq3cmec) - Right click on model_net.gdb and select 'Download'
 * Alameda [web map](https://mtc.maps.arcgis.com/home/webmap/viewer.html?webmap=d21c975d3b384e2c8a8e3ee6b4a4fd52)
-* Contra Costa web map
+* Contra Costa [web map](https://arcg.is/0zy0zq)
 * Marin web map
 * Napa web map
 * San Francisco web map
