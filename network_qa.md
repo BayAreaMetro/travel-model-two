@@ -10,14 +10,14 @@ Currently, these include the 2015 roadway network, TM2 MAZs and TAZs.  The 2015 
 
 * [Geodatabase on Box](https://mtcdrive.box.com/s/j0gd3suiefdlebkn6v2jpws87aq3cmec) - Includes all counties. Right click on model_net.gdb and select 'Download'
 
-* ArcGIS Online web maps:
+* ArcGIS Online web map for each county (view-only; an editable version can be available upon request):
   * [Alameda](https://mtc.maps.arcgis.com/home/webmap/viewer.html?webmap=d21c975d3b384e2c8a8e3ee6b4a4fd52)
   * [Contra Costa](https://arcg.is/0zy0zq)
   * Marin
   * [Napa](https://arcg.is/1einHf)
   * [San Francisco](https://arcg.is/0fX48u)
   * San Mateo
-  * [Santa Clara](https://arcg.is/1rzbCL0) (An [editable alternative](https://arcg.is/1POXza) is available. Login is required.)
+  * [Santa Clara](https://arcg.is/1rzbCL0) (An [editable version](https://arcg.is/1POXza) is available. Login is required.)
   * Solano
   * Sonoma
 
