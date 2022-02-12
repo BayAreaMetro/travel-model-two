@@ -21,7 +21,7 @@ Currently, these include the 2015 roadway network, TM2 MAZs and TAZs.  The 2015 
   * San Mateo
   * [Santa Clara](https://arcg.is/1rzbCL0) (an [editable version](https://arcg.is/1POXza) is available; login is required.)
   * [Solano](https://arcg.is/H1zKW)
-  * Sonoma
+  * [Sonoma](https://arcg.is/OTCGz)
 
 ## Resources
 
