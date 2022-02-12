@@ -10,7 +10,7 @@ Currently, these include the 2015 roadway network, TM2 MAZs and TAZs.  The 2015 
 
 * [Geodatabase on Box](https://mtcdrive.box.com/s/j0gd3suiefdlebkn6v2jpws87aq3cmec) - Includes all counties. Right click on model_net.gdb and select 'Download'
 
-* ArcGIS Online web map for each county:  
+* ArcGIS Online web maps for all counties:  
   (Web maps are view-only; an editable version can be available upon request)
 
   * [Alameda](https://mtc.maps.arcgis.com/home/webmap/viewer.html?webmap=d21c975d3b384e2c8a8e3ee6b4a4fd52)
