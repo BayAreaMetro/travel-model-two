@@ -8,16 +8,18 @@ title: Network QA
 
 Currently, these include the 2015 roadway network, TM2 MAZs and TAZs.  The 2015 transit networks will be added soon.
 
-* [Geodatabase on Box](https://mtcdrive.box.com/s/j0gd3suiefdlebkn6v2jpws87aq3cmec) - Right click on model_net.gdb and select 'Download'
-* Alameda [web map](https://mtc.maps.arcgis.com/home/webmap/viewer.html?webmap=d21c975d3b384e2c8a8e3ee6b4a4fd52)
-* Contra Costa [web map](https://arcg.is/0zy0zq)
-* Marin web map
-* Napa [web map](https://arcg.is/1einHf)
-* San Francisco [web map](https://arcg.is/0fX48u)
-* San Mateo web map
-* Santa Clara [web map](https://arcg.is/1rzbCL0), and an [editable alternative](https://arcg.is/1POXza) (login required)
-* Solano web map
-* Sonoma web map
+* [Geodatabase on Box](https://mtcdrive.box.com/s/j0gd3suiefdlebkn6v2jpws87aq3cmec) - Includes all counties. Right click on model_net.gdb and select 'Download'
+
+* ArcGIS Online web maps:
+  * [Alameda](https://mtc.maps.arcgis.com/home/webmap/viewer.html?webmap=d21c975d3b384e2c8a8e3ee6b4a4fd52)
+  * [Contra Costa](https://arcg.is/0zy0zq)
+  * Marin
+  * [Napa](https://arcg.is/1einHf)
+  * [San Francisco](https://arcg.is/0fX48u)
+  * San Mateo
+  * [Santa Clara](https://arcg.is/1rzbCL0) (an [editable alternative](https://arcg.is/1POXza) is available but login is required)
+  * Solano
+  * Sonoma
 
 ## Resources
 
