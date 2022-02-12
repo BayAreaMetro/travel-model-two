@@ -15,7 +15,7 @@ Currently, these include the 2015 roadway network, TM2 MAZs and TAZs.  The 2015 
 * Napa web map
 * San Francisco web map
 * San Mateo web map
-* Santa Clara: [web map - no login required](https://arcg.is/1rzbCL0); [web map - login required](https://arcg.is/)
+* Santa Clara: [web map - no login required](https://arcg.is/1rzbCL0); [web map - login required](https://arcg.is/1POXza)
 * Solano web map
 * Sonoma web map
 
