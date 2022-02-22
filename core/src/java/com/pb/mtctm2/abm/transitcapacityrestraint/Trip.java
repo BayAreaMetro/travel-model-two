@@ -1,4 +1,4 @@
-package com.pb.mtctm2.abm.maas;
+package com.pb.mtctm2.abm.transitcapacityrestraint;
 
 /**
  * A holder class for trips.

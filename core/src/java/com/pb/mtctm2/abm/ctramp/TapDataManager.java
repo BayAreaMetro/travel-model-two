@@ -57,6 +57,7 @@ public final class TapDataManager
     private float[]               driveAccessWalkTime;
     private float[]               driveAccessDriveTime;
     private boolean[]             driveAccessAllowed;
+    private float[]               totalSpaces;
 
     public int getMaxTap() {
 		return maxTap;
@@ -187,7 +188,8 @@ public final class TapDataManager
         	
         	//calculated weighted average parking cost (convert from dollars to cents)
         	float avgParkingCost=0.0f;
-        	if((freeSpaces + paidSpaces + permitSpaces + privateSpaces)>0)
+        	float spaces = freeSpaces + paidSpaces + permitSpaces + privateSpaces;
+        	if((spaces)>0)
         	     avgParkingCost = 
         			(paidSpaces * dailyCost +
         			permitSpaces * monthlyCost/22.0f +
@@ -202,7 +204,7 @@ public final class TapDataManager
         	driveAccessWalkTime[tap] = walkTime;
             driveAccessDriveTime[tap] = driveTime;
             driveAccessAllowed[tap] = driveAvailable;
-        
+            totalSpaces[tap] = spaces;
         }
         
         
@@ -263,7 +265,7 @@ public final class TapDataManager
         driveAccessWalkTime= new float[(int) maxLotId + 1];
         driveAccessDriveTime= new float[(int) maxLotId + 1];
         driveAccessAllowed= new boolean[(int) maxLotId + 1];
-
+        totalSpaces = new float[(int) maxLotId + 1];
     }
 
     /**
@@ -342,6 +344,20 @@ public final class TapDataManager
 
     }
     
+    public void setDriveAccessAllowed(int tap, boolean allowed) {
+    	
+    	driveAccessAllowed[tap] = allowed;
+
+    }
+
+    public float getTotalSpaces(int tap) {
+    	return totalSpaces[tap];
+    }
+    
+    public void setTotalSpaces(int tap, float spaces) {
+    	totalSpaces[tap] = spaces;
+    }
+
     public static void main(String[] args)
     {
         ResourceBundle rb = ResourceUtil.getPropertyBundle(new File(args[0]));

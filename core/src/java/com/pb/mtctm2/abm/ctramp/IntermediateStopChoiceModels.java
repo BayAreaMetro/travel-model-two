@@ -2769,7 +2769,6 @@ public class IntermediateStopChoiceModels implements Serializable {
         mcDmuObject.setPersonObject( p );
         mcDmuObject.setTourObject( t );
         
-        int tourMode = t.getTourModeChoice();
         int origMgra = s.getOrig();
 
 
@@ -2811,18 +2810,6 @@ public class IntermediateStopChoiceModels implements Serializable {
         mcDmuObject.setPersonIsFemale( p.getPersonIsFemale() );
         mcDmuObject.setHhWorkers( hh.getWorkers() );
         
-        mcDmuObject.setTourModeIsDA( modelStructure.getTourModeIsSov( tourMode ) ? 1 : 0 );
-        mcDmuObject.setTourModeIsS2( modelStructure.getTourModeIsS2( tourMode ) ? 1 : 0 );
-        mcDmuObject.setTourModeIsS3( modelStructure.getTourModeIsS3( tourMode ) ? 1 : 0 );
-        mcDmuObject.setTourModeIsWalk( modelStructure.getTourModeIsWalk( tourMode ) ? 1 : 0 );
-        mcDmuObject.setTourModeIsBike( modelStructure.getTourModeIsBike( tourMode ) ? 1 : 0 );
-        mcDmuObject.setTourModeIsWTran( modelStructure.getTourModeIsWalkTransit(tourMode) ? 1 : 0 );
-        mcDmuObject.setTourModeIsPnr( modelStructure.getTourModeIsPnr( tourMode ) ? 1 : 0 );
-        mcDmuObject.setTourModeIsKnr( modelStructure.getTourModeIsKnr( tourMode ) ? 1 : 0 );
-        mcDmuObject.setTourModeIsSchBus( modelStructure.getTourModeIsSchoolBus( tourMode ) ? 1 : 0 );
-        mcDmuObject.setTourModeIsTNC( modelStructure.getTourModeIsTNC( tourMode ) ? 1 : 0 );
-        mcDmuObject.setTourModeIsTaxi( modelStructure.getTourModeIsTaxi( tourMode ) ? 1 : 0 );
-
         mcDmuObject.setPTazTerminalTime(tazs.getOriginTazTerminalTime(mgraManager.getTaz(origMgra)));
         
         mcDmuObject.setDepartPeriod( t.getTourDepartPeriod() );

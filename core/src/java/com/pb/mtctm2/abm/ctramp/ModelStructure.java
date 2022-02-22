@@ -318,7 +318,9 @@ public abstract class ModelStructure
 
     abstract public boolean getTourModeIsPnr(int tourMode);
 
-    abstract public boolean getTourModeIsKnr(int tourMode);
+    abstract public boolean getTourModeIsKnrTransit(int tourMode);
+
+    abstract public boolean getTourModeIsTNCTransit(int tourMode);
 
     abstract public boolean getTourModeIsSchoolBus(int tourMode);
 
@@ -330,6 +332,8 @@ public abstract class ModelStructure
     
     abstract public boolean getTripModeIsKnrTransit(int tripMode);
     
+    abstract public boolean getTripModeIsTNCTransit(int tripMode);
+
     abstract public boolean getTourModeIsTNC(int tourMode);
     
     abstract public boolean getTourModeIsTaxi(int tourMode);

@@ -19,6 +19,7 @@ public class Stop
     int     alightTap;
     boolean inbound;
     int     set;
+    short   minute;
     
     float   sampleRate;
 
@@ -175,6 +176,14 @@ public class Stop
 
 	public void setSampleRate(float sampleRate) {
 		this.sampleRate = sampleRate;
+	}
+
+	public short getMinute() {
+		return minute;
+	}
+
+	public void setMinute(short minute) {
+		this.minute = minute;
 	}
     
 

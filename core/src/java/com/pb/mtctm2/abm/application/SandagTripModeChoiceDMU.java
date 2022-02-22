@@ -143,60 +143,6 @@ public class SandagTripModeChoiceDMU
         return inboundStops;
     }
     
-    public int getTourModeIsDA()
-    {
-        return tourModeIsDA;
-    }
-    
-    public int getTourModeIsS2()
-    {
-        return tourModeIsS2;
-    }
-    
-    public int getTourModeIsS3()
-    {
-        return tourModeIsS3;
-    }
-    
-    public int getTourModeIsWalk()
-    {
-        return tourModeIsWalk;
-    }
-    
-    public int getTourModeIsBike()
-    {
-        return tourModeIsBike;
-    }
-    
-    public int getTourModeIsWTran()
-    {
-        return tourModeIsWTran;
-    }
-    
-    public int getTourModeIsPnr()
-    {
-        return tourModeIsPnr;
-    }
-    
-    public int getTourModeIsKnr()
-    {
-        return tourModeIsKnr;
-    }
-    
-    public int getTourModeIsSchBus()
-    {
-        return tourModeIsSchBus;
-    }
-    
-    public int getTourModeIsTaxi()
-    {
-    	return tourModeIsTaxi;
-    }
-    
-    public int getTourModeIsTNC()
-    {
-    	return tourModeIsTNC;
-    }
     public double getHasTransitSubsidy() {
     	
     	return person.getTransitSubsidyChoice();
@@ -282,6 +228,11 @@ public class SandagTripModeChoiceDMU
         methodIndexMap.put("getTransitSubsidyPercent",601);
         methodIndexMap.put("getHasTransitPass",602);
         methodIndexMap.put("getInbound",605);
+        methodIndexMap.put("getTourModeIsTNCTransit",610);
+        methodIndexMap.put("getOutboundPNRTripOnTour",611);
+        methodIndexMap.put("getInboundPNRTripOnTour",612);
+        
+        
 
     }
 
@@ -489,7 +440,16 @@ public class SandagTripModeChoiceDMU
             case 605:
             	returnValue = getInbound();
             	break;
-	
+            case 610:
+                returnValue = getTourModeIsTNCTransit();
+                break;
+            case 611:
+            	returnValue = outboundPNRTripOnTour();
+            	break;
+            case 612:
+            	returnValue = inboundPNRTripOnTour();
+            	break;
+
             	
             default:
                 logger.error( "method number = " + variableIndex + " not found" );

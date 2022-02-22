@@ -275,6 +275,9 @@ public class Tour
         return hhObj.getHhId();
     }
 
+    public Household getHousehold() {
+    	return hhObj;
+    }
     public int getHhMgra()
     {
         return hhObj.getHhMgra();

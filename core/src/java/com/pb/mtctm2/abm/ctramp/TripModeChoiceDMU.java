@@ -68,18 +68,6 @@ public class TripModeChoiceDMU
     
     protected int outboundHalfTourDirection;
     
-    protected int tourModeIsDA;
-    protected int tourModeIsS2;
-    protected int tourModeIsS3;
-    protected int tourModeIsWalk;
-    protected int tourModeIsBike;
-    protected int tourModeIsWTran;
-    protected int tourModeIsPnr;
-    protected int tourModeIsKnr;
-    protected int tourModeIsSchBus;
-    protected int tourModeIsTaxi;
-    protected int tourModeIsTNC;
-
     protected double reimburseAmount;
     
     protected float pTazTerminalTime;
@@ -291,61 +279,6 @@ public class TripModeChoiceDMU
         lastTrip = trip;
     }
 
-    public void setTourModeIsDA(int arg)
-    {
-        tourModeIsDA = arg;
-    }
-
-    public void setTourModeIsS2(int arg)
-    {
-        tourModeIsS2 = arg;
-    }
-
-    public void setTourModeIsS3(int arg)
-    {
-        tourModeIsS3 = arg;
-    }
-
-    public void setTourModeIsWalk(int arg)
-    {
-        tourModeIsWalk = arg;
-    }
-
-    public void setTourModeIsBike(int arg)
-    {
-        tourModeIsBike = arg;
-    }
-
-    public void setTourModeIsWTran(int arg)
-    {
-        tourModeIsWTran = arg;
-    }
-
-    public void setTourModeIsPnr(int arg)
-    {
-        tourModeIsPnr = arg;
-    }
-
-    public void setTourModeIsKnr(int arg)
-    {
-        tourModeIsKnr = arg;
-    }
-
-    public void setTourModeIsSchBus(int arg)
-    {
-        tourModeIsSchBus = arg;
-    }
-
-    public void setTourModeIsTNC(int arg)
-    {
-        tourModeIsTNC = arg;
-    }
-
-    public void setTourModeIsTaxi(int arg)
-    {
-        tourModeIsTaxi = arg;
-    }
-    
     
     
     public void setOrigDuDen(double arg)
@@ -505,10 +438,16 @@ public class TripModeChoiceDMU
     
     public int getTourModeIsKnr()
     {
-        boolean tourModeIsKnr = modelStructure.getTourModeIsKnr(tour.getTourModeChoice());
+        boolean tourModeIsKnr = modelStructure.getTourModeIsKnrTransit(tour.getTourModeChoice());
         return tourModeIsKnr ? 1 : 0;
     }
     
+    public int getTourModeIsTNCTransit()
+    {
+        boolean tourModeIsKnr = modelStructure.getTourModeIsTNCTransit(tour.getTourModeChoice());
+        return tourModeIsKnr ? 1 : 0;
+    }
+
     public int getTourModeIsTNC()
     {
     	boolean tourModeIsTNC = modelStructure.getTourModeIsTNC(tour.getTourModeChoice());
@@ -728,7 +667,39 @@ public class TripModeChoiceDMU
 		return person.getTransitSubsidyPercent();
 	}
 
+	public int outboundPNRTripOnTour() {
+		
+		if(tour==null) return 0;
+		
+		Stop[] outboundStops = tour.getOutboundStops();
+		
+		if(outboundStops==null) return 0;
+		
+		for(Stop stop: outboundStops) {
+			if(stop==null)
+				continue;
+			if(modelStructure.getTripModeIsPnrTransit(stop.getMode()))
+				return 1;
+		}
+		return 0;
+	}
 
+	public int inboundPNRTripOnTour() {
+		
+		if(tour==null) return 0;
+		
+		Stop[] inboundStops = tour.getOutboundStops();
+		
+		if(inboundStops==null) return 0;
+		
+		for(Stop stop: inboundStops) {
+			if(stop==null)
+				continue;
+			if(modelStructure.getTripModeIsPnrTransit(stop.getMode()))
+				return 1;
+		}
+		return 0;
+	}
 	public int getIndexValue(String variableName)
     {
         return methodIndexMap.get(variableName);
@@ -758,5 +729,6 @@ public class TripModeChoiceDMU
     {
         throw new UnsupportedOperationException();
     }
+    
 
 }

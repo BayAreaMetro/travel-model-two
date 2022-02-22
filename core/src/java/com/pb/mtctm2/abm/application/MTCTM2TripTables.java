@@ -26,8 +26,8 @@ import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.Util;
-import com.pb.mtctm2.abm.maas.ResimulateTransitPathModel;
 import com.pb.mtctm2.abm.reports.SkimBuilder;
+import com.pb.mtctm2.abm.transitcapacityrestraint.ResimulateTransitPathModel;
 
 public class MTCTM2TripTables {
 
