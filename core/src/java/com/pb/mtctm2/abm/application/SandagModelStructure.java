@@ -389,7 +389,7 @@ public class SandagModelStructure
 
     public boolean getTourModeIsDriveTransit(int tourMode)
     {
-        return (getTourModeIsPnr(tourMode) | getTourModeIsKnrTransit(tourMode));
+        return (getTourModeIsPnr(tourMode) | getTourModeIsKnrTransit(tourMode) | getTourModeIsTNCTransit(tourMode));
     }
 
     public boolean getTourModeIsPnr(int tourMode)

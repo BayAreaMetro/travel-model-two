@@ -464,8 +464,10 @@ public class ParkingCapacityRestraintModel {
 		householdManager.setHhArray(hhs);
 		
 		//remove the taps that have reached capacity from the tap data manager
+		logger.info("Removing drive access to the following TAPs");
 		for(Integer tap : tapsToRemove) {
 			tapManager.setDriveAccessAllowed(tap, false);
+			logger.info("TAP "+tap);
 		}
 		
         // new a ctramp application object
