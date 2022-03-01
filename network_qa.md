@@ -10,7 +10,7 @@ title: Network QA
   * [2022 02 01 release](https://mtcdrive.box.com/s/j0gd3suiefdlebkn6v2jpws87aq3cmec) - Includes only the 2015 roadway network
   * [2022 03 01 release](https://mtcdrive.box.com/s/y0p4twyu3nkm1rg4u6vk6miksvzduhuf) - Includes the 2015 roadway network, nodes and transit links
 
-* [Maz and Taz](https://mtcdrive.app.box.com/folder/157365053902?s=xpwx5kl55acdceha9ol7vhhrqlyjlsx6)
+* [Travel Analysis Zones (TAZ) and Micro-Analysis Zones (MAZ)](https://mtcdrive.app.box.com/folder/157365053902?s=xpwx5kl55acdceha9ol7vhhrqlyjlsx6) - Helpful for reviewing centroid connectors
 
 * ArcGIS Online web maps for all counties:  
   (Web maps are view-only; an editable version can be available upon request)
