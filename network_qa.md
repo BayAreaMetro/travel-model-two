@@ -8,7 +8,9 @@ title: Network QA
 
 Currently, these include the 2015 roadway network, TM2 MAZs and TAZs.  The 2015 transit networks will be added soon.
 
-* [Geodatabase on Box](https://mtcdrive.box.com/s/j0gd3suiefdlebkn6v2jpws87aq3cmec) - Includes all counties. Right click on model_net.gdb and select 'Download'
+* Geodatabase - Includes all counties. Right click on model_net.gdb and select 'Download'
+  * [2022 02 01 release](https://mtcdrive.box.com/s/j0gd3suiefdlebkn6v2jpws87aq3cmec) - Includes only the 2015 roadway network
+  * [2022 03 01 release](https://mtcdrive.box.com/s/y0p4twyu3nkm1rg4u6vk6miksvzduhuf) - Includes the 2015 roadway network, nodes and transit links
 
 * ArcGIS Online web maps for all counties:  
   (Web maps are view-only; an editable version can be available upon request)
