@@ -1020,7 +1020,7 @@ public class IntermediateStopChoiceModels implements Serializable {
                     stop.setMode( modeAlt );
                     
                     // if the trip is a transit mode, set the boarding and alighting tap pairs in the stop object based on the ik segment pairs
-                    if ( modelStructure.getTripModeIsWalkTransit(modeAlt) | modelStructure.getTripModeIsPnrTransit(modeAlt) || modelStructure.getTripModeIsKnrTransit(modeAlt) ) {
+                    if ( modelStructure.getTripModeIsTransit(modeAlt) ) {
  
                     	int accEgr = -1;
                     	if(modelStructure.getTripModeIsWalkTransit(modeAlt)) {
@@ -1095,7 +1095,7 @@ public class IntermediateStopChoiceModels implements Serializable {
 	                stop.setMode( modeAlt );
 	                
 	                // if the last trip is a transit mode, set the boarding and alighting tap pairs in the stop object based on the kj segment pairs
-	                if ( modelStructure.getTripModeIsWalkTransit(modeAlt) | modelStructure.getTripModeIsPnrTransit(modeAlt) || modelStructure.getTripModeIsKnrTransit(modeAlt) ) {
+	                if ( modelStructure.getTripModeIsTransit(modeAlt) ) {
 	
 	                	int accEgr = -1;
                     	if(modelStructure.getTripModeIsWalkTransit(modeAlt)) {
@@ -1184,7 +1184,7 @@ public class IntermediateStopChoiceModels implements Serializable {
                 else
                     bestTaps = tour.getBestWtwTapPairsOut();
             }
-            else if ( modelStructure.getTripModeIsPnrTransit(modeAlt) || modelStructure.getTripModeIsKnrTransit(modeAlt) ) {
+            else if ( modelStructure.getTripModeIsPnrTransit(modeAlt) || modelStructure.getTripModeIsKnrTransit(modeAlt)  || modelStructure.getTripModeIsTNCTransit(modeAlt) ) {
                 if ( directionIsInbound )
                     bestTaps = tour.getBestWtdTapPairsIn();
                 else
@@ -1341,7 +1341,7 @@ public class IntermediateStopChoiceModels implements Serializable {
                     stop.setMode( modeAlt );
                     
                     // if the trip is a transit mode, set the boarding and alighting tap pairs in the stop object based on the ik segment pairs
-                    if ( modelStructure.getTripModeIsWalkTransit(modeAlt) | modelStructure.getTripModeIsPnrTransit(modeAlt) || modelStructure.getTripModeIsKnrTransit(modeAlt) ) {
+                    if ( modelStructure.getTripModeIsTransit(modeAlt) ) {
 
 	                	int accEgr = -1;
                     	if(modelStructure.getTripModeIsWalkTransit(modeAlt)) {
@@ -1428,7 +1428,7 @@ public class IntermediateStopChoiceModels implements Serializable {
                     stop.setMode( modeAlt );
 	                
 	                // if the last trip is a transit mode, set the boarding and alighting tap pairs in the stop object based on the kj segment pairs
-	                if ( modelStructure.getTripModeIsWalkTransit(modeAlt) || modelStructure.getTripModeIsPnrTransit(modeAlt) || modelStructure.getTripModeIsKnrTransit(modeAlt) ) {
+	                if ( modelStructure.getTripModeIsTransit(modeAlt) ) {
 	                	
 	                	int accEgr = -1;
                     	if(modelStructure.getTripModeIsWalkTransit(modeAlt)) {
@@ -1520,7 +1520,7 @@ public class IntermediateStopChoiceModels implements Serializable {
                 else
                     bestTaps = tour.getBestWtwTapPairsOut();
             }
-            else if ( modelStructure.getTripModeIsPnrTransit(modeAlt) || modelStructure.getTripModeIsKnrTransit(modeAlt) ) {
+            else if ( modelStructure.getTripModeIsPnrTransit(modeAlt) || modelStructure.getTripModeIsKnrTransit(modeAlt) || modelStructure.getTripModeIsTNCTransit(modeAlt)) {
                 if ( directionIsInbound )
                     bestTaps = tour.getBestWtdTapPairsIn();
                 else
@@ -1535,7 +1535,7 @@ public class IntermediateStopChoiceModels implements Serializable {
             else {
                 
             	// set taps
-                if ( modelStructure.getTripModeIsWalkTransit(modeAlt) || modelStructure.getTripModeIsPnrTransit(modeAlt) || modelStructure.getTripModeIsKnrTransit(modeAlt) ) {
+                if ( modelStructure.getTripModeIsTransit(modeAlt) ) {
 
                 	//pick transit path from N-paths
                 	float rn = (float)household.getHhRandom().nextDouble();
