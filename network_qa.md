@@ -34,9 +34,9 @@ Currently, these include the 2015 roadway network, TM2 MAZs and TAZs.  The 2015 
 
 ## Known Issues
 
-### Managed Laned offset rendering problem.
-
-Managed lanes are coded as a link attribute in the standard network, so when modeled networks are created, they are generated as parallel links to the mainline.  However, the process that creates the shapefile version offsets the links in a manner that is inconsistent with the generation of the nodes, resulting in a visualization of these lanes which appears to be disconnected.  However, this is a rendering problem only, and the actual modeled network does not have this issue -- just the shapefile version.
+* [Managed Laned offset rendering problem](https://github.com/BayAreaMetro/travel-model-two-networks/issues/57)
+* [Freeway names are not useful, missing route num](https://github.com/BayAreaMetro/travel-model-two-networks/issues/55)
+* [Link shapes do not represent direction in point order of polyline](https://github.com/BayAreaMetro/travel-model-two-networks/issues/56)
 
 ## Frequently Asked Questions (FAQs)
 
