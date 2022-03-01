@@ -201,59 +201,69 @@ Transit trips are assigned between transit access points (TAPs), which represent
 
 The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology.
 
-| *Operator/Agency ID* | *Agency Name* | *Mode* | *Mode Group* | *Farezones* |
-|----------------------|---------------|--------|--------------|-------------|
-| 3D | TriDelta Transit | 44 | Local bus | |
-| AB | AirBART | 40 | Local bus | |
-| AC | AC Transit | 30 | Local bus | |
-| AD | AC Transbay | 84 | Express Bus | 1-5 |
-| AM | Amtrak Capitol Cor. & Reg. Svc | 131 | Commuter rail | 25-36 |
-| AO | Alameda/Oakland Ferry | 100 | Ferry service | 120-121, 123-124 |
-| AT | Angel Island - Tiburon Ferry | 103 | Ferry service | 130-132 |
-| AY | American Canyon Transit | 55 | Local bus | |
-| BA | BART | 120 | Heavy rail | 40-85 |
-| BG | Blue and Gold | 103 | Ferry service | 128-132 |
-| BT | Benicia Transit | 58 | Local bus | |
-| CC | The County Connection | 86 | Express Bus | |
-| CC | The County Connection | 42 | Local bus | |
-| CE | ACE | 133 | Commuter rail | 20-22 |
-| CT | Caltrain | 130 | Commuter rail | 105-110 |
-| DE | Dumbarton Express | 82 | Express Bus | 2, 4 |
-| EM | Emery Go-Round | 12 | Local bus | |
-| FS | Fairfield-Suisun Transit | 92 | Express Bus | 5, 150-152, 154 |
-| FS | Fairfield-Suisun Transit | 52 | Local bus | |
-| GF | [Golden Gate Ferry](http://goldengateferry.org/) | 101 | Ferry service | 115-117 |
-| GG | [Golden Gate Transit](http://goldengatetransit.org/) | 87 | Express Bus | 1, 5, 12-16, 201, 204 |
-| GG | [Golden Gate Transit](http://goldengatetransit.org/) | 70 | Local bus | 1, 5, 12-16, 201, 204 |
-| HB | Alameda Harbor Bay Ferry | 100 | Ferry service | 122-124 |
-| MA | [Marin Transit](https://marintransit.org/) | 71 | Local bus | |
-| MS | Stanford Marguerite Shuttle | 13 | Local bus | |
-| MV | MVgo (Mountain View) | 16 | Local bus | |
-| PE | Petaluma Transit | 68 | Local bus | |
-| RV | Rio Vista Delta Breeze | 52 | Local bus | 150, 170 |
-| SA | [Sonoma Marin Area Rail Transit (SMART)](https://sonomamarintrain.org/) | 134 | Commuter rail | 97-101 |
-| SC | Santa Clara VTA | 81 | Express Bus | |
-| SC | Santa Clara VTA | 28 | Local bus | |
-| SC | Santa Clara VTA | 111 | Light rail | |
-| SF | San Francisco MUNI | 21 | Local bus | |
-| SF | San Francisco MUNI | 110 | Light rail | |
-| SF | San Francisco MUNI | 20 | Local bus | |
-| SM | SamTrans | 80 | Express Bus | |
-| SM | SamTrans | 24 | Local bus | 1-3 |
-| SO | Sonoma County Transit | 63 | Local bus | 201-208 |
-| SR | Santa Rosa CityBus | 66 | Local bus | |
-| SV | St. Helena VINE | 60 | Local bus | |
-| UC | [Union City Transit](https://www.unioncity.org/170/Union-City-Transit) | 38 | Local bus | |
-| VB | [Vallejo Baylink Ferry](https://www.vallejobayferry.com/) | 93 | Express bus | |
-| VB | [Vallejo Baylink Ferry](https://www.vallejobayferry.com/) | 104 | Ferry service | 125-127 |
-| VC | Vacaville City Coach | 56 | Local bus | |
-| VN | [Napa VINE](http://www.ridethevine.com/vine) | 60 | Local bus | 5, 160-161 |
-| VT | Vallejo Transit | 91 | Express Bus | |
-| VT | Vallejo Transit | 49 | Local bus | |
-| WC | [WestCAT](https://www.westcat.org/) | 90 | Express Bus | |
-| WC | [WestCAT](https://www.westcat.org/) | 46 | Local bus | |
-| WH | [Livermore Amador Valley Transit Authority (LAVTA)](https://www.wheelsbus.com/) | 17 | Local bus | |
-| YV | Yountville Shuttle | 60 | Local bus | |
+|TM2_operator|agency_name|TM2_mode                                     |TM2_line_haul_name|faresystem   |
+|------------|-----------|---------------------------------------------|------------------|-------------|
+|30          |AC Transit |84                                           |Express bus       |9            |
+|30          |AC Transit |30                                           |Local bus         |9            |
+|30          |AC Transit |30                                           |Local bus         |11           |
+|5           |ACE Altamont Corridor Express|133                                          |Commuter rail     |1            |
+|26          |Bay Area Rapid Transit|120                                          |Heavy rail        |2            |
+|3           |Blue & Gold Fleet|103                                          |Ferry service     |13           |
+|3           |Blue & Gold Fleet|103                                          |Ferry service     |14           |
+|3           |Blue & Gold Fleet|103                                          |Ferry service     |12           |
+|17          |Caltrain   |130                                          |Commuter rail     |3            |
+|23          |Capitol Corridor|131                                          |Commuter rail     |4            |
+|19          |Cloverdale Transit|63                                           |Local bus         |7            |
+|17          |Commute.org Shuttle|14                                           |Local bus         |46           |
+|15          |County Connection|86                                           |Express bus       |16           |
+|15          |County Connection|42                                           |Local bus         |15           |
+|15          |County Connection|42                                           |Local bus         |17           |
+|10          |Emery Go-Round|12                                           |Local bus         |18           |
+|28          |Fairfield and Suisun Transit|92                                           |Express bus       |10           |
+|28          |Fairfield and Suisun Transit|52                                           |Local bus         |10           |
+|35          |Golden Gate Transit|87                                           |Express bus       |8            |
+|20          |Golden Gate Transit|101                                          |Ferry service     |19           |
+|20          |Golden Gate Transit|101                                          |Ferry service     |20           |
+|35          |Golden Gate Transit|70                                           |Local bus         |8            |
+|99          |MVgo Mountain View|16                                           |Local bus         |21           |
+|39          |Marin Transit|71                                           |Local bus         |23           |
+|39          |Marin Transit|71                                           |Local bus         |24           |
+|21          |Petaluma Transit|68                                           |Local bus         |47           |
+|13          |Rio Vista Delta Breeze|52                                           |Local bus         |5            |
+|6           |SamTrans   |80                                           |Express bus       |6            |
+|6           |SamTrans   |24                                           |Local bus         |6            |
+|25          |San Francisco Bay Ferry|101                                          |Ferry service     |28           |
+|25          |San Francisco Bay Ferry|101                                          |Ferry service     |30           |
+|25          |San Francisco Bay Ferry|101                                          |Ferry service     |31           |
+|25          |San Francisco Bay Ferry|101                                          |Ferry service     |32           |
+|25          |San Francisco Bay Ferry|101                                          |Ferry service     |29           |
+|22          |San Francisco Municipal Transportation Agency|110                                          |Light rail        |25           |
+|22          |San Francisco Municipal Transportation Agency|20                                           |Local bus         |25           |
+|22          |San Francisco Municipal Transportation Agency|21                                           |Local bus         |26           |
+|1           |Santa Rosa CityBus|66                                           |Local bus         |33           |
+|12          |SolTrans   |91                                           |Express bus       |35           |
+|12          |SolTrans   |49                                           |Local bus         |34           |
+|12          |SolTrans   |49                                           |Local bus         |35           |
+|19          |Sonoma County Transit|63                                           |Local bus         |7            |
+|7           |Stanford Marguerite Shuttle|13                                           |Local bus         |22           |
+|4           |Tri Delta Transit|95                                           |Express bus       |36           |
+|4           |Tri Delta Transit|44                                           |Local bus         |37           |
+|4           |Tri Delta Transit|44                                           |Local bus         |36           |
+|36          |Union City Transit|38                                           |Local bus         |38           |
+|31          |VTA        |81                                           |Express bus       |40           |
+|31          |VTA        |81                                           |Express bus       |41           |
+|31          |VTA        |111                                          |Light rail        |41           |
+|31          |VTA        |28                                           |Local bus         |41           |
+|31          |VTA        |28                                           |Local bus         |39           |
+|14          |Vacaville City Coach|56                                           |Local bus         |48           |
+|38          |Vine (Napa County)|94                                           |Express bus       |43           |
+|38          |Vine (Napa County)|60                                           |Local bus         |42           |
+|38          |Vine (Napa County)|60                                           |Local bus         |44           |
+|37          |WestCat (Western Contra Costa)|90                                           |Express bus       |49           |
+|37          |WestCat (Western Contra Costa)|90                                           |Express bus       |50           |
+|37          |WestCat (Western Contra Costa)|46                                           |Local bus         |49           |
+|24          |Wheels Bus |17                                           |Local bus         |45           |
+
 
 ### Transit Fares
 
