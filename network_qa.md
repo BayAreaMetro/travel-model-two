@@ -12,8 +12,7 @@ title: Network QA
 
 * [Travel Analysis Zones (TAZ) and Micro-Analysis Zones (MAZ)](https://mtcdrive.app.box.com/folder/157365053902?s=xpwx5kl55acdceha9ol7vhhrqlyjlsx6) - Helpful for reviewing centroid connectors
 
-* ArcGIS Online web maps for all counties:  
-  (Web maps are view-only; an editable version can be available upon request)
+* ArcGIS Online web maps - one for each county:  
 
   * [Alameda](https://mtc.maps.arcgis.com/home/webmap/viewer.html?webmap=d21c975d3b384e2c8a8e3ee6b4a4fd52)
   * [Contra Costa](https://arcg.is/0zy0zq)
