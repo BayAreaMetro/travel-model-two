@@ -178,24 +178,28 @@ The transit network is made up of three core components: transit lines, transit 
 
 Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the [Level of Service Information](#level-of-service-information).
 
-### Line Attributes
+### Link Attributes
 
-| *Field* | *Description* | *Data Type* |
-|---------|---------------|-------------|
-| *NAME* | agency_id + route_id + time_period + direction_id + shape_id | String |
-| *USERA1* | agency_id or GTFS file name when agency_id is missing | String |
-| *USERA2* | Line haul mode, one of {::nomarkdown}<br/><ul><li>`Local bus`</li> <li>`Express bus`</li> <li>`Ferry service`</li> <li>`Light rail`</li> <li>`Heavy rail`</li> <li>`Commuter rail`</li></ul>{:/} | String |
-| *MODE* | Mode code | Integer |
-| *FARESYSTEM* | Faresystem code. Not necessary if *MODE* corresponds to *FARESYSTEM* in the factors file. | Integer |
-| *OPERATOR* | agency_id or GTFS file name when agency_id is missing | Integer |
-| *ONEWAY* | set to TRUE since each route is coded by direction | Character |
-| *HEADWAY[1]* | Early AM headway (3AM to 6AM) | Float |
-| *HEADWAY[2]* | AM peak headway (6AM to 10AM) | Float |
-| *HEADWAY[3]* | Midday headway (10AM to 3PM) | Float |
-| *HEADWAY[4]* | PM peak headway (3PM to 7PM) | Float |
-| *HEADWAY[5]* | Evening headway (7PM to 3AM) | Float |
-| *ACCESS* | pickup_type, dropoff_type translated to Cube coding | Integer |
-| *N* | List of stops served.  Lines are coded through stops, not TAPs (which are like transit TAZs).  A negative stop is not served. | List of Integers |
+|Field                |Description                                                                             |Data Type|
+|---------------------|----------------------------------------------------------------------------------------|---------|
+|trip_id              |unique identifier for each trip                                                         |Integer  |
+|is_stop_A            |if node A is a transit stop                                                             |boolean  |
+|access_A             |                                                                                        |         |
+|stop_sequence_A      |stop sequence of node A, if node A is a stop                                            |Integer  |
+|shape_pt_sequence_B  |sequence of node A in the route                                                         |Integer  |
+|shape_model_node_id_B|model_node_id of node B                                                                 |Integer  |
+|NAME                 |name of route with TOD                                                                  |string   |
+|agency_id            |transit agency id                                                                       |string   |
+|TM2_line_haul_name   |'Commuter rail', 'Express bus', 'Local bus', 'Light rail', 'Ferry service', 'Heavy rail'|string   |
+|TM2_mode             |see mode dictionary                                                                     |Integer  |
+|faresystem           |faresystem (1-50)                                                                       |Integer  |
+|tod                  |time of day (1, 2, 3, 4, 5)                                                             |Integer  |
+|HEADWAY              |transit service headway in minute                                                       |Integer  |
+|A                    |A of link                                                                               |Integer  |
+|B                    |B of link                                                                               |Integer  |
+|model_link_id        |model_link_id                                                                           |Integer  |
+|shstGeometryId       |the shstGeometryId of the link                                                          |Integer  |
+
 
 ### Transit Modes
 
