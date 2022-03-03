@@ -20,7 +20,7 @@ title: Network QA
   * [Napa](https://arcg.is/1einHf)
   * [San Francisco](https://arcg.is/0fX48u)
   * [San Mateo](https://arcg.is/r0XP0)
-  * [Santa Clara](https://arcg.is/1rzbCL0) (an [editable version](https://arcg.is/1POXza) is available; login is required.)
+  * [Santa Clara](https://arcg.is/1rzbCL0)
   * [Solano](https://arcg.is/H1zKW)
   * [Sonoma](https://arcg.is/OTCGz)
 
