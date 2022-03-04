@@ -218,6 +218,9 @@ public class ParkingCapacityRestraintModel {
 		int lastTime = -99;
 		for(Stop thisStop : outboundStops) {
 			
+			if(thisStop.getMinute()>0)
+				continue;
+			
 			int period = thisStop.getStopPeriod();
 			
 			//iterate until simulated time is greater or equal to the time for the last trip on the tour
@@ -237,6 +240,9 @@ public class ParkingCapacityRestraintModel {
 
 		for(Stop thisStop : inboundStops) {
 			
+			if(thisStop.getMinute()>0)
+				continue;
+
 			int period = thisStop.getStopPeriod();
 			
 			//iterate until simulated time is greater or equal to the time for the last trip on the tour
@@ -611,43 +617,15 @@ public class ParkingCapacityRestraintModel {
 	    }
 	}
 	
-	private void writeDemandToFile(String filename, float[] arrivalsToTAP, HashMap<Integer, float[]> PNRLotMap) {
-
-		PrintWriter pnrWriter = null;
-        try
-        {
-        	pnrWriter = new PrintWriter(new File(filename));
-        } catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-
-        String header = "TAP,CAPACITY,TOT_ARRIVALS";
-        for(int i=0; i<numberOfTimeBins;++i)
-        	header += ","+"BIN_"+i;
-        pnrWriter.println(header);
-        pnrWriter.flush();
-        
-        Set<Integer> tapSet = PNRLotMap.keySet();
-        for(Integer tap:tapSet) {
-        	float totalSpaces = tapManager.getTotalSpaces(tap);
-            float[] arrivals = PNRLotMap.get(tap);
-        	String printString = tap + "," + totalSpaces +","+arrivalsToTAP[tap];
-        	for(int i=0;i<arrivals.length;++i) {
-        		printString += "," + arrivals[i];
-        	}
-        	pnrWriter.println(printString);
-            pnrWriter.flush();
-        }
-
-        pnrWriter.close();
-	}
-				
 
 	private void calculateConstrainedArrivals(Tour thisTour) {
 		
 		totalConstrainedPNRTours += (1.0/sampleRate);
 		
+		
+		//times need to be resimulated
+		simulateExactTimesForTour(thisTour);
+
 		Stop[] stops = thisTour.getOutboundStops();
 		if(stops==null) return;
 		for(Stop thisStop : stops) {
@@ -678,6 +656,49 @@ public class ParkingCapacityRestraintModel {
 		}
 		
 	}
+	
+
+	/** Write the PNR lot demand by time period to an output file
+	 * 
+	 * @param filename
+	 * @param arrivalsToTAP
+	 * @param PNRLotMap
+	 */
+	private void writeDemandToFile(String filename, float[] arrivalsToTAP, HashMap<Integer, float[]> PNRLotMap) {
+
+		PrintWriter pnrWriter = null;
+        try
+        {
+        	pnrWriter = new PrintWriter(new File(filename));
+        } catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        String header = "TAP,CAPACITY,TOT_ARRIVALS";
+        for(int i=0; i<numberOfTimeBins;++i) {
+        	String timeString = getTimeString(MINUTES_PER_SIMULATION_PERIOD+(i*MINUTES_PER_SIMULATION_PERIOD));
+        	header += ","+timeString;
+        }
+        pnrWriter.println(header);
+        pnrWriter.flush();
+        
+        Set<Integer> tapSet = PNRLotMap.keySet();
+        for(Integer tap:tapSet) {
+        	float totalSpaces = tapManager.getTotalSpaces(tap);
+            float[] arrivals = PNRLotMap.get(tap);
+        	String printString = tap + "," + totalSpaces +","+arrivalsToTAP[tap];
+        	for(int i=0;i<arrivals.length;++i) {
+        		printString += "," + arrivals[i];
+        	}
+        	pnrWriter.println(printString);
+            pnrWriter.flush();
+        }
+
+        pnrWriter.close();
+	}
+				
+
     private HouseholdDataManagerIf connectToHouseholdDataManager( HashMap<String,String> propertyMap )
     {
 
