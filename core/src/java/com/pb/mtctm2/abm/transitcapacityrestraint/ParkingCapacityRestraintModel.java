@@ -92,7 +92,14 @@ public class ParkingCapacityRestraintModel {
 	protected float[] unconstrainedArrivalsToTAP; //to track arrivals over time.
 	protected float[] constrainedArrivalsToTAP; //to track arrivals over time.
 	    
-	
+	/**
+	 * Constructor
+	 * @param rb ResourceBundle version of property map
+	 * @param pMap Property map version of resource bundle (dumb? yes)
+	 * @param globalIterationNumber The global iteration number
+	 * @param iterationSampleRate The sample rate
+	 * @param sampleSeed The sample seed for monte carlo.
+	 */
 	public ParkingCapacityRestraintModel(ResourceBundle rb, HashMap<String, String> pMap, int globalIterationNumber,
             float iterationSampleRate, int sampleSeed) {
 		
@@ -105,6 +112,9 @@ public class ParkingCapacityRestraintModel {
 	}
 	
 	
+	/**
+	 * Reads properties, initializes data structures, instantiates member classes, etc.
+	 */
 	public void initialize() {
 
 		
@@ -208,7 +218,7 @@ public class ParkingCapacityRestraintModel {
 	/**
 	 * This method assigns exact departure times in minutes to all stops on the tour.
 	 * 
-	 * @param tour
+	 * @param tour A PNR tour
 	 */
 	public void simulateExactTimesForTour(Tour tour) {
 		
@@ -380,6 +390,12 @@ public class ParkingCapacityRestraintModel {
 	}
 	
 	
+	/**
+	 * Iterate through PNR arrivals (sorted by minute), calculate the arrivals by TAP and by TAP-simulation period. For any arrival to lot 
+	 * after lot is full, add the household to a container of households to resimulate (householdsToResimulate). Add full lots to container
+	 * of lots to remove from the next iteration (tapsToRemove)
+	 * 
+	 */
 	public void calculateUnconstrainedArrivalsByPeriod() {
 		
 		logger.info("Calculated "+numberOfTimeBins+" simulation periods using a period length of "+MINUTES_PER_SIMULATION_PERIOD+" minutes");
@@ -495,16 +511,26 @@ public class ParkingCapacityRestraintModel {
         
         Household[] resimulatedHouseholds = householdManager.getHhArray();
         
+        //Replace the initial households with resimulated households        
         Household[] finalHouseholds = replaceHouseholdsWithResimulatedHouseholds(unconstrainedHouseholds, resimulatedHouseholds);
         
+        //Replace the household array in the manager
         householdManager.setHhArray(finalHouseholds);
         
+        //And write the constrained household, person, tour, and trip files.
         HouseholdDataWriter dataWriter = new HouseholdDataWriter(propertyMap, modelStructure, iteration);
-
         dataWriter.writeDataToFiles(householdManager);
 		
 	}
 	
+	/**
+	 * Replace households in the unconstrainedHouseholds array with the resimulated households in resimulatedHouseholds array
+	 * 
+	 * @param unconstrainedHouseholds
+	 * @param resimulatedHouseholds
+	 * 
+	 * @return An array with all households (where initial hhs are replaced with resimulated hhs)
+	 */
 	public Household[] replaceHouseholdsWithResimulatedHouseholds(Household[] unconstrainedHouseholds, Household[] resimulatedHouseholds) {
 		
 	    //create a hashmap of the resimulated households
@@ -618,6 +644,12 @@ public class ParkingCapacityRestraintModel {
 	}
 	
 
+	/**
+	 * Iterate through trips in tour. Simulate the times for the tour. Track arrivals to lots.
+	 * This method _may_ be unnecessary once iteration is built into the algorithm.
+	 * 
+	 * @param thisTour
+	 */
 	private void calculateConstrainedArrivals(Tour thisTour) {
 		
 		totalConstrainedPNRTours += (1.0/sampleRate);
@@ -735,6 +767,12 @@ public class ParkingCapacityRestraintModel {
 
     }
     
+    /**
+     * Convert the departure time (minutes past 3 AM) into a string hour:minute. Useful for logging.
+     * 
+     * @param departTimeInMinutes
+     * @return The time string.
+     */
     public String getTimeString(int departTimeInMinutes) {
     	
     	int hour = (int) (departTimeInMinutes/60);
@@ -745,6 +783,12 @@ public class ParkingCapacityRestraintModel {
     }
 
 
+    /**
+     * For distributed computing.
+     * 
+     * @param numberOfHouseholds
+     * @return
+     */
     private ArrayList<int[]> getTaskHouseholdRanges(int numberOfHouseholds)
     {
 
@@ -805,6 +849,14 @@ public class ParkingCapacityRestraintModel {
                 return -1;
         }
     }
+    
+    /**
+     * Helper method for forming file names from a file name and iteration number.
+     * 
+     * @param originalFileName
+     * @param iteration
+     * @return
+     */
     private String formFileName(String originalFileName, int iteration)
     {
         int lastDot = originalFileName.lastIndexOf('.');
@@ -825,6 +877,10 @@ public class ParkingCapacityRestraintModel {
         return returnString;
     }
 
+    /**
+     * Main method
+     * @param args
+     */
     public static void main(String[] args)
     {
 
