@@ -13,6 +13,7 @@ CONTENTS
 1. [Roadway Network](#roadway-network)
    - [County Node Numbering System](#county-node-numbering-system)
    - [Node Attributes](#node-attributes)
+     - [External Nodes](#external-nodes)
    - [Link Attributes](#link-attributes)
       - [TOLLBOOTH & TOLLSEG](#tollbooth--tollseg)
 1. [Transit Network](#transit-network)
@@ -105,6 +106,32 @@ The following node attributes are included in the master network.
 |*RAIL_ACCESS* | Node is used by rail links | Boolean
 |*FAREZONE* | Unique sequential fare zone ID for transit skimming and assignment | Integer
 |*TAP_ID* | Transit access point (TAP) associated connected to this node | Integer
+
+#### External Nodes
+
+| *N* | *Gateway* |
+|-----|-----------|
+| 900001 | State Route 1 (Sonoma) |
+| 900002 | State Route 28 (Sonoma) |
+| 900003 | U.S. Route 101 (Sonoma) |
+| 900004 | State Route 29 (Napa) |
+| 900005 | State Route 128 (Solano) |
+| 900006 | Interstate 505 (Solano) |
+| 900007 | State Route 113 (Solano) |
+| 900008 | Interstate 80 (Solano) |
+| 900009 | State Route 12 (Solano) |
+| 900010 | State Route 160 (Contra Costa) |
+| 900011 | State Route 4 (Contra Costa) |
+| 900012 | County Route J-4 (Contra Costa) |
+| 900013 | Interstate 205 + Interstate 580 (Alameda) |
+| 900014 | State Route 152 (Santa Clara/East) |
+| 900015 | State Route 156 (Santa Clara) |
+| 900016 | State Route 25 (Santa Clara) |
+| 900017 | U.S. Route 101 (Santa Clara) |
+| 900018 | State Route 152 (Santa Clara/West) |
+| 900019 | State Route 17 (Santa Clara) |
+| 900020 | State Route 9 (Santa Clara) |
+| 900021 | State Route 1 (San Mateo) |
 
 ### Link Attributes
 
