@@ -15,7 +15,7 @@
 ; Input:  (1)  Station-specific assumed growth rates and commute shares for each forecast year
 ;              (the lack of external/external movements through the region allows simple factoring of cells
 ;              without re-balancing) (ixex_config.dbf)
-;         (2)  An input base matrix derived from the Census journey-to-work data (ixDaily2015.tpp) and 
+;         (2)  An input base matrix derived from the Census journey-to-work data (ixDaily2015.new.tpp) and 
 ;              totals (ixDaily2015_totals.dbf)
 ;         (3)  Environment variables: %MODEL_YEAR% (e.g. 2015, 2035, 2050, etc)
 ;
