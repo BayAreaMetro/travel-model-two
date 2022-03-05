@@ -38,6 +38,7 @@ if __name__ == '__main__':
 
         # translation
         GEO_TRANSLATION_FILE       = "M:\\Data\\GIS layers\\\maz_taz_conversion\\maz_v1_intersect_v22.xlsx"
+        GEO_TRANSLATION_SHEET      = "taz_v1_intersect_v22"
         GEO_TRANSLATION_SRC_GEO    = "maz_v1_0"
         GEO_TRANSLATION_TARGET_GEO = "maz_v2_2"
         GEO_TRANSLATION_SRC_PCT    = "pct_of_maz_v1_0"
@@ -84,6 +85,7 @@ if __name__ == '__main__':
 
         # translation
         GEO_TRANSLATION_FILE       = "M:\\Data\\GIS layers\\\maz_taz_conversion\\taz_v1_intersect_v22.xlsx"
+        GEO_TRANSLATION_SHEET      = "taz_v1_intersect_v22"
         GEO_TRANSLATION_SRC_GEO    = "taz_v1_0"
         GEO_TRANSLATION_TARGET_GEO = "taz_v2_2"
         GEO_TRANSLATION_SRC_PCT    = "pct_of_taz_v1_0"
@@ -99,14 +101,16 @@ if __name__ == '__main__':
     elif args.convert_type == "ix_tm1_taz_to_tm2_taz_v22":
 
         # these are lists to iterate over - this is a two pass process.  Convert J first, then I.
-        INPUT_DATA_FILES            = ["IXDaily2006x4.may2208.csv"          , "IXDaily2006x4.may2208_updated_j.csv"]
-        INPUT_DATA_GEOS             = ["J"                                  , "I"]
-        INPUT_DATA_EXTRA_INDEX_COLS = [["I"]                                , ["J_tm2"]]
-        OUTPUT_DATA_FILES           = ["IXDaily2006x4.may2208_updated_j.csv", "IXDaily2006x4.may2208_updated_ij.csv"]
-        OUTPUT_DATA_GEOS            = ["J_tm2"                              , "I_tm2"]
+        # Do it twice -- once for the 2006 matrix and once for 2015
+        INPUT_DATA_FILES            = ["IXDaily2006x4.may2208.csv"          , "IXDaily2006x4.may2208_updated_j.csv" ,"ixDaily2015.csv"          , "ixDaily2015_updated_j.csv" ]
+        INPUT_DATA_GEOS             = ["J"                                  , "I"                                   ,"J"                        , "I"                         ]
+        INPUT_DATA_EXTRA_INDEX_COLS = [["I"]                                , ["J_tm2"]                             ,["I"]                      , ["J_tm2"]                   ]
+        OUTPUT_DATA_FILES           = ["IXDaily2006x4.may2208_updated_j.csv", "IXDaily2006x4.may2208_updated_ij.csv","ixDaily2015_updated_j.csv", "ixDaily2015_updated_ij.csv"]
+        OUTPUT_DATA_GEOS            = ["J_tm2"                              , "I_tm2"                               ,"J_tm2"                    , "I_tm2"                     ]
 
         # translation
-        GEO_TRANSLATION_FILE       = "M:\\Data\\GIS layers\\\maz_taz_conversion\\taz_tm1_intersect_taz_tm2.xlsx"
+        GEO_TRANSLATION_FILE       = "M:\\Data\\GIS layers\\\maz_taz_conversion\\tm1_tm2_taz_maz_crosswalks.xlsx"
+        GEO_TRANSLATION_SHEET      = "tazTM1_to_tazTM2"
         GEO_TRANSLATION_SRC_GEO    = "taz_tm1"
         GEO_TRANSLATION_TARGET_GEO = "taz_tm2_v2_2"
         GEO_TRANSLATION_SRC_PCT    = "pct_of_taz_tm1"
@@ -124,7 +128,8 @@ if __name__ == '__main__':
         OUTPUT_DATA_GEOS            = ["I_tm2", "J_tm2"]
 
         # translation
-        GEO_TRANSLATION_FILE       = "M:\\Data\\GIS layers\\\maz_taz_conversion\\taz_tm1_intersect_taz_tm2.xlsx"
+        GEO_TRANSLATION_FILE       = "M:\\Data\\GIS layers\\\maz_taz_conversion\\tm1_tm2_taz_maz_crosswalks.xlsx"
+        GEO_TRANSLATION_SHEET      = "tazTM1_to_tazTM2"
         GEO_TRANSLATION_SRC_GEO    = "taz_tm1"
         GEO_TRANSLATION_TARGET_GEO = "taz_tm2_v2_2"
         GEO_TRANSLATION_SRC_PCT    = "pct_of_taz_tm1"
@@ -136,7 +141,7 @@ if __name__ == '__main__':
     pandas.options.display.float_format = '{:.2f}'.format
 
     # read the translation file
-    translate_df = pandas.read_excel(GEO_TRANSLATION_FILE, header=0)
+    translate_df = pandas.read_excel(GEO_TRANSLATION_FILE, sheet_name=GEO_TRANSLATION_SHEET, header=0)
     print("Read translation file {}".format(GEO_TRANSLATION_FILE))
     print("Head:\n{}".format(translate_df.head()))
 
