@@ -66,7 +66,7 @@
 
 
 ;start cluster nodes
-*Cluster.exe MTC_AIRPAX 1-12 start exit
+*"%TPP_PATH%\Cluster.exe" MTC_AIRPAX 1-12 start exit
 
 token_taz_count = %TAZ_COUNT%
 
@@ -511,4 +511,4 @@ endrun
 *DEL nonres\2035*.mtx
 
 ;stop cluster nodes
-*Cluster.exe MTC_AIRPAX 1-12 close exit
+*"%TPP_PATH%\Cluster.exe" MTC_AIRPAX 1-12 close exit
