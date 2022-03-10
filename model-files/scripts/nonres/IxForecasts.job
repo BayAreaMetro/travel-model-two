@@ -75,7 +75,7 @@ run pgm = matrix
        year_delta      = %MODEL_YEAR%-2015
 
        ; figure out 2015 desired total -- this is future-dependent
-       IF ('%FUTURE%'='PBA50')
+       IF (@token_future@='PBA50')
 
          IF (EXT_ZONE == @FIRST_EXT_ZONE@) PRINT LIST="--PBA50--%MODEL_YEAR%--  Non-commute share grows based on slope for ",year_delta," years"
          total_modyear[EXT_ZONE-@FIRST_EXT_ZONE@] = total_2015 + year_delta*(1.0-commute_share)*slope
