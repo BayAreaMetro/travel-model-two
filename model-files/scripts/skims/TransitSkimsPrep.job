@@ -92,7 +92,7 @@ SKIM_MATRIX_DEF = '%BASE_SCRIPTS%\block\skim_matrix_definitions.block'
 
 ;first, build transit drive access skims
 ;export highway skims as csv files
-*Cluster.exe MTC_HWYSKIM 1-5 start exit
+*"%TPP_PATH%\Cluster.exe" MTC_HWYSKIM 1-5 start exit
 
 loop period = 1,5
 
@@ -125,7 +125,7 @@ ENDLOOP
 Wait4Files files = MTC_HWYSKIM1.script.end, MTC_HWYSKIM2.script.end, MTC_HWYSKIM3.script.end, MTC_HWYSKIM4.script.end, MTC_HWYSKIM5.script.end,
            printfiles = merge, deldistribfiles = t, CheckReturnCode = t
 
-*Cluster.exe MTC_HWYSKIM 1-5 close exit
+*"%TPP_PATH%\Cluster.exe" MTC_HWYSKIM 1-5 close exit
 
 ;export taps connectors from network
 RUN PGM=NETWORK
@@ -150,18 +150,17 @@ RUN PGM=NETWORK
     ENDPHASE
 ENDRUN
 
-;call python program to build transit drive access skims
-*python %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
-
+; build transit drive access skims
+*"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
 IF (RETURNCODE > 0) abort
 ;*del skims\DA_*_taz_time.csv
 
 ; run script used to help consolidate taps
-*python %BASE_SCRIPTS%\skims\tap_lines.py
+*"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\tap_lines.py
 IF (RETURNCODE > 0) abort
 
 ;rebuild transit line file with new numbers
-*python %BASE_SCRIPTS%\skims\build_new_transit_line.py "trn\transitLines.lin" "trn\transitLines_new_nodes.lin" "hwy\mtc_transit_network_tap_to_node.txt"
+*"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\build_new_transit_line.py "trn\transitLines.lin" "trn\transitLines_new_nodes.lin" "hwy\mtc_transit_network_tap_to_node.txt"
 IF (RETURNCODE > 0) abort
 
 ;now build transit times based on congested times from loaded network
