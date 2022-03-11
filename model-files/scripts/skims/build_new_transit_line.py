@@ -27,7 +27,7 @@ for line in reader:
     node_map[int(line["OLD_NODE"])] = int(line["N"])
 
 #next, read in the transit lines, change the node, and write out the results
-f = open(out_line_file,'wb')
+f = open(out_line_file,'w')
 f.write(";;<<PT>><<LINE>>;;"+os.linesep)
 trn_line          = ""
 trn_line_count    = 0

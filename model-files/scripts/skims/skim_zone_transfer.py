@@ -76,9 +76,10 @@ for line in open(skim_file):
         try:
             data[i] = transfer[i][int(data[i])]
         except Exception as inst:
-            if data == ['\x1a']:  # EOF
-                # print("End of file reached")
-                continue
+            # for some reason this file has lots of blank lines -- workaround this
+            if data == ['']: continue
+            # handle EOF
+            if data == ['\x1a']: continue
             print(data)
             raise inst
     f.write(','.join(data) + os.linesep)
