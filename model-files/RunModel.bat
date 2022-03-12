@@ -3,8 +3,6 @@
 :: set RUNTYPE=LOCAL to run everything on this machine
 :: set RUNTYPE=DISTRIBUTED to farm out work to other nodes
 set RUNTYPE=LOCAL
-:: set ENVTYPE=MTC or RSG
-set ENVTYPE=RSG
 
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 :: RunModel.bat
@@ -18,8 +16,7 @@ set ENVTYPE=RSG
 :: RunModel.bat > model_run_out.txt 2>&1
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:: Step 0: Copy over CTRAMP from %GITHUB_DIR%
- set GITHUB_DIR=F:\Projects\Clients\mtc\updated_networks\travel-model-two
+:: Step 0: Copy over CTRAMP from %GITHUB_DIR%, which should be set prior to this (e.g. in SetUpModel.bat)
  if not exist CTRAMP (
   mkdir CTRAMP\model
   mkdir CTRAMP\runtime

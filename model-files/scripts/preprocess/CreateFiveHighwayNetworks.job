@@ -33,7 +33,7 @@ run pgm = hwynet
 ;    PAR NODES=10000000
 
    ; begin with the standard input network
-   neti = hwy\mtc_final_network_with_dist.net
+   neti = hwy\mtc_final_network_with_tolls.net
 
    ; write out to the same name with the added variables
    neto = hwy\mtc_final_network_with_tolls_fft.net
@@ -403,7 +403,6 @@ loop period = 1, 5
 
       ; placeholder for total reliability
       RELBTY_SD = STREL
-      RELBTY_VAR = RELBTY_SD ^ 2
 
 
 
