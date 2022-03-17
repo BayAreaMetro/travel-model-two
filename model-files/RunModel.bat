@@ -1,9 +1,5 @@
 @echo on
 
-:: set RUNTYPE=LOCAL to run everything on this machine
-:: set RUNTYPE=DISTRIBUTED to farm out work to other nodes
-set RUNTYPE=LOCAL
-
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 :: RunModel.bat
 ::
@@ -63,10 +59,9 @@ SET AV_SCENARIO=0
 :: Scripts base directory
 SET BASE_SCRIPTS=CTRAMP\scripts
 
-:: Add these variables to the PATH environment variable, moving the current path to the back of the list
-set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUBE_PATH%;%CUBE_DLL_PATH%;%PYTHON_PATH%;%PYTHON_PATH%\condabin;%PYTHON_PATH%\envs
-
-CALL conda activate mtc_py2
+:: expect conda to be in PATH
+CALL conda activate %TM2_PYTHON_CONDA_ENV%
+IF ERRORLEVEL 2 goto done
 
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
@@ -143,18 +138,18 @@ if NOT %MATRIX_SERVER%==localhost (
 :: preprocess input network to
 :: 1 - fix space issue in CNTYPE
 :: 2 - add a FEET field based on DISTANCE
-runtpp %BASE_SCRIPTS%\preprocess\preprocess_input_net.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\preprocess_input_net.job
 IF ERRORLEVEL 2 goto done
 
 :: Write a batch file with number of zones, taps, mazs
-runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
 if ERRORLEVEL 2 goto done
 
 ::Run the batch file
 call zoneSystem.bat
 
 :: Build sequential numberings
-runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
 
 :: Create all necessary input files based on updated sequential zone numbering
 :zones
@@ -172,11 +167,11 @@ move popsyn\households_renum.csv popsyn\households.csv
 IF %SELECT_COUNTY% GTR 0 (
 
   :: Collapse the mazs outside select county
-  runtpp %BASE_SCRIPTS%\preprocess\CreateCollapsedNetwork.job
+  "%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\CreateCollapsedNetwork.job
   if ERRORLEVEL 2 goto done
 
   :: RERUN: Write a batch file with number of zones, taps, mazs
-  runtpp %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
+  "%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\writeZoneSystems.job
   if ERRORLEVEL 2 goto done
 
   ::RERUN: Run the batch file
@@ -193,7 +188,7 @@ IF %SELECT_COUNTY% GTR 0 (
   python %BASE_SCRIPTS%\preprocess\popsampler.PY landuse\sampleRateByTAZ.csv popsyn\households.csv popsyn\persons.csv
 
   :: RERUN: Build sequential numberings
-  runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
+  "%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
   if ERRORLEVEL 2 goto done
 
   ::RERUN: Create all necessary input files based on updated sequential zone numbering
@@ -209,7 +204,7 @@ IF %SELECT_COUNTY% GTR 0 (
 ::  move popsyn\households_renum.csv popsyn\households.csv
 
 :: Write out the intersection and maz XYs
-runtpp %BASE_SCRIPTS%\preprocess\maz_densities.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\maz_densities.job
 if ERRORLEVEL 2 goto done
 
 :: Calculate density fields and append to MAZ file
@@ -217,15 +212,15 @@ python %BASE_SCRIPTS%\preprocess\createMazDensityFile.py
 IF ERRORLEVEL 1 goto done
 
 :: Build sequential numberings
-runtpp %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\zone_seq_net_builder.job
 if ERRORLEVEL 2 goto done
 
 :: Translate the roadway network into a non-motorized network
-runtpp %BASE_SCRIPTS%\preprocess\CreateNonMotorizedNetwork.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\CreateNonMotorizedNetwork.job
 if ERRORLEVEL 2 goto done
 
 :: Create the tap data
-runtpp %BASE_SCRIPTS%\preprocess\tap_to_taz_for_parking.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\tap_to_taz_for_parking.job
 if ERRORLEVEL 2 goto done
 
 python %BASE_SCRIPTS%\preprocess\tap_data_builder.py .
@@ -235,28 +230,28 @@ IF ERRORLEVEL 1 goto done
 python %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\tolls.csv hwy\tolls.dbf
 IF ERRORLEVEL 1 goto done
 
-runtpp %BASE_SCRIPTS%\preprocess\SetTolls.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\SetTolls.job
 if ERRORLEVEL 2 goto done
 
 :: Set a penalty to dummy links connecting HOV/HOT lanes and general purpose lanes
-runtpp %BASE_SCRIPTS%\preprocess\SetHovXferPenalties.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\SetHovXferPenalties.job
 if ERRORLEVEL 2 goto done
 
 :capclass
 :: Create areatype and capclass fields in network
-runtpp %BASE_SCRIPTS%\preprocess\SetCapClass.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\SetCapClass.job
 if ERRORLEVEL 2 goto done
 
-runtpp %BASE_SCRIPTS%\preprocess\setInterchangeDistance.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\setInterchangeDistance.job
 if ERRORLEVEL 2 goto done
 
 :createfivehwynets
 :: Create time-of-day-specific
-runtpp %BASE_SCRIPTS%\preprocess\CreateFiveHighwayNetworks.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\CreateFiveHighwayNetworks.job
 if ERRORLEVEL 2 goto done
 
 :: Create taz networks
-runtpp %BASE_SCRIPTS%\preprocess\BuildTazNetworks.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\preprocess\BuildTazNetworks.job
 if ERRORLEVEL 2 goto done
 
 echo COMPLETED PREPROCESS  %DATE% %TIME% >> logs\feedback.rpt
@@ -272,11 +267,11 @@ echo COMPLETED PREPROCESS  %DATE% %TIME% >> logs\feedback.rpt
 :nonmot
 
 :: Build the skim tables
-runtpp %BASE_SCRIPTS%\skims\NonMotorizedSkims.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\NonMotorizedSkims.job
 if ERRORLEVEL 2 goto done
 
 :::: Build the maz-maz skims
-runtpp %BASE_SCRIPTS%\skims\MazMazSkims.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\MazMazSkims.job
 if ERRORLEVEL 2 goto done
 
 echo COMPLETED NON-MOTORIZED-SKIMS  %DATE% %TIME% >> logs\feedback.rpt
@@ -287,7 +282,7 @@ echo COMPLETED NON-MOTORIZED-SKIMS  %DATE% %TIME% >> logs\feedback.rpt
 ::
 :: ------------------------------------------------------------------------------------------------------
 :: Run the airport model
-runtpp %BASE_SCRIPTS%\nonres\BuildAirPax.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\nonres\BuildAirPax.job
 if ERRORLEVEL 2 goto done
 
 :itercnt
@@ -300,15 +295,15 @@ if ERRORLEVEL 2 goto done
 
 :: Build the initial highway and transit skims
 :hwyskims
-runtpp %BASE_SCRIPTS%\skims\HwySkims.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\HwySkims.job
 if ERRORLEVEL 2 goto done
 
 :transitnet
-runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
 :transitskimsprep
-runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
 if ERRORLEVEL 2 goto done
 
 :createemmenetwork
@@ -317,14 +312,16 @@ CALL conda deactivate
 CALL conda activate mtc
 
 :: Create emme project from scratch since it's the first iteration
-python %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "yes"
+"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
 
-%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "mtc_emme" --first_iteration "yes"
+"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "mtc_emme" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
 
-REM %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "yes"
-%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "yes" --skip_import_demand
+:: Passing the port specified in the Emme Desktop GUI 
+:: see Tools > Application Options > Advanced.  
+:: At the bottom of the pane, there is text: "Desktop API is listening on port 4242."
+"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "yes" --skip_import_demand --port 4242
 IF ERRORLEVEL 1 goto done
 
 CALL conda deactivate
@@ -332,10 +329,10 @@ CALL conda activate mtc_py2
 
 :afteremmeskims
 
-REM runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
+REM "%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\TransitSkims.job
 REM if ERRORLEVEL 2 goto done
 
-REM runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
+REM "%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
 REM if ERRORLEVEL 2 goto done
 
 ::Step X: Main model iteration setup
@@ -431,8 +428,8 @@ ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.mat /NDL /NFL
 ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.omx /NDL /NFL
 
 :afterrobocopy
-runtpp CTRAMP\scripts\assign\merge_auto_matrices.s
-REM runtpp CTRAMP\scripts\assign\merge_demand_matrices.s
+"%TPP_PATH%\runtpp" CTRAMP\scripts\assign\merge_auto_matrices.s
+REM "%TPP_PATH%\runtpp" CTRAMP\scripts\assign\merge_demand_matrices.s
 if ERRORLEVEL 2 goto done
 
 :: ------------------------------------------------------------------------------------------------------
@@ -444,31 +441,31 @@ if ERRORLEVEL 2 goto done
 :nonres
 
 :: Build the internal/external demand matrices forecast
-runtpp CTRAMP\scripts\nonres\IxForecasts.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\nonres\IxForecasts.job
 if ERRORLEVEL 2 goto done
 
 :: Apply diurnal factors to the fixed internal/external demand matrices
-runtpp CTRAMP\scripts\nonres\IxTimeOfDay.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\nonres\IxTimeOfDay.job
 if ERRORLEVEL 2 goto done
 
 :: Apply a value toll choice model for the internal/external demand
-runtpp CTRAMP\scripts\nonres\IxTollChoice.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\nonres\IxTollChoice.job
 if ERRORLEVEL 2 goto done
 
 :: Apply the commercial vehicle generation models
-runtpp CTRAMP\scripts\nonres\TruckTripGeneration.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\nonres\TruckTripGeneration.job
 if ERRORLEVEL 2 goto done
 
 :: Apply the commercial vehicle distribution models
-runtpp CTRAMP\scripts\nonres\TruckTripDistribution.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\nonres\TruckTripDistribution.job
 if ERRORLEVEL 2 goto done
 
 :: Apply the commercial vehicle diurnal factors
-runtpp CTRAMP\scripts\nonres\TruckTimeOfDay.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\nonres\TruckTimeOfDay.job
 if ERRORLEVEL 2 goto done
 
 :: Apply a value toll choice model for eligible commercial demand
-runtpp CTRAMP\scripts\nonres\TruckTollChoice.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\nonres\TruckTollChoice.job
 if ERRORLEVEL 2 goto done
 
 :hwyasgn
@@ -480,32 +477,32 @@ if ERRORLEVEL 2 goto done
 :: ------------------------------------------------------------------------------------------------------
 
 :mazasgn
-runtpp CTRAMP\scripts\assign\build_and_assign_maz_to_maz_auto.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\assign\build_and_assign_maz_to_maz_auto.job
 if ERRORLEVEL 2 goto done
 
 :tazasgn
-runtpp CTRAMP\scripts\assign\HwyAssign.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\assign\HwyAssign.job
 if ERRORLEVEL 2 goto done
 
-runtpp CTRAMP\scripts\assign\AverageNetworkVolumes.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\assign\AverageNetworkVolumes.job
 if ERRORLEVEL 2 goto done
 
-runtpp CTRAMP\scripts\assign\CalculateAverageSpeed.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\assign\CalculateAverageSpeed.job
 if ERRORLEVEL 2 goto done
 
-runtpp CTRAMP\scripts\assign\MergeNetworks.job
+"%TPP_PATH%\runtpp" CTRAMP\scripts\assign\MergeNetworks.job
 if ERRORLEVEL 2 goto done
 
 :: If another iteration is to be run, run hwy skims
 IF %ITERATION% LSS %MAX_ITERATION% (
-  runtpp %BASE_SCRIPTS%\skims\HwySkims.job
+  "%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\HwySkims.job
   if ERRORLEVEL 2 goto done
 )
 
-runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
-runtpp %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
+"%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\TransitSkimsPrep.job
 if ERRORLEVEL 2 goto done
 
 :emmeseconditeration
@@ -533,7 +530,7 @@ SET /A INNER_ITERATION=0
 SET /A INNER_ITERATION+=1
 
   :: no longer needed
-	REM runtpp CTRAMP\scripts\assign\merge_transit_matrices.s
+	REM "%TPP_PATH%\runtpp" CTRAMP\scripts\assign\merge_transit_matrices.s
 	REM if ERRORLEVEL 2 goto done
 
 :innerskim
@@ -549,10 +546,10 @@ SET /A INNER_ITERATION+=1
 :afterinnerskim
 
   :: Run Transit Assignment
-  REM runtpp CTRAMP\scripts\assign\TransitAssign.job
+  REM "%TPP_PATH%\runtpp" CTRAMP\scripts\assign\TransitAssign.job
   REM if ERRORLEVEL 2 goto done
 
-  REM runtpp %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
+  REM "%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
   REM if ERRORLEVEL 2 goto done
 
   :: Start Matrix Server remotely or locally

@@ -7,6 +7,10 @@
 :: set ENVTYPE=MTC or RSG
 set ENVTYPE=MTC
 
+:: set RUNTYPE=LOCAL to run everything on this machine
+:: set RUNTYPE=DISTRIBUTED to farm out work to other nodes
+set RUNTYPE=LOCAL
+
 :: ------------------------------
 :: Step 1: Specify file locations
 :: ------------------------------
