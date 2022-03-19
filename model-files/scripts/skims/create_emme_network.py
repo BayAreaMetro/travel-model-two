@@ -755,12 +755,12 @@ def split_tap_connectors_to_prevent_walk(network):
                 line_data.pop("vehicle"),
                 itinerary)
             # copy line attributes back
-            for k, v in line_data.iteritems():
+            for (k, v) in line_data.items():
                 new_line[k] = v
             # copy segment attributes back
             for seg in new_line.segments(include_hidden=True):
                 data = seg_data.get((seg.i_node, seg.j_node, seg.loop_index), {})
-                for k, v in data.iteritems():
+                for (k, v) in data.items():
                     seg[k] = v
             # set boarding, alighting and dwell time on new tap access / egress segments
             for tap_ref in tap_segments:
@@ -980,9 +980,9 @@ def apply_station_attributes(input_dir, network):
                     modes_at_stop = [str(segment.line['#src_mode']) for segment in transfer_link.j_node.outgoing_segments()]
                     modes_at_stop = list(set(['b' if stop_mode == 'x' else stop_mode for stop_mode in modes_at_stop]))
                     print('mode: ', mode, ' modes_at_stop: ', modes_at_stop)
-                    if (transfer_link.j_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype('string').values):
+                    if (transfer_link.j_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype(str).values):
                         print('connects to transfer node')
-                    if (mode in modes_at_stop) | (transfer_link.j_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype('string').values):
+                    if (mode in modes_at_stop) | (transfer_link.j_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype(str).values):
                         # create new link if this tranfer node services the mode or connects to another transfer node
                         new_transfer_link = network.create_link(new_tnode.id, transfer_link.j_node, transfer_link.modes)
                         for attr in link_attributes:
@@ -995,9 +995,9 @@ def apply_station_attributes(input_dir, network):
                     modes_at_stop = [str(segment.line['#src_mode']) for segment in transfer_link.i_node.outgoing_segments()]
                     modes_at_stop = list(set(['b' if stop_mode == 'x' else stop_mode for stop_mode in modes_at_stop]))
                     print('mode: ', mode, ' modes_at_stop: ', modes_at_stop)
-                    if (transfer_link.i_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype('string').values):
+                    if (transfer_link.i_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype(str).values):
                         print('connects to transfer node')
-                    if (mode in modes_at_stop) | (transfer_link.i_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype('string').values):
+                    if (mode in modes_at_stop) | (transfer_link.i_node.id in tap_to_pseudo_tap_xwalk['emme_pseudo_tap'].astype(str).values):
                         # create new link if this tranfer node services the mode or connects to another transfer node
                         new_transfer_link = network.create_link(transfer_link.i_node, new_tnode.id, transfer_link.modes)
                         for attr in link_attributes:
@@ -1012,8 +1012,8 @@ def apply_station_attributes(input_dir, network):
             network.delete_node(transfer_node_id)
 
         # need to connect newly created transfer nodes to eachother
-        for mode, tnode_id in new_tnode_mode_dict.iteritems():
-            for next_mode, next_tnode_id in new_tnode_mode_dict.iteritems():
+        for (mode, tnode_id) in new_tnode_mode_dict.items():
+            for (next_mode, next_tnode_id) in new_tnode_mode_dict.items():
                 if tnode_id == next_tnode_id:
                     # don't need to connect transfer node to itself
                     continue

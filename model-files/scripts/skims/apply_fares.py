@@ -332,7 +332,7 @@ class ApplyFares(object):
                     if board_cost is None:
                         # use the smallest fare found from this farezone as best guess 
                         # as a reasonable boarding cost
-                        board_cost = min(fare_matrix[farezone].itervalues())
+                        board_cost = min(fare_matrix[farezone].values())
                         self._log.append({
                             "type": "text3",
                             "content": farezone_warning3 % (
@@ -491,7 +491,7 @@ class ApplyFares(object):
             {"type": "header", "content": "Faresystem distances"})
         self._log.append(
             {"type": "text2", "content": "Max transfer distance: %s" % MAX_TRANSFER_DISTANCE})
-        for fs_index, fs_data in enumerate(faresystems.itervalues()):
+        for (fs_index, fs_data) in faresystems.items():
             stops = set([])
             for line in fs_data["LINES"]:
                 for stop in line.segments(True):
