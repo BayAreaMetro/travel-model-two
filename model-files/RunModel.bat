@@ -307,9 +307,6 @@ if ERRORLEVEL 2 goto done
 if ERRORLEVEL 2 goto done
 
 :createemmenetwork
-:: changing to python 3 environment for emme
-CALL conda deactivate
-CALL conda activate mtc
 
 :: Create emme project from scratch since it's the first iteration
 "%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "yes"
