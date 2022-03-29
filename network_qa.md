@@ -12,17 +12,17 @@ title: Network QA
 
 * [Travel Analysis Zones (TAZ) and Micro-Analysis Zones (MAZ)](https://mtcdrive.app.box.com/folder/157365053902?s=xpwx5kl55acdceha9ol7vhhrqlyjlsx6) - Helpful for reviewing centroid connectors
 
-* ArcGIS Online web maps - one for each county:  
+* ArcGIS Online web maps - available upon request:  
 
   * [Alameda](https://mtc.maps.arcgis.com/home/webmap/viewer.html?webmap=d21c975d3b384e2c8a8e3ee6b4a4fd52)
   * [Contra Costa](https://arcg.is/0zy0zq)
-  * [Marin](https://arcg.is/0TnPT50)
-  * [Napa](https://arcg.is/1einHf)
+  * [Marin]
+  * [Napa]
   * [San Francisco](https://arcg.is/0fX48u)
-  * [San Mateo](https://arcg.is/r0XP0)
+  * [San Mateo]
   * [Santa Clara](https://arcg.is/1rzbCL0)
-  * [Solano](https://arcg.is/H1zKW)
-  * [Sonoma](https://arcg.is/OTCGz)
+  * [Solano]
+  * [Sonoma]
 
 ## Resources
 
