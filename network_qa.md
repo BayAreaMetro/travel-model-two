@@ -16,13 +16,13 @@ title: Network QA
 
   * [Alameda](https://mtc.maps.arcgis.com/home/webmap/viewer.html?webmap=d21c975d3b384e2c8a8e3ee6b4a4fd52)
   * [Contra Costa](https://arcg.is/0zy0zq)
-  * [Marin]
-  * [Napa]
-  * [San Francisco](https://arcg.is/0fX48u)
-  * [San Mateo]
-  * [Santa Clara](https://arcg.is/1rzbCL0)
-  * [Solano]
-  * [Sonoma]
+  * Marin
+  * Napa
+  * San Francisco (https://arcg.is/0fX48u)
+  * San Mateo
+  * Santa Clara (https://arcg.is/1rzbCL0)
+  * Solano
+  * Sonoma
 
 ## Resources
 
