@@ -18,9 +18,9 @@ title: Network QA
   * [Contra Costa](https://arcg.is/0zy0zq)
   * Marin
   * Napa
-  * San Francisco (https://arcg.is/0fX48u)
+  * San Francisco
   * San Mateo
-  * Santa Clara (https://arcg.is/1rzbCL0)
+  * [Santa Clara](https://arcg.is/1rzbCL0)
   * Solano
   * Sonoma
 
