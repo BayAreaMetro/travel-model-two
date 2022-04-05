@@ -11,10 +11,9 @@ Usage: %EMME_PYTHON_PATH%\python skim_transit_network.py
 
     [-p, --trn_path]: path to the trn folder, default is the
         current_working_folder\trn
-    [-s, --skims_path]:path to the skims folder, default is the
+    [-s, --skims_path]: path to the skims folder, default is the
         current_working_folder\skims
-    [-i, --first_iteration]: Is this the first iteration? yes or no,
-        default is yes.  If no, will include CCR in skimming and assignment
+    [-c, --ccr_periods]: List of time periods to run CCR as EA,AM,MD,PM,EV or ALL
     [--save_iter_flows]: Save per-iteration flows in scenario
     [-t, --time_periods]: List of time periods as EA,AM,MD,PM,EV or
         ALL, default is ALL
@@ -77,6 +76,16 @@ _hours_in_period = {
     'EV': 8,  # 7:00 PM to 3:00 AM
 }
 
+# number of trips in the peak hour / avg number of trips per hour in period
+# factor of 1 means no adjustment
+_vcr_adjustment_factor = {
+    'EA': 1,
+    'AM': 1.219,
+    'MD': 1,
+    'PM': 1.262,
+    'EV': 1,
+}
+
 # TODO: make global lists tuples
 transit_modes = ['b', 'x', 'f', 'l', 'h', 'r']
 aux_transit_modes = ['w', 'a', 'e']
@@ -104,24 +113,33 @@ def calc_segment_cost(transit_volume, capacity, segment):
         return 0.0
     line = segment.line
     # need assignment period in seated_capacity calc?
+    # capacity adjusted for full time period
     seated_capacity = line.vehicle.seated_capacity * {0} * 60 / line.headway
-    num_seated = min(transit_volume, seated_capacity)
-    num_standing = max(transit_volume - seated_capacity, 0)
+    # volume is adjusted to reflect peak period
+    adj_transit_volume = transit_volume * {1}
+    num_seated = min(adj_transit_volume, seated_capacity)
+    num_standing = max(adj_transit_volume - seated_capacity, 0)
 
-    vcr = transit_volume / capacity
+    # adjusting transit volume to account for peak period spreading
+    vcr = adj_transit_volume / capacity
     crowded_factor = (((
-           (min_seat_weight+(max_seat_weight-min_seat_weight)*(transit_volume/capacity)**power_seat_weight)*num_seated
-           +(min_stand_weight+(max_stand_weight-min_stand_weight)*(transit_volume/capacity)**power_stand_weight)*num_standing
-           )/(transit_volume+0.01)))
+           (min_seat_weight+(max_seat_weight-min_seat_weight)*(vcr)**power_seat_weight)*num_seated
+           +(min_stand_weight+(max_stand_weight-min_stand_weight)*(vcr)**power_stand_weight)*num_standing
+           )/(adj_transit_volume+0.01)))
 
     # Toronto implementation limited factor between 1.0 and 10.0
+
+    # subtracting 1 from factor since new transit times are calculated as:
+    #  trtime_new = trtime_old * (1 + crowded_factor), but Toronto was derived
+    #  using trtime_new = trtime_old * (crowded_factor)
+    #  (see https://app.asana.com/0/0/1185777482487173/1202006990557038/f)
+    crowded_factor = max(crowded_factor - 1, 0)
     return crowded_factor
 """
 
 _headway_cost_function = """
 max_hdwy_growth = 1.5
 max_hdwy = 999.98
-
 
 def calc_eawt(segment, vcr, headway):
     # EAWT_AM = 0. 259625 + 1. 612019*(1/Headway) + 0.005274*(Arriving V/C) + 0. 591765*(Total Offs Share)
@@ -162,7 +180,8 @@ def calc_adj_headway(transit_volume, transit_boardings, headway, capacity, segme
     return adj_hdwy
 
 def calc_headway(transit_volume, transit_boardings, headway, capacity, segment):
-    vcr = transit_volume / capacity
+    # multipying vcr by peak period factor
+    vcr = transit_volume / capacity * {1}
     eawt = calc_eawt(segment, vcr, segment.line.headway)
     adj_hdwy = calc_adj_headway(transit_volume, transit_boardings, headway, capacity, segment)
     return adj_hdwy + eawt
@@ -537,6 +556,7 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
 
     with _m.logbook_trace("Transit assignment and skims for period %s" % period):
         run_assignment(modeller, scenario, period, params, network, num_processors, use_fares, use_ccr)
+        network = scenario.get_network()
 
         if not assignment_only:
             with _m.logbook_trace("Skims for Local-only (set1)"):
@@ -748,13 +768,13 @@ def run_assignment(modeller, scenario, period, params, network, num_processors, 
         func = {
             "segment": {
                 "type": "CUSTOM",
-                "python_function": _segment_cost_function.format(_hours_in_period[period]),
+                "python_function": _segment_cost_function.format(_hours_in_period[period], _vcr_adjustment_factor[period]),
                 "congestion_attribute": "us3",
                 "orig_func": False
             },
             "headway": {
                 "type": "CUSTOM",
-                "python_function": _headway_cost_function.format(mode_attr),
+                "python_function": _headway_cost_function.format(mode_attr, _vcr_adjustment_factor[period]),
             },
             "assignment_period": _hours_in_period[period]
         }
@@ -888,15 +908,15 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
         total_ivtt_expr = []
         if use_ccr:
             scenario.create_extra_attribute("TRANSIT_SEGMENT", "@mode_timtr")
+            print scenario.has_transit_results
             try:
                 for mode_name, modes in mode_combinations:
                     network.create_attribute("TRANSIT_SEGMENT", "@mode_timtr")
                     for line in network.transit_lines():
                         if line.mode.id in modes:
                             for segment in line.segments():
-                                # segment["@mode_timtr"] = segment["@base_timtr"]
-                                # segment["@mode_timtr"] = segment["@trantime_final"]
-                                segment["@mode_timtr"] = segment["@timtr"]
+                                # segment["@mode_timtr"] = segment['transit_time']
+                                segment["@mode_timtr"] = segment['transit_time'] - segment['@ccost']
                     mode_timtr = network.get_attribute_values("TRANSIT_SEGMENT", ["@mode_timtr"])
                     network.delete_attribute("TRANSIT_SEGMENT", "@mode_timtr")
                     scenario.set_attribute_values("TRANSIT_SEGMENT", ["@mode_timtr"], mode_timtr)
@@ -968,11 +988,17 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
         with _m.logbook_trace("Calculate CCR skims"):
             # TODO: factor this to run once ...
             create_extra("TRANSIT_SEGMENT", "@eawt", "extra added wait time", overwrite=True, scenario=scenario)
+            create_extra("TRANSIT_SEGMENT", "@seg_rel", "link reliability on transit segment", overwrite=True, scenario=scenario)
             # create_extra("TRANSIT_SEGMENT", "@crowding_factor", "crowding factor along segments", overwrite=True, scenario=scenario)
             create_extra("TRANSIT_SEGMENT", "@capacity_penalty", "capacity penalty at boarding", overwrite=True, scenario=scenario)
+            create_extra("TRANSIT_SEGMENT", "@tot_capacity", "total capacity", overwrite=True, scenario=scenario)
+            create_extra("TRANSIT_SEGMENT", "@seated_capacity", "seated capacity", overwrite=True, scenario=scenario)
+            create_extra("TRANSIT_SEGMENT", "@tot_vcr", "volume to total capacity ratio", overwrite=True, scenario=scenario)
+            create_extra("TRANSIT_SEGMENT", "@seated_vcr", "volume to seated capacity ratio", overwrite=True, scenario=scenario)
             network = scenario.get_partial_network(["TRANSIT_LINE", "TRANSIT_SEGMENT"], include_attributes=True)
             attr_map = {
-                "TRANSIT_SEGMENT": ["@phdwy", "transit_volume", "transit_boardings"],
+                "TRANSIT_SEGMENT": ["@phdwy", "transit_volume", "transit_boardings", "@capacity_penalty",
+                                    "@tot_capacity", "@seated_capacity", "@tot_vcr", "@seated_vcr", '@seg_rel'],
                 "TRANSIT_VEHICLE": ["seated_capacity", "total_capacity"],
                 "TRANSIT_LINE": ["headway"],
             }
@@ -989,29 +1015,43 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             enclosing_scope = {"network": network, "scenario": scenario}
             # code = compile(_segment_cost_function, "segment_cost_function", "exec")
             # exec(code, enclosing_scope)
-            code = compile(_headway_cost_function.format(mode_name), "headway_cost_function", "exec")
+            code = compile(_headway_cost_function.format(mode_name, _vcr_adjustment_factor[period]), "headway_cost_function", "exec")
             exec(code, enclosing_scope)
             calc_eawt = enclosing_scope["calc_eawt"]
             hdwy_fraction = 0.5 # fixed in assignment spec
 
-            # NOTE: assume assignment period is 1 hour
             for segment in network.transit_segments():
-                headway = segment.line.headway
+                line = segment.line
+                headway = line.headway
                 veh_cap = line.vehicle.total_capacity
+                seated_veh_cap = line.vehicle.seated_capacity
                 # capacity = 60.0 * veh_cap / line.headway
                 capacity = 60.0 * _hours_in_period[period] * veh_cap / line.headway
+                seated_capacity = 60.0 * _hours_in_period[period] * seated_veh_cap / line.headway
                 transit_volume = segment.transit_volume
-                vcr = transit_volume / capacity
+                vcr = transit_volume / capacity * _vcr_adjustment_factor[period]
+                seated_vcr = transit_volume / seated_capacity * _vcr_adjustment_factor[period]
+                segment["@tot_capacity"] = capacity
+                segment["@seated_capacity"] = seated_capacity
+                segment["@tot_vcr"] = vcr
+                segment["@seated_vcr"] = seated_vcr
+                # link reliability is calculated as link_rel_factor * (congested transit time)
+                # where congested transit time = crowded transit time - crowding penalty
+                if segment.link:
+                    # sometimes segment.link returns None. Is this due to hidden segments??
+                    segment["@seg_rel"] = segment.link.data3 * (segment['transit_time'] - segment['@ccost'])
+                else:
+                    segment['@seg_rel'] = 0
                 segment["@eawt"] = calc_eawt(segment, vcr, headway)
-                # segment["@crowding_penalty"] = calc_segment_cost(transit_volume, capacity, segment)
                 segment["@capacity_penalty"] = max(segment["@phdwy"] - segment["@eawt"] - headway, 0) * hdwy_fraction
 
-            values = network.get_attribute_values('TRANSIT_SEGMENT', ["@eawt", "@capacity_penalty"])
-            scenario.set_attribute_values('TRANSIT_SEGMENT', ["@eawt", "@capacity_penalty"], values)
+            additional_attribs = ["@eawt", "@capacity_penalty", "@tot_vcr", "@seated_vcr", "@tot_capacity", "@seated_capacity", "@seg_rel"]
+            values = network.get_attribute_values('TRANSIT_SEGMENT', additional_attribs)
+            scenario.set_attribute_values('TRANSIT_SEGMENT', additional_attribs, values)
 
             # # Link unreliability
-            # spec = get_strat_spec({"in_vehicle": "ul1"}, "%s_LINKREL" % skim_name)
-            # strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
+            spec = get_strat_spec({"in_vehicle": "@seg_rel"}, "%s_LINKREL" % skim_name)
+            strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
 
             # Crowding penalty
             spec = get_strat_spec({"in_vehicle": "@ccost"}, "%s_CROWD" % skim_name)
@@ -1024,10 +1064,6 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             # skim capacity penalty
             spec = get_strat_spec({"boarding": "@capacity_penalty"}, "%s_CAPPEN" % skim_name)
             strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
-
-            # skim station platform time
-            # spec = get_strat_spec({"boarding": "@stnplatformtime", "aux_transit": "@stnplatformtimewalk"}, "%s_STPLATTIME" % skim_name)
-            # strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
 
     return
 
@@ -1377,6 +1413,171 @@ def export_boardings_by_line(desktop, output_transit_boardings_file):
     table.export(output_transit_boardings_file)
     table.close()
 
+
+def export_boardings_by_segment(desktop, output_transit_boardings_file):
+    """
+    Writes out csv file containing the transit boardings by segment for use in
+    validation summaries
+
+    Parameters:
+        - desktop: emme desktop object with an primary scenario that has transit
+            boardings assigned
+        - output_transit_boardings_file: str of file to write transit boardings to
+    """
+    project = desktop.project
+    table = project.new_network_table("TRANSIT_SEGMENT")
+    column = _worksheet.Column()
+
+    # Creating total boardings by line table
+    column.expression = "i"
+    column.name = "i_node"
+    table.add_column(0, column)
+
+    column.expression = "j"
+    column.name = "j_node"
+    table.add_column(1, column)
+
+    column.expression = "line"
+    column.name = "line_name"
+    table.add_column(2, column)
+
+    column.expression = "description"
+    column.name = "description"
+    table.add_column(3, column)
+
+    column.expression = "voltr"
+    column.name = "volume"
+    table.add_column(4, column)
+
+    column.expression = "board"
+    column.name = "boardings"
+    table.add_column(5, column)
+
+    column.expression = "alight"
+    column.name = "alightings"
+    table.add_column(6, column)
+
+    column.expression = "#src_mode"
+    column.name = "mode"
+    table.add_column(7, column)
+
+    column.expression = "@mode"
+    column.name = "line_mode"
+    table.add_column(8, column)
+
+    column.expression = "capt"
+    column.name = "total_cap_of_line_per_hr"
+    table.add_column(9, column)
+
+    column.expression = "caps"
+    column.name = "seated_cap_of_line_per_hr"
+    table.add_column(10, column)
+
+    column.expression = "xi"
+    column.name = "i_node_x"
+    table.add_column(11, column)
+
+    column.expression = "yi"
+    column.name = "i_node_y"
+    table.add_column(12, column)
+
+    column.expression = "xj"
+    column.name = "j_node_x"
+    table.add_column(13, column)
+
+    column.expression = "yj"
+    column.name = "j_node_y"
+    table.add_column(14, column)
+
+    column.expression = "@tot_capacity"
+    column.name = "total_capacity"
+    table.add_column(15, column)
+
+    column.expression = "@seated_capacity"
+    column.name = "seated_capacity"
+    table.add_column(16, column)
+
+    column.expression = "@capacity_penalty"
+    column.name = "capacity_penalty"
+    table.add_column(17, column)
+
+    column.expression = "@tot_vcr"
+    column.name = "tot_vcr"
+    table.add_column(18, column)
+
+    column.expression = "@seated_vcr"
+    column.name = "seated_vcr"
+    table.add_column(19, column)
+
+    column.expression = "@ccost"
+    column.name = "ccost"
+    table.add_column(20, column)
+
+    column.expression = "@eawt"
+    column.name = "eawt"
+    table.add_column(21, column)
+
+    column.expression = "@seg_rel"
+    column.name = "seg_rel"
+    table.add_column(22, column)
+
+    table.export(output_transit_boardings_file)
+    table.close()
+
+
+def export_boardings_by_station(modeller, output_folder, period):
+    sta2sta = modeller.tool(
+        "inro.emme.transit_assignment.extended.station_to_station_analysis")
+    sta2sta_spec = {
+        "type": "EXTENDED_TRANSIT_STATION_TO_STATION_ANALYSIS",
+        "transit_line_selections": {
+            "first_boarding": "mod=h",
+            "last_alighting": "mod=h"
+        },
+        "analyzed_demand": None,
+    }
+
+    # FIXME these expressions need to be more flexible if fares are applied
+    operator_dict = {
+    # mode: network_selection
+        'bart': "mode=h",
+        'caltrain': "mode=i"
+    }
+
+    # no station to station attributes for local buses
+    sets = ["PREM", "ALLPEN"]
+
+    with _m.logbook_trace("Writing station-to-station summaries for period %s" % period):
+        for set in sets:
+            for op, cut in operator_dict.iteritems():
+                class_name = "%s_%s" % (period, set)
+                demand_matrix = "mfTRN_%s_%s" % (_set_dict[set], period)
+                output_file_name = "%s_station_to_station_%s_%s.txt" % (op, set, period)
+                print(class_name, demand_matrix, output_file_name)
+
+                sta2sta_spec['transit_line_selections']['first_boarding'] = cut
+                sta2sta_spec['transit_line_selections']['last_alighting'] = cut
+                sta2sta_spec['analyzed_demand'] = demand_matrix
+
+                output_path = _os.path.join(output_folder, output_file_name)
+                sta2sta(specification=sta2sta_spec,
+                        output_file=output_path,
+                        append_to_output_file=False,
+                        class_name=class_name)
+
+
+def output_transit_boardings(desktop, output_location, period):
+    desktop.data_explorer().replace_primary_scenario(scenario)
+    output_transit_boardings_file = _os.path.join(_os.getcwd(), output_location, "boardings_by_line_{}.csv".format(period))
+    export_boardings_by_line(desktop, output_transit_boardings_file)
+
+    output_transit_segments_file = _os.path.join(_os.getcwd(), output_location, "boardings_by_segment_{}.csv".format(period))
+    export_boardings_by_segment(desktop, output_transit_segments_file)
+
+    # output_station_to_station_folder = _os.path.join(_os.getcwd(), output_location)
+    # export_boardings_by_station(modeller, output_station_to_station_folder, period)
+
+
 # --------------------------------------------- Entry Point ---------------------------------------
 if __name__ == "__main__":
     parser = _argparse.ArgumentParser(description="Skim an already created Emme transit network.")
@@ -1385,6 +1586,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--skims_path', help=r"path to the skims folder, default is the current_working_folder\skims",
                         default=_os.path.join(_os.getcwd(), 'skims'))
     parser.add_argument('-i', '--first_iteration', help='Is this the first iteration? yes or no, default is yes', default='yes')
+    parser.add_argument('-c', '--ccr_periods', help='List of time periods to run CCR as EA,AM,MD,PM,EV or ALL', default='AM,PM')
     parser.add_argument('--save_iter_flows', action="store_true", help='Save per-iteration flows in scenarios', default=False)
     parser.add_argument('-t', '--time_periods', help='List of time periods as EA,AM,MD,PM,EV or ALL', default='ALL')
     parser.add_argument('-o', '--port', help='Port to connect to Emme desktop session', default=59673, type=int)
@@ -1421,15 +1623,10 @@ if __name__ == "__main__":
         else:
             create_empty_demand_matrices(period, scenario)
 
-        # Only run ccr assignment if not first run and period in ['AM', 'PM']
-        # if args.first_iteration == 'no' and period in ['AM', 'PM']:
-        #     use_ccr = True
-        #     # read in demand matrices for ccr-assignment
-        #     ctramp_output_folder = _os.path.join(_os.getcwd(), 'ctramp_output')
-        #     import_demand_matrices(period, scenario, ctramp_output_folder, num_processors="MAX-4")
-        # else:
-        #     use_ccr = False
-        use_ccr = False
+        if (not args.skip_import_demand) and (period in args.ccr_periods.split(",") or (args.ccr_periods == 'ALL')):
+            use_ccr = True
+        else:
+            use_ccr = False
 
         perform_assignment_and_skim(modeller, scenario, period=period, assignment_only=False,
                                     num_processors=args.num_processors, use_fares=True, use_ccr=use_ccr)
@@ -1441,6 +1638,4 @@ if __name__ == "__main__":
             save_per_iteration_flows(scenario)
 
         if args.output_transit_boardings:
-            desktop.data_explorer().replace_primary_scenario(scenario)
-            output_transit_boardings_file = _os.path.join(_os.getcwd(), args.trn_path, "boardings_by_line_{}.csv".format(period))
-            export_boardings_by_line(desktop, output_transit_boardings_file)
+            output_transit_boardings(desktop, output_location=args.trn_path, period=period)

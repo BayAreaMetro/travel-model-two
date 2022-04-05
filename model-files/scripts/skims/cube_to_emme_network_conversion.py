@@ -87,7 +87,7 @@ extra_link_attributes = ['SPEED', 'FEET',
     'USECLASS_EA', 'USECLASS_AM', 'USECLASS_MD', 'USECLASS_PM', 'USECLASS_EV',
     'ASSIGNABLE', 'TRANSIT', 'FT', 'FFS', 'TRANTIME', 'WALKDIST','WALKTIME',
     'WALK_ACCESS', 'BIKE_ACCESS', 'DRIVE_ACCES', 'BUS_ONLY', 'RAIL_ONLY',
-    'OLD_A', 'OLD_B', 'CTIM', 'NTL_MODE']
+    'OLD_A', 'OLD_B', 'CTIM', 'NTL_MODE', 'RELBTY_SD', 'AT']
 extra_transit_line_attributes = ['HEADWAY[1]','HEADWAY[2]','HEADWAY[3]','HEADWAY[4]',
     'HEADWAY[5]', 'MODE', 'FARESYSTEM', 'uses_NNTIME', 'scaled_headway']
 # name is from the raodway attribute names file
@@ -1237,6 +1237,7 @@ class emme_network_conversion:
         Write the transit time function transaction file.
         There are two transit time functions, ft1 set to 0 for the zero function,
         and ft2 = trantime_final * (1 + link_unreliability)
+        FIXME: If we are skimming link unrel separately, don't want this in cost?
 
         Parameters:
             - None
@@ -1248,7 +1249,9 @@ class emme_network_conversion:
             file.write('c Transit time functions (TTF)\n')
             # set transit time function to first user link field which is set to trantime_final
             file.write('a  ft1 = 0\n')
-            file.write('a  ft2 = us1*(1+ul3)\n')  # link unreliability stored in ul3 / link.data3
+            file.write('a  ft2 = us1\n')
+            # file.write('a  ft2 = us1*(1+ul3)\n')  # link unreliability stored in ul3 / link.data3
+
         file.close()
         pass
 
