@@ -36,8 +36,10 @@ title: Network QA
 ## Known Issues
 
 * [Managed Lane offset rendering problem](https://github.com/BayAreaMetro/travel-model-two-networks/issues/57)
-* [Freeway names are not useful, missing route num](https://github.com/BayAreaMetro/travel-model-two-networks/issues/55)
 * [Link shapes do not represent direction in point order of polyline](https://github.com/BayAreaMetro/travel-model-two-networks/issues/56)
+* [Roadway links missing names (and freeway links missing route direction)](https://github.com/BayAreaMetro/travel-model-two-networks/issues/58)
+* [Freeway names are not useful, missing route num](https://github.com/BayAreaMetro/travel-model-two-networks/issues/55)
+* [num_lanes comprises of GP,HOV,ML,etc](https://github.com/BayAreaMetro/travel-model-two-networks/issues/62)
 
 ## Frequently Asked Questions (FAQs)
 
