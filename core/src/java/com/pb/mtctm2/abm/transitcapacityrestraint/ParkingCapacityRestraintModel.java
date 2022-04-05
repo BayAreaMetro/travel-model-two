@@ -51,12 +51,18 @@ public class ParkingCapacityRestraintModel {
 	protected static final String ModelSeedProperty = "Model.Random.Seed";
     private transient ModelStructure          modelStructure;
 	protected int numberOfTimeBins;
-	private int numberOfSimulationPeriods;
 	private ArrayList<Household> householdsToResimulate;
 	private float sampleRate;
 	private int seed;
-	private static float UNSPECIFIED_SPACES = 50;
+	private static float UNSPECIFIED_SPACES = 20;
 	private static int MINUTES_PER_SIMULATION_PERIOD = 15;
+	private static int MAX_ITERATIONS = 10;
+	
+	//this is the factor on 1/sample rate that is the maximum tolerance for convergence. For example, if the sample rate is 0.2
+	//then lumpiness (minimum number of vehicles) is 1/0.2 = 5. If the max tolerance is 2, the model would iterate until either
+	//max iterations is reached or when all lots have demand < (lot capacity + 5 * 2). Note this may need to be scaled as sample rate increases.
+	
+	private static int LUMPINESS_FACTOR=2; 
 
     private static int              PACKET_SIZE                           = 0;
 
@@ -78,19 +84,24 @@ public class ParkingCapacityRestraintModel {
 
     private ResourceBundle     rb;
 
+    protected float totalPNRTours;
+    protected float totalPNRArrivals;
+
     protected ArrayList<Stop> unconstrainedPNRTrips;
-    protected float totalUnconstrainedPNRTours;
-    protected float totalUnconstrainedPNRArrivals;
     protected HashMap<Integer, float[]> unconstrainedPNRLotMap; //a hashmap of lots and the lot arrivals by time period.
     protected float[] unconstrainedPNRArrivalsByPeriod; //an array of arrivals by period
+   
     protected ArrayList<Stop> constrainedPNRTrips;
     protected float totalConstrainedPNRTours;
     protected float totalConstrainedPNRArrivals;
     protected HashMap<Integer, float[]> constrainedPNRLotMap; //a hashmap of lots and the lot arrivals by time period.
     protected float[] constrainedPNRArrivalsByPeriod; //an array of arrivals by period
-	protected ArrayList<Integer> tapsToRemove;
+
+    protected ArrayList<Integer> tapsToRemove;
 	protected float[] unconstrainedArrivalsToTAP; //to track arrivals over time.
 	protected float[] constrainedArrivalsToTAP; //to track arrivals over time.
+	
+	
 	    
 	/**
 	 * Constructor
@@ -139,12 +150,7 @@ public class ParkingCapacityRestraintModel {
         if (propertyValue == null) INITIALIZATION_PACKET_SIZE = 0;
         else INITIALIZATION_PACKET_SIZE = Integer.parseInt(propertyValue);
 
-        unconstrainedPNRTrips = new ArrayList<Stop>();
-
-		modelStructure = new SandagModelStructure();
-		
-		totalUnconstrainedPNRTours = 0;
-		totalUnconstrainedPNRArrivals = 0;
+ 		modelStructure = new SandagModelStructure();
 		
 		tapManager = TapDataManager.getInstance(propertyMap);
 		mgraManager = MgraDataManager.getInstance(propertyMap);
@@ -152,7 +158,7 @@ public class ParkingCapacityRestraintModel {
 		
 		//set the length of a simulation period
 		numberOfTimeBins = ((24*60)/MINUTES_PER_SIMULATION_PERIOD);
-		logger.info("Running "+numberOfSimulationPeriods+" simulation periods using a period length of "+MINUTES_PER_SIMULATION_PERIOD+" minutes");
+		logger.info("Running "+numberOfTimeBins+" simulation periods using a period length of "+MINUTES_PER_SIMULATION_PERIOD+" minutes");
 
 
 	}
@@ -171,32 +177,85 @@ public class ParkingCapacityRestraintModel {
 		
 		HouseholdDataManagerIf householdDataManager = connectToHouseholdDataManager(propertyMap);
 		
-		processHouseholds(householdDataManager);
+		boolean converged = false;
+		int constraintIteration=-1;
 		
-		logger.info("Total unconstrained PNR tours:    "+ totalUnconstrainedPNRTours); 
-		logger.info("Total unconstrained PNR arrivals: "+ totalUnconstrainedPNRArrivals); 
+		do {
+			
+			++constraintIteration;
 		
-		Collections.sort(unconstrainedPNRTrips, new StopComparator());
+			logger.info("Running capacity restraint iteration "+constraintIteration);
+			
+			processHouseholds(householdDataManager);
 		
-		calculateUnconstrainedArrivalsByPeriod();
+			logger.info("Total unconstrained PNR tours:    "+ totalPNRTours); 
+			logger.info("Total unconstrained PNR arrivals: "+ totalPNRArrivals); 
 		
-        String filename = propertyMap.get(PROPERTIES_PROJECT_DIRECTORY)
-        		+ formFileName(propertyMap.get(PROPERTIES_UNCONSTRAINED_PNR_DEMAND_FILE), iteration);
+			Collections.sort(unconstrainedPNRTrips, new StopComparator());
+		
+			calculateUnconstrainedArrivalsByPeriod();
+		
+			String filename = propertyMap.get(PROPERTIES_PROJECT_DIRECTORY)
+        		+ formFileName(propertyMap.get(PROPERTIES_UNCONSTRAINED_PNR_DEMAND_FILE), iteration*10+constraintIteration);
 	
-		writeDemandToFile(filename,unconstrainedArrivalsToTAP,unconstrainedPNRLotMap);
+			writeDemandToFile(filename,unconstrainedArrivalsToTAP,unconstrainedPNRLotMap);
 		
- 		constrainDemand(householdDataManager);
+			constrainDemand(householdDataManager);
  		
- 		calculateConstrainedArrivalsByPeriod(householdDataManager);
- 		
-        filename = propertyMap.get(PROPERTIES_PROJECT_DIRECTORY)
-        		+ formFileName(propertyMap.get(PROPERTIES_CONSTRAINED_PNR_DEMAND_FILE), iteration);
+			calculateConstrainedArrivalsByPeriod(householdDataManager);
+			
+			converged = checkForConvergence(constraintIteration);
+
+			if(converged)
+				break;
+			
+			filename = propertyMap.get(PROPERTIES_PROJECT_DIRECTORY)
+        		+ formFileName(propertyMap.get(PROPERTIES_CONSTRAINED_PNR_DEMAND_FILE), iteration*10+constraintIteration);
 	
-		writeDemandToFile(filename,constrainedArrivalsToTAP,constrainedPNRLotMap);
+			writeDemandToFile(filename,constrainedArrivalsToTAP,constrainedPNRLotMap);
 		
+			
+		}while(true);
+		
+		logger.info("Ran "+(constraintIteration+1)+" iterations of PNR lot capacity restraint");
+		logger.info("Model converged? : "+converged);
 	}
 	
+	/**
+	 * Check for model convergence. 
+	 * 	  If constraint iteration = max iterations -1, return true.
+	 *    If any lot demand is greater than the capacity + the tolerance (1.0/sample rate * lumpiness factor)
+	 *    than continue.
+	 *    
+	 * @param constraintIteration
+	 * @return
+	 */
+	public boolean checkForConvergence(int constraintIteration) {
+		
+		if(constraintIteration == (MAX_ITERATIONS-1))
+			return true;
+		
+		//minimum tolerance is a function of sample rate
+		float lumpiness = 1.0f/sampleRate;
+		
+		
+		//iterate through lots
+		Set<Integer> taps = constrainedPNRLotMap.keySet();
+		for(int tap : taps) {
+			
+			float totalArrivals = constrainedArrivalsToTAP[tap];
+			
+			float capacity = tapManager.getTotalSpaces(tap);
+			
+			if(totalArrivals > (capacity + lumpiness * LUMPINESS_FACTOR))
+				return false;
+			
+		}
 	
+		
+		return true;
+		
+	}
 	/**
 	 * Simulate the exact time for the period.
 	 * 
@@ -285,6 +344,12 @@ public class ParkingCapacityRestraintModel {
 		int totalHouseholds=0;
 		int totalPersons=0;
 		
+		//trips by stop
+        unconstrainedPNRTrips = new ArrayList<Stop>();
+		totalPNRTours = 0;
+		totalPNRArrivals = 0;
+		
+
         try
         {
 
@@ -372,7 +437,7 @@ public class ParkingCapacityRestraintModel {
 	 */
 	public void codePNRTour(Tour thisTour) {
 		if(modelStructure.getTourModeIsPnr(thisTour.getTourModeChoice())){
-			totalUnconstrainedPNRTours += (1.0/sampleRate);;
+			totalPNRTours += (1.0/sampleRate);;
 				
 			simulateExactTimesForTour(thisTour);
 				
@@ -383,7 +448,7 @@ public class ParkingCapacityRestraintModel {
 				if(modelStructure.getTripModeIsPnrTransit(thisStop.getMode())) {
 						
 					unconstrainedPNRTrips.add(thisStop);
-					totalUnconstrainedPNRArrivals += (1.0/sampleRate);
+					totalPNRArrivals += (1.0/sampleRate);
 				}
 			}
 		}
@@ -413,7 +478,7 @@ public class ParkingCapacityRestraintModel {
 		
 		//to hold arrivals over time
 		unconstrainedArrivalsToTAP = new float[tapManager.getMaxTap()+1];
-		 
+	
 		for(Stop thisStop : unconstrainedPNRTrips) {
 			
 			float departTime = thisStop.getMinute();
@@ -664,7 +729,7 @@ public class ParkingCapacityRestraintModel {
 				
 			if(modelStructure.getTripModeIsPnrTransit(thisStop.getMode())) {
 					
-				totalUnconstrainedPNRArrivals += (1.0/sampleRate);
+				totalPNRArrivals += (1.0/sampleRate);
 				
 				float departTime = thisStop.getMinute();
 				int bin = (int) Math.floor(departTime/((float) MINUTES_PER_SIMULATION_PERIOD));
