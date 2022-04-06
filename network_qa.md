@@ -15,12 +15,12 @@ title: Network QA
 * ArcGIS Online web maps - available upon request:  
 
   * [Alameda](https://mtc.maps.arcgis.com/home/webmap/viewer.html?webmap=d21c975d3b384e2c8a8e3ee6b4a4fd52)
-  * [Contra Costa](https://arcg.is/0zy0zq)
+  * Contra Costa
   * Marin
   * Napa
   * San Francisco
   * San Mateo
-  * [Santa Clara](https://arcg.is/1rzbCL0)
+  * Santa Clara
   * Solano
   * Sonoma
 
