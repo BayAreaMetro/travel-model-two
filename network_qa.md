@@ -2,7 +2,7 @@
 layout: page
 title: Network QA
 ---
-# February 2022 Network QA
+# 2022 Network QA
 
 ## 2015 Networks
 
