@@ -436,7 +436,7 @@ def create_empty_demand_matrices(period, scenario):
             create_full_matrix(summed_matrix_name, 'demand summed across access modes', scenario)
 
 
-def import_demand_matrices(period, scenario, ctramp_output_folder, num_processors="MAX-1"):
+def import_demand_matrices(period, scenario, ctramp_output_folder, num_processors="MAX-1", msa_iteration=1):
     """
     Imports the TAP-to-TAP transit demand matrices created from CT-RAMP by time of day,
     access mode, and transit set type (local, premium, local+premium).  Demand matrices
@@ -459,28 +459,28 @@ def import_demand_matrices(period, scenario, ctramp_output_folder, num_processor
 
     with _m.logbook_trace("Importing demand matrices for period %s" % period):
         for set_num in _all_sets:
-            sum_expression = ''
+            matrix_names = []
             for access_mode in _all_access_modes:
                 omx_filename = omx_filename_template.format(period=period, access_mode=access_mode, set=set_num)
                 omx_filename_path = _os.path.join(ctramp_output_folder, omx_filename)
                 matrix_name = matrix_name_template.format(period=period, access_mode=access_mode, set=set_num)
 
                 create_full_matrix(matrix_name, omx_filename, scenario)
-
                 import_from_omx_tool(
                     file_path=omx_filename_path,
                     matrices={matrix_name: 'mf' + matrix_name},
                     zone_mapping='NO',
                     scenario=scenario)
-
-                if sum_expression == '':
-                    sum_expression = 'mf' + matrix_name
-                else:
-                    sum_expression = sum_expression + ' + mf' + matrix_name
+                matrix_names.append(matrix_name)
+            sum_expression =  ' + mf'.join(matrix_names)
 
             # Sum demand accross access modes:
             summed_matrix_name = summed_matrix_name_template.format(period=period, set=set_num)
-            create_full_matrix(summed_matrix_name, 'demand summed across access modes', scenario)
+            if msa_iteration == 1:
+                create_full_matrix(summed_matrix_name, 'demand summed across access modes', scenario)
+            else:
+                sum_expression = "{prev_demand} + (1.0 / {msa}) * (({demand}) - ({prev_demand}))".format(
+                    {"prev_demand": summed_matrix_name, "msa": msa_iteration, "demand": sum_expression})
             spec = {
                 "type": "MATRIX_CALCULATION",
                 "constraint": None,
@@ -1585,7 +1585,7 @@ if __name__ == "__main__":
                         default=_os.path.join(_os.getcwd(), 'trn'))
     parser.add_argument('-s', '--skims_path', help=r"path to the skims folder, default is the current_working_folder\skims",
                         default=_os.path.join(_os.getcwd(), 'skims'))
-    parser.add_argument('-i', '--first_iteration', help='Is this the first iteration? yes or no, default is yes', default='yes')
+    parser.add_argument('-i', '--iteration', help='Current inner loop iteration number for MSA averaging', type=int)
     parser.add_argument('-c', '--ccr_periods', help='List of time periods to run CCR as EA,AM,MD,PM,EV or ALL', default='AM,PM')
     parser.add_argument('--save_iter_flows', action="store_true", help='Save per-iteration flows in scenarios', default=False)
     parser.add_argument('-t', '--time_periods', help='List of time periods as EA,AM,MD,PM,EV or ALL', default='ALL')
@@ -1595,8 +1595,6 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--num_processors', help='Number of processors to use, can specify MAX-#', default='MAX-4')
 
     args = parser.parse_args()
-    assert (args.first_iteration == 'yes') or (args.first_iteration == 'no'), \
-        'Please specify "yes" or "no" for the first_iteration (-i) run-time argument'
     if args.time_periods == "ALL":
         time_periods = _all_periods[:]
     else:
@@ -1619,7 +1617,7 @@ if __name__ == "__main__":
 
         ctramp_output_folder = _os.path.join(_os.getcwd(), 'ctramp_output')
         if not args.skip_import_demand:
-            import_demand_matrices(period, scenario, ctramp_output_folder, num_processors=args.num_processors)
+            import_demand_matrices(period, scenario, ctramp_output_folder, num_processors=args.num_processors, msa_iteration=args.iteration)
         else:
             create_empty_demand_matrices(period, scenario)
 
