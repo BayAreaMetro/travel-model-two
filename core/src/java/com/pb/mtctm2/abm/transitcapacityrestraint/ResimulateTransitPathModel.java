@@ -61,9 +61,14 @@ public class ResimulateTransitPathModel{
     private ModelStructure modelStructure;
     private ArrayList<Trip> transitTrips;
     private double[] endTimeMinutes; // the period end time in number of minutes past 3 AM , starting in period 1 (index 1)
+    
     private HashMap<Long,Float> valueOfTimeByPersonNumber;
     private HashMap<Long,Float> valueOfTimeByHhId; // the maximum VOT for all persons in the household
     private HashMap<Long,Integer> personTypeByPersonNumber;
+    private HashMap<Long, Integer> transitSubsidyChoiceByPersonNumber;
+    private HashMap<Long, Float> transitSubsidyPercentByPersonNumber;
+    private HashMap<Long, Integer> transitPassChoiceByPersonNumber;
+    
     private int tripsWithNoTransitPath;
     private int resimulatedTransitTrips;
     private UtilityExpressionCalculator identifyTripToResimulateUEC;
@@ -88,7 +93,9 @@ public class ResimulateTransitPathModel{
     private static final String ResimulateTransitPathIdentifyPageProperty = "ResimulateTransitPath.identifyTripToResimulate.page";
     public static final String ResimulateTransitPathIndividualOutputFileProperty = "ResimulateTransitPath.results.IndivTripDataFile";
     public static final String ResimulateTransitPathJointOutputFileProperty = "ResimulateTransitPath.results.JointTripDataFile";
-    
+    protected static final String transitFareDiscountFileName = "transit.fareDiscount.file";
+
+    private float[][] fareDiscounts;
 
     /**
      * Create a New Transit Path Model.
@@ -156,6 +163,12 @@ public class ResimulateTransitPathModel{
         resimulateDMU = new ResimulateTransitPathDMU();
         identifyTripToResimulateUEC = new UtilityExpressionCalculator(uecFile, identifyPage, dataPage, propertyMap, resimulateDMU);
         index         = new IndexValues();
+        
+        String directoryPath = Util.getStringValueFromPropertyMap(propertyMap,CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
+        String fareDiscountFileName = Paths.get(directoryPath,propertyMap.get(transitFareDiscountFileName)).toString();
+        fareDiscounts = readTransitFareDiscounts(fareDiscountFileName);
+        resimulateDMU.setTransitFareDiscounts(fareDiscounts);
+
 
 	}
 	
@@ -247,6 +260,7 @@ public class ResimulateTransitPathModel{
 			//get the value of time for this person (or hh if joint tour)
 			long personNumber = trip.getPersonNumber();
 			float valueOfTime = (joint == 1) ? valueOfTimeByHhId.get(hhid) : valueOfTimeByPersonNumber.get(personNumber);
+			float fareSubsidy = (joint == 1) ? 0 :transitSubsidyPercentByPersonNumber.get(personNumber);
 			
 			int personType = personTypeByPersonNumber.get(personNumber);
 			
@@ -278,8 +292,10 @@ public class ResimulateTransitPathModel{
 	        //set person specific variables and re-calculate best tap pair utilities
 	    	walkDmu.setApplicationType(bestPathCalculator.APP_TYPE_TRIPMC);
 	    	walkDmu.setTourCategoryIsJoint(joint);
-	    	walkDmu.setPersonType(joint==1 ? walkDmu.getPersonType() : personType);
+	    	walkDmu.setPersonType(joint==1 ? 1 : personType);
 	    	walkDmu.setValueOfTime(valueOfTime);
+	    	walkDmu.setFareSubsidy(fareSubsidy);
+	    	
 	    	driveDmu.setApplicationType(bestPathCalculator.APP_TYPE_TRIPMC);
 	    	driveDmu.setTourCategoryIsJoint(joint);
 	     	driveDmu.setPersonType(joint==1 ? driveDmu.getPersonType() : personType);
@@ -334,11 +350,15 @@ public class ResimulateTransitPathModel{
         	long hhid = (long) personData.getValueAt(row, "hh_id");
         	long personNumber = (long) personData.getValueAt(row,"person_num");
         	float valueOfTime = personData.getValueAt(row,"value_of_time");
+        	int transitSubsidy_choice = (int) personData.getValueAt(row,"transitSubsidy_choice");
+        	float transitSubsidy_percent = personData.getValueAt(row,"transitSubsidy_percent");
+        	int transitPass_choice = (int) personData.getValueAt(row,"transitPass_choice");
+
         	String personTypeString = personData.getStringValueAt(row,"type");
         	int personType = getPersonType(personTypeString);
            	personTypeByPersonNumber.put(personNumber, personType);
-                  	
-        	valueOfTimeByPersonNumber.put(personNumber, valueOfTime);
+           	
+           	valueOfTimeByPersonNumber.put(personNumber, valueOfTime);
         	if(valueOfTimeByHhId.containsKey(hhid)){
         		float existingVOTForHH = valueOfTimeByHhId.get(hhid);
         		if(valueOfTime>existingVOTForHH)
@@ -346,6 +366,11 @@ public class ResimulateTransitPathModel{
         	}else{
     			valueOfTimeByHhId.put(hhid,valueOfTime);
         	}
+        	
+            transitSubsidyChoiceByPersonNumber.put(personNumber,transitSubsidy_choice);
+            transitSubsidyPercentByPersonNumber.put(personNumber,transitSubsidy_percent);
+            transitPassChoiceByPersonNumber.put(personNumber,transitPass_choice);
+        	
         }
 
 	}
@@ -419,7 +444,7 @@ public class ResimulateTransitPathModel{
 		for(int i =0;i<Person.personTypeNameArray.length;++i){
 			
 			if(personTypeString.compareTo(Person.personTypeNameArray[i])==0)
-				return i;
+				return i+1;
 			
 		}
 	   
@@ -627,6 +652,53 @@ public class ResimulateTransitPathModel{
 			writer.println(outputRecord);
 			writer.flush();
 		}
+		
+	    public static float[][] readTransitFareDiscounts(String fileName)
+	    {
+
+	        File discountFile = new File(fileName);
+
+	        // read in the csv table
+	        TableDataSet discountTable;
+	        try
+	        {
+	            OLD_CSVFileReader reader = new OLD_CSVFileReader();
+	            reader.setDelimSet("," + reader.getDelimSet());
+	            discountTable = reader.readFile(discountFile);
+
+	        } catch (Exception e)
+	        {
+	           throw new RuntimeException();
+	        }
+	        
+	        int ptypes=8;
+	        int modes=6;
+	        
+	        //initialize array to 1 in case the fare is missing from file for a given mode and ptype combo
+	        float fareDiscounts[][] = new float[modes][];
+	        for(int i = 0; i< modes;++i) {
+	        	fareDiscounts[i]=new float[ptypes];
+	        	for(int j=0;j<ptypes;++j)
+	        		fareDiscounts[i][j]=1;
+	        }
+	        
+	        for(int row=1;row<=discountTable.getRowCount();++row) {
+	 
+	        	int mode = (int) discountTable.getValueAt(row,"mode");
+	        	int ptype = (int) discountTable.getValueAt(row, "ptype");
+	        	float discount = discountTable.getValueAt(row, "mean_discount");
+	        	
+	        	fareDiscounts[mode-1][ptype-1]=discount;
+	        }
+	 
+	        return fareDiscounts;
+	 
+	    }
+	    
+	    public float[][] getTransitFareDiscounts(){
+	    	
+	    	return fareDiscounts;
+	    }
 		
 		/**
 		 * Main run method
