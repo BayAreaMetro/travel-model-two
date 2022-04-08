@@ -78,9 +78,13 @@ public class MTCTM2TripTables {
     public int numSkimSets;
     public boolean transitResim;
     
-    public MTCTM2TripTables(String resourceBundleName, int iteration, boolean transitResim){
+    public boolean appendSkimsToTrips;
+    
+    public MTCTM2TripTables(String resourceBundleName, int iteration, boolean transitResim, boolean appendSkimsToTrips){
 
     	this.transitResim = transitResim;
+    	this.appendSkimsToTrips = appendSkimsToTrips;
+    	
         rbMap = ResourceUtil.getResourceBundleAsHashMap(resourceBundleName);
         properties = new Properties();
         for (String key : rbMap.keySet()) 
@@ -136,7 +140,8 @@ public class MTCTM2TripTables {
 		mazSets = new MazSets();
 		
         //setup skim builder class
-        skimBuilder = new SkimBuilder(properties);
+		if(appendSkimsToTrips)
+			skimBuilder = new SkimBuilder(properties);
 
 	}
 	
@@ -260,12 +265,16 @@ public class MTCTM2TripTables {
         connectToMatrixServer();
         
         // add time, distance, and cost to trip files
-        addTripFields(indivTripData);
-        addTripFields(jointTripData);
-        
-        // write out updated trip tables 
-        writeTripFile(indivTripData, indivTripFile);
-        writeTripFile(jointTripData, jointTripFile);
+		if(appendSkimsToTrips) {
+			addTripFields(indivTripData);
+			addTripFields(jointTripData);
+
+			// write out updated trip tables 
+	        writeTripFile(indivTripData, indivTripFile);
+	        writeTripFile(jointTripData, jointTripFile);
+	
+		}
+		
         
         //Iterate through periods so that we don't have to keep
 		//trip tables for all periods in memory.
@@ -688,6 +697,7 @@ public class MTCTM2TripTables {
 		String propertiesName = null;
         int iteration=0;
         boolean transitResim=false;
+        boolean appendSkimsToTrips=false;
         
         if (args.length == 0)
         {
@@ -708,12 +718,16 @@ public class MTCTM2TripTables {
 	            {
 	                transitResim = args[i + 1].equalsIgnoreCase("TRUE");
 	            }
+	            if (args[i].equalsIgnoreCase("-appendSkims"))
+	            {
+	            	appendSkimsToTrips = args[i + 1].equalsIgnoreCase("TRUE");
+	            }
 	           
 	        }
         }
 		
 		//run trip table generator
-		MTCTM2TripTables tripTables = new MTCTM2TripTables(propertiesName, iteration, transitResim);		
+		MTCTM2TripTables tripTables = new MTCTM2TripTables(propertiesName, iteration, transitResim, appendSkimsToTrips);		
 		tripTables.createTripTables();
 
 	}
