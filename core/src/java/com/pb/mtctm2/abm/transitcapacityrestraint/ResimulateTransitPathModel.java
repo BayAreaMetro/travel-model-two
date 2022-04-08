@@ -141,7 +141,10 @@ public class ResimulateTransitPathModel{
         valueOfTimeByPersonNumber = new HashMap<Long,Float>();
         valueOfTimeByHhId =  new HashMap<Long,Float>();
         personTypeByPersonNumber =  new HashMap<Long,Integer>();
-        
+        transitSubsidyChoiceByPersonNumber =  new HashMap<Long,Integer>();
+        transitSubsidyPercentByPersonNumber =  new HashMap<Long,Float>();
+        transitPassChoiceByPersonNumber =  new HashMap<Long,Integer>();
+
         //set up the trace
         seek = new Boolean(Util.getStringValueFromPropertyMap(propertyMap, SeekProperty));
         String[] hhids = Util.getStringArrayFromPropertyMap(propertyMap, TraceHouseholdList);
