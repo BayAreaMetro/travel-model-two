@@ -135,6 +135,8 @@ public class SkimBuilder {
 
     public SkimBuilder(Properties properties,  MatrixDataServerIf ms) {
 
+    	this.ms = ms;
+    	
     	HashMap<String,String> rbMap = new HashMap<String,String>((Map<String,String>) (Map) properties);
 
         tapManager = TapDataManager.getInstance(rbMap);
