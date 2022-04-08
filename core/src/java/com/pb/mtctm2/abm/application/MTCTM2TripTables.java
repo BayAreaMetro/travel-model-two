@@ -139,9 +139,12 @@ public class MTCTM2TripTables {
 		//create mazSets
 		mazSets = new MazSets();
 		
+	    // connect to matrix server
+        connectToMatrixServer();
+ 
         //setup skim builder class
 		if(appendSkimsToTrips)
-			skimBuilder = new SkimBuilder(properties);
+			skimBuilder = new SkimBuilder(properties, ms);
 
 	}
 	
@@ -261,9 +264,7 @@ public class MTCTM2TripTables {
 		jointTripFile = formFileName(directory + jointTripFile, iteration);
 		jointTripData = openTripFile(jointTripFile);
 
-	    // connect to matrix server
-        connectToMatrixServer();
-        
+       
         // add time, distance, and cost to trip files
 		if(appendSkimsToTrips) {
 			addTripFields(indivTripData);
@@ -360,7 +361,9 @@ public class MTCTM2TripTables {
 			int inbound = (int) tripData.getValueAt(i,"inbound");
 			
 			//get trip distance for taz/maz level matrix decision
-			float tripdist = (int) tripData.getValueAt(i,"TRIP_DISTANCE");
+			float tripdist=0;
+			if(appendSkimsToTrips)
+				tripdist = (int) tripData.getValueAt(i,"TRIP_DISTANCE");
 			
 			float sampleRate = tripData.getValueAt(i,"sampleRate");
 			int avAvailable = (int) tripData.getValueAt(i, "avAvailable");
@@ -417,7 +420,16 @@ public class MTCTM2TripTables {
         		}
         		
         		//is auto trip maz level or taz level
-        		if(mazSets.isMazSetTrip(tripdist, originMGRA, destinationMGRA)) {
+        		if(!appendSkimsToTrips) {
+        			//taz level
+        			if(avAvailable==0){
+        				float value = matrix[mode][mat].getValueAt(originTAZ, destinationTAZ);
+        				matrix[mode][mat].setValueAt(originTAZ, destinationTAZ, (value + vehicleTrips));
+        			}else{
+        				float value = matrix[4][mat].getValueAt(originTAZ, destinationTAZ);
+        				matrix[4][mat].setValueAt(originTAZ, destinationTAZ, (value + vehicleTrips));
+        			}
+        		}else if(mazSets.isMazSetTrip(tripdist, originMGRA, destinationMGRA)) {
         			//maz level
         			int mazSet = mazSets.getZoneSet(originMGRA, destinationMGRA);
         			int omaz = mazSets.getNewZoneSetNum(originMGRA);
@@ -697,7 +709,7 @@ public class MTCTM2TripTables {
 		String propertiesName = null;
         int iteration=0;
         boolean transitResim=false;
-        boolean appendSkimsToTrips=false;
+        boolean appendSkimsToTrips=true;
         
         if (args.length == 0)
         {

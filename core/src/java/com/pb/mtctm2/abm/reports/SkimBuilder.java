@@ -131,11 +131,11 @@ public class SkimBuilder {
     private final String 			FUEL_COST_PROPERTY          = "aoc.fuel";
     private final String 			MAINTENANCE_COST_PROPERTY = "aoc.maintenance";
     private float autoOperatingCost;
+    MatrixDataServerIf ms;
 
-    public SkimBuilder(Properties properties) {
+    public SkimBuilder(Properties properties,  MatrixDataServerIf ms) {
 
-        HashMap<String,String> rbMap = new HashMap<String,String>((Map<String,String>) (Map) properties);
-        startMatrixServer(properties);
+    	HashMap<String,String> rbMap = new HashMap<String,String>((Map<String,String>) (Map) properties);
 
         tapManager = TapDataManager.getInstance(rbMap);
         tazManager = TazDataManager.getInstance(rbMap);
@@ -161,16 +161,18 @@ public class SkimBuilder {
         autoOperatingCost = (fuelCost + mainCost)  * 0.01f;
 
     }
+   
 
-    private void startMatrixServer(Properties properties) {
+    public static MatrixDataServerIf startMatrixServer(Properties properties) {
         String serverAddress = (String) properties.get("RunModel.MatrixServerAddress");
         int serverPort = new Integer((String) properties.get("RunModel.MatrixServerPort"));
         logger.info("connecting to matrix server " + serverAddress + ":" + serverPort);
 
+        MatrixDataServerIf ms = null;
         try{
 
             MatrixDataManager mdm = MatrixDataManager.getInstance();
-            MatrixDataServerIf ms = new MatrixDataServerRmi(serverAddress, serverPort, MatrixDataServer.MATRIX_DATA_SERVER_NAME);
+            ms = new MatrixDataServerRmi(serverAddress, serverPort, MatrixDataServer.MATRIX_DATA_SERVER_NAME);
             ms.testRemote(Thread.currentThread().getName());
             mdm.setMatrixDataServerObject(ms);
 
@@ -179,7 +181,7 @@ public class SkimBuilder {
             throw new RuntimeException(e);
 
         }
-
+        return ms;
     }
 
     private final TripModeChoice[] modeChoiceLookup = {
