@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.pb.mtctm2.abm.ctramp.TapDataManager;
 import com.pb.mtctm2.abm.ctramp.TazDataManager;
+import com.pb.common.calculator.MatrixDataManager;
 import com.pb.common.calculator.MatrixDataServerIf;
 import com.pb.common.datafile.NEW_CSVFileReader;
 import com.pb.common.datafile.OLD_CSVFileReader;
@@ -69,6 +70,7 @@ public class MTCTM2TripTables {
 	private String directory;
 	private String matrixFileExtension = "omx";
  	private MatrixDataServerIf ms;
+ 	private MatrixDataManager mdm;
     
     SkimBuilder skimBuilder;
     private HashMap<String, Float> averageOcc3Plus;  //a HashMap of average occupancies for 3+ vehicles by tour purpose
@@ -582,6 +584,9 @@ public class MTCTM2TripTables {
 		ms = new MatrixDataServerRmi(matrixServerAddress, serverPort, MatrixDataServer.MATRIX_DATA_SERVER_NAME);
 		ms.testRemote(Thread.currentThread().getName());
         logger.info("connected to matrix data server");
+        mdm = MatrixDataManager.getInstance();
+        mdm.setMatrixDataServerObject(ms);
+
     }
 
     
