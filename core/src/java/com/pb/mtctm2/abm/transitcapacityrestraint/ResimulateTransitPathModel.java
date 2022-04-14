@@ -316,10 +316,26 @@ public class ResimulateTransitPathModel{
 			
 			float rnum = (float) random.nextDouble();
 			int pathIndex = bestPathCalculator.chooseTripPath(rnum, bestTaps, debug, logger);
-			int boardTap = (int) bestTaps[pathIndex][0];
-			int alightTap = (int)  bestTaps[pathIndex][1];
-			int set = (int)  bestTaps[pathIndex][2];
-       	
+			
+			int boardTap=-1;
+			int alightTap=-1;
+			int set=-1;
+			if(pathIndex==-1) {
+				logger.info("*** Error, no best tap pair in choice set for trip after recalculating TAP utilities for person attributes ***");
+				trip.logTrip(logger);
+				logger.info("   persontype:          "+(joint==1 ? 1 : personType));
+				logger.info("   valueoftime:         "+valueOfTime);
+				logger.info("   fare subsidy:        "+fareSubsidy);
+				logger.info("   Setting transit path to input set, boarding and alighting TAPs");
+				boardTap=trip.getBoardingTap();
+				alightTap=trip.getAlightingTap();
+				set=trip.getSet();
+				++tripsWithNoTransitPath;
+			}else {
+				boardTap = (int) bestTaps[pathIndex][0];
+				alightTap = (int)  bestTaps[pathIndex][1];
+				set = (int)  bestTaps[pathIndex][2];
+			}
 			trip.setBoardingTap(boardTap);
 			trip.setAlightingTap(alightTap);
 			trip.setSet(set);
@@ -594,6 +610,7 @@ public class ResimulateTransitPathModel{
 	        "parking_mgra,stop_period,trip_mode,trip_board_tap,trip_alight_tap,tour_mode,set,sampleRate,avAvailable,resimulatedTrip");
 
 	        printWriter.println(headerString);
+	        printWriter.flush();
 
 		}
 		/**
@@ -609,6 +626,7 @@ public class ResimulateTransitPathModel{
 			+"trip_mode,num_participants,trip_board_tap,trip_alight_tap,tour_mode,set,sampleRate,avAvailable,resimulatedTrip");
 
 	        printWriter.println(headerString);
+	        printWriter.flush();
 
 		}
 		

@@ -1,5 +1,6 @@
 package com.pb.mtctm2.abm.transitcapacityrestraint;
 
+import org.apache.log4j.Logger;
 /**
  * A holder class for trips.
  * @author joel.freedman
@@ -54,6 +55,26 @@ class Trip implements Comparable{
 		this.set = set;
 		
 		
+	}
+	
+	public void logTrip(Logger logger) {
+		
+		logger.info("   hhid:                    "+hhid);
+		logger.info("   personId:                "+personId);
+    	logger.info("   personNumber:            "+personNumber);
+    	logger.info("   tourid:                  "+tourid);
+    	logger.info("   stopid:                  "+stopid);
+    	logger.info("   inbound:                 "+inbound);
+    	logger.info("   joint:                   "+joint);
+    	logger.info("   originMaz:               "+originMaz);
+    	logger.info("   destinationMaz:          "+destinationMaz);
+    	logger.info("   departPeriod:            "+departPeriod);
+    	logger.info("   departTime:              "+departTime);
+    	logger.info("   sampleRate:              "+sampleRate);
+    	logger.info("   mode:                    "+mode);
+    	logger.info("   original boardingTap:    "+boardingTap);
+    	logger.info("   original alightingTap:   "+alightingTap);
+    	logger.info("   original set:            "+set);
 	}
 
 	public long getHhid() {
