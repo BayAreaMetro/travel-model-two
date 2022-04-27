@@ -26,6 +26,7 @@ class Trip implements Comparable{
 	int boardingTap;
 	int alightingTap;
 	int set;
+	float transitPathRandom;
 	String tourPurpose;
 	String originPurpose;
 	String destinationPurpose;
@@ -35,7 +36,7 @@ class Trip implements Comparable{
 	int tourMode;
 	
 	
-	public Trip(long hhid,long personId,int personNumber, int tourid,int stopid,int inbound,int joint,int originMaz, int destinationMaz, int departPeriod, float departTime, float sampleRate, int mode, int boardingTap, int alightingTap, int set){
+	public Trip(long hhid,long personId,int personNumber, int tourid,int stopid,int inbound,int joint,int originMaz, int destinationMaz, int departPeriod, float departTime, float sampleRate, int mode, int boardingTap, int alightingTap, int set, float rnum){
        	this.hhid = hhid;		
        	this.personId = personId;
     	this.personNumber = personNumber;
@@ -53,6 +54,7 @@ class Trip implements Comparable{
 		this.boardingTap = boardingTap;
 		this.alightingTap = alightingTap;
 		this.set = set;
+		this.transitPathRandom = rnum;
 		
 		
 	}
@@ -75,6 +77,7 @@ class Trip implements Comparable{
     	logger.info("   original boardingTap:    "+boardingTap);
     	logger.info("   original alightingTap:   "+alightingTap);
     	logger.info("   original set:            "+set);
+    	logger.info("   transit path rnum        "+transitPathRandom);
 	}
 
 	public long getHhid() {
@@ -275,6 +278,14 @@ class Trip implements Comparable{
 
 	public void setTourMode(int tourMode) {
 		this.tourMode = tourMode;
+	}
+
+	public float getTransitPathRandom() {
+		return transitPathRandom;
+	}
+
+	public void setTransitPathRandom(float transitPathRandom) {
+		this.transitPathRandom = transitPathRandom;
 	}
 
 	/**

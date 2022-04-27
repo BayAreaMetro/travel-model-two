@@ -55,6 +55,9 @@ public class Tour
     private double[][]   bestDtwTapPairsOut;
     private double[][]   bestDtwTapPairsIn;
     
+    private float randomNumberForTapChoiceOut;
+    private float randomNumberForTapChoiceIn;
+    
     private int       choosenTransitPathIn;
     private int       choosenTransitPathOut;
     
@@ -746,6 +749,22 @@ public class Tour
 
 	public void setDestinationChoiceLogsum(float destinationChoiceLogsum) {
 		this.destinationChoiceLogsum = destinationChoiceLogsum;
+	}
+
+	public float getRandomNumberForTapChoiceOut() {
+		return randomNumberForTapChoiceOut;
+	}
+
+	public void setRandomNumberForTapChoiceOut(float randomNumberForTapChoiceOut) {
+		this.randomNumberForTapChoiceOut = randomNumberForTapChoiceOut;
+	}
+
+	public float getRandomNumberForTapChoiceIn() {
+		return randomNumberForTapChoiceIn;
+	}
+
+	public void setRandomNumberForTapChoiceIn(float randomNumberForTapChoiceIn) {
+		this.randomNumberForTapChoiceIn = randomNumberForTapChoiceIn;
 	}
 
 }

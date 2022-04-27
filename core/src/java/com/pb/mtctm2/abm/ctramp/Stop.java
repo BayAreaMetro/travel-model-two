@@ -20,8 +20,10 @@ public class Stop
     boolean inbound;
     int     set;
     short   minute;
+    float randomNumberForTapChoice;
     
-    float   sampleRate;
+
+	float   sampleRate;
 
     String  origPurpose;
     String  destPurpose;
@@ -185,6 +187,13 @@ public class Stop
 	public void setMinute(short minute) {
 		this.minute = minute;
 	}
-    
+    public float getRandomNumberForTapChoice() {
+		return randomNumberForTapChoice;
+	}
+
+	public void setRandomNumberForTapChoice(float randomNumberForTapChoice) {
+		this.randomNumberForTapChoice = randomNumberForTapChoice;
+	}
+
 
 }

@@ -56,6 +56,7 @@ public class HouseholdDataWriter
     private boolean             saveUtilsProbsFlag              = false;
     private boolean writeStopsFlag 								= true; 
     private int                 setNA                           = -1;
+    private float               rnumNA                          = -1;
 
     private HashMap<String,String> rbMap;
     
@@ -859,7 +860,7 @@ public class HouseholdDataWriter
         data.add("tour_mode");
         
         data.add("set");
-        
+        data.add("tranpath_rnum");
         data.add("sampleRate");
         data.add("avAvailable");
         return data;
@@ -887,6 +888,7 @@ public class HouseholdDataWriter
         data.add("tour_mode");
         
         data.add("set");
+        data.add("tranpath_rnum");
         
         data.add("sampleRate");
         data.add("avAvailable");
@@ -916,6 +918,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.INTEGER);
         return data;
     }
@@ -941,6 +944,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.INTEGER);
         return data;
@@ -1030,11 +1034,14 @@ public class HouseholdDataWriter
         data.add(string(t.getTourModeChoice()));
         
         int set = setNA;
+        float rnum = rnumNA;
         
         if(modelStructure.getTripModeIsTransit(s.getMode())) {
         	set = s.getSet();
+        	rnum = s.getRandomNumberForTapChoice();
         }
         data.add(string(set));
+        data.add(String.format("%.5f", rnum));
         float sampleRate = s.getSampleRate();
         data.add(string(sampleRate));
         int avAvailable = t.getUseOwnedAV() ? 1 : 0;
@@ -1132,11 +1139,14 @@ public class HouseholdDataWriter
         data.add(string(t.getTourModeChoice()));
 
         int set = setNA;
+        float rnum = rnumNA;
         
         if(modelStructure.getTripModeIsTransit(s.getMode())) {
+        	rnum = s.getRandomNumberForTapChoice();
         	set = s.getSet();
         }
         data.add(string(set));
+        data.add(String.format("%.5f", rnum));
         float sampleRate = s.getSampleRate();
         data.add(string(sampleRate));
         int avAvailable = t.getUseOwnedAV() ? 1 : 0;
@@ -1195,6 +1205,7 @@ public class HouseholdDataWriter
         data.add(string(t.getTourModeChoice()));
        
         data.add(string(0));							// set
+        data.add(String.format("%.5f",0f));             //random 
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
         int avAvailable = t.getUseOwnedAV() ? 1 : 0;
@@ -1268,6 +1279,7 @@ public class HouseholdDataWriter
         data.add(string(t.getTourModeChoice()));
        
         data.add(string(0));							// set
+        data.add(String.format("%.5f",0f));             //random 
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
         int avAvailable = t.getUseOwnedAV() ? 1 : 0;

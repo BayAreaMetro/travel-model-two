@@ -314,7 +314,7 @@ public class ResimulateTransitPathModel{
 					bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.WTD, originMaz, destinationMaz, todPeriod, debug, logger, odDistance);
 			}
 			
-			float rnum = (float) random.nextDouble();
+			float rnum = trip.getTransitPathRandom();
 			int pathIndex = bestPathCalculator.chooseTripPath(rnum, bestTaps, debug, logger);
 			
 			int boardTap=-1;
@@ -436,9 +436,10 @@ public class ResimulateTransitPathModel{
         	int tour_mode = (int)inputTripTableData.getValueAt(row,"tour_mode");
         	
         	int set = (int)inputTripTableData.getValueAt(row,"set"); 
+        	float rnum = inputTripTableData.getValueAt(row, "tranpath_rnum");
         	
             if(modelStructure.getTripModeIsTransit(mode)){
-        		Trip trip = new Trip(hhid,personId,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,boardingTap,alightingTap,set);
+        		Trip trip = new Trip(hhid,personId,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,boardingTap,alightingTap,set,rnum);
         		trip.setAvAvailable(avAvailable);
         		trip.setTourPurpose(tour_purpose);
         		trip.setOriginPurpose(orig_purpose);
