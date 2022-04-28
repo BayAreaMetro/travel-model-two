@@ -101,6 +101,9 @@ _matrices = {}
 _matrix_count = {}
 
 _segment_cost_function = """
+values = scenario.get_attribute_values("TRANSIT_VEHICLE", ["seated_capacity"])
+network.set_attribute_values("TRANSIT_VEHICLE", ["seated_capacity"], values)
+
 min_seat_weight = 1.0
 max_seat_weight = 1.4
 power_seat_weight = 2.2
