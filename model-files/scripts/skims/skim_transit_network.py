@@ -483,7 +483,7 @@ def import_demand_matrices(period, scenario, ctramp_output_folder, num_processor
                 create_full_matrix(summed_matrix_name, 'demand summed across access modes', scenario)
             else:
                 sum_expression = "{prev_demand} + (1.0 / {msa}) * (({demand}) - ({prev_demand}))".format(
-                    {"prev_demand": summed_matrix_name, "msa": msa_iteration, "demand": sum_expression})
+                    prev_demand=summed_matrix_name, msa=msa_iteration, demand=sum_expression)
             spec = {
                 "type": "MATRIX_CALCULATION",
                 "constraint": None,
@@ -1040,11 +1040,11 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
                 segment["@seated_vcr"] = seated_vcr
                 # link reliability is calculated as link_rel_factor * (congested transit time)
                 # where congested transit time = crowded transit time - crowding penalty
-                if segment.link:
+                if segment.link is None:
                     # sometimes segment.link returns None. Is this due to hidden segments??
-                    segment["@seg_rel"] = segment.link.data3 * (segment['transit_time'] - segment['@ccost'])
-                else:
                     segment['@seg_rel'] = 0
+                else:
+                    segment["@seg_rel"] = segment.link.data3 * (segment['transit_time'] - segment['@ccost'])
                 segment["@eawt"] = calc_eawt(segment, vcr, headway)
                 segment["@capacity_penalty"] = max(segment["@phdwy"] - segment["@eawt"] - headway, 0) * hdwy_fraction
 
@@ -1431,98 +1431,38 @@ def export_boardings_by_segment(desktop, output_transit_boardings_file):
     table = project.new_network_table("TRANSIT_SEGMENT")
     column = _worksheet.Column()
 
-    # Creating total boardings by line table
-    column.expression = "i"
-    column.name = "i_node"
-    table.add_column(0, column)
+    col_name_dict = {
+        "i": "i_node",
+        "j": "j_node",
+        "line": "line_name",
+        "description": "description",
+        "voltr": "volume",
+        "board": "boardings",
+        "alight": "alightings",
+        "#src_mode": "mode",
+        "@mode": "line_mode",
+        "capt": "total_cap_of_line_per_hr",
+        "caps": "seated_cap_of_line_per_hr",
+        "xi": "i_node_x",
+        "yi": "i_node_y",
+        "xj": "j_node_x",
+        "yj": "j_node_y",
+        "@tot_capacity": "total_capacity",
+        "@seated_capacity": "seated_capacity",
+        "@capacity_penalty": "capacity_penalty",
+        "@tot_vcr": "tot_vcr",
+        "@seated_vcr": "seated_vcr",
+        "@ccost": "ccost",
+        "@eawt": "eawt",
+        "@seg_rel": "seg_rel",
+    }
 
-    column.expression = "j"
-    column.name = "j_node"
-    table.add_column(1, column)
-
-    column.expression = "line"
-    column.name = "line_name"
-    table.add_column(2, column)
-
-    column.expression = "description"
-    column.name = "description"
-    table.add_column(3, column)
-
-    column.expression = "voltr"
-    column.name = "volume"
-    table.add_column(4, column)
-
-    column.expression = "board"
-    column.name = "boardings"
-    table.add_column(5, column)
-
-    column.expression = "alight"
-    column.name = "alightings"
-    table.add_column(6, column)
-
-    column.expression = "#src_mode"
-    column.name = "mode"
-    table.add_column(7, column)
-
-    column.expression = "@mode"
-    column.name = "line_mode"
-    table.add_column(8, column)
-
-    column.expression = "capt"
-    column.name = "total_cap_of_line_per_hr"
-    table.add_column(9, column)
-
-    column.expression = "caps"
-    column.name = "seated_cap_of_line_per_hr"
-    table.add_column(10, column)
-
-    column.expression = "xi"
-    column.name = "i_node_x"
-    table.add_column(11, column)
-
-    column.expression = "yi"
-    column.name = "i_node_y"
-    table.add_column(12, column)
-
-    column.expression = "xj"
-    column.name = "j_node_x"
-    table.add_column(13, column)
-
-    column.expression = "yj"
-    column.name = "j_node_y"
-    table.add_column(14, column)
-
-    column.expression = "@tot_capacity"
-    column.name = "total_capacity"
-    table.add_column(15, column)
-
-    column.expression = "@seated_capacity"
-    column.name = "seated_capacity"
-    table.add_column(16, column)
-
-    column.expression = "@capacity_penalty"
-    column.name = "capacity_penalty"
-    table.add_column(17, column)
-
-    column.expression = "@tot_vcr"
-    column.name = "tot_vcr"
-    table.add_column(18, column)
-
-    column.expression = "@seated_vcr"
-    column.name = "seated_vcr"
-    table.add_column(19, column)
-
-    column.expression = "@ccost"
-    column.name = "ccost"
-    table.add_column(20, column)
-
-    column.expression = "@eawt"
-    column.name = "eawt"
-    table.add_column(21, column)
-
-    column.expression = "@seg_rel"
-    column.name = "seg_rel"
-    table.add_column(22, column)
+    col_num = 0
+    for expression, name in col_name_dict.items():
+        column.expression = expression
+        column.name = name
+        table.add_column(col_num, column)
+        col_num += 1
 
     table.export(output_transit_boardings_file)
     table.close()
