@@ -1001,9 +1001,11 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             network = scenario.get_partial_network(["TRANSIT_LINE", "TRANSIT_SEGMENT"], include_attributes=True)
             attr_map = {
                 "TRANSIT_SEGMENT": ["@phdwy", "transit_volume", "transit_boardings", "@capacity_penalty",
-                                    "@tot_capacity", "@seated_capacity", "@tot_vcr", "@seated_vcr", '@seg_rel'],
+                                    "@tot_capacity", "@seated_capacity", "@tot_vcr", "@seated_vcr", '@seg_rel',
+                                    "transit_time", "@ccost", "@eawt"],
                 "TRANSIT_VEHICLE": ["seated_capacity", "total_capacity"],
                 "TRANSIT_LINE": ["headway"],
+                "LINK": ["data3"],
             }
             if use_fares:
                 # only if use_fares, otherwise will use .mode.id
