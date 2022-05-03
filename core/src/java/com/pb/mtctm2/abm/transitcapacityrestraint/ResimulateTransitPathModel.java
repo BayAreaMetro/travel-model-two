@@ -489,6 +489,7 @@ public class ResimulateTransitPathModel{
 	            MatrixDataServerIf ms = new MatrixDataServerRmi(serverAddress, serverPort, MatrixDataServer.MATRIX_DATA_SERVER_NAME);
 	            ms.testRemote(Thread.currentThread().getName());
 	            mdm.setMatrixDataServerObject(ms);
+	            ms.clear();
 
 	        } catch (Exception e) {
 	            logger.error("could not connect to matrix server", e);
