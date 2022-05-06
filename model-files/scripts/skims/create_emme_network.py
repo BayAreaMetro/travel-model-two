@@ -69,8 +69,8 @@ tap_to_pseudo_tap_xwalk_file = _join(_os.getcwd(), 'hwy', 'tap_to_pseudo_tap_xwa
 
 
 # ------------- run parameters ---------
-_all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
 # _all_periods = ['AM']
+_all_periods = ['EA', 'AM', 'MD', 'PM', 'EV']
 # mapping time of day period to emme scenario_id
 period_to_scenario_dict = {
     'EA': 1000,
@@ -133,7 +133,7 @@ def init_emme_project(root, title, port=59673, overwrite=False):
         'transit_vehicles': 200,
         'transit_lines': 2000,
         'transit_segments': 2000000,
-        'extra_attribute_values': 100000000,
+        'extra_attribute_values': 150000000,
 
         'functions': 99,
         'operators': 5000,
@@ -836,7 +836,6 @@ def update_transit_times(network):
 def calc_link_unreliability(network, period):
     """
     Sets the link unreliability factor for transit services routed on those links.
-    Not fully implemented yet.
 
     Parameters:
         - network: Emme network object to set link unreliability on
@@ -844,6 +843,32 @@ def calc_link_unreliability(network, period):
     Returns:
         - None (link unreliability is set on network)
     """
+    AT_to_area_type_dict = {
+    # AT gets set in codeLinkAreaType.py script
+        0: 'CBD',  # regional core
+        1: 'CBD',  # CBD
+        2: 'UBD', # urban business
+        3: 'URBAN', # urban
+        4: 'SUBURBAN', # suburban
+        5: 'RURAL', # rural
+        -1: 'UBD', #CRRAIL and TAP links
+    }
+
+    FT_to_facility_type_dict = {
+        1: 'FREEWAY', # freeway
+        2: 'FREEWAY', # expressway
+        3: 'PRIMARY', # ramp
+        4: 'PRIMARY', # divided arterial
+        5: 'PRIMARY', # undivided arterial
+        6: 'SECONDARY', # collector
+        7: 'SECONDARY', # local
+        8: 'SECONDARY', # centroid connector
+        99: 'SECONDARY', # dummy
+        0: 'SECONDARY', # walk links, AT is set to RURAl for them so they get 0
+    }
+
+    # factor table from LA Metro CCR Summary Report page 4-10
+    # found here: https://app.box.com/file/695415124876?s=okcovqhetmqfd8o0mtuucxjtolmtq9j7
     factor_table = {
         "PEAK": {
             "FREEWAY":   {"CBD": 0.24, "UBD": 0.24, "URBAN": 0.16, "SUBURBAN": 0.08, "RURAL": 0.00},
@@ -863,11 +888,23 @@ def calc_link_unreliability(network, period):
     if period in ["AM", "PM"]:
         factor_table = factor_table["PEAK"]
     else:
-        factor_table = factor_table["OFFPEAK"]
+        factor_table = factor_table["OFF_PEAK"]
+
     for link in network.links():
-        #facility_type = ?
-        #area_type = ?
-        # NOTE: TBD with new network
+        facility_type = FT_to_facility_type_dict[link['@ft']]
+        area_type = AT_to_area_type_dict[link['@at']]
+
+        if (link['#cntype'] in ['TAP', 'TRWALK']) | (link['@ft'] == 8):
+            area_type = 'RURAL' # no link unreliability for connectors
+        if link['#cntype'] == 'CRAIL':
+            for segment in link.segments():
+                line_mode = segment.line.mode
+                if line_mode == 'h':
+                    facility_type = 'RAIL' # heavy rail
+                if line_mode in ['r', 'c', 'f']:
+                    facility_type = 'ROW'
+                break
+
         link.data3 = factor_table[facility_type][area_type]
 
 
@@ -1106,7 +1143,7 @@ def create_time_period_scenario(modeller, scenario_id, root, period):
     # # fill_transit_times_for_created_segments(network)
     distribute_nntime(network, input_dir)
     update_transit_times(network)
-    # calc_link_unreliability(network, period)
+    calc_link_unreliability(network, period)
     # walktime set in BuildTransitNetworks.job.  999 for non-TRWALK links.
     # fix here is no longer needed
     # fix_bad_walktimes(network)

@@ -370,6 +370,9 @@ public class TourModeChoiceModel
                 
                 float rnumOut = (float)hhRandom.nextDouble();
                 float rnumIn = (float)hhRandom.nextDouble();
+                tour.setRandomNumberForTapChoiceOut(rnumOut);
+                tour.setRandomNumberForTapChoiceIn(rnumIn);
+                
                 if(modelStructure.getTourModeIsWalkTransit(chosen)) {
                 	tour.setChoosenTransitPathOut(logsumHelper.chooseTripPath((float)rnumOut, 
                 			tour.getBestWtwTapPairsOut(), household.getDebugChoiceModels(), modelLogger));

@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.pb.mtctm2.abm.ctramp.TapDataManager;
 import com.pb.mtctm2.abm.ctramp.TazDataManager;
+import com.pb.common.calculator.MatrixDataManager;
 import com.pb.common.calculator.MatrixDataServerIf;
 import com.pb.common.datafile.NEW_CSVFileReader;
 import com.pb.common.datafile.OLD_CSVFileReader;
@@ -69,6 +70,7 @@ public class MTCTM2TripTables {
 	private String directory;
 	private String matrixFileExtension = "omx";
  	private MatrixDataServerIf ms;
+ 	private MatrixDataManager mdm;
     
     SkimBuilder skimBuilder;
     private HashMap<String, Float> averageOcc3Plus;  //a HashMap of average occupancies for 3+ vehicles by tour purpose
@@ -78,9 +80,13 @@ public class MTCTM2TripTables {
     public int numSkimSets;
     public boolean transitResim;
     
-    public MTCTM2TripTables(String resourceBundleName, int iteration, boolean transitResim){
+    public boolean appendSkimsToTrips;
+    
+    public MTCTM2TripTables(String resourceBundleName, int iteration, boolean transitResim, boolean appendSkimsToTrips){
 
     	this.transitResim = transitResim;
+    	this.appendSkimsToTrips = appendSkimsToTrips;
+    	
         rbMap = ResourceUtil.getResourceBundleAsHashMap(resourceBundleName);
         properties = new Properties();
         for (String key : rbMap.keySet()) 
@@ -135,8 +141,12 @@ public class MTCTM2TripTables {
 		//create mazSets
 		mazSets = new MazSets();
 		
+	    // connect to matrix server
+        connectToMatrixServer();
+ 
         //setup skim builder class
-        skimBuilder = new SkimBuilder(properties);
+		if(appendSkimsToTrips)
+			skimBuilder = new SkimBuilder(properties, ms);
 
 	}
 	
@@ -256,16 +266,18 @@ public class MTCTM2TripTables {
 		jointTripFile = formFileName(directory + jointTripFile, iteration);
 		jointTripData = openTripFile(jointTripFile);
 
-	    // connect to matrix server
-        connectToMatrixServer();
-        
+       
         // add time, distance, and cost to trip files
-        addTripFields(indivTripData);
-        addTripFields(jointTripData);
-        
-        // write out updated trip tables 
-        writeTripFile(indivTripData, indivTripFile);
-        writeTripFile(jointTripData, jointTripFile);
+		if(appendSkimsToTrips) {
+			addTripFields(indivTripData);
+			addTripFields(jointTripData);
+
+			// write out updated trip tables 
+	        writeTripFile(indivTripData, indivTripFile);
+	        writeTripFile(jointTripData, jointTripFile);
+	
+		}
+		
         
         //Iterate through periods so that we don't have to keep
 		//trip tables for all periods in memory.
@@ -351,7 +363,9 @@ public class MTCTM2TripTables {
 			int inbound = (int) tripData.getValueAt(i,"inbound");
 			
 			//get trip distance for taz/maz level matrix decision
-			float tripdist = (int) tripData.getValueAt(i,"TRIP_DISTANCE");
+			float tripdist=0;
+			if(appendSkimsToTrips)
+				tripdist = (int) tripData.getValueAt(i,"TRIP_DISTANCE");
 			
 			float sampleRate = tripData.getValueAt(i,"sampleRate");
 			int avAvailable = (int) tripData.getValueAt(i, "avAvailable");
@@ -408,7 +422,16 @@ public class MTCTM2TripTables {
         		}
         		
         		//is auto trip maz level or taz level
-        		if(mazSets.isMazSetTrip(tripdist, originMGRA, destinationMGRA)) {
+        		if(!appendSkimsToTrips) {
+        			//taz level
+        			if(avAvailable==0){
+        				float value = matrix[mode][mat].getValueAt(originTAZ, destinationTAZ);
+        				matrix[mode][mat].setValueAt(originTAZ, destinationTAZ, (value + vehicleTrips));
+        			}else{
+        				float value = matrix[4][mat].getValueAt(originTAZ, destinationTAZ);
+        				matrix[4][mat].setValueAt(originTAZ, destinationTAZ, (value + vehicleTrips));
+        			}
+        		}else if(mazSets.isMazSetTrip(tripdist, originMGRA, destinationMGRA)) {
         			//maz level
         			int mazSet = mazSets.getZoneSet(originMGRA, destinationMGRA);
         			int omaz = mazSets.getNewZoneSetNum(originMGRA);
@@ -561,6 +584,9 @@ public class MTCTM2TripTables {
 		ms = new MatrixDataServerRmi(matrixServerAddress, serverPort, MatrixDataServer.MATRIX_DATA_SERVER_NAME);
 		ms.testRemote(Thread.currentThread().getName());
         logger.info("connected to matrix data server");
+        mdm = MatrixDataManager.getInstance();
+        mdm.setMatrixDataServerObject(ms);
+
     }
 
     
@@ -688,6 +714,7 @@ public class MTCTM2TripTables {
 		String propertiesName = null;
         int iteration=0;
         boolean transitResim=false;
+        boolean appendSkimsToTrips=true;
         
         if (args.length == 0)
         {
@@ -708,12 +735,16 @@ public class MTCTM2TripTables {
 	            {
 	                transitResim = args[i + 1].equalsIgnoreCase("TRUE");
 	            }
+	            if (args[i].equalsIgnoreCase("-appendSkims"))
+	            {
+	            	appendSkimsToTrips = args[i + 1].equalsIgnoreCase("TRUE");
+	            }
 	           
 	        }
         }
 		
 		//run trip table generator
-		MTCTM2TripTables tripTables = new MTCTM2TripTables(propertiesName, iteration, transitResim);		
+		MTCTM2TripTables tripTables = new MTCTM2TripTables(propertiesName, iteration, transitResim, appendSkimsToTrips);		
 		tripTables.createTripTables();
 
 	}

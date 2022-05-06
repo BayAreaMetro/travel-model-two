@@ -1042,6 +1042,7 @@ public class IntermediateStopChoiceModels implements Serializable {
 	                        
                         	//pick transit path from N-paths
                         	float rn = (float)household.getHhRandom().nextDouble();
+                        	stop.setRandomNumberForTapChoice(rn);
                         	int pathindex = logsumHelper.chooseTripPath(rn, segmentIkBestTapPairs[selectedIndex][accEgr], household.getDebugChoiceModels(), smcLogger);
                         	
                             stop.setBoardTap( (int)segmentIkBestTapPairs[selectedIndex][accEgr][pathindex][0] );
@@ -1118,6 +1119,7 @@ public class IntermediateStopChoiceModels implements Serializable {
 	                    	
                         	//pick transit path from N-paths
                             float rn = (float)household.getHhRandom().nextDouble();
+                            stop.setRandomNumberForTapChoice(rn);
                         	int pathindex = logsumHelper.chooseTripPath(rn, segmentKjBestTapPairs[oldSelectedIndex][accEgr], household.getDebugChoiceModels(), smcLogger);
                         	
                             stop.setBoardTap( (int)segmentKjBestTapPairs[oldSelectedIndex][accEgr][pathindex][0] );
@@ -1200,6 +1202,7 @@ public class IntermediateStopChoiceModels implements Serializable {
             	
             	//pick transit path from N-paths
                 float rn = (float)household.getHhRandom().nextDouble();
+                stop.setRandomNumberForTapChoice(rn);
                 int pathindex = logsumHelper.chooseTripPath(rn, bestTaps, household.getDebugChoiceModels(), smcLogger);
             	
                 stop.setBoardTap( (int)bestTaps[pathindex][0] );
@@ -1363,6 +1366,7 @@ public class IntermediateStopChoiceModels implements Serializable {
 	                    	
 	                    	//pick transit path from N-paths
                         	float rn = (float)household.getHhRandom().nextDouble();
+                            stop.setRandomNumberForTapChoice(rn);
                         	int pathindex = logsumHelper.chooseTripPath(rn, segmentIkBestTapPairs[selectedIndex][accEgr], household.getDebugChoiceModels(), smcLogger);
                         	
                             stop.setBoardTap( (int)segmentIkBestTapPairs[selectedIndex][accEgr][pathindex][0] );
@@ -1450,6 +1454,7 @@ public class IntermediateStopChoiceModels implements Serializable {
 
 	                    	//pick transit path from N-paths
                         	float rn = (float)household.getHhRandom().nextDouble();
+                            stop.setRandomNumberForTapChoice(rn);
                         	int pathindex = logsumHelper.chooseTripPath(rn, segmentKjBestTapPairs[oldSelectedIndex][accEgr], household.getDebugChoiceModels(), smcLogger);
                         	
                             stop.setBoardTap( (int)segmentKjBestTapPairs[oldSelectedIndex][accEgr][pathindex][0] );
@@ -1539,6 +1544,7 @@ public class IntermediateStopChoiceModels implements Serializable {
 
                 	//pick transit path from N-paths
                 	float rn = (float)household.getHhRandom().nextDouble();
+                    stop.setRandomNumberForTapChoice(rn);
                 	int pathindex = logsumHelper.chooseTripPath(rn, bestTaps, household.getDebugChoiceModels(), smcLogger);
                 	
                     stop.setBoardTap( (int)bestTaps[pathindex][0] );

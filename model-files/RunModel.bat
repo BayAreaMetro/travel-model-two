@@ -318,7 +318,7 @@ IF ERRORLEVEL 1 goto done
 :: Passing the port specified in the Emme Desktop GUI 
 :: see Tools > Application Options > Advanced.  
 :: At the bottom of the pane, there is text: "Desktop API is listening on port 4242."
-"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "yes" --skip_import_demand --port 4242
+"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --iteration 1 --skip_import_demand --port 4242
 IF ERRORLEVEL 1 goto done
 
 CALL conda deactivate
@@ -534,7 +534,7 @@ SET /A INNER_ITERATION+=1
   CALL conda deactivate
   CALL conda activate mtc
 
-  %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --first_iteration "no" --output_transit_boardings
+  %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --iteration %INNER_ITERATION% --output_transit_boardings
   IF ERRORLEVEL 1 goto done
 
   :: changing back to python 2 environment
