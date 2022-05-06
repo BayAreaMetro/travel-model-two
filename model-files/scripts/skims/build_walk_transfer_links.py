@@ -18,11 +18,19 @@ import os,sys
 taps_connection = sys.argv[1]
 taps_connectors = sys.argv[2]
     
-f = open(taps_connectors,'wb')
+f = open(taps_connectors,'w')
 finished_taps = {}
-for line in open(taps_connection):
+for line in open(taps_connection, 'r'):
     line = line.strip().split(',')
-    taps = (int(line[0]),int(line[1]))
+    try:
+        taps = (int(line[0]),int(line[1]))
+    except Exception as e:
+        # for some reason this file has lots of blank lines -- workaround this
+        if line == ['']: continue
+        # handle EOF
+        if line == ['\x1a']: continue
+        print("line=[{}]".format(line))
+        raise e
     if not taps in finished_taps:
         #tap,tap,cntype,distance
         #write both directions

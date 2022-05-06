@@ -17,7 +17,7 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;start cluster nodes
-*Cluster.exe MTC_HWYNET 1-5 start exit
+*"%TPP_PATH%\Cluster.exe" MTC_HWYNET 1-5 start exit
 
 ; do, more or less, the same skim procedure for each of the five time periods
 loop period = 1, 5
@@ -166,4 +166,4 @@ endloop ; token_period
 Wait4Files files = MTC_HWYNET1.script.end, MTC_HWYNET2.script.end, MTC_HWYNET3.script.end, MTC_HWYNET4.script.end, MTC_HWYNET5.script.end, 
            printfiles = merge, deldistribfiles = t, CheckReturnCode = t
 ;stop cluster nodes
-*Cluster.exe MTC_HWYNET 1-5 close exit
+*"%TPP_PATH%\Cluster.exe" MTC_HWYNET 1-5 close exit

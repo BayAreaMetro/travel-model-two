@@ -160,7 +160,7 @@ LOOP CLASS = 1,1
 ENDLOOP
         
 ;start cluster nodes
-*Cluster.exe MTC_HWYMAZSKIM 1-9 start exit
+*"%TPP_PATH%\Cluster.exe" MTC_HWYMAZSKIM 1-9 start exit
 
 ;loop by county, but just use free flow speed
 LOOP PROC_COUNT=1,9
@@ -268,7 +268,7 @@ LOOP PROC_COUNT=1,9
                  ENDRUN
                  
                 ;run script
-                *Voyager.exe @SFILE@_@SKIM_COUNTY@.s /Start
+                *"%TPP_PATH%\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
                 
                 ;clean-up
                 *del @SFILE@_@SKIM_COUNTY@.s
@@ -289,7 +289,7 @@ Wait4Files Files=MTC_HWYMAZSKIM1.script.end, MTC_HWYMAZSKIM2.script.end, MTC_HWY
           checkreturncode=T, printfiles=MERGE, deldistribfiles=T
 
 ;stop cluster nodes
-*Cluster.exe MTC_HWYMAZSKIM 1-9 close exit
+*"%TPP_PATH%\Cluster.exe" MTC_HWYMAZSKIM 1-9 close exit
 
 ;merge files
 

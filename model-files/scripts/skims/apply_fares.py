@@ -81,7 +81,7 @@ class ApplyFares(object):
                 line.segment(-1).allow_boardings = False
 
             self._log.append({"type": "header", "content": "Base fares by faresystem"})
-            for fs_id, fs_data in faresystems.iteritems():
+            for (fs_id, fs_data) in faresystems.items():
                 self._log.append(
                     {"type": "text", "content": "FAREZONE {}: {} {}".format(fs_id, fs_data["STRUCTURE"], fs_data["NAME"])})
                 lines = fs_data["LINES"]
@@ -114,14 +114,14 @@ class ApplyFares(object):
 
         except Exception as error:
             self._log.append({"type": "text", "content": "error during apply fares"})
-            self._log.append({"type": "text", "content": unicode(error)})
+            self._log.append({"type": "text", "content": str(error)})
             self._log.append({"type": "text", "content": _traceback.format_exc()})
             raise
         finally:
             log_content = []
             header = ["NUMBER", "NAME", "NUM LINES", "NUM SEGMENTS", "MODES", "FAREMATRIX ID", 
                       "NUM ZONES", "NUM MATRIX RECORDS"]
-            for fs_id, fs_data in faresystems.iteritems():
+            for (fs_id, fs_data) in faresystems.items():
                 log_content.append([str(fs_data.get(h, "")) for h in header])
             self._log.insert(0, {
                 "content": log_content,
@@ -241,7 +241,7 @@ class ApplyFares(object):
                     zone_nodes[farezone].add(seg.i_node)
         self._log.append(
             {"type": "text2", "content": "Farezone IDs and node count: %s" % (
-                ", ".join(["%s: %s" % (k, len(v)) for k, v in zone_nodes.iteritems()]))})
+                ", ".join(["%s: %s" % (k, len(v)) for (k, v) in zone_nodes.items()]))})
 
         # Two cases:
         #  - zone / area fares with boundary crossings, different FS may overlap:
@@ -256,7 +256,7 @@ class ApplyFares(object):
 
         count_single_node_zones = 0.0
         count_multi_node_zones = 0.0
-        for zone, nodes in zone_nodes.iteritems():
+        for (zone, nodes) in zone_nodes.items():
             if len(nodes) > 1:
                 count_multi_node_zones += 1.0
             else:
@@ -332,7 +332,7 @@ class ApplyFares(object):
                     if board_cost is None:
                         # use the smallest fare found from this farezone as best guess 
                         # as a reasonable boarding cost
-                        board_cost = min(fare_matrix[farezone].itervalues())
+                        board_cost = min(fare_matrix[farezone].values())
                         self._log.append({
                             "type": "text3",
                             "content": farezone_warning3 % (
@@ -491,7 +491,7 @@ class ApplyFares(object):
             {"type": "header", "content": "Faresystem distances"})
         self._log.append(
             {"type": "text2", "content": "Max transfer distance: %s" % MAX_TRANSFER_DISTANCE})
-        for fs_index, fs_data in enumerate(faresystems.itervalues()):
+        for (fs_index, fs_data) in faresystems.items():
             stops = set([])
             for line in fs_data["LINES"]:
                 for stop in line.segments(True):
@@ -504,10 +504,10 @@ class ApplyFares(object):
 
         # get distances between every pair of zone systems
         # determine transfer fares which are too far away to be used
-        for fs_id, fs_data in faresystems.iteritems():
+        for (fs_id, fs_data) in faresystems.items():
             fs_data["distance"] = []
             fs_data["xfer_fares"] = xfer_fares = {}
-            for fs_id2, fs_data2 in faresystems.iteritems():
+            for (fs_id2, fs_data2) in faresystems.items():
                 if fs_data["NUM LINES"] == 0 or fs_data2["NUM LINES"] == 0:
                     distance = "n/a"
                 elif fs_id == fs_id2:
@@ -540,7 +540,7 @@ class ApplyFares(object):
                 xfer_fares[fs_id2] = xfer
 
         distance_table = [["p/q"] + list(faresystems.keys())]
-        for fs, fs_data in faresystems.iteritems():
+        for (fs, fs_data) in faresystems.items():
             distance_table.append([fs] + [("%.0f" % d if isinstance(d, float) else d) for d in fs_data["distance"]])
         self._log.append(
             {"type": "text2", "content": "Table of distance between stops in faresystems (feet)"})
@@ -562,7 +562,7 @@ class ApplyFares(object):
         # first pass: only group by matching mode patterns to minimize the number
         #             of levels with multiple modes
         group_xfer_fares_mode = []
-        for fs_id, fs_data in faresystems.iteritems():
+        for (fs_id, fs_data) in faresystems.items():
             fs_modes = fs_data["MODE_SET"]
             if not fs_modes:
                 continue
@@ -648,7 +648,7 @@ class ApplyFares(object):
                 line.vehicle = temp_veh
             network.delete_transit_vehicle(vehicle)
             new_veh = network.create_transit_vehicle(veh_id, meta_mode.id)
-            for a, v in attributes.iteritems():
+            for (a, v) in attributes.items():
                 new_veh[a] = v
             for line in lines[veh_id]:
                 line.vehicle = new_veh

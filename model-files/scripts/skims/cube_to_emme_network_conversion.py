@@ -376,13 +376,13 @@ class emme_network_conversion:
 
 
         assert all(pd.Series(emme_transit_modes_dict).isin(mode_transaction_df['mode'].values)), \
-            "Mode in the emme_transit_modes_dict is not listed in  the mode transaction file"
+            "Mode in the emme_transit_modes_dict is not listed in the mode transaction file"
 
         if write_file == False:
             return mode_transaction_df
 
-        with open(self.emme_mode_transaction_file, 'w') as file:
-            file.write('t modes init\n')
+        with open(self.emme_mode_transaction_file, 'w', newline='') as file:
+            file.write('t modes init' + os.linesep)
             mode_transaction_df.to_csv(file, mode='a', sep=' ', index=False, header=False)
         file.close()
         return mode_transaction_df
@@ -434,8 +434,8 @@ class emme_network_conversion:
         veh_output_cols = ['transaction', 'vehicle', 'descr', 'mode', 'fleet', 'caps',
                            'capt', 'ctc', 'cdc', 'etc', 'edc', 'auto']
 
-        with open(self.emme_vehicle_transaction_file, 'w') as file:
-            file.write('t vehicles init\n')
+        with open(self.emme_vehicle_transaction_file, 'w', newline='') as file:
+            file.write('t vehicles init' + os.linesep)
             veh_transaction_df[veh_output_cols].to_csv(file, mode='a', sep=' ', index=False, header=False)
         file.close()
 
@@ -663,10 +663,10 @@ class emme_network_conversion:
         node_gdf, node_transaction_cols = self.create_emme_nodes_input(node_gdf)
         link_gdf, link_transaction_cols = self.create_emme_links_input(link_gdf, mode_transaction_df)
 
-        with open(self.emme_network_transaction_file, 'w') as file:
-            file.write('t nodes init\n')
+        with open(self.emme_network_transaction_file, 'w', newline='') as file:
+            file.write('t nodes init' + os.linesep)
             node_gdf[node_transaction_cols].to_csv(file, mode='a', sep=' ', index=False, header=False)
-            file.write('t links init\n')
+            file.write('t links init' + os.linesep)
             link_gdf[link_transaction_cols].to_csv(file, mode='a', sep=' ', index=False, header=False)
         file.close()
         return node_gdf, link_gdf

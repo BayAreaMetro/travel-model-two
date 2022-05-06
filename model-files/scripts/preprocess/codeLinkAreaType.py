@@ -15,9 +15,9 @@ LINK_CSV_FILE = os.path.join(model_run_dir,r'hwy\mtc_final_network_with_tolls_li
 AREA_TYPE_FILE = os.path.join(model_run_dir,r'hwy\link_area_type.csv')
 BUFF_DIST       = 5280 * 0.5
 
-print "Reading MAZ data"
+print("Reading MAZ data")
 mazData = []
-with open(MAZ_DATA_FILE, 'rb') as csvfile:
+with open(MAZ_DATA_FILE, 'r') as csvfile:
   mazreader = csv.reader(csvfile, skipinitialspace=True)
   for row in mazreader:
     mazData.append(row)
@@ -36,11 +36,11 @@ for row in mazData:
   orig_maz_id = row[mazDataColNames.index("MAZ_ORIGINAL")]
   origMazToSeqMaz[orig_maz_id] = maz
 
-print "Reading nodes"
+print("Reading nodes")
 mazs = dict()
 nodes = dict()
 spIndexMaz = index.Index()
-with open(NODE_CSV_FILE,'rb') as node_file:
+with open(NODE_CSV_FILE,'r') as node_file:
   node_reader = csv.reader(node_file,skipinitialspace=True)
   for row in node_reader:
     n = row[0]
@@ -52,7 +52,7 @@ with open(NODE_CSV_FILE,'rb') as node_file:
       spIndexMaz.insert(int(origMazToSeqMaz[n]), (xCoord, yCoord, xCoord, yCoord))
     nodes[n] = [n, xCoord, yCoord]
 
-print "Calculate buffered MAZ measures"
+print("Calculate buffered MAZ measures")
 for k in mazLandUse.keys():
   
   #get maz data
@@ -95,10 +95,10 @@ for k in mazLandUse.keys():
   else:
     mazLandUse[k][6] = 0 #regional core
 
-print "Find nearest MAZ for each link, take min area type of A or B node"
+print("Find nearest MAZ for each link, take min area type of A or B node")
 lines = ["A,B,AREATYPE" + os.linesep]
 
-with open(LINK_CSV_FILE,'rb') as link_file:
+with open(LINK_CSV_FILE,'r') as link_file:
   link_reader = csv.reader(link_file,skipinitialspace=True)
   for row in link_reader:
     a = int(row[0])
@@ -123,7 +123,7 @@ with open(LINK_CSV_FILE,'rb') as link_file:
     lines.append("%i,%i,%i%s" % (a, b, linkAT, os.linesep))
 
 #create output file
-print "Write link area type CSV file"
-outFile = open(AREA_TYPE_FILE, "wb")
+print("Write link area type CSV file")
+outFile = open(AREA_TYPE_FILE, "w")
 outFile.writelines(lines)
 outFile.close()

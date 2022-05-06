@@ -180,7 +180,7 @@ ENDRUN
 *del hwy\mtc_transit_network_temp3.net
 
 ;start cluster nodes
-*Cluster.exe MTC_TRANNET 1-5 start exit
+*"%TPP_PATH%\Cluster.exe" MTC_TRANNET 1-5 start exit
 
 ;now build transit times based on congested times from loaded network
 ;loop over time period
@@ -239,4 +239,4 @@ Wait4Files files = MTC_TRANNET1.script.end, MTC_TRANNET2.script.end, MTC_TRANNET
 
 
 ;stop cluster nodes
-*Cluster.exe MTC_TRANNET 1-5 close exit
+*"%TPP_PATH%\Cluster.exe" MTC_TRANNET 1-5 close exit
