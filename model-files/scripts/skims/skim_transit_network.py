@@ -558,7 +558,7 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
     #     element_types=["TRANSIT_LINE", "TRANSIT_SEGMENT"], include_attributes=True)
 
     with _m.logbook_trace("Transit assignment and skims for period %s" % period):
-        run_assignment(modeller, scenario, period, params, network, num_processors, use_fares, use_ccr)
+        # run_assignment(modeller, scenario, period, params, network, num_processors, use_fares, use_ccr)
         network = scenario.get_network()
 
         if not assignment_only:
@@ -911,7 +911,6 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
         total_ivtt_expr = []
         if use_ccr:
             scenario.create_extra_attribute("TRANSIT_SEGMENT", "@mode_timtr")
-            print scenario.has_transit_results
             try:
                 for mode_name, modes in mode_combinations:
                     network.create_attribute("TRANSIT_SEGMENT", "@mode_timtr")
@@ -998,11 +997,12 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             create_extra("TRANSIT_SEGMENT", "@seated_capacity", "seated capacity", overwrite=True, scenario=scenario)
             create_extra("TRANSIT_SEGMENT", "@tot_vcr", "volume to total capacity ratio", overwrite=True, scenario=scenario)
             create_extra("TRANSIT_SEGMENT", "@seated_vcr", "volume to seated capacity ratio", overwrite=True, scenario=scenario)
+            create_extra("TRANSIT_SEGMENT", "@ccost_skim", "copy of ccost used for skimming", overwrite=True, scenario=scenario)
             network = scenario.get_partial_network(["TRANSIT_LINE", "TRANSIT_SEGMENT"], include_attributes=True)
             attr_map = {
                 "TRANSIT_SEGMENT": ["@phdwy", "transit_volume", "transit_boardings", "@capacity_penalty",
                                     "@tot_capacity", "@seated_capacity", "@tot_vcr", "@seated_vcr", '@seg_rel',
-                                    "transit_time", "@ccost", "@eawt"],
+                                    "@base_timtr", "@eawt", "@ccost_skim"],
                 "TRANSIT_VEHICLE": ["seated_capacity", "total_capacity"],
                 "TRANSIT_LINE": ["headway"],
                 "LINK": ["data3"],
@@ -1040,17 +1040,17 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
                 segment["@seated_capacity"] = seated_capacity
                 segment["@tot_vcr"] = vcr
                 segment["@seated_vcr"] = seated_vcr
-                # link reliability is calculated as link_rel_factor * (congested transit time)
-                # where congested transit time = crowded transit time - crowding penalty
+                # link reliability is calculated as link_rel_factor * base (non-crowded) transit time
                 if segment.link is None:
                     # sometimes segment.link returns None. Is this due to hidden segments??
                     segment['@seg_rel'] = 0
                 else:
-                    segment["@seg_rel"] = segment.link.data3 * (segment['transit_time'] - segment['@ccost'])
+                    segment["@seg_rel"] = segment.link.data3 * segment['@base_timtr']
                 segment["@eawt"] = calc_eawt(segment, vcr, headway)
                 segment["@capacity_penalty"] = max(segment["@phdwy"] - segment["@eawt"] - headway, 0) * hdwy_fraction
+                segment['@ccost_skim'] = segment['@ccost']
 
-            additional_attribs = ["@eawt", "@capacity_penalty", "@tot_vcr", "@seated_vcr", "@tot_capacity", "@seated_capacity", "@seg_rel"]
+            additional_attribs = ["@eawt", "@capacity_penalty", "@tot_vcr", "@seated_vcr", "@tot_capacity", "@seated_capacity", "@seg_rel", "@ccost_skim"]
             values = network.get_attribute_values('TRANSIT_SEGMENT', additional_attribs)
             scenario.set_attribute_values('TRANSIT_SEGMENT', additional_attribs, values)
 
@@ -1059,7 +1059,10 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
 
             # Crowding penalty
-            spec = get_strat_spec({"in_vehicle": "@ccost"}, "%s_CROWD" % skim_name)
+            # for some unknown reason, just using ccost here will produce an all 0 matrix...
+            # spec = get_strat_spec({"in_vehicle": "@ccost"}, "%s_CROWD" % skim_name)
+            # hack to get around this was to create a new variable that is a copy of ccost and use it to skim
+            spec = get_strat_spec({"in_vehicle": "@ccost_skim"}, "%s_CROWD" % skim_name)
             strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
 
             # skim node reliability, Extra added wait time (EAWT)
