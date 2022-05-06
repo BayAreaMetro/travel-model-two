@@ -7,6 +7,10 @@
 :: set ENVTYPE=MTC or RSG
 set ENVTYPE=MTC
 
+:: set RUNTYPE=LOCAL to run everything on this machine
+:: set RUNTYPE=DISTRIBUTED to farm out work to other nodes
+set RUNTYPE=LOCAL
+
 :: ------------------------------
 :: Step 1: Specify file locations
 :: ------------------------------
@@ -53,8 +57,8 @@ c:\windows\system32\Robocopy.exe /E "%INPUT_NETWORK%\hwy"   INPUT\hwy
 c:\windows\system32\Robocopy.exe /E "%INPUT_NETWORK%\trn"   INPUT\trn
 
 :: popsyn and land use input
-c:\windows\system32\Robocopy.exe /E "%INPUT_LU%"            INPUT\popsyn
-c:\windows\system32\Robocopy.exe /E "%INPUT_POPSYN%"        INPUT\landuse
+c:\windows\system32\Robocopy.exe /E "%INPUT_LU%"            INPUT\landuse
+c:\windows\system32\Robocopy.exe /E "%INPUT_POPSYN%"        INPUT\popsyn
 
 :: non residential input
 c:\windows\system32\Robocopy.exe /E "%INPUT_NONRES%"        INPUT\nonres

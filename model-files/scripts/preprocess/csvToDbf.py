@@ -7,7 +7,7 @@ Goes through file twice, the first time to figure out types.
 Try assuming ints, then floats, then strings.
 
 """
-from dbfpy import dbf
+import dbfpy3
 import argparse,collections,csv,os,sys
 
 if __name__ == '__main__':
@@ -28,6 +28,8 @@ if __name__ == '__main__':
             col_list = row
             for colname in row:
                 dbf_colname = colname[:10]
+                # make it upper case
+                dbf_colname = dbf_colname.upper()
                 if len(colname) > 10: print("Truncating column {} to {}", colname, dbf_colname)
                 columns[colname] = [dbf_colname, "N", 10] # try int first
             continue
@@ -60,11 +62,12 @@ if __name__ == '__main__':
     print("Read {} and determined dbf columns".format(args.input_csv))
 
     # create the dbf
-    new_dbf = dbf.Dbf(args.output_dbf, new=True)
+    new_dbf = dbfpy3.dbf.Dbf(args.output_dbf, new=True)
 
     for col in columns.keys():
-        # print "{} : {}".format(col, columns[col])
-        new_dbf.addField(columns[col])
+        # print("{} : {}".format(col, columns[col]))
+        # dbfpy3 wants type_code, name, length
+        new_dbf.add_field( (columns[col][1], columns[col][0], columns[col][2]) )
 
     csvfile   = open(args.input_csv)
     csvreader = csv.reader(csvfile)
@@ -75,19 +78,21 @@ if __name__ == '__main__':
             header = True
             continue
 
-        rec = new_dbf.newRecord()
+        rec = new_dbf.new()
         for col_idx in range(len(row)):
             colname = col_list[col_idx]
+            dbf_colname = columns[colname][0]
+            print(dbf_colname)
             if columns[colname][1] == "N" and len(columns[colname]) == 3:
-                rec[ columns[colname][0] ] = int(row[col_idx])
+                rec[ dbf_colname ] = int(row[col_idx])
             elif columns[colname][1] == "N":
-                rec[ columns[colname][0] ] = float(row[col_idx])
+                rec[ dbf_colname] = float(row[col_idx])
             else:
-                rec[ columns[colname][0] ] = row[col_idx]
-        rec.store()
+                rec[ dbf_colname ] = row[col_idx]
+        new_dbf.write(rec)
 
     csvfile.close()
-    print new_dbf
+    print(new_dbf)
     new_dbf.close()
 
     print("Wrote {}".format(args.output_dbf))

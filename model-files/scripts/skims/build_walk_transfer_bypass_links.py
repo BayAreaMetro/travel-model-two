@@ -50,9 +50,8 @@ with open(mtc_tap_to_stop_connectors) as f:
 
 #use ext space for pseudo-taps (901,000+) - leave 1,000 spots for externals
 pseudo_tap_counter = 901001
-tap_numbers = taps.keys()
-tap_numbers.sort()
-with open(output_node_file,'wb') as f:
+tap_numbers = sorted(taps.keys())
+with open(output_node_file,'w') as f:
     for tap in tap_numbers:
         (x,y) = taps[tap]
         #offset tap by 7 feet diagonally so that we are close, but not overlapping
@@ -62,7 +61,7 @@ with open(output_node_file,'wb') as f:
         pseudo_tap_counter += 1
 
 # write crosswalk between tap and newly created pseudo tap node
-with open(output_tap_xwalk_file, 'wb') as f:
+with open(output_tap_xwalk_file, 'w') as f:
     for tap, pseudo_tap in taps.items():
         f.write(','.join(map(str,[tap,pseudo_tap])) + os.linesep)
 
@@ -77,7 +76,7 @@ with open(mtc_transit_network_node_xy) as f:
         node_coord[n] = (x,y)
 
 
-with open(output_link_file,'wb') as f:
+with open(output_link_file,'w') as f:
     #first write out pseudo-tap->stop links
     for tap in tap_links:
         (x1,y1) = node_coord[tap]

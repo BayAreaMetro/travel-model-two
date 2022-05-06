@@ -45,32 +45,39 @@ extra_transit_line_attributes = ['HEADWAY[1]','HEADWAY[2]','HEADWAY[3]','HEADWAY
 # --------------------------------------------- Methods --------------------------------------------
 class emme_network_conversion:
     def __init__(self, cube_network_folder, period):
-        self.period = period
-        self.emme_network_transaction_folder = os.path.join(
-            cube_network_folder,"emme_network_transaction_files_{}".format(period))
-        self.link_shapefile = os.path.join(cube_network_folder, "mtc_transit_network_{}_CONG_links.DBF".format(period))
-        self.node_shapefile = os.path.join(cube_network_folder, "mtc_transit_network_{}_CONG_nodes.DBF".format(period))
-        # transit_lin_file = r"E:\projects\clients\marin\2015_test_2019_02_13\trn\transitLines_new_nodes.lin"
-        self.transit_lin_file = os.path.join(cube_network_folder, "transitLines_new_nodes.lin")
-        self.transit_system_file = os.path.join(cube_network_folder, "transitSystem.PTS")
-        self.transit_SET3_file =  os.path.join(cube_network_folder, "transitFactors_SET3.fac")
-        self.node_id_crosswalk_file = os.path.join(self.emme_network_transaction_folder, "node_id_crosswalk.csv")
-        self.emme_mode_transaction_file = os.path.join(self.emme_network_transaction_folder, "emme_modes.txt")
-        self.emme_vehicle_transaction_file = os.path.join(self.emme_network_transaction_folder, "emme_vehicles.txt")
-        self.emme_network_transaction_file = os.path.join(self.emme_network_transaction_folder, "emme_network.txt")
-        self.extra_node_attr_file = os.path.join(self.emme_network_transaction_folder, "emme_extra_node_attributes.txt")
-        self.extra_link_attr_file = os.path.join(self.emme_network_transaction_folder, "emme_extra_link_attributes.txt")
-        self.update_extra_link_attr_file = os.path.join(self.emme_network_transaction_folder, "emme_update_extra_link_attributes.txt")
-        self.emme_transit_network_file = os.path.join(self.emme_network_transaction_folder, "emme_transit_lines.txt")
-        self.extra_transit_line_attr_file = os.path.join(self.emme_network_transaction_folder, "emme_extra_line_attributes.txt")
-        self.extra_transit_segment_attr_file = os.path.join(self.emme_network_transaction_folder, "emme_extra_segment_attributes.txt")
-        self.emme_transit_time_function_file = os.path.join(self.emme_network_transaction_folder, "emme_transit_time_function.txt")
-        self.all_stop_attributes_file = os.path.join(self.emme_network_transaction_folder, "all_stop_attributes.csv")
-        self.all_transit_lines_file = os.path.join(self.emme_network_transaction_folder, "all_transit_lines.csv")
+        self.period                             = period
+        self.emme_network_transaction_folder    = os.path.join(cube_network_folder, "emme_network_transaction_files_{}".format(period))
+        self.link_shapefile                     = os.path.join(cube_network_folder, "mtc_transit_network_{}_CONG_links.DBF".format(period))
+        self.node_shapefile                     = os.path.join(cube_network_folder, "mtc_transit_network_{}_CONG_nodes.DBF".format(period))
+        self.transit_lin_file                   = os.path.join(cube_network_folder, "transitLines_new_nodes.lin")
+        self.transit_system_file                = os.path.join(cube_network_folder, "transitSystem.PTS")
+        self.transit_SET3_file                  = os.path.join(cube_network_folder, "transitFactors_SET3.fac")
+
+        self.node_id_crosswalk_file             = os.path.join(self.emme_network_transaction_folder, "node_id_crosswalk.csv")
+        self.emme_mode_transaction_file         = os.path.join(self.emme_network_transaction_folder, "emme_modes.txt")
+        self.emme_vehicle_transaction_file      = os.path.join(self.emme_network_transaction_folder, "emme_vehicles.txt")
+        self.emme_network_transaction_file      = os.path.join(self.emme_network_transaction_folder, "emme_network.txt")
+        self.extra_node_attr_file               = os.path.join(self.emme_network_transaction_folder, "emme_extra_node_attributes.txt")
+        self.extra_link_attr_file               = os.path.join(self.emme_network_transaction_folder, "emme_extra_link_attributes.txt")
+        self.update_extra_link_attr_file        = os.path.join(self.emme_network_transaction_folder, "emme_update_extra_link_attributes.txt")
+        self.emme_transit_network_file          = os.path.join(self.emme_network_transaction_folder, "emme_transit_lines.txt")
+        self.extra_transit_line_attr_file       = os.path.join(self.emme_network_transaction_folder, "emme_extra_line_attributes.txt")
+        self.extra_transit_segment_attr_file    = os.path.join(self.emme_network_transaction_folder, "emme_extra_segment_attributes.txt")
+        self.emme_transit_time_function_file    = os.path.join(self.emme_network_transaction_folder, "emme_transit_time_function.txt")
+        self.all_stop_attributes_file           = os.path.join(self.emme_network_transaction_folder, "all_stop_attributes.csv")
+        self.all_transit_lines_file             = os.path.join(self.emme_network_transaction_folder, "all_transit_lines.csv")
 
     def load_input_data(self):
+        """
+        Reads node and link shapefiles as geodataframes and verifies that extra_node_attributes, extra_link_attributes
+        are present as columns.
+
+        Returns both geodataframes.
+        """
         print("Loading input data for", self.period, "period")
+        print("- Reading {}".format(self.node_shapefile))
         node_gdf = geopandas.read_file(self.node_shapefile)
+        print("- Reading {}".format(self.link_shapefile))
         link_gdf = geopandas.read_file(self.link_shapefile)
 
         for attr in extra_node_attributes:
