@@ -53,7 +53,7 @@ try:
     import openmatrix as _omx
     def open_file(file_path, mode):
         return OmxMatrix(_omx.open_file(file_path, mode))
-except Exception, e:
+except Exception as e:
     import omx as _omx
     def open_file(file_path, mode):
         return OmxMatrix(_omx.openFile(file_path, mode))
@@ -203,7 +203,7 @@ def connect_to_desktop(port=59673):
     Returns:
         - Emme desktop object from the specified port
     """
-    print("port:", port)
+    print("connecting to Emme desktop via port:", port)
     desktop = _app.connect(port=port)
     return desktop
 
@@ -220,6 +220,7 @@ def start_desktop(root, title="emme_full_run", port=59673):
         - Emme desktop object
     """
     emme_project = _os.path.join(root, title, title + ".emp")
+    print("emme_project: {}".format(emme_project))
     desktop = _app.start(  # will not close desktop when program ends
         project=emme_project, user_initials="RSG", visible=True, port=port)
     return desktop
@@ -508,7 +509,7 @@ def parse_num_processors(value):
     max_processors = _multiprocessing.cpu_count()
     if isinstance(value, int):
         return value
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         if value == "MAX":
             return max_processors
         if _re.match("^[0-9]+$", value):
@@ -558,7 +559,7 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
     #     element_types=["TRANSIT_LINE", "TRANSIT_SEGMENT"], include_attributes=True)
 
     with _m.logbook_trace("Transit assignment and skims for period %s" % period):
-        run_assignment(modeller, scenario, period, params, network, num_processors, use_fares, use_ccr)
+        # run_assignment(modeller, scenario, period, params, network, num_processors, use_fares, use_ccr)
         network = scenario.get_network()
 
         if not assignment_only:
@@ -752,7 +753,7 @@ def run_assignment(modeller, scenario, period, params, network, num_processors, 
         specs = []
         names = []
         demand_matrix_template = "mfTRN_{set}_{period}"
-        for mode_name, parameters in skim_parameters.iteritems():
+        for (mode_name, parameters) in skim_parameters.items():
             spec = _copy(base_spec)
             spec["modes"] = parameters["modes"]
             # name = "%s_%s%s" % (period, a_name, mode_name)
@@ -792,7 +793,7 @@ def run_assignment(modeller, scenario, period, params, network, num_processors, 
         assign_transit = modeller.tool(
             "inro.emme.transit_assignment.extended_transit_assignment")
         add_volumes = False
-        for mode_name, parameters in skim_parameters.iteritems():
+        for (mode_name, parameters) in skim_parameters.items():
             spec = _copy(base_spec)
             name = "%s_%s" % (period, mode_name)
             spec["modes"] = parameters["modes"]
@@ -800,6 +801,7 @@ def run_assignment(modeller, scenario, period, params, network, num_processors, 
             spec["demand"] = "mfTRN_{set}_{period}".format(set=_set_dict[mode_name], period=period)
             # spec['od_results'] = {'total_impedance': 'mf{}_{}_IMPED'.format(period, mode_name)}
             spec["journey_levels"] = parameters["journey_levels"]
+            print("Running assign_transit with spec={} class_name={} add_volumes={} scenario={}".format(spec, name, add_volumes, scenario))
             assign_transit(spec, class_name=name, add_volumes=add_volumes, scenario=scenario)
             add_volumes = True
 
@@ -911,7 +913,6 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
         total_ivtt_expr = []
         if use_ccr:
             scenario.create_extra_attribute("TRANSIT_SEGMENT", "@mode_timtr")
-            print scenario.has_transit_results
             try:
                 for mode_name, modes in mode_combinations:
                     network.create_attribute("TRANSIT_SEGMENT", "@mode_timtr")
@@ -998,11 +999,12 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             create_extra("TRANSIT_SEGMENT", "@seated_capacity", "seated capacity", overwrite=True, scenario=scenario)
             create_extra("TRANSIT_SEGMENT", "@tot_vcr", "volume to total capacity ratio", overwrite=True, scenario=scenario)
             create_extra("TRANSIT_SEGMENT", "@seated_vcr", "volume to seated capacity ratio", overwrite=True, scenario=scenario)
+            create_extra("TRANSIT_SEGMENT", "@ccost_skim", "copy of ccost used for skimming", overwrite=True, scenario=scenario)
             network = scenario.get_partial_network(["TRANSIT_LINE", "TRANSIT_SEGMENT"], include_attributes=True)
             attr_map = {
                 "TRANSIT_SEGMENT": ["@phdwy", "transit_volume", "transit_boardings", "@capacity_penalty",
                                     "@tot_capacity", "@seated_capacity", "@tot_vcr", "@seated_vcr", '@seg_rel',
-                                    "transit_time", "@ccost", "@eawt"],
+                                    "@base_timtr", "@eawt", "@ccost_skim"],
                 "TRANSIT_VEHICLE": ["seated_capacity", "total_capacity"],
                 "TRANSIT_LINE": ["headway"],
                 "LINK": ["data3"],
@@ -1040,17 +1042,17 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
                 segment["@seated_capacity"] = seated_capacity
                 segment["@tot_vcr"] = vcr
                 segment["@seated_vcr"] = seated_vcr
-                # link reliability is calculated as link_rel_factor * (congested transit time)
-                # where congested transit time = crowded transit time - crowding penalty
+                # link reliability is calculated as link_rel_factor * base (non-crowded) transit time
                 if segment.link is None:
                     # sometimes segment.link returns None. Is this due to hidden segments??
                     segment['@seg_rel'] = 0
                 else:
-                    segment["@seg_rel"] = segment.link.data3 * (segment['transit_time'] - segment['@ccost'])
+                    segment["@seg_rel"] = segment.link.data3 * segment['@base_timtr']
                 segment["@eawt"] = calc_eawt(segment, vcr, headway)
                 segment["@capacity_penalty"] = max(segment["@phdwy"] - segment["@eawt"] - headway, 0) * hdwy_fraction
+                segment['@ccost_skim'] = segment['@ccost']
 
-            additional_attribs = ["@eawt", "@capacity_penalty", "@tot_vcr", "@seated_vcr", "@tot_capacity", "@seated_capacity", "@seg_rel"]
+            additional_attribs = ["@eawt", "@capacity_penalty", "@tot_vcr", "@seated_vcr", "@tot_capacity", "@seated_capacity", "@seg_rel", "@ccost_skim"]
             values = network.get_attribute_values('TRANSIT_SEGMENT', additional_attribs)
             scenario.set_attribute_values('TRANSIT_SEGMENT', additional_attribs, values)
 
@@ -1059,7 +1061,10 @@ def run_skims(modeller, scenario, name, period, valid_modes, params, num_process
             strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
 
             # Crowding penalty
-            spec = get_strat_spec({"in_vehicle": "@ccost"}, "%s_CROWD" % skim_name)
+            # for some unknown reason, just using ccost here will produce an all 0 matrix...
+            # spec = get_strat_spec({"in_vehicle": "@ccost"}, "%s_CROWD" % skim_name)
+            # hack to get around this was to create a new variable that is a copy of ccost and use it to skim
+            spec = get_strat_spec({"in_vehicle": "@ccost_skim"}, "%s_CROWD" % skim_name)
             strategy_analysis(spec, class_name=class_name, scenario=scenario, num_processors=num_processors)
 
             # skim node reliability, Extra added wait time (EAWT)
@@ -1084,7 +1089,7 @@ def save_per_iteration_flows(scenario):
             "inro.emme.transit_assignment.extended.network_results")
 
         for strat in scenario.transit_strategies.strat_files():
-            print strat.name
+            print(strat.name)
             _, num, class_name = strat.name.split()
             attr_name = ("@%s_it%s" % (class_name, num)).lower()
             create_attr("TRANSIT_SEGMENT", attr_name, scenario=scenario, overwrite=True)
@@ -1233,7 +1238,7 @@ class OmxMatrix(object):
         exception_raised = False
         try:
             self.matrix.create_mapping(name, ids) # Emme 44 and above
-        except Exception, e:
+        except Exception as e:
             exception_raised = True
 
         if exception_raised:
@@ -1248,7 +1253,7 @@ class OmxMatrix(object):
                 chunkshape=chunkshape,
                 attrs=attrs
             )
-        except Exception, e:
+        except Exception as e:
             exception_raised = True
         if exception_raised: # Emme 437
             self.matrix.createMatrix(
@@ -1308,7 +1313,7 @@ class ExportOMX(object):
 
     def write_matrices(self, matrices):
         if isinstance(matrices, dict):
-            for key, matrix in matrices.iteritems():
+            for (key, matrix) in matrices.items():
                 self.write_matrix(matrix, key)
         else:
             for matrix in matrices:

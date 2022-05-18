@@ -23,7 +23,7 @@
 #       duDenBin        Houseold density bin (1 through 3 where 3 is the highest)
 #   landuse\maz_data_withDensity.csv: landuse\maz_data.csv joined with landuse\maz_density.csv on MAZ_ORIGINAL
 #   
-# Requires: Basic python 2.7.x, pandas
+# Requires: python 2.7.x or python 3, pandas
 #
 
 # Import modules
@@ -39,10 +39,10 @@ outDensityData      = "landuse\maz_density.csv"
 outMazData          = "landuse\maz_data_withDensity.csv"
 start_time          = datetime.datetime.now()
 
-print inMazNodes
-print inIntersectionNodes
-print inMazData
-print outDensityData
+print(inMazNodes)
+print(inIntersectionNodes)
+print(inMazData)
+print(outDensityData)
 
 # Open intersection file as pandas table
 intersections = pd.read_csv(inIntersectionNodes)
@@ -87,7 +87,7 @@ for row in reader:
     intersections['distance'] = intersections.eval("((X-maz_x)**2 + (Y-maz_y)**2)**0.5")    
     int_cnt.append(len(intersections[intersections.distance <= max_dist]))
     if((n % 1000) == 0):
-        print "Counting Intersections for MAZ ", maz_n, " : ", int_cnt[n] 
+        print("Counting Intersections for MAZ {} : {}".format(maz_n,int_cnt[n]))
     n = n + 1
      
 readMazNodeFile.close()
@@ -113,7 +113,7 @@ maz_seqn = mazData['MAZ'].tolist()
 maz_nonseqn = mazData['MAZ_ORIGINAL'].tolist()
 
 # create writer
-writeMazDensityFile = open(outDensityData, "wb")
+writeMazDensityFile = open(outDensityData, "w")
 writer = csv.writer(writeMazDensityFile, delimiter=',')
 outHeader = ["MAZ_ORIGINAL","TotInt","EmpDen","RetEmpDen","DUDen","PopDen","IntDenBin","EmpDenBin","DuDenBin","PopEmpDenPerMi"]
 writer.writerow(outHeader)
@@ -147,7 +147,7 @@ while i < len(maz_seqn):
     mazData['dest_y'] = maz_y_seq[i]
 
     if((i ==0) or (i % 100) == 0):
-        print "Calculating Density Variables for MAZ ", origNonSeqMaz
+        print("Calculating Density Variables for MAZ {}".format(origNonSeqMaz))
  
      
     #sum the variables for all mazs within the max distance
@@ -222,4 +222,4 @@ mazData.to_csv(outMazData, index=False)
 end_time = datetime.datetime.now()
 duration = end_time - start_time
 
-print "*** Finished in {} minutes ***".format(duration.total_seconds()/60.0)
+print("*** Finished in {} minutes ***".format(duration.total_seconds()/60.0))

@@ -36,11 +36,11 @@ if __name__ == '__main__':
     infile                  = os.path.join(base_dir,'hwy',      'tap_to_taz_for_parking.txt')
     outfile                 = os.path.join(base_dir,'hwy',      'tap_data.csv')
 
-    sequence_mapping        = pandas.DataFrame.from_csv(zone_seq_mapping_file)
+    sequence_mapping        = pandas.read_csv(zone_seq_mapping_file)
     sequence_mapping.reset_index(inplace=True)
 
-    tap_data                = pandas.read_table(infile, names=['TAP_original','TAZ_original','TAZ2','SP_DISTANCE','FEET'],
-                                                delimiter=',')
+    tap_data                = pandas.read_csv(infile, names=['TAP_original','TAZ_original','TAZ2','SP_DISTANCE','FEET'],
+                                              delimiter=',')
     tap_data_grouped        = tap_data.groupby('TAP_original')
 
     tap_data_out_init       = False
@@ -56,7 +56,7 @@ if __name__ == '__main__':
                 tap_data_out_init = True
 
         except KeyError:
-            print 'tap %8d not captured in tap->taz (for parking) script' % row['N']
+            print('tap {} not captured in tap->taz (for parking) script'.format(row['N']))
             # use the last one -- does this make sense?
             use_this = tap_data_out.tail(1).copy()
             use_this.loc[:,'TAP_original'] = row['N']
@@ -84,4 +84,4 @@ if __name__ == '__main__':
     # reorder and write
     tap_data_out = tap_data_out[['TAP','TAP_original','lotid','TAZ','capacity']]
     tap_data_out.to_csv(outfile, index=False)
-    print "Wrote %s" % outfile
+    print("Wrote {}".format(outfile))

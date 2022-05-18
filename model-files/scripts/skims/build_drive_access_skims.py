@@ -79,7 +79,7 @@ start_time = pytime.time()
 
 periods = ['EA','AM','MD','PM','EV']
 
-print 'reading node->taz/maz/tap sequence mapping'
+print('reading node->taz/maz/tap sequence mapping')
 seq_mapping = {}
 tazseq_mapping = {}
 mazseq_mapping = {}
@@ -100,7 +100,7 @@ for data in reader:
         seq_mapping[   int(data["N"     ])] = int(data["EXTSEQ"])
         extseq_mapping[int(data["EXTSEQ"])] = int(data["N"     ])
 
-print 'reading maz->taz'
+print('reading maz->taz')
 #read maz->taz mapping
 mazn_tazn_mapping = {}
 #maz,taz
@@ -115,7 +115,7 @@ for line in open(maz_to_taz_mapping_file):
     mazn_tazn_mapping[int(data[col_maz])] = int(data[col_taz])
 
 #read param block
-print 'reading hwy parameter block data'
+print('reading hwy parameter block data')
 block_data = {}
 for line in open(hwy_parameter_block_file):
     line = line.strip()
@@ -133,15 +133,22 @@ auto_op_cost = block_data['AUTOOPCOST'] / 5280 #correct for feet
 vot = 0.6 / block_data['VOT'] #turn into minutes / cents
 walk_rate = 60.0 / 3.0 / 5280.0
 
-print 'reading maz->tap skims and building tap->maz/taz lookup'
+print('reading maz->tap skims and building tap->maz/taz lookup')
 #read maz->tap walk skims
 #build tap-> (closest) (maz,taz,maz->tap walk_time)
 tapn_tazn_lookup = {}
 tapns = {}
 for line in open(ped_maz_tap_distance_file):
     line = line.strip().split(',')
-    mazn = mazseq_mapping[int(line[0])]
-    tapn = tapseq_mapping[int(line[1])]
+    try:
+        mazn = mazseq_mapping[int(line[0])]
+        tapn = tapseq_mapping[int(line[1])]
+    except Exception as e:
+        if line==['']: continue     # continue blank line
+        if line==['\x1a']: continue # continue on EOF -- for loop will end
+        print(e)
+        print("line={}".format(line))
+        raise e
     distance = float(line[4])
     walk_time = walk_rate*distance
     tapns[tapn] = None
@@ -152,7 +159,7 @@ tapns = list(tapns.keys())
 tapns.sort()
 
 
-print 'reading transit lines from {}'.format(transit_line_file)
+print('reading transit lines from {}'.format(transit_line_file))
 #read transit lines to pull out tod and stop information
 stops_by_tod_and_mode = {}
 for period in periods:
@@ -230,12 +237,12 @@ for temp_line in open(transit_line_file):
     trn_line = ""
 
 
-print 'building tap->mode'
+print('building tap->mode')
 all_tapn = []
 for line in open(network_tap_nodes_file):
     all_tapn.append(int(line))
 
-print 'building tod->mode->taps'
+print('building tod->mode->taps')
 tod_mode_tapn = {}
 for period in periods:
     tod_mode_tapn[period] = {}
@@ -252,7 +259,7 @@ for line in open(network_tap_links_file):
         stopn = a
     #stops_by_tod_and_mode[periods[i]][mode][n]
     if not tapn in all_tapn:
-        print 'tapn not found in (' + str(a) + ',' + str(b) + ')'
+        print('tapn not found in ({}),{})'.format(a,b))
         continue
     # mode = tapn_to_mode[tapn]
     for mode_id in id_mode_map:
@@ -268,7 +275,7 @@ for line in open(network_tap_links_file):
                             tapn
                         ]  # closest (mazn,tazn,walk_time from mazn to tapn,walk_distance from mazn to tapn)
 
-print 'taps with no (apparent) walk access: ' + str(isolated_tapns.keys())
+print('taps with no (apparent) walk access: {}'.format(isolated_tapns.keys()))
 
 
 # ------------------------------------------
@@ -293,7 +300,7 @@ tod_mode_tapn_df['TTAP'] = tod_mode_tapn_df['TTAP'].map(seq_mapping)
 # (building separately because each time period has different skims and network)
 total_table_array = []
 for period in periods:
-    print 'building drive access skims for period ' + period
+    print('building drive access skims for period {}'.format(period))
     # grab taps serviced in this period and their tazs
     taps_for_period = tod_mode_tapn_df.loc[tod_mode_tapn_df['PERIOD'] == period]
 
@@ -331,7 +338,7 @@ for period in periods:
             & (tod_mode_tapn_costs['DDIST'] < max_dist)]
 
         if len(mode_cut) == 0:
-            print "No taps within" + str(max_dist) + "miles for mode" + mode
+            print("No taps within {} miles for mode {}".format(max_dist, mode))
             continue
 
         # select entries for the closest N taps to this TAZ for this mode and this time of day
@@ -359,9 +366,9 @@ final_df = pd.concat(total_table_array)
 # fill missing toll values
 final_df['DTOLL'] = final_df['DTOLL'].fillna(0)
 
-print 'writing drive access skim results'
+print('writing drive access skim results')
 output_col_order = ['FTAZ', 'MODE', 'PERIOD', 'TTAP', 'TMAZ', 'TTAZ', 'DTIME', 'DDIST', 'DTOLL', 'WDIST']
 final_df[output_col_order].to_csv(drive_tansit_skim_out_file, index=False)
 
 end_time = pytime.time()
-print 'elapsed time in minutes: ' + str((end_time - start_time) / 60.0)
+print('elapsed time in minutes: {}'.format((end_time - start_time) / 60.0))

@@ -37,7 +37,7 @@ with open(os.path.join(base_dir,'hwy','mtc_final_network_zone_seq.csv')) as f:
 #transfer the zone numberings
 for i in range(len(in_files)):
     with open(os.path.join(base_dir,in_files[i])) as f:
-        with open(os.path.join(base_dir,out_files[i]),'wb') as of:
+        with open(os.path.join(base_dir,out_files[i]),'w') as of:
             first = True
             for line in f:
                 line = line.strip()
