@@ -62,7 +62,7 @@ public class ParkingCapacityRestraintModel {
 	//then lumpiness (minimum number of vehicles) is 1/0.2 = 5. If the max tolerance is 2, the model would iterate until either
 	//max iterations is reached or when all lots have demand < (lot capacity + 5 * 2). Note this may need to be scaled as sample rate increases.
 	
-	private static int LUMPINESS_FACTOR=2; 
+	private static float LUMPINESS_FACTOR=2f; 
 
     private static int              PACKET_SIZE                           = 0;
 
@@ -206,13 +206,13 @@ public class ParkingCapacityRestraintModel {
 			
 			converged = checkForConvergence(constraintIteration);
 
-			if(converged)
-				break;
+			if(converged) {
+				filename = propertyMap.get(PROPERTIES_PROJECT_DIRECTORY)
+		        		+ formFileName(propertyMap.get(PROPERTIES_CONSTRAINED_PNR_DEMAND_FILE), iteration*10+constraintIteration);
 			
-			filename = propertyMap.get(PROPERTIES_PROJECT_DIRECTORY)
-        		+ formFileName(propertyMap.get(PROPERTIES_CONSTRAINED_PNR_DEMAND_FILE), iteration*10+constraintIteration);
-	
-			writeDemandToFile(filename,constrainedArrivalsToTAP,constrainedPNRLotMap);
+				writeDemandToFile(filename,constrainedArrivalsToTAP,constrainedPNRLotMap);
+				break;
+			}
 		
 			
 		}while(true);
@@ -232,13 +232,19 @@ public class ParkingCapacityRestraintModel {
 	 */
 	public boolean checkForConvergence(int constraintIteration) {
 		
-		if(constraintIteration == (MAX_ITERATIONS-1))
+		logger.info("Checking for convergence");
+		
+		if(constraintIteration == (MAX_ITERATIONS-1)) {
+			logger.info("Max iterations reached");
 			return true;
+		}
 		
 		//minimum tolerance is a function of sample rate
-		float lumpiness = 1.0f/sampleRate;
+		float buffer = 1.0f/sampleRate * LUMPINESS_FACTOR;
+		logger.info("Buffer for over-capacity calculation: "+buffer);
 		
 		
+		logger.info("LOT    CAPACITY    CAP+BUFFER    ARRIVALS   OVER?");
 		//iterate through lots
 		Set<Integer> taps = constrainedPNRLotMap.keySet();
 		for(int tap : taps) {
@@ -247,7 +253,9 @@ public class ParkingCapacityRestraintModel {
 			
 			float capacity = tapManager.getTotalSpaces(tap);
 			
-			if(totalArrivals > (capacity + lumpiness * LUMPINESS_FACTOR))
+			logger.info(tap+" "+capacity+" "+(capacity+buffer)+" "+totalArrivals+" "+(totalArrivals > (capacity + buffer)? "TRUE": "FALSE"));
+			
+			if(totalArrivals > (capacity + buffer))
 				return false;
 			
 		}
