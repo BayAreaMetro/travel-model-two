@@ -1,5 +1,2 @@
-Sandbox for Travel Model Two.
-
-Starting point borrowed from the personal website of [Joshua Lande](https://github.com/joshualande/joshualande.github.io).
-
-The sitemap.xml file was inspired by [this post](http://jethrokuan.github.io/2013/12/20/SEO-with-Jekyll.html).
+Travel Model Two documentation is now being created via [mkdocs](https://www.mkdocs.org), with multiple
+versions deployed (by branch) via [mike](https://github.com/jimporter/mike).
