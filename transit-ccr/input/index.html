@@ -1,0 +1,2954 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="http://bayareametro.github.io/travel-model-two/transit-ccr/input/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.3">
+    
+    
+      
+        <title>Input - Travel Model Two</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.4a0965b7.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#input" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Travel Model Two" class="md-header__button md-logo" aria-label="Travel Model Two" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Travel Model Two
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Input
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/BayAreaMetro/travel-model-two" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Travel Model Two
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../guide/" class="md-tabs__link">
+      Guide
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  <li class="md-tabs__item">
+    <a href="./" class="md-tabs__link md-tabs__link--active">
+      Input
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../process/" class="md-tabs__link">
+      Process
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../geographies/" class="md-tabs__link">
+      Geographies
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../papers/" class="md-tabs__link">
+      Papers
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../network_qa/" class="md-tabs__link">
+      Network QA
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Travel Model Two" class="md-nav__button md-logo" aria-label="Travel Model Two" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Travel Model Two
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/BayAreaMetro/travel-model-two" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Travel Model Two
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Input
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Input
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#input-file-list" class="md-nav__link">
+    Input File List
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#time-periods" class="md-nav__link">
+    Time Periods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#roadway-network" class="md-nav__link">
+    Roadway Network
+  </a>
+  
+    <nav class="md-nav" aria-label="Roadway Network">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#county-node-numbering-system" class="md-nav__link">
+    County Node Numbering System
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-attributes" class="md-nav__link">
+    Node Attributes
+  </a>
+  
+    <nav class="md-nav" aria-label="Node Attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#external-nodes" class="md-nav__link">
+    External Nodes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#link-attributes" class="md-nav__link">
+    Link Attributes
+  </a>
+  
+    <nav class="md-nav" aria-label="Link Attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tollbooth-tollseg" class="md-nav__link">
+    TOLLBOOTH &amp; TOLLSEG
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transit-network" class="md-nav__link">
+    Transit Network
+  </a>
+  
+    <nav class="md-nav" aria-label="Transit Network">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#link-attributes_1" class="md-nav__link">
+    Link Attributes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transit-modes" class="md-nav__link">
+    Transit Modes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transit-fares" class="md-nav__link">
+    Transit Fares
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#micro-zonal-data" class="md-nav__link">
+    Micro Zonal Data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zonal-data" class="md-nav__link">
+    Zonal Data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synthetic-population" class="md-nav__link">
+    Synthetic Population
+  </a>
+  
+    <nav class="md-nav" aria-label="Synthetic Population">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#households" class="md-nav__link">
+    Households
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#persons" class="md-nav__link">
+    Persons
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#truck-distribution" class="md-nav__link">
+    Truck Distribution
+  </a>
+  
+    <nav class="md-nav" aria-label="Truck Distribution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#friction-factors" class="md-nav__link">
+    Friction Factors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k-factors" class="md-nav__link">
+    K-Factors
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fixed-demand" class="md-nav__link">
+    Fixed Demand
+  </a>
+  
+    <nav class="md-nav" aria-label="Fixed Demand">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#internalexternal" class="md-nav__link">
+    Internal/External
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#air-passenger" class="md-nav__link">
+    Air Passenger
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../process/" class="md-nav__link">
+        Process
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../geographies/" class="md-nav__link">
+        Geographies
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../papers/" class="md-nav__link">
+        Papers
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_qa/" class="md-nav__link">
+        Network QA
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#input-file-list" class="md-nav__link">
+    Input File List
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#time-periods" class="md-nav__link">
+    Time Periods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#roadway-network" class="md-nav__link">
+    Roadway Network
+  </a>
+  
+    <nav class="md-nav" aria-label="Roadway Network">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#county-node-numbering-system" class="md-nav__link">
+    County Node Numbering System
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-attributes" class="md-nav__link">
+    Node Attributes
+  </a>
+  
+    <nav class="md-nav" aria-label="Node Attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#external-nodes" class="md-nav__link">
+    External Nodes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#link-attributes" class="md-nav__link">
+    Link Attributes
+  </a>
+  
+    <nav class="md-nav" aria-label="Link Attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tollbooth-tollseg" class="md-nav__link">
+    TOLLBOOTH &amp; TOLLSEG
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transit-network" class="md-nav__link">
+    Transit Network
+  </a>
+  
+    <nav class="md-nav" aria-label="Transit Network">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#link-attributes_1" class="md-nav__link">
+    Link Attributes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transit-modes" class="md-nav__link">
+    Transit Modes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transit-fares" class="md-nav__link">
+    Transit Fares
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#micro-zonal-data" class="md-nav__link">
+    Micro Zonal Data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zonal-data" class="md-nav__link">
+    Zonal Data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synthetic-population" class="md-nav__link">
+    Synthetic Population
+  </a>
+  
+    <nav class="md-nav" aria-label="Synthetic Population">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#households" class="md-nav__link">
+    Households
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#persons" class="md-nav__link">
+    Persons
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#truck-distribution" class="md-nav__link">
+    Truck Distribution
+  </a>
+  
+    <nav class="md-nav" aria-label="Truck Distribution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#friction-factors" class="md-nav__link">
+    Friction Factors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k-factors" class="md-nav__link">
+    K-Factors
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fixed-demand" class="md-nav__link">
+    Fixed Demand
+  </a>
+  
+    <nav class="md-nav" aria-label="Fixed Demand">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#internalexternal" class="md-nav__link">
+    Internal/External
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#air-passenger" class="md-nav__link">
+    Air Passenger
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/BayAreaMetro/travel-model-two/edit/master/docs/input.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="input">Input</h1>
+<h2 id="input-file-list">Input File List</h2>
+<p>The table below contains brief descriptions of the input files required to execute the travel model. </p>
+<table>
+<thead>
+<tr>
+<th><strong>File name</strong></th>
+<th><strong>Purpose</strong></th>
+<th><strong>Folder location</strong></th>
+<th><strong>File type</strong></th>
+<th><strong>File format</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mtc_final_network.net</code></td>
+<td>Highway, bike, walk network</td>
+<td>hwy\</td>
+<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
+<td><a href="#roadway-network">Roadway Network</a></td>
+</tr>
+<tr>
+<td><code>mazData.csv</code></td>
+<td>Micro zone data</td>
+<td>landuse\</td>
+<td>CSV</td>
+<td><a href="#micro-zonal-data">Micro Zonal Data</a></td>
+</tr>
+<tr>
+<td><code>tazData.csv</code></td>
+<td>Travel analysis zone data</td>
+<td>landuse\</td>
+<td>CSV</td>
+<td><a href="#zonal-data">Zonal Data</a></td>
+</tr>
+<tr>
+<td><code>truckFF.dat</code></td>
+<td>Friction factors for the commercial vehicle distribution models</td>
+<td>nonres\</td>
+<td>ASCII</td>
+<td><a href="#truck-distribution">Truck Distribution</a></td>
+</tr>
+<tr>
+<td><code>truckkfact.k22.z1454.mat</code></td>
+<td>"K-factors" for the commercial vehicle distribution models</td>
+<td>nonres\</td>
+<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
+<td><a href="#truck-distribution">Truck Distribution</a></td>
+</tr>
+<tr>
+<td><code>truck_kfactors_taz.csv</code></td>
+<td>"K-factors" for the commercial vehicle distribution models</td>
+<td>nonres\</td>
+<td>CSV</td>
+<td><a href="#truck-distribution">Truck Distribution</a></td>
+</tr>
+<tr>
+<td><code>ixDailyYYYY.tpp</code></td>
+<td>Internal-external fixed trip table for year YYYY</td>
+<td>nonres\</td>
+<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
+<td><a href="#fixed-demand">Fixed Demand</a></td>
+</tr>
+<tr>
+<td><code>IXDaily2006x4.may2208.new</code></td>
+<td>Internal-external input fixed trip table</td>
+<td>nonres\</td>
+<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
+<td><a href="#fixed-demand">Fixed Demand</a></td>
+</tr>
+<tr>
+<td><code>YYYY_fromtoAAA.csv</code></td>
+<td>Airport passenger fixed trips for year YYYY and airport AAA</td>
+<td>nonres\</td>
+<td>CSV</td>
+<td><a href="#fixed-demand">Fixed Demand</a></td>
+</tr>
+<tr>
+<td><code>households.csv</code></td>
+<td>Synthetic population household file</td>
+<td>popsyn\</td>
+<td>CSV</td>
+<td>PopSynHousehold</td>
+</tr>
+<tr>
+<td><code>persons.csv</code></td>
+<td>Synthetic population person file</td>
+<td>popsyn\</td>
+<td>CSV</td>
+<td></td>
+</tr>
+<tr>
+<td><code>transitLines.lin</code></td>
+<td>Transit lines</td>
+<td>trn\transit_lines</td>
+<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
+<td>TransitNetwork</td>
+</tr>
+<tr>
+<td><code>transitFactors_MMMM.fac</code></td>
+<td>Cube Public Transport (PT) factor files by transit line haul mode MMMM</td>
+<td>trn\transit_support</td>
+<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
+<td>TransitNetwork</td>
+</tr>
+</tbody>
+</table>
+<h2 id="time-periods">Time Periods</h2>
+<p>Time periods in Travel Model Two are consistent with Travel Model One:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Time Period</strong></th>
+<th><strong>Times</strong></th>
+<th><strong>Duration</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EA (early AM)</td>
+<td>3 am to 6 am</td>
+<td>3 hours</td>
+</tr>
+<tr>
+<td>AM (AM peak period)</td>
+<td>6 am to 10 am</td>
+<td>4 hours</td>
+</tr>
+<tr>
+<td>MD (midday)</td>
+<td>10 am to 3 pm</td>
+<td>5 hours</td>
+</tr>
+<tr>
+<td>PM (PM peak period)</td>
+<td>3 pm to 7 pm</td>
+<td>4 hours</td>
+</tr>
+<tr>
+<td>EV (evening)</td>
+<td>7 pm to 3 am</td>
+<td>8 hours</td>
+</tr>
+</tbody>
+</table>
+<h2 id="roadway-network">Roadway Network</h2>
+<p>The all streets highway network, walk network, and bicycle network were developed from <a href="http://www.openstreetmap.org/">OpenStreetMap</a>.  The <em>projection</em> is <a href="https://epsg.io/102646"><strong>NAD 1983 StatePlane California VI FIPS 0406 Feet</strong></a>.</p>
+<h3 id="county-node-numbering-system">County Node Numbering System</h3>
+<p>The highway network uses a numbering system whereby each county has a reserved block of nodes. Within each county’s block, nodes 1 through 9,999 are reserved for TAZs, 10,001 through 89,999 are for MAZs, and 90,001 through 99,999 for transit access points or TAPs. The blocks are assigned to the nine counties per MTC’s numbering scheme, as shown in the table below.</p>
+<p>Roadway, walk, bicycle, and transit network nodes are numbered by county as well and range from 1,000,000 to 10,000,000 as shown below.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>County</th>
+<th>TAZs</th>
+<th>MAZs</th>
+<th>TAPs</th>
+<th>Network Node</th>
+<th>HOV Lane Node</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>San Francisco</td>
+<td>1 - 9,999</td>
+<td>10,001 – 89,999</td>
+<td>90,001 – 99,999</td>
+<td>1,000,000 – 1,500,000</td>
+<td>5,500,000 – 6,000,000</td>
+</tr>
+<tr>
+<td>2</td>
+<td>San Mateo</td>
+<td>100,001 – 109,999</td>
+<td>110,001 – 189,999</td>
+<td>190,001 – 199,999</td>
+<td>1,500,000 – 2,000,000</td>
+<td>6,000,000 – 6,500,000</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Santa Clara</td>
+<td>200,001 – 209,999</td>
+<td>210,001 – 289,999</td>
+<td>290,001 – 299,999</td>
+<td>2,000,000 – 2,500,000</td>
+<td>6,500,000 – 7,000,000</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Alameda</td>
+<td>300,001 – 309,999</td>
+<td>310,001 – 389,999</td>
+<td>390,001 – 399,999</td>
+<td>2,500,000 – 3,000,000</td>
+<td>7,000,000 – 7,500,000</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Contra Costa</td>
+<td>400,001 – 409,999</td>
+<td>410,001 – 489,999</td>
+<td>490,001 – 499,999</td>
+<td>3,000,000 – 3,500,000</td>
+<td>7,500,000 – 8,000,000</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Solano</td>
+<td>500,001 – 509,999</td>
+<td>510,001 – 589,999</td>
+<td>590,001 – 599,999</td>
+<td>3,500,000 – 4,000,000</td>
+<td>8,000,000 – 8,500,000</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Napa</td>
+<td>600,001 – 609,999</td>
+<td>610,001 – 689,999</td>
+<td>690,001 – 699,999</td>
+<td>4,000,000 – 4,500,000</td>
+<td>8,500,000 – 9,000,000</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Sonoma</td>
+<td>700,001 – 709,999</td>
+<td>710,001 – 789,999</td>
+<td>790,001 – 799,999</td>
+<td>4,500,000 – 5,000,000</td>
+<td>9,000,000 – 9,000,000</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Marin</td>
+<td>800,001 – 809,999</td>
+<td>810,001 – 889,999</td>
+<td>890,001 – 899,999</td>
+<td>5,000,000 – 5,500,000</td>
+<td>9,500,000 – 9,999,999</td>
+</tr>
+<tr>
+<td></td>
+<td>External</td>
+<td>900,001 - 999,999</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="node-attributes">Node Attributes</h3>
+<p>The following node attributes are included in the master network.</p>
+<table>
+<thead>
+<tr>
+<th><em>Field</em></th>
+<th><em>Description</em></th>
+<th><em>Data Type</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>N</em></td>
+<td>Node Number</td>
+<td>Integer (see <a href="#county-node-numbering-system">Node Numbering</a>)</td>
+</tr>
+<tr>
+<td><em>X</em></td>
+<td>X coordinate (feet)</td>
+<td>Float</td>
+</tr>
+<tr>
+<td><em>Y</em></td>
+<td>Y coordinate (feet)</td>
+<td>Float</td>
+</tr>
+<tr>
+<td><em>OSM_NODE_ID</em></td>
+<td>OpenStreetMap node identifier</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td><em>COUNTY</em></td>
+<td>County Name</td>
+<td>String</td>
+</tr>
+<tr>
+<td><em>DRIVE_ACCESS</em></td>
+<td>Node is used by automobile and/or bus links</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><em>WALK_ACCESS</em></td>
+<td>Node is used by pedestrian links</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><em>BIKE_ACCESS</em></td>
+<td>Node is used by bicycle links</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><em>RAIL_ACCESS</em></td>
+<td>Node is used by rail links</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><em>FAREZONE</em></td>
+<td>Unique sequential fare zone ID for transit skimming and assignment</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td><em>TAP_ID</em></td>
+<td>Transit access point (TAP) associated connected to this node</td>
+<td>Integer</td>
+</tr>
+</tbody>
+</table>
+<h4 id="external-nodes">External Nodes</h4>
+<table>
+<thead>
+<tr>
+<th><em>N</em></th>
+<th><em>Gateway</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>900001</td>
+<td>State Route 1 (Sonoma)</td>
+</tr>
+<tr>
+<td>900002</td>
+<td>State Route 28 (Sonoma)</td>
+</tr>
+<tr>
+<td>900003</td>
+<td>U.S. Route 101 (Sonoma)</td>
+</tr>
+<tr>
+<td>900004</td>
+<td>State Route 29 (Napa)</td>
+</tr>
+<tr>
+<td>900005</td>
+<td>State Route 128 (Solano)</td>
+</tr>
+<tr>
+<td>900006</td>
+<td>Interstate 505 (Solano)</td>
+</tr>
+<tr>
+<td>900007</td>
+<td>State Route 113 (Solano)</td>
+</tr>
+<tr>
+<td>900008</td>
+<td>Interstate 80 (Solano)</td>
+</tr>
+<tr>
+<td>900009</td>
+<td>State Route 12 (Solano)</td>
+</tr>
+<tr>
+<td>900010</td>
+<td>State Route 160 (Contra Costa)</td>
+</tr>
+<tr>
+<td>900011</td>
+<td>State Route 4 (Contra Costa)</td>
+</tr>
+<tr>
+<td>900012</td>
+<td>County Route J-4 (Contra Costa)</td>
+</tr>
+<tr>
+<td>900013</td>
+<td>Interstate 205 + Interstate 580 (Alameda)</td>
+</tr>
+<tr>
+<td>900014</td>
+<td>State Route 152 (Santa Clara/East)</td>
+</tr>
+<tr>
+<td>900015</td>
+<td>State Route 156 (Santa Clara)</td>
+</tr>
+<tr>
+<td>900016</td>
+<td>State Route 25 (Santa Clara)</td>
+</tr>
+<tr>
+<td>900017</td>
+<td>U.S. Route 101 (Santa Clara)</td>
+</tr>
+<tr>
+<td>900018</td>
+<td>State Route 152 (Santa Clara/West)</td>
+</tr>
+<tr>
+<td>900019</td>
+<td>State Route 17 (Santa Clara)</td>
+</tr>
+<tr>
+<td>900020</td>
+<td>State Route 9 (Santa Clara)</td>
+</tr>
+<tr>
+<td>900021</td>
+<td>State Route 1 (San Mateo)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="link-attributes">Link Attributes</h3>
+<p>The following link attributes are included on the master network.</p>
+<table>
+<thead>
+<tr>
+<th><em>Field</em></th>
+<th><em>Description</em></th>
+<th><em>Data Type</em></th>
+<th><em>Source</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>A</em></td>
+<td>from node</td>
+<td>Integer (see <a href="#county-node-numbering-system">Node Numbering</a>)</td>
+<td></td>
+</tr>
+<tr>
+<td><em>B</em></td>
+<td>to node</td>
+<td>Integer (see <a href="#county-node-numbering-system">Node Numbering</a>)</td>
+<td></td>
+</tr>
+<tr>
+<td><em>MODEL_LINK_ID</em></td>
+<td>Unique link identifier</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>SHSTGEOMERTRYID</em></td>
+<td>Unique link shape identifier per SharedStreets approach</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>ASSIGNABLE</em></td>
+<td>Is link used for assignment (1=True, 0=False)</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>DRIVE_ACCESS</em></td>
+<td>Link is used by automobiles and/or buses (1=True, 0=False)</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>BIKE_ACCESS</em></td>
+<td>Link is used by bicycles (1=True, 0=False)</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>WALK_ACCESS</em></td>
+<td>Link is used by pedestrians (1=True, 0=False)</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>BUS_ONLY</em></td>
+<td>Link is used by buses, but not automobiles (1=True, 0=False)</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>RAIL_ONLY</em></td>
+<td>Link is used by rail vehicles (1=True, 0=False)</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>DRIVE_ACCESS</em></td>
+<td>Link is used by automobiles and/or buses (1=True, 0=False)</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>MANAGED</em></td>
+<td>Link has a parallel managed lane (1=True, 0=False)</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>SEGMENT_ID</em></td>
+<td>Parallel managed lane unique segment identifier (on managed and general purpose lanes)</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>COUNTY</em></td>
+<td>County name</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>CNTYPE</em></td>
+<td>Link connector type{::nomarkdown}<br /><ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul>{:/}</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td><em>TRANSIT</em></td>
+<td>Is Transit link</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>TOLLBOOTH</em></td>
+<td>Toll link.  See <a href="#tollbooth--tollseg">TOLLBOOTH &amp; TOLLSEG table below</a>. Links with values <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block">less than 11</a> are <em>bridge tolls</em>; 11 or above are <em>value tolls</em>.</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>TOLLSEG</em></td>
+<td>See <a href="#tollbooth--tollseg">TOLLBOOTH &amp; TOLLSEG table below</a>.</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>FT</em></td>
+<td>Facility type{::nomarkdown}<br /> <ul><li>1: Freeway</li> <li>2: Expressway</li> <li>3: Ramp</li> <li>4:  Divided Arterial</li> <li>5: Undivided Arterial</li> <li>6: Collector</li> <li>7: Local</li> <li>8: Connector (MAZ, TAZ, TAP)</li></ul>{:/}</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>LANES_[EA,AM,MD,PM,EV]</em></td>
+<td>Model number of lanes by time period</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr>
+<td><em>USECLASS_[EA,AM,MD,PM,EV]</em></td>
+<td>Link user class by time period{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/}</td>
+<td>Integer</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="tollbooth-tollseg">TOLLBOOTH &amp; TOLLSEG</h4>
+<table>
+<thead>
+<tr>
+<th><em>TOLLBOOTH</em></th>
+<th><em>TOLLSEG</em></th>
+<th><em>Definition</em></th>
+<th><em>Opening Year (or anticipated) for Toll Collection</em></th>
+<th><em>Project Card</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td></td>
+<td>Benicia-Martinez Bridge</td>
+<td><a href="https://en.wikipedia.org/wiki/Benicia%E2%80%93Martinez_Bridge#Historical_toll_rates">1962</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_hov_lane_benicia_bridge_toll_plaza.yml"><code>year_2015_hov_lane_benicia_bridge_toll_plaza.yml</code></a></td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>Carquinez Bridge</td>
+<td><a href="https://en.wikipedia.org/wiki/Carquinez_Bridge#Historical_toll_rates">1958</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_carquinez_bridge_toll_plaza.yml"><code>year_2015_carquinez_bridge_toll_plaza.yml</code></a></td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td>Richmond Bridge</td>
+<td><a href="https://en.wikipedia.org/wiki/Richmond%E2%80%93San_Rafael_Bridge#Historical_toll_rates">1956</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_richmond_bridge_toll_plaza.yml"><code>year_2015_richmond_bridge_toll_plaza.yml</code></a></td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td>Golden Gate Bridge</td>
+<td><a href="https://en.wikipedia.org/wiki/Golden_Gate_Bridge#Tolls">1937</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_golden_gate_bridge_toll_plaza.yml"><code>year_2015_golden_gate_bridge_toll_plaza.yml</code></a></td>
+</tr>
+<tr>
+<td>5</td>
+<td></td>
+<td>San Francisco/Oakland Bay Bridge</td>
+<td><a href="https://en.wikipedia.org/wiki/San_Francisco%E2%80%93Oakland_Bay_Bridge#Financing_and_tolls">1936</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_hov_lane_bay_bridge_toll_plaza_segment_02.yml"><code>year_2015_hov_lane_bay_bridge_toll_plaza_segment_02.yml</code></a>, <a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_hov_lane_bay_bridge_toll_plaza_segment_03.yml"><code>year_2015_hov_lane_bay_bridge_toll_plaza_segment_03.yml</code></a></td>
+</tr>
+<tr>
+<td>6</td>
+<td></td>
+<td>San Mateo Bridge</td>
+<td><a href="https://en.wikipedia.org/wiki/San_Mateo%E2%80%93Hayward_Bridge#Historical_toll_rates">1929</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_san_mateo_bridge_toll_plaza.yml"><code>year_2015_san_mateo_bridge_toll_plaza.yml</code></a></td>
+</tr>
+<tr>
+<td>7</td>
+<td></td>
+<td>Dumbarton Bridge</td>
+<td><a href="https://en.wikipedia.org/wiki/Dumbarton_Bridge_(California)#Historical_toll_rates">1927</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_dumbarton_bridge_toll_plaza.yml"><code>year_2015_dumbarton_bridge_toll_plaza.yml</code></a></td>
+</tr>
+<tr>
+<td>8</td>
+<td></td>
+<td>Antioch Bridge</td>
+<td><a href="https://en.wikipedia.org/wiki/Antioch_Bridge#Historical_toll_rates">1989</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_antioch_bridge.yml"><code>year_2015_antioch_bridge.yml</code></a></td>
+</tr>
+<tr>
+<td>25</td>
+<td></td>
+<td><a href="https://511.org/driving/express-lanes/i-680-sunol-express-lane">I-680 Sunol Express Lanes Phase 1</a> <em>Southbound</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>25</td>
+<td>1</td>
+<td>Andrade Rd to Washington Blvd</td>
+<td>September 2010</td>
+<td></td>
+</tr>
+<tr>
+<td>25</td>
+<td>2</td>
+<td>Washington Blvd to Mission Blvd</td>
+<td>September 2010</td>
+<td></td>
+</tr>
+<tr>
+<td>25</td>
+<td>3</td>
+<td>Mission Blvd to SR 237</td>
+<td>September 2010</td>
+<td></td>
+</tr>
+<tr>
+<td>28</td>
+<td></td>
+<td><a href="https://www.alamedactc.org/programs-projects/expresslanesops/580expresslanes/">I-580 Express Lanes</a> <em>Eastbound</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>28</td>
+<td>1</td>
+<td>Hacienda Dr to Airway Blvd</td>
+<td>February 2016</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580e_segment_01_hacienda_drive_to_airway_blvd.yml"><code>year_2016_managed_lane_i580e_segment_01_hacienda_drive_to_airway_blvd.yml</code></a>, <a href="year_2016_managed_lane_i580e_segment_02_hacienda_drive_to_airway_blvd.yml"><code>year_2016_managed_lane_i580e_segment_02_hacienda_drive_to_airway_blvd.yml</code></a></td>
+</tr>
+<tr>
+<td>28</td>
+<td>2</td>
+<td>Airway Blvd to Livermore Ave</td>
+<td>February 2016</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580e_airway_blvd_to_livermore_ave.yml"><code>year_2016_managed_lane_i580e_airway_blvd_to_livermore_ave.yml</code></a></td>
+</tr>
+<tr>
+<td>28</td>
+<td>3</td>
+<td>Livermore Ave to Vasco Rd</td>
+<td>February 2016</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580e_segment_01_livermore_ave_to_vasco_road.yml"><code>year_2016_managed_lane_i580e_segment_01_livermore_ave_to_vasco_road.yml</code></a>, <a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580e_segment_02_livermore_ave_to_vasco_road.yml"><code>year_2016_managed_lane_i580e_segment_02_livermore_ave_to_vasco_road.yml</code></a></td>
+</tr>
+<tr>
+<td>28</td>
+<td>4</td>
+<td>Vasco Rd to Greenville Rd</td>
+<td>February 2016</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580e_vasco_road_to_greenville_road.yml"><code>year_2016_managed_lane_i580e_vasco_road_to_greenville_road.yml</code></a></td>
+</tr>
+<tr>
+<td>29</td>
+<td></td>
+<td><a href="https://www.alamedactc.org/programs-projects/expresslanesops/580expresslanes/">I-580 Express Lanes</a> <em>Westbound</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>29</td>
+<td>1</td>
+<td>Greenville Rd to Springtown Blvd</td>
+<td>February 2016</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580w_greenville_road_to_springtown_blvd.yml"><code>year_2016_managed_lane_i580w_greenville_road_to_springtown_blvd.yml</code></a></td>
+</tr>
+<tr>
+<td>29</td>
+<td>2</td>
+<td>Springtown to Isabel Ave</td>
+<td>February 2016</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580w_springtown_blvd_to_isabel_ave.yml"><code>year_2016_managed_lane_i580w_springtown_blvd_to_isabel_ave.yml</code></a></td>
+</tr>
+<tr>
+<td>29</td>
+<td>3</td>
+<td>Isabel Ave to Fallon Rd</td>
+<td>February 2016</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580w_isabel_ave_to_fallon_road.yml"><code>year_2016_managed_lane_i580w_isabel_ave_to_fallon_road.yml</code></a></td>
+</tr>
+<tr>
+<td>29</td>
+<td>4</td>
+<td>Fallon Rd to Hacienda Dr</td>
+<td>February 2016</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580w_fallon_road_to_hacienda_drive.yml"><code>year_2016_managed_lane_i580w_fallon_road_to_hacienda_drive.yml</code></a></td>
+</tr>
+<tr>
+<td>29</td>
+<td>5</td>
+<td>Hacienda Dr to San Ramon Rd</td>
+<td>February 2016</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580w_hacienda_drive_to_san_ramon_road.yml"><code>year_2016_managed_lane_i580w_hacienda_drive_to_san_ramon_road.yml</code></a></td>
+</tr>
+<tr>
+<td>31</td>
+<td></td>
+<td><a href="https://511.org/driving/express-lanes/b-sr-237-express-lanes">SR-237 Express Lanes Phase 1</a> <em>Southbound</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>31</td>
+<td>1</td>
+<td>Dixon Landing Rd to N First Ave (Westbound)</td>
+<td>March 2012</td>
+<td></td>
+</tr>
+<tr>
+<td>32</td>
+<td></td>
+<td><a href="https://511.org/driving/express-lanes/b-sr-237-express-lanes">SR-237 Express Lanes Phase 1</a> <em>Northbound</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>32</td>
+<td>1</td>
+<td>N First Ave to Dixon Landing Rd (Eastbound)</td>
+<td>March 2012</td>
+<td></td>
+</tr>
+<tr>
+<td>33</td>
+<td></td>
+<td><a href="https://511.org/driving/express-lanes/i-680-contra-costa-express-lanes">I-680 Contra Costa Express Lanes</a> <em>Southbound</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>33</td>
+<td>1</td>
+<td>Rudgear to Crow Canyon (Crow Canyon SB pricing zone)</td>
+<td>October 2017</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2017_managed_lane_i680n_acosta_blvd_to_livorna_road.yml"><code>year_2017_managed_lane_i680n_acosta_blvd_to_livorna_road.yml</code></a></td>
+</tr>
+<tr>
+<td>33</td>
+<td>2</td>
+<td>Crow Canyon to Alcosta (Alcosta pricing zone)</td>
+<td>October 2017</td>
+<td></td>
+</tr>
+<tr>
+<td>34</td>
+<td></td>
+<td><a href="https://511.org/driving/express-lanes/i-680-contra-costa-express-lanes">I-680 Contra Costa Express Lanes</a> <em>Northbound</em></td>
+<td>October 2017</td>
+<td></td>
+</tr>
+<tr>
+<td>34</td>
+<td>1</td>
+<td>Alcosta to Crow Canyon (Crow Canyon NB pricing zone)</td>
+<td>October 2017</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2017_managed_lane_i680s_benicia_bridge_to_acosta_blvd.yml"><code>year_2017_managed_lane_i680s_benicia_bridge_to_acosta_blvd.yml</code></a></td>
+</tr>
+<tr>
+<td>34</td>
+<td>2</td>
+<td>Crow Canyon to Livorna (Livorna pricing zone)</td>
+<td>October 2017</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="transit-network">Transit Network</h2>
+<p>The transit network is made up of three core components: transit lines, transit modes, and transit fares.  The transit lines were built GTFS feeds from raound 2015.  The lines are coded with a mode (see below) and serve a series of stop nodes.  Transit fares are coded according to Cube's Public Transport program (see below).</p>
+<p>Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the <a href="#level-of-service-information">Level of Service Information</a>. </p>
+<h3 id="link-attributes_1">Link Attributes</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+<th>Data Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>trip_id</td>
+<td>unique identifier for each trip</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>is_stop_A</td>
+<td>if node A is a transit stop</td>
+<td>boolean</td>
+</tr>
+<tr>
+<td>access_A</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>stop_sequence_A</td>
+<td>stop sequence of node A, if node A is a stop</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>shape_pt_sequence_B</td>
+<td>sequence of node A in the route</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>shape_model_node_id_B</td>
+<td>model_node_id of node B</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>NAME</td>
+<td>name of route with TOD</td>
+<td>string</td>
+</tr>
+<tr>
+<td>agency_id</td>
+<td>transit agency id</td>
+<td>string</td>
+</tr>
+<tr>
+<td>TM2_line_haul_name</td>
+<td>'Commuter rail', 'Express bus', 'Local bus', 'Light rail', 'Ferry service', 'Heavy rail'</td>
+<td>string</td>
+</tr>
+<tr>
+<td>TM2_mode</td>
+<td>see mode dictionary</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>faresystem</td>
+<td>faresystem (1-50)</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>tod</td>
+<td>time of day (1, 2, 3, 4, 5)</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>HEADWAY</td>
+<td>transit service headway in minute</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>A</td>
+<td>A of link</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>B</td>
+<td>B of link</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>model_link_id</td>
+<td>model_link_id</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>shstGeometryId</td>
+<td>the shstGeometryId of the link</td>
+<td>Integer</td>
+</tr>
+</tbody>
+</table>
+<h3 id="transit-modes">Transit Modes</h3>
+<p>The following transit modes are defined based on the <a href="https://511.org/developers/list/apis/">Open511</a> attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology. </p>
+<table>
+<thead>
+<tr>
+<th>TM2_operator</th>
+<th>agency_name</th>
+<th>TM2_mode</th>
+<th>TM2_line_haul_name</th>
+<th>faresystem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30</td>
+<td>AC Transit</td>
+<td>84</td>
+<td>Express bus</td>
+<td>9</td>
+</tr>
+<tr>
+<td>30</td>
+<td>AC Transit</td>
+<td>30</td>
+<td>Local bus</td>
+<td>9</td>
+</tr>
+<tr>
+<td>30</td>
+<td>AC Transit</td>
+<td>30</td>
+<td>Local bus</td>
+<td>11</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ACE Altamont Corridor Express</td>
+<td>133</td>
+<td>Commuter rail</td>
+<td>1</td>
+</tr>
+<tr>
+<td>26</td>
+<td>Bay Area Rapid Transit</td>
+<td>120</td>
+<td>Heavy rail</td>
+<td>2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Blue &amp; Gold Fleet</td>
+<td>103</td>
+<td>Ferry service</td>
+<td>13</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Blue &amp; Gold Fleet</td>
+<td>103</td>
+<td>Ferry service</td>
+<td>14</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Blue &amp; Gold Fleet</td>
+<td>103</td>
+<td>Ferry service</td>
+<td>12</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Caltrain</td>
+<td>130</td>
+<td>Commuter rail</td>
+<td>3</td>
+</tr>
+<tr>
+<td>23</td>
+<td>Capitol Corridor</td>
+<td>131</td>
+<td>Commuter rail</td>
+<td>4</td>
+</tr>
+<tr>
+<td>19</td>
+<td>Cloverdale Transit</td>
+<td>63</td>
+<td>Local bus</td>
+<td>7</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Commute.org Shuttle</td>
+<td>14</td>
+<td>Local bus</td>
+<td>46</td>
+</tr>
+<tr>
+<td>15</td>
+<td>County Connection</td>
+<td>86</td>
+<td>Express bus</td>
+<td>16</td>
+</tr>
+<tr>
+<td>15</td>
+<td>County Connection</td>
+<td>42</td>
+<td>Local bus</td>
+<td>15</td>
+</tr>
+<tr>
+<td>15</td>
+<td>County Connection</td>
+<td>42</td>
+<td>Local bus</td>
+<td>17</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Emery Go-Round</td>
+<td>12</td>
+<td>Local bus</td>
+<td>18</td>
+</tr>
+<tr>
+<td>28</td>
+<td>Fairfield and Suisun Transit</td>
+<td>92</td>
+<td>Express bus</td>
+<td>10</td>
+</tr>
+<tr>
+<td>28</td>
+<td>Fairfield and Suisun Transit</td>
+<td>52</td>
+<td>Local bus</td>
+<td>10</td>
+</tr>
+<tr>
+<td>35</td>
+<td>Golden Gate Transit</td>
+<td>87</td>
+<td>Express bus</td>
+<td>8</td>
+</tr>
+<tr>
+<td>20</td>
+<td>Golden Gate Transit</td>
+<td>101</td>
+<td>Ferry service</td>
+<td>19</td>
+</tr>
+<tr>
+<td>20</td>
+<td>Golden Gate Transit</td>
+<td>101</td>
+<td>Ferry service</td>
+<td>20</td>
+</tr>
+<tr>
+<td>35</td>
+<td>Golden Gate Transit</td>
+<td>70</td>
+<td>Local bus</td>
+<td>8</td>
+</tr>
+<tr>
+<td>99</td>
+<td>MVgo Mountain View</td>
+<td>16</td>
+<td>Local bus</td>
+<td>21</td>
+</tr>
+<tr>
+<td>39</td>
+<td>Marin Transit</td>
+<td>71</td>
+<td>Local bus</td>
+<td>23</td>
+</tr>
+<tr>
+<td>39</td>
+<td>Marin Transit</td>
+<td>71</td>
+<td>Local bus</td>
+<td>24</td>
+</tr>
+<tr>
+<td>21</td>
+<td>Petaluma Transit</td>
+<td>68</td>
+<td>Local bus</td>
+<td>47</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Rio Vista Delta Breeze</td>
+<td>52</td>
+<td>Local bus</td>
+<td>5</td>
+</tr>
+<tr>
+<td>6</td>
+<td>SamTrans</td>
+<td>80</td>
+<td>Express bus</td>
+<td>6</td>
+</tr>
+<tr>
+<td>6</td>
+<td>SamTrans</td>
+<td>24</td>
+<td>Local bus</td>
+<td>6</td>
+</tr>
+<tr>
+<td>25</td>
+<td>San Francisco Bay Ferry</td>
+<td>101</td>
+<td>Ferry service</td>
+<td>28</td>
+</tr>
+<tr>
+<td>25</td>
+<td>San Francisco Bay Ferry</td>
+<td>101</td>
+<td>Ferry service</td>
+<td>30</td>
+</tr>
+<tr>
+<td>25</td>
+<td>San Francisco Bay Ferry</td>
+<td>101</td>
+<td>Ferry service</td>
+<td>31</td>
+</tr>
+<tr>
+<td>25</td>
+<td>San Francisco Bay Ferry</td>
+<td>101</td>
+<td>Ferry service</td>
+<td>32</td>
+</tr>
+<tr>
+<td>25</td>
+<td>San Francisco Bay Ferry</td>
+<td>101</td>
+<td>Ferry service</td>
+<td>29</td>
+</tr>
+<tr>
+<td>22</td>
+<td>San Francisco Municipal Transportation Agency</td>
+<td>110</td>
+<td>Light rail</td>
+<td>25</td>
+</tr>
+<tr>
+<td>22</td>
+<td>San Francisco Municipal Transportation Agency</td>
+<td>20</td>
+<td>Local bus</td>
+<td>25</td>
+</tr>
+<tr>
+<td>22</td>
+<td>San Francisco Municipal Transportation Agency</td>
+<td>21</td>
+<td>Local bus</td>
+<td>26</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Santa Rosa CityBus</td>
+<td>66</td>
+<td>Local bus</td>
+<td>33</td>
+</tr>
+<tr>
+<td>12</td>
+<td>SolTrans</td>
+<td>91</td>
+<td>Express bus</td>
+<td>35</td>
+</tr>
+<tr>
+<td>12</td>
+<td>SolTrans</td>
+<td>49</td>
+<td>Local bus</td>
+<td>34</td>
+</tr>
+<tr>
+<td>12</td>
+<td>SolTrans</td>
+<td>49</td>
+<td>Local bus</td>
+<td>35</td>
+</tr>
+<tr>
+<td>19</td>
+<td>Sonoma County Transit</td>
+<td>63</td>
+<td>Local bus</td>
+<td>7</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Stanford Marguerite Shuttle</td>
+<td>13</td>
+<td>Local bus</td>
+<td>22</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Tri Delta Transit</td>
+<td>95</td>
+<td>Express bus</td>
+<td>36</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Tri Delta Transit</td>
+<td>44</td>
+<td>Local bus</td>
+<td>37</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Tri Delta Transit</td>
+<td>44</td>
+<td>Local bus</td>
+<td>36</td>
+</tr>
+<tr>
+<td>36</td>
+<td>Union City Transit</td>
+<td>38</td>
+<td>Local bus</td>
+<td>38</td>
+</tr>
+<tr>
+<td>31</td>
+<td>VTA</td>
+<td>81</td>
+<td>Express bus</td>
+<td>40</td>
+</tr>
+<tr>
+<td>31</td>
+<td>VTA</td>
+<td>81</td>
+<td>Express bus</td>
+<td>41</td>
+</tr>
+<tr>
+<td>31</td>
+<td>VTA</td>
+<td>111</td>
+<td>Light rail</td>
+<td>41</td>
+</tr>
+<tr>
+<td>31</td>
+<td>VTA</td>
+<td>28</td>
+<td>Local bus</td>
+<td>41</td>
+</tr>
+<tr>
+<td>31</td>
+<td>VTA</td>
+<td>28</td>
+<td>Local bus</td>
+<td>39</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Vacaville City Coach</td>
+<td>56</td>
+<td>Local bus</td>
+<td>48</td>
+</tr>
+<tr>
+<td>38</td>
+<td>Vine (Napa County)</td>
+<td>94</td>
+<td>Express bus</td>
+<td>43</td>
+</tr>
+<tr>
+<td>38</td>
+<td>Vine (Napa County)</td>
+<td>60</td>
+<td>Local bus</td>
+<td>42</td>
+</tr>
+<tr>
+<td>38</td>
+<td>Vine (Napa County)</td>
+<td>60</td>
+<td>Local bus</td>
+<td>44</td>
+</tr>
+<tr>
+<td>37</td>
+<td>WestCat (Western Contra Costa)</td>
+<td>90</td>
+<td>Express bus</td>
+<td>49</td>
+</tr>
+<tr>
+<td>37</td>
+<td>WestCat (Western Contra Costa)</td>
+<td>90</td>
+<td>Express bus</td>
+<td>50</td>
+</tr>
+<tr>
+<td>37</td>
+<td>WestCat (Western Contra Costa)</td>
+<td>46</td>
+<td>Local bus</td>
+<td>49</td>
+</tr>
+<tr>
+<td>24</td>
+<td>Wheels Bus</td>
+<td>17</td>
+<td>Local bus</td>
+<td>45</td>
+</tr>
+</tbody>
+</table>
+<h3 id="transit-fares">Transit Fares</h3>
+<p>Transit fares are modeled in Cube's Public Transport (PT) program as follows:
+  1. Each transit mode is assigned a fare system in the Cube factor files
+  1. Each fare system is defined in the fares.far fare file
+  1. Each fare system is either FROMTO (fare zone based) or FLAT (initial + transfer in fare)
+  1. For FROMTO fare systems:
+    1. Each stop node is assigned a FAREZONE ID in the master network
+    1. The fare is looked up from the fare matrix (fareMatrix.txt), which is a text file with the following columns: MATRIX ZONE_I ZONE_J VALUE
+    1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file
+  1. For FLAT fare systems:
+    1. The initial fare is defined via the IBOARDFARE in the fares.far file
+    1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file</p>
+<h2 id="micro-zonal-data">Micro Zonal Data</h2>
+<table>
+<thead>
+<tr>
+<th><em>Column Name</em></th>
+<th><em>Description</em></th>
+<th><em>Used by</em></th>
+<th><em>Source</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>MAZ_ORIGINAL</em></td>
+<td>Original micro zone number. It's original because these will get renumbered during the model run assuming <a href="#county-node-numbering-system">the node numbering conventions</a></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>TAZ_ORIGINAL</em></td>
+<td>Original TAZ number. It's original because these will get renumbered during the model run assuming <a href="#county-node-numbering-system">the node numbering conventions</a></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>CountyID</em></td>
+<td>County ID Number</td>
+<td>MAZAutoTripMatrix via <a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>CountyName</em></td>
+<td>County name string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>DistID</em></td>
+<td>District ID Number (TODO: link district map)</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/TourModeChoice.xls">TourModeChoice.xls</a></td>
+<td>District system definition</td>
+</tr>
+<tr>
+<td><em>DistName</em></td>
+<td>District Name (TODO: link district map)</td>
+<td></td>
+<td>District system definition</td>
+</tr>
+<tr>
+<td><em>ACRES</em></td>
+<td>MAZ acres</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py">createMazDensityFile.py</a></td>
+<td>Calculated from shapefile</td>
+</tr>
+<tr>
+<td><em>HH</em></td>
+<td>Total number of households</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>POP</em></td>
+<td>Total population</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Employment Industry Categories</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>ag</em></td>
+<td>Employment in agriculture: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 11</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>art_rec</em></td>
+<td>Employment in arts, entertainment and recreation: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 71</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>const</em></td>
+<td>Employment in construction: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 23</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>eat</em></td>
+<td>Employment in food services and drinking places: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 722</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>ed_high</em></td>
+<td>Employment in junior colleges, colleges, universities: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 6112, 6113, 6114, 6115</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>ed_k12</em></td>
+<td>Employment in K-12 schools: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 6111</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>ed_oth</em></td>
+<td>Employment in other schools, libraries and educational services: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 6116, 6117</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>fire</em></td>
+<td>Employment in FIRE (finance, insurance and real estate): NAICS 52, 53 not in leasing</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>gov</em></td>
+<td>Employment in government: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 92</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>health</em></td>
+<td>Employment in health care: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 62 except those in <em>serv_soc</em></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>hotel</em></td>
+<td>Employment in hotels and other accomodations: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 721</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>info</em></td>
+<td>Employment in information-based services: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 51</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>lease</em></td>
+<td>Employment in leasing: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 532</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>logis</em></td>
+<td>Employment in logistics/warehousing and distribution: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 42, 493</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>man_bio</em></td>
+<td>Employment in biological/drug manufacturing: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 325411, 325412, 325313, 325414</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>man_hvy</em></td>
+<td>Employment in heavy manufacturing: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 31-33 subset</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>man_lgt</em></td>
+<td>Employment in light manufacturing: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 31-33 subset</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>man_tech</em></td>
+<td>Employment in high-tech manufacturing: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 334</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>natres</em></td>
+<td>Employment in mining and resource extraction: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 21</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>prof</em></td>
+<td>Employment in professional and technical services: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 54</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>ret_loc</em></td>
+<td>Employment in local-serving retail: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 444130, 444190, 444210, 444220, 445110, 445120, 445210, 445220, 445230, 445291, 445292, 445299, 445310, 446110, 446120, 446130, 446191, 446199, 447110, 447190, 448110, 448120, 448130, 448140, 448150, 448190, 448210, 448310, 448320, 451110, 451120, 451130, 451140, 451211, 451212, 452910, 452990, 453110, 453220, 453310, 453910, 453920, 453930, 453991, 453998, 454111, 454112, 454113</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>ret_reg</em></td>
+<td>Employment in regional retail: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 441110, 441120, 441210, 441222, 441228, 441310, 441320, 442110, 442210, 442291, 442299, 443141, 443142, 444110, 444120, 452111, 452112, 453210, 454210, 454310, 454390</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>serv_bus</em></td>
+<td>Employment in managerial services, administrative and business services: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 55,56</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>serv_pers</em></td>
+<td>Employment in personal and other services: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 53, 81</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>serv_soc</em></td>
+<td>Employment in social services and childcare: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 624</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>transp</em></td>
+<td>Employment in transportation: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 48 (most of it), 49 (not in <em>logis</em>)</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>util</em></td>
+<td>Employment in utilities: <a href="https://www.census.gov/eos/www/naics/">NAICS</a> 22, 56</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>unclass</em></td>
+<td>Employment not classified</td>
+<td>is this used?</td>
+<td></td>
+</tr>
+<tr>
+<td><em>emp_total</em></td>
+<td>Total employment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>School Enrollment Categories</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>publicenrollgradekto8</em></td>
+<td>Public school grade K-8 enrollment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>privateenrollgradekto8</em></td>
+<td>Private school grade K-8 enrollment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>publicenrollgrade9to12</em></td>
+<td>Public high school grade 9-12 enrollment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>privateenrollgrade9to12</em></td>
+<td>Private high school grade 9-12 enrollment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>comm_coll_enroll</em></td>
+<td>Community college enrollment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>EnrollGradeKto8</em></td>
+<td>Total high school grade 9-12 enrollment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>EnrollGrade9to12</em></td>
+<td>Total high school grade 9-12 enrollment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>collegeEnroll</em></td>
+<td>Major College enrollment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>otherCollegeEnroll</em></td>
+<td>Other College enrollment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>AdultSchEnrl</em></td>
+<td>Adult School enrollment</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>ech_dist</em></td>
+<td>Elementary school district</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>hch_dist</em></td>
+<td>High school district</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Parking</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>parkarea</em></td>
+<td>{::nomarkdown}<ul><li>1: Trips with destinations in this MAZ may choose to park in a different MAZ, parking charges apply (downtown)</li> <li>2: Trips with destinations in parkarea 1 may choose to park in this MAZ, parking charges might apply (quarter mile buffer around downtown)</li> <li>3: Only trips with destinations in this MAZ may park here, parking charges apply (outside downtown paid parking, only show cost no capacity issue)</li> <li>4: Only trips with destinations in this MAZ may park here, parking charges do not apply (outside downtown, free parking)</li> </ul>{:/}</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>hstallsoth</em></td>
+<td>Number of stalls allowing hourly parking for trips with destinations in other MAZs</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>hstallssam</em></td>
+<td>Number of stalls allowing hourly parking for trips with destinations in the same MAZ</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>hparkcost</em></td>
+<td>Average cost of parking for one hour in hourly stalls in this MAZ, dollars</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>numfreehrs</em></td>
+<td>Number of hours of free parking allowed before parking charges begin in hourly stalls</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>dstallsoth</em></td>
+<td>Stalls allowing daily parking for trips with destinations in other MAZs</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>dstallssam</em></td>
+<td>Stalls allowing daily parking for trips with destinations in the same MAZ</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>dparkcost</em></td>
+<td>Average cost of parking for one day in daily stalls, dollars</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>mstallsoth</em></td>
+<td>Stalls allowing monthly parking for trips with destinations in other MAZs</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>mstallssam</em></td>
+<td>Stalls allowing monthly parking for trips with destinations in the same MAZ</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>mparkcost</em></td>
+<td>Average cost of parking for one day in monthly stalls, amortized over 22 workdays, dollars</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Other</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>park_area</em></td>
+<td>Area of park space, in square meters</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities</a></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Calculated land use measures</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>TotInt</em></td>
+<td>Total intersections</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a>, <a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/AutoOwnership.xls">AutoOwnership</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py">createMazDensityFile.py</a></td>
+</tr>
+<tr>
+<td><em>DUDen</em></td>
+<td>Dwelling unit density</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py">createMazDensityFile.py</a></td>
+</tr>
+<tr>
+<td><em>EmpDen</em></td>
+<td>Employment density</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/MgraDataManager.java#L47">MgraDataManager</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py">createMazDensityFile.py</a></td>
+</tr>
+<tr>
+<td><em>PopDen</em></td>
+<td>Population density</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/AutoOwnership.xls">AutoOwnership</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py">createMazDensityFile.py</a></td>
+</tr>
+<tr>
+<td><em>RetEmpDen</em></td>
+<td>Retail employment density</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/AutoOwnership.xls">AutoOwnership</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py">createMazDensityFile.py</a></td>
+</tr>
+<tr>
+<td><em>TotIntBin</em></td>
+<td>Total intersection bin</td>
+<td>is this used?</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py">createMazDensityFile.py</a></td>
+</tr>
+<tr>
+<td><em>EmpDenBin</em></td>
+<td>Employment density bin</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/AtWorkSubtourFrequency.xls">AtWorkSubtourFrequency</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py">createMazDensityFile.py</a></td>
+</tr>
+<tr>
+<td><em>DuDenBin</em></td>
+<td>Dwelling unit density bin</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/AtWorkSubtourFrequency.xls">AtWorkSubtourFrequency</a></td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py">createMazDensityFile.py</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="zonal-data">Zonal Data</h2>
+<table>
+<thead>
+<tr>
+<th><em>Field</em></th>
+<th><em>Description</em></th>
+<th><em>Used by</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>TAZ_ORIGINAL</em></td>
+<td>Original TAZ number. It's original because these will get renumbered during the model run assuming <a href="#county-node-numbering-system">the node numbering conventions</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>AVGTTS</em></td>
+<td>Average travel time savings for transponder ownership model</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/TazDataManager.java#L37">TazDataManager</a></td>
+</tr>
+<tr>
+<td><em>DIST</em></td>
+<td>Distance for transponder ownership model</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/TazDataManager.java#L37">TazDataManager</a></td>
+</tr>
+<tr>
+<td><em>PCTDETOUR</em></td>
+<td>Percent detour for transponder ownership model</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/TazDataManager.java#L37">TazDataManager</a></td>
+</tr>
+<tr>
+<td><em>TERMINALTIME</em></td>
+<td>Terminal time</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/TazDataManager.java#L37">TazDataManager</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="synthetic-population">Synthetic Population</h2>
+<p>The synethic population is generated by <a href="https://github.com/BayAreaMetro/popsyn3">popsyn3</a> or <a href="https://github.com/BayAreaMetro/populationsim">populationsim</a> (TBD).</p>
+<h3 id="households">Households</h3>
+<table>
+<thead>
+<tr>
+<th><em>Column Name</em></th>
+<th><em>Description</em></th>
+<th><em>Used by</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>HHID</em></td>
+<td>Unique household ID</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>TAZ</em></td>
+<td>TAZ of residence</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>MAZ</em></td>
+<td>MAZ of residence</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>MTCCountyID</em></td>
+<td>County of residence</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>HHINCADJ</em></td>
+<td>Household income in 2010 dollars</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>NWRKRS_ESR</em></td>
+<td>Number of workers.  A count of <em>EMPLOYED</em> persons in the household, ranges from 0 to 20.</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>VEH</em></td>
+<td>Number of vehicles owned by the household. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>, ranges from 0 (no vehicles) to 6 (6 or more vehicles), with N/A recoded as -9 for group quarters</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>NP</em></td>
+<td>Number of persons in household. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>.  Ranges from 1 to 20</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>HHT</em></td>
+<td>Household type. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>. {::nomarkdown}<br /> <ul><li>1=Married-couple family household</li><li>2=Other family household, Male householder, no wife present</li><li>3=Other family household, Female householder, no husband present</li><li>4=Nonfamily household, Male householder, Living alone</li><li>5=Nonfamily household, Male householder, Not living alone</li><li>6=Nonfamily household, Female householder, Living alone</li><li>7=Nonfamily household, Female householder, Not living alone</li><li>-9=N/A recoded for group quarters</li></ul>{:/}</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>BLD</em></td>
+<td>Units in structure. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>. {::nomarkdown}<br /> <ul><li>1=Mobile home or trailer</li><li>2=One-family house detached</li><li>3=One-family house attached</li><li>4=2 Apartments</li><li>5=3-4 Apartments</li><li>6=5-9 Apartments</li><li>7=10-19 Apartments</li><li>8=20-49 Apartments</li><li>9=50 or more apartments</li><li>10=Boat, RV, van, etc.</li><li>-9=N/A recoded for group quarters</li></ul>{:/}</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>TYPE</em></td>
+<td>Type of unit (housing, institutional or noninstitutional group quarters). From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>. 1=Housing unit, 2=Institutional group quarters (shouldn't be included in this input data set), 3=Noninstitutional group quarters.</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="persons">Persons</h3>
+<table>
+<thead>
+<tr>
+<th><em>Column Name</em></th>
+<th><em>Description</em></th>
+<th><em>Used by</em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>HHID</em></td>
+<td>Unique household ID</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>PERID</em></td>
+<td>Unique person ID</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>AGEP</em></td>
+<td>Age of person. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>, ranges from 0 to 99.</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>SEX</em></td>
+<td>Sex of person. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>. 1=Male, 2=Female</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>SCHL</em></td>
+<td>Education attainment of person. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>. {::nomarkdown}<br /> <ul><li>-9=N/A recoded for less than 3 years old</li><li>1=No schooling completed</li><li>2=Nursery school to grade 4</li><li>3=Grade 5 or grade 6</li><li>4=Grade 7 or grade 8</li><li>5=Grade 9</li><li>6=Grade 10</li><li>7=Grade 11</li><li>8=12th grade, no diploma</li><li>9=High school graduate</li><li>10=Some college, but less than 1 year</li><li>11=One or more years of college, no degree</li><li>12=Associate's degree</li><li>13=Bachelor's degree</li><li>14=Master's degree</li><li>15=Professional school degree</li><li>16=Doctorate degree</li><ul>{:/}</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>OCCP</em></td>
+<td>Occupation, based on recoding of <em>SOCP00</em> or <em>SOCP10</em> from <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>. Recoding done in <a href="https://github.com/BayAreaMetro/populationsim/blob/master/bay_area/create_seed_population.py">create_seed_population.py</a> {::nomarkdown}<br /> <ul><li>-999 is N/A recode (less than 16 years old/Not in labor force who last worked more than 5 years ago or never worked)</li><li>1=Management</li><li>2=Professional</li><li>3=Services</li><li>4=Retail</li><li>5=Manual</li><li>6=Military</li></ul>{:/} <a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+<td></td>
+</tr>
+<tr>
+<td><em>WKHP</em></td>
+<td>Usual hours worked per week past 12 months. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>. -9=N/A recoded for persons less than 16 years old or who did not work during the past 12 months. Otherwise ranges from 1 to 99.</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>WKW</em></td>
+<td>Weeks worked during past 12 months. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a>.  {::nomarkdown}<br /> <ul><li>-9=N/A recoded for persons less than 16 years old or who did not work during the past 12 months</li><li>1=50 to 52 weeks</li><li>2=48 to 49 weeks</li><li>3=40 to 47 weeks</li><li>4= 27 to 39 weeks</li><li>5=14 to 26 weeks</li><li>6=13 weeks or less</li></ul>{:/}</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>EMPLOYED</em></td>
+<td>Based on <em>ESR</em> below. 1=Employed, set if <em>ESR</em> is one of [1,2,4,5]. 0=Unemployed.</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>ESR</em></td>
+<td>Employment status recode. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a> {::nomarkdown}<br /> <ul><li>0=N/A recoded for persons less than 16 years old</li><li>1=Civilian employed, at work</li><li>2=Civilian employed, with a job but not at work</li><li>3=Unemployed</li><li>4=Armed forces, at work</li><li>5=Armed forces, with a job but not at work</li><li>6=Not in labor force</li></ul>{:/}</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+<tr>
+<td><em>SCHG</em></td>
+<td>Grade level attending. From <a href="https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2007-2011.pdf">PUMS</a> {::nomarkdown}<br /> <ul><li>-9=N/A (not attending school) recoded</li><li>1=Nursery schoo./preschool</li><li>2=Kindergarten</li><li>3=Grade 1 to grade 4</li><li>4=Grade 5 to grade 8</li><li>5=Grade 9 to grade 12</li><li>6=College undergraduate</li><li>7=Graduate or professional school</li></ul>{:/}</td>
+<td><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdDataManager.java#L44">HouseholdDataManager</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="truck-distribution">Truck Distribution</h2>
+<p>MTC uses a simple three-step (generation, distribution, and assignment) commercial vehicle model to generate estimates of four types of commercial vehicles. The four vehicle types are very small (two-axle, four-tire), small (two-axle, six-tire), medium (three-axle), and large or combination trucks (four-or-more-axle).</p>
+<h3 id="friction-factors">Friction Factors</h3>
+<p>The trip distribution step uses a standard gravity model with a blended travel time impedance measure. This file sets the friction factors, which are vehicle type specific, using an ASCII fixed format text file with the following data:</p>
+<ul>
+<li>Travel time in minutes (integer, starting in column 1, left justified);</li>
+<li>Friction factors for very small trucks (integer, starting in column 9, left justified);</li>
+<li>Friction factors for small trucks (integer, starting in column 17, left justified);</li>
+<li>Friction factors for medium trucks (integer, starting in column 25, left justified); and,</li>
+<li>Friction factors for large trucks (integer, starting in column 33, left justified).</li>
+</ul>
+<h3 id="k-factors">K-Factors</h3>
+<p>The trip distribution step also uses a matrix of K-factors to adjust the distribution results to better match observed data. This matrix contains a unit-less adjustment value; the higher the number, the more attractive the production/attraction pair.</p>
+<h2 id="fixed-demand">Fixed Demand</h2>
+<p>MTC uses representations of internal/external and air passenger demand that is year-, but not scenario-, specific -- meaning simple sketch methods are used to estimate this demand from past trends. This demand is then fixed for each forecast year and does not respond to changes in land use or the transport network.</p>
+<h3 id="internalexternal">Internal/External</h3>
+<p>So-called internal/external demand is travel that either begins or ends in the nine county Bay Area. This demand is based on Census journey-to-work data and captures all passenger (i.e. non-commercial) vehicle demand. This demand is introduced to the model via a matrix that contains the following four demand tables in production-attraction format:</p>
+<ul>
+<li>Daily single-occupant vehicle flows;</li>
+<li>Daily two-occupant vehicle flows;</li>
+<li>Daily three-or-more occupant vehicle flows; and,</li>
+<li>Daily vehicle flows, which is the sum of the first three tables and not used by the travel model.</li>
+</ul>
+<h3 id="air-passenger">Air Passenger</h3>
+<p>Air passenger demand is based on surveys of air passenger and captures demand from the following travel modes: passenger vehicles, rental cars, taxis, limousines, shared ride vans, hotel shuttles, and charter buses. This demand is introduced to the model via Main.TimePeriods specific matrices that contain the following six flow tables:</p>
+<ul>
+<li>Single-occupant vehicles;</li>
+<li>Two-occupant vehicles;</li>
+<li>Three-occupant vehicles;</li>
+<li>Single-occupant vehicles that are willing to pay a high-occupancy toll lane fee;</li>
+<li>Two-occupant vehicles that are willing to pay a high-occupancy toll lane fee; and,</li>
+<li>Three-occupant vehicles that are willing to pay a high-occupancy toll lane fee.</li>
+</ul>
+
+              
+            </article>
+            
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../guide/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Guide" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Guide
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../process/" class="md-footer__link md-footer__link--next" aria-label="Next: Process" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Process
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "content.code.annotate", "content.tabs.link", "navigation.indexes"], "search": "../assets/javascripts/workers/search.b028fd86.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.f758a944.min.js"></script>
+      
+    
+  </body>
+</html>
