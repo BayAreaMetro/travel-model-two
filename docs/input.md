@@ -34,17 +34,13 @@ Time periods in Travel Model Two are consistent with Travel Model One:
 
 ## Roadway Network
 
-The *all streets highway network* was developed from the [TomTom](http://www.tomtom.com/en_gb/licensing/) (previously TeleAtlas) North America routable network database.  The *projection* is [**NAD 1983 StatePlane California VI FIPS 0406 Feet**](https://epsg.io/102646).
-
-The *bike network* was built from the highway network and the [MTC Bike Mapper](http://gis.mtc.ca.gov/btp/) network. The Bike Mapper network is a framework in which local cities update a master database of bicycle infrastructure and bicycle lane attributes, from which MTC has built and now maintains a trip planner application. 
-
-The *walk network* was built from the highway network and the open source [Open Street Map](http://www.openstreetmap.org/) (OSM) network. 
+The all streets highway network, walk network, and bicycle network were developed from [OpenStreetMap](http://www.openstreetmap.org/).  The *projection* is [**NAD 1983 StatePlane California VI FIPS 0406 Feet**](https://epsg.io/102646).
 
 ### County Node Numbering System
 
 The highway network uses a numbering system whereby each county has a reserved block of nodes. Within each county’s block, nodes 1 through 9,999 are reserved for TAZs, 10,001 through 89,999 are for MAZs, and 90,001 through 99,999 for transit access points or TAPs. The blocks are assigned to the nine counties per MTC’s numbering scheme, as shown in the table below.
 
-TeleAtlas network nodes are numbered by county as well and range from 1,000,000 to 10,000,000 as shown below. HOV lane nodes are those nodes corresponding to general purpose lane nodes.   
+Roadway, walk, bicycle, and transit network nodes are numbered by county as well and range from 1,000,000 to 10,000,000 as shown below.
 
 Code  | County | TAZs | MAZs |  TAPs | Network Node | HOV Lane Node
 ---|-------|-----|----|------|-------------|-------------
@@ -68,13 +64,40 @@ The following node attributes are included in the master network.
 |*N* | Node Number | Integer (see [Node Numbering](#county-node-numbering-system))
 |*X* | X coordinate (feet) | Float
 |*Y* | Y coordinate (feet) | Float
-|*COUNTY* | County Code | Integer
-|*MODE* | Best transit mode served. {::nomarkdown}<br /><ul><li>1: Local bus</li> <li>2: Express bus</li> <li>3: Ferry</li> <li>4: Light rail</li> <li>5: Heavy rail</li> <li>6: Commuter rail</li> </ul>{:/} Appears to be set for TAPs and nodes with **STOP** set.| Integer
-|*STOP* | Transit stop or terminal name of the node | String
-|*PNR_CAP* |  Number of parking spaces at the stop or terminal if a parking facility is available | Integer
-|*PNR[1-5]* | Is parking available at the stop or terminal by time period? | Integer (1=available)
-|*PNR_FEE[1-5]* | Parking fee at the stop by time period | Float
+|*OSM_NODE_ID* | OpenStreetMap node identifier | Integer
+|*COUNTY* | County Name | String
+|*DRIVE_ACCESS* | Node is used by automobile and/or bus links | Boolean
+|*WALK_ACCESS* | Node is used by pedestrian links | Boolean
+|*BIKE_ACCESS* | Node is used by bicycle links | Boolean
+|*RAIL_ACCESS* | Node is used by rail links | Boolean
 |*FAREZONE* | Unique sequential fare zone ID for transit skimming and assignment | Integer
+|*TAP_ID* | Transit access point (TAP) associated connected to this node | Integer
+
+#### External Nodes
+
+| *N* | *Gateway* |
+|-----|-----------|
+| 900001 | State Route 1 (Sonoma) |
+| 900002 | State Route 28 (Sonoma) |
+| 900003 | U.S. Route 101 (Sonoma) |
+| 900004 | State Route 29 (Napa) |
+| 900005 | State Route 128 (Solano) |
+| 900006 | Interstate 505 (Solano) |
+| 900007 | State Route 113 (Solano) |
+| 900008 | Interstate 80 (Solano) |
+| 900009 | State Route 12 (Solano) |
+| 900010 | State Route 160 (Contra Costa) |
+| 900011 | State Route 4 (Contra Costa) |
+| 900012 | County Route J-4 (Contra Costa) |
+| 900013 | Interstate 205 + Interstate 580 (Alameda) |
+| 900014 | State Route 152 (Santa Clara/East) |
+| 900015 | State Route 156 (Santa Clara) |
+| 900016 | State Route 25 (Santa Clara) |
+| 900017 | U.S. Route 101 (Santa Clara) |
+| 900018 | State Route 152 (Santa Clara/West) |
+| 900019 | State Route 17 (Santa Clara) |
+| 900020 | State Route 9 (Santa Clara) |
+| 900021 | State Route 1 (San Mateo) |
 
 ### Link Attributes
 
@@ -84,122 +107,160 @@ The following link attributes are included on the master network.
 |-------|---------------|-------------|----------|
 | *A* | from node | Integer (see [Node Numbering](#county-node-numbering-system)) |
 | *B* | to node | Integer (see [Node Numbering](#county-node-numbering-system)) |
-| *F_JNCTID* | TomTom from node | Long integer | TomTom |
-| *T_JNCTID* | TomTom to node | Long integer | TomTom |
-| *FRC* | Functional Road Class{::nomarkdown}<br /> <ul><li>-1: Not Applicable</li> <li>0: Motorway, Freeway, or Other Major Road</li>  <li>1: a Major Road Less Important than a Motorway</li> <li>2: Other Major Road</li> <li>3: Secondary Road</li> <li>4: Local Connecting Road</li> <li>5: Local Road of High Importance</li> <li>6: Local Road</li> <li>7: Local Road of Minor Importance</li> <li>8: Other Road</li> </ul>{:/} | Float | TomTom |
-| *NAME* | Road name | String | TomTom |
-| *FREEWAY* | Freeway{::nomarkdown}<br /> <ul><li>0: No Part of Freeway (default)</li> <li>1: Part of Freeway</li> </ul>{:/} | Integer | TomTom |
-| *TOLLRD* | Toll Road{::nomarkdown}<br /> <ul> <li>Blank: No Toll Road (default)</li> <li>B: Toll Road in Both Directions</li> <li>FT: Toll Road in Positive Direction</li> <li>TF: Toll Road in Negative Direction</li> </ul>{:/} | String | TomTom |
-| *ONEWAY* |  Direction of Traffic Flow{::nomarkdown}<br /> <ul><li>Blank: Open in Both Directions (default)</li> <li>FT: Open in Positive Direction</li> <li>N: Closed in Both Directions</li> <li>TF: Open in Negative Direction</li></ul>{:/} | String | TomTom |
-| *KPH* | Calculated Average Speed (kilometers per hour) | Integer | TomTom |
-| *MINUTES* | Travel Time (minutes) | Integer | TomTom |
-| *CARRIAGE* | Carriageway Type{::nomarkdown}<br /> <ul><li>Blank: Not Applicable</li> <li>1: Car Pool</li> <li>2: Express</li> <li>3: Local</li></ul>{:/} | Integer | TomTom |
-| *LANES* | TomTom Number of lanes | Integer | TomTom |
-| *RAMP* | Exit / Entrance Ramp{::nomarkdown}<br /> <ul><li>0: No Exit/Entrance Ramp - Default</li> <li>1: Exit</li> <li>2: Entrance</li></ul>{:/} | Integer | TomTom |
-| *SPEEDCAT* | Speed Category{::nomarkdown}<br /><ul><li>1: &gt; 130 km/h</li> <li>2: 101 - 130 km/h</li> <li>3: 91 - 100 km/h</li> <li>4: 71 - 90 km/h</li> <li>5: 51 - 70 km/h</li> <li>6: 31 - 50 km/h</li> <li>7: 11 - 30 km/h</li><li>8: &lt; 11 km/h</li></ul>{:/} | Integer | TomTom |
-| *FEET* | Calculated from TomTom Meters field | Integer | TomTom |
-| *RTEDIR* | Route Directional{::nomarkdown}<br /><ul><li>Blank: Not Applicable (default)</li> <li>N: Northbound</li> <li>E: Eastbound</li> <li>S: Southbound</li> <li>O / W: Westbound</li></ul>{:/} | String | TomTom |
+| *MODEL_LINK_ID* | Unique link identifier | Integer |   |
+| *SHSTGEOMERTRYID* | Unique link shape identifier per SharedStreets approach | String |   |
 | *ASSIGNABLE* | Is link used for assignment (1=True, 0=False) | Integer |   |
+| *DRIVE_ACCESS* | Link is used by automobiles and/or buses (1=True, 0=False) | Integer |   |
+| *BIKE_ACCESS* | Link is used by bicycles (1=True, 0=False) | Integer |   |
+| *WALK_ACCESS* | Link is used by pedestrians (1=True, 0=False) | Integer |   |
+| *BUS_ONLY* | Link is used by buses, but not automobiles (1=True, 0=False) | Integer |   |
+| *RAIL_ONLY* | Link is used by rail vehicles (1=True, 0=False) | Integer |   |
+| *DRIVE_ACCESS* | Link is used by automobiles and/or buses (1=True, 0=False) | Integer |   |
+| *MANAGED* | Link has a parallel managed lane (1=True, 0=False) | Integer |   |
+| *SEGMENT_ID* | Parallel managed lane unique segment identifier (on managed and general purpose lanes) | Integer |   |
+| *COUNTY* | County name | String |   |
 | *CNTYPE* | Link connector type{::nomarkdown}<br /><ul> <li>BIKE - bike link</li> <li>CRAIL - commuter rail</li> <li>FERRY- ferry link</li> <li>HRAIL - heavy rail link</li> <li>LRAIL- light rail link</li> <li>MAZ - MAZ connector link</li> <li>PED - ped link</li> <li>TANA - regular network link</li> <li>TAP - TAP link</li> <li>TAZ - TAZ connector link</li> <li>USE - HOV (user class) link</li> </ul>{:/} | String |   |
 | *TRANSIT* | Is Transit link | Integer |   |
-| *USECLASS* | Link user class{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
-| *TOLLBOOTH* | Toll link.  Links with values [less than 11](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block) are _bridge tolls_; 11 or above are _value tolls_. {::nomarkdown}<br /> <ul><li>1: Benicia-Martinez Bridge</li> <li>2: Carquinez Bridge</li> <li>3: Richmond Bridge</li> <li>4: Golden Gate Bridge</li> <li>5: San Francisco/Oakland Bay Bridge</li> <li>6: San Mateo Bridge</li> <li>7: Dumbarton Bridge</li> <li>8: Antioch Bridge</li> <li>25: I-680 Sunol Express Lanes</li> <li>28: I-580 Express Lanes EB</li> <li>29: I-580 Express Lanes WB</li> <li>31: SR-237 Express Lanes SB</li> <li>32: SR-237 Express Lanes NB</li> <li>33: I-680 Contra Costa Express Lanes SB</li> <li>34: I-680 Contra Costa Express Lanes NB</li></ul>{:/} | Integer |   |
-| *TOLLSEG* | Toll segments{::nomarkdown}<br /> <ul></ul> <li>For I-680 Sunol Express Lanes SB (TOLLBOOTH=25): <ul><li>1: Andrade Rd to Washington Blvd</li> <li>2: Washington Blvd to Mission Blvd</li> <li>3: Mission Blvd to SR 237</li></ul></li> <li>I-580 Express Lanes EB (TOLLBOOTH=28): <ul><li>1: Hacienda Dr to Airway Blvd</li> <li>2: Airway Blvd to Livermore Ave</li> <li>3: Livermore Ave to Vasco Rd</li> <li>4: Vasco Rd to Greenville Rd	</li></ul>  <li>I-580 Express Lanes WB (TOLLBOOTH=29): <ul><li>1: Greenville Rd to Springtown Blvd</li> <li>2: Springtown to Isabel Ave</li> <li>3: Isabel Ave to Fallon Rd</li> <li>4: Fallon Rd to Hacienda Dr	</li> <li>5: Hacienda Dr to San Ramon Rd</li></ul> <ul></ul> <li>SR-237 Express Lanes SB (TOLLBOOTH=31): <ul><li>1: Dixon Landing Rd to N First Ave (Westbound)</li></ul>  <ul></ul> <li>SR-237 Express Lanes NB (TOLLBOOTH=32): <ul><li>1: N First Ave to Dixon Landing Rd (Eastbound)</li></ul> <ul></ul> <li>I-680 Contra Costa Express Lanes SB (TOLLBOOTH=33): <ul><li>1: Rudgear to Crow Canyon (Crow Canyon SB pricing zone)</li> <li>2: Crow Canyon to Alcosta (Alcosta pricing zone)</li></ul>   <ul></ul> <li>I-680 Contra Costa Express Lanes NB (TOLLBOOTH=34): <ul><li>1: Alcosta to Crow Canyon (Crow Canyon NB pricing zone)</li> <li>2: Crow Canyon to Livorna (Livorna pricing zone)</li> {:/} | Integer |   |
-| *FT* | Facility type{::nomarkdown}<br /> <ul><li>0: Connector</li> <li>1: Freeway to Freeway</li> <li>2: Freeway</li> <li>3:  Expressway</li> <li>4: Collector</li> <li>5: Ramp</li> <li>6: Special Facility</li> <li>7: Major Arterial</li></ul>{:/} | Integer |   |
-| *FFS* | Free flow speed calculated from TomTom KPH | Integer |   |
-| *NUMLANES* | Model number of lanes | Integer |   |
-| *HIGHWAYT* | Highway type{::nomarkdown}<br /> <ul> <li>footway</li> <li>footway_unconstructed</li> <li>pedestrian</li> <li>steps</li> </ul>{:/} | String | Open Street Map |
-| *B_CLASS* | Bike Class{::nomarkdown}<br /> <ul><li>0 - Unclassified Street</li> <li>1 - Class I Trail</li> <li>2 - Class II Route</li> <li>3 - Class III Route</li></ul>{:/} | Integer | BikeMapper |
-| *REPRIORITIZE* | Priority{::nomarkdown}<br/> <ul><li>2 - Highly Desirable</li> <li>1 - Desirable</li> <li>0 - No Preference</li> <li>-1 - Undesirable</li> <li>-2 - Highly Undesirable</li></ul>{:/} | Integer | BikeMapper |
-| *GRADE_CAT* | Grade class{::nomarkdown}<br /> <ul><li>4 - 18% or High Grade</li> <li>3 - 10-18% Grade</li> <li>2 - 5-10% Grade</li> <li>1 - 0-5% Grade</li></ul>{:/} | Integer | BikeMapper |
-| *PED_FLAG* | Pedestrian access (Y=yes; blank=no) | String | BikeMapper |
-| *BIKEPEDOK* | Bridge that allows bike and peds (1=true, 0=false) | Integer | BikeMapper |
-| *PEMSID* | PEMS ID | Integer | PEMS |
-| *PEMSLANES* | PEMS number of lanes | Integer | PEMS |
-| *PEMSDIST* | Distance from link to PEMS station | Float | PEMS |
-| *TAP_DRIVE* | TAP link to parking lot (1=true) | Int | MTC |
+| *TOLLBOOTH* | Toll link.  See [TOLLBOOTH & TOLLSEG table below](#tollbooth--tollseg). Links with values [less than 11](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block) are _bridge tolls_; 11 or above are _value tolls_. | Integer |   |
+| *TOLLSEG* | See [TOLLBOOTH & TOLLSEG table below](#tollbooth--tollseg). | Integer |   |
+| *FT* | Facility type{::nomarkdown}<br /> <ul><li>1: Freeway</li> <li>2: Expressway</li> <li>3: Ramp</li> <li>4:  Divided Arterial</li> <li>5: Undivided Arterial</li> <li>6: Collector</li> <li>7: Local</li> <li>8: Connector (MAZ, TAZ, TAP)</li></ul>{:/} | Integer |   |
+| *LANES_[EA,AM,MD,PM,EV]* | Model number of lanes by time period | Integer |   |
+| *USECLASS_[EA,AM,MD,PM,EV]* | Link user class by time period{::nomarkdown}<br /> <ul><li>0 - NA; link open to everyone</li> <li>2 - HOV 2+</li> <li>3 - HOV 3+</li> <li>4 - No combination trucks</li></ul>{:/} | Integer |   |
+
+#### TOLLBOOTH & TOLLSEG
+
+| *TOLLBOOTH* | *TOLLSEG* | *Definition* | *Opening Year (or anticipated) for Toll Collection* | *Project Card* |
+|-------------|-----------|--------------|-----------------------------------------------------|----------|
+| 1 | | Benicia-Martinez Bridge | [1962](https://en.wikipedia.org/wiki/Benicia%E2%80%93Martinez_Bridge#Historical_toll_rates) | [`year_2015_hov_lane_benicia_bridge_toll_plaza.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_hov_lane_benicia_bridge_toll_plaza.yml) |
+| 2 | | Carquinez Bridge | [1958](https://en.wikipedia.org/wiki/Carquinez_Bridge#Historical_toll_rates) | [`year_2015_carquinez_bridge_toll_plaza.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_carquinez_bridge_toll_plaza.yml) |
+| 3 | | Richmond Bridge | [1956](https://en.wikipedia.org/wiki/Richmond%E2%80%93San_Rafael_Bridge#Historical_toll_rates) | [`year_2015_richmond_bridge_toll_plaza.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_richmond_bridge_toll_plaza.yml) |
+| 4 | | Golden Gate Bridge | [1937](https://en.wikipedia.org/wiki/Golden_Gate_Bridge#Tolls) | [`year_2015_golden_gate_bridge_toll_plaza.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_golden_gate_bridge_toll_plaza.yml) |
+| 5 | | San Francisco/Oakland Bay Bridge | [1936](https://en.wikipedia.org/wiki/San_Francisco%E2%80%93Oakland_Bay_Bridge#Financing_and_tolls) | [`year_2015_hov_lane_bay_bridge_toll_plaza_segment_02.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_hov_lane_bay_bridge_toll_plaza_segment_02.yml), [`year_2015_hov_lane_bay_bridge_toll_plaza_segment_03.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_hov_lane_bay_bridge_toll_plaza_segment_03.yml) |
+| 6 | | San Mateo Bridge | [1929](https://en.wikipedia.org/wiki/San_Mateo%E2%80%93Hayward_Bridge#Historical_toll_rates) | [`year_2015_san_mateo_bridge_toll_plaza.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_san_mateo_bridge_toll_plaza.yml) |
+| 7 | | Dumbarton Bridge | [1927](https://en.wikipedia.org/wiki/Dumbarton_Bridge_(California)#Historical_toll_rates) | [`year_2015_dumbarton_bridge_toll_plaza.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_dumbarton_bridge_toll_plaza.yml) |
+| 8 | | Antioch Bridge | [1989](https://en.wikipedia.org/wiki/Antioch_Bridge#Historical_toll_rates) | [`year_2015_antioch_bridge.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2015_antioch_bridge.yml) |
+| 25 | | [I-680 Sunol Express Lanes Phase 1](https://511.org/driving/express-lanes/i-680-sunol-express-lane) *Southbound* | | |
+| 25 | 1 | Andrade Rd to Washington Blvd | September 2010 | |
+| 25 | 2 | Washington Blvd to Mission Blvd | September 2010 | |
+| 25 | 3 | Mission Blvd to SR 237 | September 2010 | |
+| 28 | | [I-580 Express Lanes](https://www.alamedactc.org/programs-projects/expresslanesops/580expresslanes/) *Eastbound* | | |
+| 28 | 1 | Hacienda Dr to Airway Blvd | February 2016 | [`year_2016_managed_lane_i580e_segment_01_hacienda_drive_to_airway_blvd.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580e_segment_01_hacienda_drive_to_airway_blvd.yml), [`year_2016_managed_lane_i580e_segment_02_hacienda_drive_to_airway_blvd.yml`](year_2016_managed_lane_i580e_segment_02_hacienda_drive_to_airway_blvd.yml) |
+| 28 | 2 | Airway Blvd to Livermore Ave | February 2016 | [`year_2016_managed_lane_i580e_airway_blvd_to_livermore_ave.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580e_airway_blvd_to_livermore_ave.yml) |
+| 28 | 3 | Livermore Ave to Vasco Rd | February 2016 | [`year_2016_managed_lane_i580e_segment_01_livermore_ave_to_vasco_road.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580e_segment_01_livermore_ave_to_vasco_road.yml), [`year_2016_managed_lane_i580e_segment_02_livermore_ave_to_vasco_road.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580e_segment_02_livermore_ave_to_vasco_road.yml) |
+| 28 | 4 | Vasco Rd to Greenville Rd | February 2016 | [`year_2016_managed_lane_i580e_vasco_road_to_greenville_road.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580e_vasco_road_to_greenville_road.yml) |
+| 29 | | [I-580 Express Lanes](https://www.alamedactc.org/programs-projects/expresslanesops/580expresslanes/) *Westbound* | | |
+| 29 | 1 | Greenville Rd to Springtown Blvd | February 2016 | [`year_2016_managed_lane_i580w_greenville_road_to_springtown_blvd.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580w_greenville_road_to_springtown_blvd.yml) |
+| 29 | 2 | Springtown to Isabel Ave | February 2016 | [`year_2016_managed_lane_i580w_springtown_blvd_to_isabel_ave.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580w_springtown_blvd_to_isabel_ave.yml) |
+| 29 | 3 | Isabel Ave to Fallon Rd | February 2016 | [`year_2016_managed_lane_i580w_isabel_ave_to_fallon_road.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580w_isabel_ave_to_fallon_road.yml) |
+| 29 | 4 | Fallon Rd to Hacienda Dr | February 2016 | [`year_2016_managed_lane_i580w_fallon_road_to_hacienda_drive.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580w_fallon_road_to_hacienda_drive.yml) |
+| 29 | 5 | Hacienda Dr to San Ramon Rd | February 2016 | [`year_2016_managed_lane_i580w_hacienda_drive_to_san_ramon_road.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2016_managed_lane_i580w_hacienda_drive_to_san_ramon_road.yml) |
+| 31 | | [SR-237 Express Lanes Phase 1](https://511.org/driving/express-lanes/b-sr-237-express-lanes) *Southbound* | | |
+| 31 | 1 | Dixon Landing Rd to N First Ave (Westbound) | March 2012 | |
+| 32 | | [SR-237 Express Lanes Phase 1](https://511.org/driving/express-lanes/b-sr-237-express-lanes) *Northbound* | | |
+| 32 | 1 | N First Ave to Dixon Landing Rd (Eastbound) | March 2012 | |
+| 33 | | [I-680 Contra Costa Express Lanes](https://511.org/driving/express-lanes/i-680-contra-costa-express-lanes) *Southbound* | | |
+| 33 | 1 | Rudgear to Crow Canyon (Crow Canyon SB pricing zone) | October 2017 | [`year_2017_managed_lane_i680n_acosta_blvd_to_livorna_road.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2017_managed_lane_i680n_acosta_blvd_to_livorna_road.yml)|
+| 33 | 2 | Crow Canyon to Alcosta (Alcosta pricing zone) | October 2017 | |
+| 34 | | [I-680 Contra Costa Express Lanes](https://511.org/driving/express-lanes/i-680-contra-costa-express-lanes) *Northbound* | October 2017 | |
+| 34 | 1 | Alcosta to Crow Canyon (Crow Canyon NB pricing zone) | October 2017 | [`year_2017_managed_lane_i680s_benicia_bridge_to_acosta_blvd.yml`](https://github.com/BayAreaMetro/travel-model-two-networks/blob/develop/project_cards/year_2017_managed_lane_i680s_benicia_bridge_to_acosta_blvd.yml) |
+| 34 | 2 | Crow Canyon to Livorna (Livorna pricing zone) | October 2017 | |
 
 ## Transit Network
 
-The transit network is made up of three core components: transit lines, transit modes, and transit fares.  The transit lines were built from MTC’s regional transit database (or RTD).  The lines are coded with a mode (see below) and serve a series of stop nodes.  Transit fares are coded according to Cube's Public Transport program (see below).
+The transit network is made up of three core components: transit lines, transit modes, and transit fares.  The transit lines were built GTFS feeds from raound 2015.  The lines are coded with a mode (see below) and serve a series of stop nodes.  Transit fares are coded according to Cube's Public Transport program (see below).
 
 Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the [Level of Service Information](#level-of-service-information). 
 
-### Line Attributes
+### Link Attributes
 
-| *Field* | *Description* | *Data Type* |
-|---------|---------------|-------------|
-| *NAME* | RTD CPT_AGENCYID and SCH_ROUTEDESIGNATOR | String |
-| *USERA1* | Transit operator | String |
-| *USERA2* | Line haul mode, one of {::nomarkdown}<br/><ul><li>`Local bus`</li> <li>`Express bus`</li> <li>`Ferry service`</li> <li>`Light rail`</li> <li>`Heavy rail`</li> <li>`Commuter rail`</li></ul>{:/} | String |
-| *MODE* | Mode code | Integer |
-| *FARESYSTEM* | Faresystem code. Not necessary if *MODE* corresponds to *FARESYSTEM* in the factors file. | Integer |
-| *OPERATOR* | Operator code | Integer |
-| *ONEWAY* | set to TRUE since each route is coded by direction | Character |
-| *XYSPEED* | set to 15 by default (not used) | Integer |
-| *HEADWAY[1]* | early AM headway (3AM to 6AM) | Float |
-| *HEADWAY[2]* | AM peak headway (6AM to 10AM) | Float |
-| *HEADWAY[3]* | Midday headway (10AM to 3PM) | Float |
-| *HEADWAY[4]* | PM peak headway (3PM to 7PM) | Float |
-| *HEADWAY[5]* | Evening headway (7PM to 3AM) | Float |
-| *N* | List of stops served.  Lines are coded through stops, not TAPs (which are like transit TAZs).  A negative stop is not served. | List of Integers |
+|Field                |Description                                                                             |Data Type|
+|---------------------|----------------------------------------------------------------------------------------|---------|
+|trip_id              |unique identifier for each trip                                                         |Integer  |
+|is_stop_A            |if node A is a transit stop                                                             |boolean  |
+|access_A             |                                                                                        |         |
+|stop_sequence_A      |stop sequence of node A, if node A is a stop                                            |Integer  |
+|shape_pt_sequence_B  |sequence of node A in the route                                                         |Integer  |
+|shape_model_node_id_B|model_node_id of node B                                                                 |Integer  |
+|NAME                 |name of route with TOD                                                                  |string   |
+|agency_id            |transit agency id                                                                       |string   |
+|TM2_line_haul_name   |'Commuter rail', 'Express bus', 'Local bus', 'Light rail', 'Ferry service', 'Heavy rail'|string   |
+|TM2_mode             |see mode dictionary                                                                     |Integer  |
+|faresystem           |faresystem (1-50)                                                                       |Integer  |
+|tod                  |time of day (1, 2, 3, 4, 5)                                                             |Integer  |
+|HEADWAY              |transit service headway in minute                                                       |Integer  |
+|A                    |A of link                                                                               |Integer  |
+|B                    |B of link                                                                               |Integer  |
+|model_link_id        |model_link_id                                                                           |Integer  |
+|shstGeometryId       |the shstGeometryId of the link                                                          |Integer  |
+
 
 ### Transit Modes
 
 The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology. 
 
-| *Operator/Agency ID* | *Agency Name* | *Mode* | *Mode Group* | *Farezones* |
-|----------------------|---------------|--------|--------------|-------------|
-| 3D | TriDelta Transit | 44 | Local bus | |
-| AB | AirBART | 40 | Local bus | |
-| AC | AC Transit | 30 | Local bus | |
-| AD | AC Transbay | 84 | Express Bus | 1-5 |
-| AM | Amtrak Capitol Cor. & Reg. Svc | 131 | Commuter rail | 25-36 |
-| AO | Alameda/Oakland Ferry | 100 | Ferry service | 120-121, 123-124 |
-| AT | Angel Island - Tiburon Ferry | 103 | Ferry service | 130-132 |
-| AY | American Canyon Transit | 55 | Local bus | |
-| BA | BART | 120 | Heavy rail | 40-85 |
-| BG | Blue and Gold | 103 | Ferry service | 128-132 |
-| BT | Benicia Transit | 58 | Local bus | |
-| CC | The County Connection | 86 | Express Bus | |
-| CC | The County Connection | 42 | Local bus | |
-| CE | ACE | 133 | Commuter rail | 20-22 |
-| CT | Caltrain | 130 | Commuter rail | 105-110 |
-| DE | Dumbarton Express | 82 | Express Bus | 2, 4 |
-| EM | Emery Go-Round | 12 | Local bus | |
-| FS | Fairfield-Suisun Transit | 92 | Express Bus | 5, 150-152, 154 |
-| FS | Fairfield-Suisun Transit | 52 | Local bus | |
-| GF | [Golden Gate Ferry](http://goldengateferry.org/) | 101 | Ferry service | 115-117 |
-| GG | [Golden Gate Transit](http://goldengatetransit.org/) | 87 | Express Bus | 1, 5, 12-16, 201, 204 |
-| GG | [Golden Gate Transit](http://goldengatetransit.org/) | 70 | Local bus | 1, 5, 12-16, 201, 204 |
-| HB | Alameda Harbor Bay Ferry | 100 | Ferry service | 122-124 |
-| MA | [Marin Transit](https://marintransit.org/) | 71 | Local bus | |
-| MS | Stanford Marguerite Shuttle | 13 | Local bus | |
-| PE | Petaluma Transit | 68 | Local bus | |
-| RV | Rio Vista Delta Breeze | 52 | Local bus | 150, 170 |
-| SA | [Sonoma Marin Area Rail Transit (SMART)](https://sonomamarintrain.org/) | 134 | Commuter rail | 97-101 |
-| SC | Santa Clara VTA | 81 | Express Bus | |
-| SC | Santa Clara VTA | 28 | Local bus | |
-| SC | Santa Clara VTA | 111 | Light rail | |
-| SF | San Francisco MUNI | 21 | Local bus | |
-| SF | San Francisco MUNI | 110 | Light rail | |
-| SF | San Francisco MUNI | 20 | Local bus | |
-| SM | SamTrans | 80 | Express Bus | |
-| SM | SamTrans | 24 | Local bus | 1-3 |
-| SO | Sonoma County Transit | 63 | Local bus | 201-208 |
-| SR | Santa Rosa CityBus | 66 | Local bus | |
-| SV | St. Helena VINE | 60 | Local bus | |
-| UC | [Union City Transit](https://www.unioncity.org/170/Union-City-Transit) | 38 | Local bus | |
-| VB | [Vallejo Baylink Ferry](https://www.vallejobayferry.com/) | 93 | Express bus | |
-| VB | [Vallejo Baylink Ferry](https://www.vallejobayferry.com/) | 104 | Ferry service | 125-127 |
-| VC | Vacaville City Coach | 56 | Local bus | |
-| VN | [Napa VINE](http://www.ridethevine.com/vine) | 60 | Local bus | 5, 160-161 |
-| VT | Vallejo Transit | 91 | Express Bus | |
-| VT | Vallejo Transit | 49 | Local bus | |
-| WC | [WestCAT](https://www.westcat.org/) | 90 | Express Bus | |
-| WC | [WestCAT](https://www.westcat.org/) | 46 | Local bus | |
-| WH | [Livermore Amador Valley Transit Authority (LAVTA)](https://www.wheelsbus.com/) | 17 | Local bus | |
-| YV | Yountville Shuttle | 60 | Local bus | |
+|TM2_operator|agency_name|TM2_mode                                     |TM2_line_haul_name|faresystem   |
+|------------|-----------|---------------------------------------------|------------------|-------------|
+|30          |AC Transit |84                                           |Express bus       |9            |
+|30          |AC Transit |30                                           |Local bus         |9            |
+|30          |AC Transit |30                                           |Local bus         |11           |
+|5           |ACE Altamont Corridor Express|133                                          |Commuter rail     |1            |
+|26          |Bay Area Rapid Transit|120                                          |Heavy rail        |2            |
+|3           |Blue & Gold Fleet|103                                          |Ferry service     |13           |
+|3           |Blue & Gold Fleet|103                                          |Ferry service     |14           |
+|3           |Blue & Gold Fleet|103                                          |Ferry service     |12           |
+|17          |Caltrain   |130                                          |Commuter rail     |3            |
+|23          |Capitol Corridor|131                                          |Commuter rail     |4            |
+|19          |Cloverdale Transit|63                                           |Local bus         |7            |
+|17          |Commute.org Shuttle|14                                           |Local bus         |46           |
+|15          |County Connection|86                                           |Express bus       |16           |
+|15          |County Connection|42                                           |Local bus         |15           |
+|15          |County Connection|42                                           |Local bus         |17           |
+|10          |Emery Go-Round|12                                           |Local bus         |18           |
+|28          |Fairfield and Suisun Transit|92                                           |Express bus       |10           |
+|28          |Fairfield and Suisun Transit|52                                           |Local bus         |10           |
+|35          |Golden Gate Transit|87                                           |Express bus       |8            |
+|20          |Golden Gate Transit|101                                          |Ferry service     |19           |
+|20          |Golden Gate Transit|101                                          |Ferry service     |20           |
+|35          |Golden Gate Transit|70                                           |Local bus         |8            |
+|99          |MVgo Mountain View|16                                           |Local bus         |21           |
+|39          |Marin Transit|71                                           |Local bus         |23           |
+|39          |Marin Transit|71                                           |Local bus         |24           |
+|21          |Petaluma Transit|68                                           |Local bus         |47           |
+|13          |Rio Vista Delta Breeze|52                                           |Local bus         |5            |
+|6           |SamTrans   |80                                           |Express bus       |6            |
+|6           |SamTrans   |24                                           |Local bus         |6            |
+|25          |San Francisco Bay Ferry|101                                          |Ferry service     |28           |
+|25          |San Francisco Bay Ferry|101                                          |Ferry service     |30           |
+|25          |San Francisco Bay Ferry|101                                          |Ferry service     |31           |
+|25          |San Francisco Bay Ferry|101                                          |Ferry service     |32           |
+|25          |San Francisco Bay Ferry|101                                          |Ferry service     |29           |
+|22          |San Francisco Municipal Transportation Agency|110                                          |Light rail        |25           |
+|22          |San Francisco Municipal Transportation Agency|20                                           |Local bus         |25           |
+|22          |San Francisco Municipal Transportation Agency|21                                           |Local bus         |26           |
+|1           |Santa Rosa CityBus|66                                           |Local bus         |33           |
+|12          |SolTrans   |91                                           |Express bus       |35           |
+|12          |SolTrans   |49                                           |Local bus         |34           |
+|12          |SolTrans   |49                                           |Local bus         |35           |
+|19          |Sonoma County Transit|63                                           |Local bus         |7            |
+|7           |Stanford Marguerite Shuttle|13                                           |Local bus         |22           |
+|4           |Tri Delta Transit|95                                           |Express bus       |36           |
+|4           |Tri Delta Transit|44                                           |Local bus         |37           |
+|4           |Tri Delta Transit|44                                           |Local bus         |36           |
+|36          |Union City Transit|38                                           |Local bus         |38           |
+|31          |VTA        |81                                           |Express bus       |40           |
+|31          |VTA        |81                                           |Express bus       |41           |
+|31          |VTA        |111                                          |Light rail        |41           |
+|31          |VTA        |28                                           |Local bus         |41           |
+|31          |VTA        |28                                           |Local bus         |39           |
+|14          |Vacaville City Coach|56                                           |Local bus         |48           |
+|38          |Vine (Napa County)|94                                           |Express bus       |43           |
+|38          |Vine (Napa County)|60                                           |Local bus         |42           |
+|38          |Vine (Napa County)|60                                           |Local bus         |44           |
+|37          |WestCat (Western Contra Costa)|90                                           |Express bus       |49           |
+|37          |WestCat (Western Contra Costa)|90                                           |Express bus       |50           |
+|37          |WestCat (Western Contra Costa)|46                                           |Local bus         |49           |
+|24          |Wheels Bus |17                                           |Local bus         |45           |
+
 
 ### Transit Fares
 

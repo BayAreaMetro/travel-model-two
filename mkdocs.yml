@@ -17,6 +17,7 @@ nav:
 - Process: 'process.md'
 - Geographies: 'geographies.md'
 - Papers: 'papers.md'
+- Network QA: 'network_qa.md'
 
 plugins:
   - autorefs

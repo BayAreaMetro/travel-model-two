@@ -2,7 +2,7 @@
 
 *Work in Progress*
 
-*Model Version TM2.0 - Marin*
+*Model Version TM2.1 - transit-ccr*
 
 ## Computing Environment
 

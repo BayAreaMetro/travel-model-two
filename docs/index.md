@@ -16,8 +16,8 @@ Important travel behavior enhancements in Travel Model Two include:
 
 ## Versions
 
-* TM2.0: Initial TM2 with Cube, CTRAMP core, 3-zone system. In use by TAM (Marin) -- **these docs are for this version**
-* TM2.1: TM2 with transit CCR implemented in Emme (uses Cube and Emme), CTRAMP core. Anticipated release: Summer 2022. This work is being performed in the branch [transit-ccr](https://github.com/BayAreaMetro/travel-model-two/tree/transit-ccr)
+* TM2.0: Initial TM2 with Cube, CTRAMP core, 3-zone system. In use by TAM (Marin)
+* TM2.1: TM2 with transit CCR implemented in Emme (uses Cube and Emme), CTRAMP core. Anticipated release: Summer 2022. This work is being performed in the branch [transit-ccr](https://github.com/BayAreaMetro/travel-model-two/tree/transit-ccr) -- **these docs are for this version**
 * TM2.2: TM2.2: TM2 with Emme only (not Cube). CTRAMP core. This work is being performed in the [tm2py repository](https://github.com/BayAreaMetro/tm2py)
 * TM2.3: TM2 with Emme only and ActivitySim core.
 
