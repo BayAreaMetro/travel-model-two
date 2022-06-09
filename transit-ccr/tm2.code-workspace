@@ -2,9 +2,6 @@
 	"folders": [
 		{
 			"path": ".."
-		},
-		{
-			"path": "../../tm2-gh-pages"
 		}
 	],
 	"settings": {}
