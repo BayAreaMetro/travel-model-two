@@ -54,15 +54,29 @@ public class ParkingCapacityRestraintModel {
 	private ArrayList<Household> householdsToResimulate;
 	private float sampleRate;
 	private int seed;
-	private static float UNSPECIFIED_SPACES = 20;
-	private static int MINUTES_PER_SIMULATION_PERIOD = 15;
-	private static int MAX_ITERATIONS = 10;
+	private float unspecified_spaces = 20;
+	private int minutes_per_simulation_period = 15;
+	private int max_iterations = 10;
+	private float lumpiness_factor=2f; 
+	private float parkAndHideFactor=1.15f;
+	private float occupancyFactor = 1.05f;
+	
+	
+    private static final String PROPERTIES_SPACES_FOR_MISSING_TAPS = "ParkingCapacityRestraint.spacesForMissingLots";
+    private static final String PROPERTIES_MINUTES_PER_SIMULATION_PERIOD = "ParkingCapacityRestraint.minutesPerSimulationPeriod";
+    private static final String PROPERTIES_MAX_ITERATIONS = "ParkingCapacityRestraint.maxIterations";
+    private static final String PROPERTIES_LUMPINESS_FACTOR = "ParkingCapacityRestraint.lumpinessFactor";
+    private static final String PROPERTIES_PARK_AND_HIDE_FACTOR = "ParkingCapacityRestraint.parkAndHideFactor";
+    private static final String PROPERTIES_MAX_OCCUPANCY_FACTOR = "ParkingCapacityRestraint.occupancyFactor";
+    
+    
+
+	
 	
 	//this is the factor on 1/sample rate that is the maximum tolerance for convergence. For example, if the sample rate is 0.2
 	//then lumpiness (minimum number of vehicles) is 1/0.2 = 5. If the max tolerance is 2, the model would iterate until either
 	//max iterations is reached or when all lots have demand < (lot capacity + 5 * 2). Note this may need to be scaled as sample rate increases.
 	
-	private static float LUMPINESS_FACTOR=2f; 
 
     private static int              PACKET_SIZE                           = 0;
 
@@ -128,6 +142,12 @@ public class ParkingCapacityRestraintModel {
 	 */
 	public void initialize() {
 
+		unspecified_spaces = Float.parseFloat(propertyMap.get(PROPERTIES_SPACES_FOR_MISSING_TAPS));
+		minutes_per_simulation_period = Integer.parseInt(propertyMap.get(PROPERTIES_MINUTES_PER_SIMULATION_PERIOD));
+		max_iterations = Integer.parseInt(propertyMap.get(PROPERTIES_MAX_ITERATIONS));
+		lumpiness_factor = Float.parseFloat(propertyMap.get( PROPERTIES_LUMPINESS_FACTOR));
+	    parkAndHideFactor = Float.parseFloat(propertyMap.get(PROPERTIES_PARK_AND_HIDE_FACTOR));
+	    occupancyFactor = Float.parseFloat(propertyMap.get(PROPERTIES_MAX_OCCUPANCY_FACTOR));
 		
 		//initialize the end time in minutes (stored in double so no overlap between periods)
         endTimeMinutes = new double[40+1];
@@ -157,8 +177,8 @@ public class ParkingCapacityRestraintModel {
 		tazManager = TazDataManager.getInstance(propertyMap);
 		
 		//set the length of a simulation period
-		numberOfTimeBins = ((24*60)/MINUTES_PER_SIMULATION_PERIOD);
-		logger.info("Running "+numberOfTimeBins+" simulation periods using a period length of "+MINUTES_PER_SIMULATION_PERIOD+" minutes");
+		numberOfTimeBins = ((24*60)/minutes_per_simulation_period);
+		logger.info("Running "+numberOfTimeBins+" simulation periods using a period length of "+minutes_per_simulation_period+" minutes");
 
 
 	}
@@ -234,13 +254,14 @@ public class ParkingCapacityRestraintModel {
 		
 		logger.info("Checking for convergence");
 		
-		if(constraintIteration == (MAX_ITERATIONS-1)) {
+		if(constraintIteration == (max_iterations-1)) {
 			logger.info("Max iterations reached");
 			return true;
 		}
 		
 		//minimum tolerance is a function of sample rate
-		float buffer = 1.0f/sampleRate * LUMPINESS_FACTOR;
+		float buffer = 1.0f/sampleRate * lumpiness_factor;
+		
 		logger.info("Buffer for over-capacity calculation: "+buffer);
 		
 		
@@ -251,7 +272,7 @@ public class ParkingCapacityRestraintModel {
 			
 			float totalArrivals = constrainedArrivalsToTAP[tap];
 			
-			float capacity = tapManager.getTotalSpaces(tap);
+			float capacity = tapManager.getTotalSpaces(tap) * parkAndHideFactor * occupancyFactor;
 			
 			logger.info(tap+" "+capacity+" "+(capacity+buffer)+" "+totalArrivals+" "+(totalArrivals > (capacity + buffer)? "TRUE": "FALSE"));
 			
@@ -471,7 +492,7 @@ public class ParkingCapacityRestraintModel {
 	 */
 	public void calculateUnconstrainedArrivalsByPeriod() {
 		
-		logger.info("Calculated "+numberOfTimeBins+" simulation periods using a period length of "+MINUTES_PER_SIMULATION_PERIOD+" minutes");
+		logger.info("Calculated "+numberOfTimeBins+" simulation periods using a period length of "+minutes_per_simulation_period+" minutes");
 		
 		unconstrainedPNRArrivalsByPeriod=new float[numberOfTimeBins];
 		
@@ -490,16 +511,17 @@ public class ParkingCapacityRestraintModel {
 		for(Stop thisStop : unconstrainedPNRTrips) {
 			
 			float departTime = thisStop.getMinute();
-			int bin = (int) Math.floor(departTime/((float) MINUTES_PER_SIMULATION_PERIOD));
+			int bin = (int) Math.floor(departTime/((float) minutes_per_simulation_period));
 			
 			int tap = thisStop.getBoardTap();
 
 			//assume some small number of spaces if lot is not in station attribute file?
 			float totalSpaces = tapManager.getTotalSpaces(tap);
 			if(totalSpaces==0) {
-				totalSpaces=UNSPECIFIED_SPACES;
+				totalSpaces=unspecified_spaces;
 				tapManager.setTotalSpaces(tap, totalSpaces);
 			}
+			totalSpaces = totalSpaces  * parkAndHideFactor * occupancyFactor;
 			
 			unconstrainedPNRArrivalsByPeriod[bin] += (1.0/sampleRate);
 			
@@ -740,7 +762,7 @@ public class ParkingCapacityRestraintModel {
 				totalPNRArrivals += (1.0/sampleRate);
 				
 				float departTime = thisStop.getMinute();
-				int bin = (int) Math.floor(departTime/((float) MINUTES_PER_SIMULATION_PERIOD));
+				int bin = (int) Math.floor(departTime/((float) minutes_per_simulation_period));
 				
 				int tap = thisStop.getBoardTap();
 		
@@ -782,7 +804,7 @@ public class ParkingCapacityRestraintModel {
 
         String header = "TAP,CAPACITY,TOT_ARRIVALS";
         for(int i=0; i<numberOfTimeBins;++i) {
-        	String timeString = getTimeString(MINUTES_PER_SIMULATION_PERIOD+(i*MINUTES_PER_SIMULATION_PERIOD));
+        	String timeString = getTimeString(minutes_per_simulation_period+(i*minutes_per_simulation_period));
         	header += ","+timeString;
         }
         pnrWriter.println(header);
@@ -790,7 +812,8 @@ public class ParkingCapacityRestraintModel {
         
         Set<Integer> tapSet = PNRLotMap.keySet();
         for(Integer tap:tapSet) {
-        	float totalSpaces = tapManager.getTotalSpaces(tap);
+        	float totalSpaces = tapManager.getTotalSpaces(tap) * parkAndHideFactor * occupancyFactor;
+    		
             float[] arrivals = PNRLotMap.get(tap);
         	String printString = tap + "," + totalSpaces +","+arrivalsToTAP[tap];
         	for(int i=0;i<arrivals.length;++i) {
