@@ -299,6 +299,9 @@ class ApplyFares(object):
             # Get list of stop segments
             stop_segments = [seg for seg in line.segments(include_hidden=True)
                              if (seg.allow_alightings or seg.allow_boardings)]
+            # Get list of all segments
+            all_segments = [seg for seg in line.segments(include_hidden=True)]
+
             for i, seg in enumerate(stop_segments):
                 farezone = int(seg.i_node["@farezone"])
                 if farezone not in valid_farezones:
@@ -343,13 +346,22 @@ class ApplyFares(object):
                     if seg.link:
                         seg.link.board_cost = max(board_cost, seg.link.board_cost)
 
-
                 farezone = int(seg.i_node["@farezone"])
                 # Set the zone-to-zone fare increment from the previous stop
                 if prev_farezone != 0 and farezone != prev_farezone:
                     try:
                         invehicle_cost = fare_matrix[prev_farezone][farezone] - prev_seg.link.board_cost
-                        prev_seg.link.invehicle_cost =  max(invehicle_cost, prev_seg.link.invehicle_cost)
+                        fare_zone_data_is_complete = False
+                        # Find the boundary_segment between previous stop (prev_seg) and current stop (seg).
+                        # The boundary_segment is the segment for which fare zone of I node is different from fare zone of J node.
+                        for boundary_segment in all_segments[prev_seg.number:seg.number+1]:
+                            if boundary_segment.j_node and boundary_segment.i_node['@farezone'] != boundary_segment.j_node['@farezone']:
+                                boundary_segment.link.invehicle_cost = max(invehicle_cost, boundary_segment.link.invehicle_cost)
+                                fare_zone_data_is_complete = True
+                                break
+                        # If no boundary segment was found, the previous stop is assumed to be the boundary segment.
+                        if fare_zone_data_is_complete is False:
+                            prev_seg.link.invehicle_cost =  max(invehicle_cost, prev_seg.link.invehicle_cost)
                     except KeyError:
                         self._log.append({
                             "type": "text3", 
@@ -1009,3 +1021,4 @@ if __name__ == "__main__":
     apply_fares.fare_matrix_file = args.fare_matrix
 
     apply_fares.execute()
+
