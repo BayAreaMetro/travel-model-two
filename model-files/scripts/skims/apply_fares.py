@@ -1,19 +1,28 @@
-#///////////////////////////////////////////////////////////////////////////////
-#////                                                                        ///
-#//// Copyright INRO, 2020.                                                  ///
-#//// Rights to use and modify are granted to the                            ///
-#//// Metropolitan Transportation Commission (MTC)                           ///
-#//// and partner agencies.                                                  ///
-#//// This copyright notice must be preserved.                               ///
-#////                                                                        ///
-#//// apply_fares.py                                                         ///
-#////                                                                        ///
-#////     Usage:                                                             ///
-#////                                                                        ///
-#////                                                                        ///
-#////                                                                        ///
-#////                                                                        ///
-#///////////////////////////////////////////////////////////////////////////////
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# ////                                                                                                               ///
+# //// Copyright INRO, 2022                                                                                          ///
+# //// Rights to use and modify are granted to the Metropolitan Transportation Commission (MTC) and partner agencies.///
+# ////                                                                                                               ///                                                  
+# //// This copyright notice must be preserved.                                                                      ///
+# ////                                                                                                               ///
+# //// apply_fares.py                                                                                                ///
+# ////                                                                                                               ///
+# //// Run fare calculations for Emme scenario from specified fares.far and farematrix.txt                           /// 
+# ///  Used in create_emme_network.py.                                                                               ///
+# ////                                                                                                               ///
+# //// Usage: python apply_fares.py                                                                                  ///
+# ////     Note that the Emme python must be used to have access to the Emme API                                     ///
+# ////                                                                                                               ///
+# ////     [-e, --emmebank]: full path to Emme database (emmebank) file                                              ///
+# ////     [-s, --src_scenario]: Source Emme scenario ID.                                                            ///
+# ////     [-d, --dst_scenario]: Destination Emme scenario ID. Default is same as src_scenario.                      ///
+# ////     [-f, --dot_far]: The .far file describing the fare systems.                                               ///
+# ////     [-m, --fare_matrix]: The fare matrix file with the FROMTO fares.                                          ///
+# ////                                                                                                               ///
+# //// Date: June, 2022                                                                                              ///
+# //// Contacts: kevin@inrosoftware.com                                                                              ///
+# ////                                                                                                               ///
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 import inro.modeller as _m
 import inro.emme.database.emmebank as _eb
@@ -199,6 +208,7 @@ class ApplyFares(object):
             for segment in line.segments():
                 segment["@board_cost"] = board_fare
 
+    # Set @board_cost and @invehicle_cost to approximate the provided fare matrix
     def generate_fromto_approx(self, network, lines, fare_matrix, fs_data):
         network.create_attribute("LINK", "invehicle_cost")
         network.create_attribute("LINK", "board_cost")
@@ -277,6 +287,7 @@ class ApplyFares(object):
         network.delete_attribute("LINK", "invehicle_cost")
         network.delete_attribute("LINK", "board_cost")
 
+    # Set @board_cost and @invehicle_cost for segments in lines to match with fare matrix intra-zonal and boundary crossing costs
     def zone_boundary_crossing_approx(self, lines, valid_farezones, fare_matrix, fs_data):
         farezone_warning1 = "Warning: no value in fare matrix for @farezone ID %s "\
            "found on line %s at node %s (using @farezone from previous segment in itinerary)"
@@ -370,6 +381,7 @@ class ApplyFares(object):
                     prev_farezone = farezone
                 prev_seg = seg
 
+    # Set @board_cost and @invehicle_cost to match a non negative linear approximation of the station to station fare matrix
     def station_to_station_approx(self, lines, valid_farezones, fare_matrix, fs_data, zone_nodes, valid_links, network):
         network.create_attribute("LINK", "board_index", -1)
         network.create_attribute("LINK", "invehicle_index", -1)
@@ -498,6 +510,7 @@ class ApplyFares(object):
                 network.delete_attribute(domain, name)
             network.create_attribute(domain, name)
 
+    # Compute distances between faresystems and transfer costs
     def faresystem_distances(self, faresystems, network):
         self._log.append(
             {"type": "header", "content": "Faresystem distances"})
@@ -558,6 +571,7 @@ class ApplyFares(object):
             {"type": "text2", "content": "Table of distance between stops in faresystems (feet)"})
         self._log.append({"content": distance_table, "type": "table"})
 
+    # Group fare systems by mode patterns to reduce number of Journey levels
     def group_faresystems(self, faresystems, network):
         self._log.append(
             {"type": "header", "content": "Faresystem groups for ALL MODES"})
@@ -632,6 +646,7 @@ class ApplyFares(object):
 
         return faresystem_groups
 
+    # Generate modes as a meta representation of real world modes and return corresponding journey level structure and mode mapping
     def generate_transfer_fares(self, faresystems, faresystem_groups, network):
         self.create_attribute("MODE", "#orig_mode", self.scenario, network, "STRING")
         self.create_attribute("TRANSIT_LINE", "#src_mode", self.scenario, network, "STRING")
@@ -995,7 +1010,7 @@ def bounding_rect(shape):
 
 
 if __name__ == "__main__":
-    parser = _argparse.ArgumentParser(description="Run fare calculations for Emme scenariofrom secified fares.far and farematrix.txt")
+    parser = _argparse.ArgumentParser(description="Run fare calculations for Emme scenario from specified fares.far and farematrix.txt")
     parser.add_argument('-e', '--emmebank', help="Full path to Emme database (emmebank) file",
                         default=_os.path.abspath(_os.getcwd()))
     parser.add_argument('-s', '--src_scenario', help="Source Emme scenario ID")
@@ -1021,4 +1036,3 @@ if __name__ == "__main__":
     apply_fares.fare_matrix_file = args.fare_matrix
 
     apply_fares.execute()
-
