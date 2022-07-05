@@ -63,7 +63,7 @@
 ;        (21) Shared ride 2 value toll path, value toll (year 2000 cents), TOLLVTOLLS2;
 ;        (22) Shared ride 2 value toll path, free flow time (minutes), TOLLFFTS2;
 ;        (23) Shared ride 2 value toll path, distance on hov facilities (miles), TOLLHOVDISTS2;
-;        (24)  Drive alone value toll path, distance on toll facilities (miles), TOLLTOLLDISTS2;
+;        (24) Shared ride 2 value toll path, distance on toll facilities (miles), TOLLTOLLDISTS2;
 ;
 ;        (25) Shared ride 3+ no value toll path, time (minutes), TIMES3;
 ;        (26) Shared ride 3+ no value toll path, distance (miles), DISTS3;
@@ -352,9 +352,6 @@ loop period = 1, 5
 
             ; Group 11 defines the value toll links the non-value-toll-paying users are prohibited from using
             if (lw.tollclass >= firstValue && li.TOLL@token_period@_@token_class@ > 0) addtogroup = 11
-
-            ;Reliability (variance)
-            lw.RELBTY_VAR = li.RELBTY_SD ^ 2
 
          endphase
 

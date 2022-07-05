@@ -69,7 +69,7 @@ SET BASE_SCRIPTS=CTRAMP\scripts
 :: Add these variables to the PATH environment variable, moving the current path to the back of the list
 set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUBE_PATH%;%CUBE_DLL_PATH%;%PYTHON_PATH%;%PYTHON_PATH%\condabin;%PYTHON_PATH%\envs
 
-CALL conda activate mtc_py2
+CALL conda activate mtc
 
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
@@ -306,6 +306,8 @@ if ERRORLEVEL 2 goto done
 runtpp %BASE_SCRIPTS%\skims\HwySkims.job
 if ERRORLEVEL 2 goto done
 
+echo COMPLETED HIGHWAY SKIMS  %DATE% %TIME% >> logs\feedback.rpt
+
 :transitnet
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
@@ -316,17 +318,17 @@ if ERRORLEVEL 2 goto done
 
 :createemmenetwork
 :: changing to python 3 environment for emme
-CALL conda deactivate
-CALL conda activate mtc
+REM CALL conda deactivate
+REM CALL conda activate mtc
 
 :: Create emme project from scratch since it's the first iteration
 python %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
 
-%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "mtc_emme" --first_iteration "yes"
+%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network_py2.py -p "trn" --name "mtc_emme" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
 
-%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --iteration 1 --skip_import_demand
+%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network_py2.py -p "trn" -s "skims" --iteration 1 --skip_import_demand
 IF ERRORLEVEL 1 goto done
 
 copy skims\transit_skims_EA.omx skims\transit_skims_EA_%ITERATION%_%INNER_ITERATION%.omx
@@ -335,10 +337,12 @@ copy skims\transit_skims_MD.omx skims\transit_skims_MD_%ITERATION%_%INNER_ITERAT
 copy skims\transit_skims_PM.omx skims\transit_skims_PM_%ITERATION%_%INNER_ITERATION%.omx
 copy skims\transit_skims_EV.omx skims\transit_skims_EV_%ITERATION%_%INNER_ITERATION%.omx
 
-CALL conda deactivate
-CALL conda activate mtc_py2
+REM CALL conda deactivate
+REM CALL conda activate mtc_py2
 
 :afteremmeskims
+
+echo COMPLETED TRANSIT SKIMS  %DATE% %TIME% >> logs\feedback.rpt
 
 REM runtpp %BASE_SCRIPTS%\skims\TransitSkims.job
 REM if ERRORLEVEL 2 goto done
@@ -440,6 +444,7 @@ IF NOT %HH_SERVER%==localhost (
 ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.mat /NDL /NFL
 ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.omx /NDL /NFL
 
+echo FINISHED CTRAMP ITERATION %ITERATION%  %DATE% %TIME% >> logs\feedback.rpt
 
 :afterrobocopy
 runtpp CTRAMP\scripts\assign\merge_auto_matrices.s
@@ -482,6 +487,7 @@ if ERRORLEVEL 2 goto done
 runtpp CTRAMP\scripts\nonres\TruckTollChoice.job
 if ERRORLEVEL 2 goto done
 
+echo FINISHED NON-RES  %DATE% %TIME% >> logs\feedback.rpt
 :hwyasgn
 
 :: ------------------------------------------------------------------------------------------------------
@@ -513,6 +519,8 @@ IF %ITERATION% LSS %MAX_ITERATION% (
   if ERRORLEVEL 2 goto done
 )
 
+echo FINISHED HWY SKIMS %DATE% %TIME% >> logs\feedback.rpt
+
 runtpp %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
@@ -521,18 +529,18 @@ if ERRORLEVEL 2 goto done
 
 :emmeseconditeration
 :: changing to python 3 environment for emme
-CALL conda deactivate
-CALL conda activate mtc
+REM CALL conda deactivate
+REM CALL conda activate mtc
 :: Emme project already created, just updating congested link times
 python %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "no"
 IF ERRORLEVEL 1 goto done
 
 :emmeseconditerationnetwork
-%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --first_iteration "no"
+%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\create_emme_network_py2.py -p "trn" --first_iteration "no"
 IF ERRORLEVEL 1 goto done
 :: changing back to python 2 environment
-CALL conda deactivate
-CALL conda activate mtc_py2
+REM CALL conda deactivate
+REM CALL conda activate mtc_py2
 :afteremmeupdate
 
 :: Create the block file that controls whether the crowding functions are called during transit assignment.
@@ -545,21 +553,22 @@ SET /A INNER_ITERATION=0
 SET /A INNER_ITERATION+=1
 
 :innerskim
-  CALL conda deactivate
-  CALL conda activate mtc
+  REM CALL conda deactivate
+  REM CALL conda activate mtc
 
   IF %INNER_ITERATION% EQU 1 (
-     %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --iteration %INNER_ITERATION% --output_transit_boardings --time_periods "ALL"
+     %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network_py2.py -p "trn" -s "skims" --iteration %INNER_ITERATION% --output_transit_boardings --time_periods "ALL"
      IF ERRORLEVEL 1 goto done
   ) ELSE (
     :: Only need to run congested periods when resimulating transit
-     %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --iteration %INNER_ITERATION% --output_transit_boardings --time_periods "AM,PM"
+     %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network_py2.py -p "trn" -s "skims" --iteration %INNER_ITERATION% --output_transit_boardings --time_periods "AM,PM"
      IF ERRORLEVEL 1 goto done
   )
+  echo FINISHED TRANSIT SKIMS %DATE% %TIME% >> logs\feedback.rpt
 
   :: changing back to python 2 environment
-  CALL conda deactivate
-  CALL conda activate mtc_py2
+  REM CALL conda deactivate
+  REM CALL conda activate mtc_py2
 
   ::Do not perform inner loop for first model iteration
   if %ITERATION% LEQ 1 GOTO iteration_start
@@ -611,6 +620,8 @@ SET /A INNER_ITERATION+=1
   copy skims\transit_skims_PM.omx skims\transit_skims_PM_%ITERATION%_%INNER_ITERATION%.omx
   copy skims\transit_skims_EV.omx skims\transit_skims_EV_%ITERATION%_%INNER_ITERATION%.omx
 
+  echo FINISHED INNER ITERATION %INNER_ITERATION% %DATE% %TIME% >> logs\feedback.rpt
+
 	IF %INNER_ITERATION% LSS %MAX_INNER_ITERATION% GOTO inner_iteration_start
 
 IF %ITERATION% LSS %MAX_ITERATION% GOTO iteration_start
@@ -648,5 +659,5 @@ ECHO FINISHED SUCCESSFULLY!
 
 :: Complete target and message
 :done
-
+echo FINISHED %DATE% %TIME% >> logs\feedback.rpt
 ECHO FINISHED.
