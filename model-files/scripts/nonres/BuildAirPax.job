@@ -92,7 +92,7 @@ loop year = 1,2
         ; do each as a separate process
         DistributeMultistep processid = 'MTC_AIRPAX', processNum = @processIdx@
              
-             *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\assign\taz_matrix_transfer.py . nonres\@token_year@_@token_toFrom@@token_airport@.csv nonres\@token_year@_@token_toFrom@@token_airport@_seq.csv
+             *"python" %BASE_SCRIPTS%\assign\taz_matrix_transfer.py . nonres\@token_year@_@token_toFrom@@token_airport@.csv nonres\@token_year@_@token_toFrom@@token_airport@_seq.csv
              IF (RETURNCODE > 0) abort
 
              run pgm = matrix

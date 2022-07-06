@@ -8,7 +8,7 @@
 ; -----------------------------------
 
 ; convert nodes CSV to DBF
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\interchange_nodes.csv hwy\interchange_nodes.dbf
+*"python" %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\interchange_nodes.csv hwy\interchange_nodes.dbf
 
 RUN PGM=NETWORK
     NETI[1] = "hwy\complete_network.net"

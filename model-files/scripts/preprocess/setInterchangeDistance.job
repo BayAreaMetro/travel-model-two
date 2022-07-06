@@ -46,10 +46,10 @@ ENDRUN
 
 
 ; run python script to calculate distances
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\interchangeDistance.py hwy\fwy_links.csv hwy\fwy_interchange_dist.csv
+*"python" %BASE_SCRIPTS%\preprocess\interchangeDistance.py hwy\fwy_links.csv hwy\fwy_interchange_dist.csv
 
 ; convert output CSV to DBF
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\fwy_interchange_dist.csv hwy\fwy_interchange_dist.dbf
+*"python" %BASE_SCRIPTS%\preprocess\csvToDbf.py hwy\fwy_interchange_dist.csv hwy\fwy_interchange_dist.dbf
 
 ; merge output back into network
 RUN PGM=NETWORK

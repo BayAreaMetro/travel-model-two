@@ -48,7 +48,7 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;build truck taz data
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\nonres\truck_taz_data.py
+*"python" %BASE_SCRIPTS%\nonres\truck_taz_data.py
 IF (ReturnCode != 0) ABORT
 
 ; apply the generation models
