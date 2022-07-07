@@ -26,7 +26,7 @@ RUN PGM=NETWORK
 ENDRUN
 
 ;run script to add area type to network links
-;*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\preprocess\codeLinkAreaType.py .
+;*"python" %BASE_SCRIPTS%\preprocess\codeLinkAreaType.py .
 ;call python from active anaconda environment
 *python %BASE_SCRIPTS%\preprocess\codeLinkAreaType.py .
 IF (RETURNCODE > 0) abort

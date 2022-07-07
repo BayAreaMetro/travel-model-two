@@ -151,16 +151,16 @@ RUN PGM=NETWORK
 ENDRUN
 
 ; build transit drive access skims
-*"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
+*"python" %BASE_SCRIPTS%\skims\build_drive_access_skims.py . %BASE_SCRIPTS%\block
 IF (RETURNCODE > 0) abort
 ;*del skims\DA_*_taz_time.csv
 
 ; run script used to help consolidate taps
-*"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\tap_lines.py
+*"python" %BASE_SCRIPTS%\skims\tap_lines.py
 IF (RETURNCODE > 0) abort
 
 ;rebuild transit line file with new numbers
-*"%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\build_new_transit_line.py "trn\transitLines.lin" "trn\transitLines_new_nodes.lin" "hwy\mtc_transit_network_tap_to_node.txt"
+*"python" %BASE_SCRIPTS%\skims\build_new_transit_line.py "trn\transitLines.lin" "trn\transitLines_new_nodes.lin" "hwy\mtc_transit_network_tap_to_node.txt"
 IF (RETURNCODE > 0) abort
 
 ;now build transit times based on congested times from loaded network
@@ -202,14 +202,14 @@ LOOP PERIOD = 1,5
     ;convert loaded auto network node numbers to originals
     RUN PGM=NETWORK
       NETI = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ.net
-      LINKO = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ_ORIGNODE.CSV, FORMAT=SDF DELIMITER=',' INCLUDE=OLD_A,OLD_B,CTIM
+      LINKO = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ_ORIGNODE.CSV, FORMAT=SDF DELIMITER=',' INCLUDE=OLD_A,OLD_B,CTIM,RELBTY_SD
 
      ENDRUN
 
     ; merge congested times and calculate transit time
     RUN PGM=NETWORK
       NETI = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE.net
-      LINKI[2] = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ_ORIGNODE.CSV,VAR=A,B,CTIM
+      LINKI[2] = hwy\AVGLOAD@TOKEN_PERIOD@_TAZ_ORIGNODE.CSV,VAR=A,B,CTIM,RELBTY_SD
       NETO = hwy\mtc_transit_network_@TOKEN_PERIOD@_ORIGNODE_CONG.net
 
       MERGE RECORD = FALSE ; only keep transit network links
@@ -217,6 +217,7 @@ LOOP PERIOD = 1,5
       PHASE = LINKMERGE
 
           CTIM = li.2.CTIM
+          RELBTY_SD = li.2.RELBTY_SD
           IF (CTIM>0 & li.1.FT=1)
             TRANTIME = CTIM    ; same as auto time for freeways
           ELSEIF (CTIM>0)
