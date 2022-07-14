@@ -326,7 +326,7 @@ for period in periods:
     tod_mode_tapn_costs = tod_mode_tapn_costs[~tod_mode_tapn_costs['TTAP'].isna()]
 
     # select the nearest N TAPS by mode within the maximum set drive distance
-    all_tod_available_taps = []
+    all_tod_available_taps = None
     for mode in mode_settings_dict.keys():
 #         print(mode)
         max_dist = mode_settings_dict[mode]['MAX_DIST']

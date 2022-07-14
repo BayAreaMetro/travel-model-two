@@ -664,8 +664,11 @@ public class TripModeChoiceDMU
 	}
 	
 	public float getFareSubsidy() {
-		return person.getTransitSubsidyPercent();
-	}
+        return ((tour.getTourPrimaryPurposeIndex() == ModelStructure.WORK_PRIMARY_PURPOSE_INDEX)||
+        		(tour.getTourPrimaryPurposeIndex() == ModelStructure.SCHOOL_PRIMARY_PURPOSE_INDEX)||
+        		(tour.getTourPrimaryPurposeIndex() == ModelStructure.UNIVERSITY_PRIMARY_PURPOSE_INDEX))
+        		? person.getTransitSubsidyPercent() : 0f;	
+    }
 
 	public int outboundPNRTripOnTour() {
 		

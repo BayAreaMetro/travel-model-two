@@ -11,7 +11,11 @@ IF ENVTYPE==RSG (
 set TPP_PATH=C:\Program Files\Citilabs\CubeVoyager
 
 :: The location of the Cube executable from Citilabs (what is this used for?)
-set CUBE_PATH=C:\Program Files\Citilabs\Cube
+IF ENVTYPE==RSG (
+  set CUBE_PATH=C:\Program Files (x86)\Citilabs\Cube
+) ELSE (
+  set CUBE_PATH=C:\Program Files\Citilabs\Cube
+)
 
 :: The name of the conda python environment to use
 :: Should have Emme packages installed, plus...
@@ -20,6 +24,10 @@ set TM2_PYTHON_CONDA_ENV=tm2_transit_ccr
 :: Location of Emme installation
 IF ENVTYPE==RSG (
   SET EMME_PATH=C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.5.1
+  SET EMMEPATH=C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.5.1
+  SET EMME_PYTHON_PATH="C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.5.1\Python27"
+  :: BEWARE path issues with other python installs
+  path=%EMMEPATH%\programs;%EMMEPATH%\Python27;%EMMEPATH%\Python27\Scripts\;%PATH%
 ) ELSE (
   SET EMME_PATH=C:\Program Files\INRO\Emme\Emme 4\Emme-4.6.0
 )
