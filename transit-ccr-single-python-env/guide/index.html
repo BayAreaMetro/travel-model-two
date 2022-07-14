@@ -1,0 +1,1646 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="http://bayareametro.github.io/travel-model-two/transit-ccr-single-python-env/guide/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>Guide - Travel Model Two</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#user-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Travel Model Two" class="md-header__button md-logo" aria-label="Travel Model Two" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Travel Model Two
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/BayAreaMetro/travel-model-two" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Travel Model Two
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  <li class="md-tabs__item">
+    <a href="./" class="md-tabs__link md-tabs__link--active">
+      Guide
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../input/" class="md-tabs__link">
+      Input
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../process/" class="md-tabs__link">
+      Process
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../geographies/" class="md-tabs__link">
+      Geographies
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../papers/" class="md-tabs__link">
+      Papers
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../network_qa/" class="md-tabs__link">
+      Network QA
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Travel Model Two" class="md-nav__button md-logo" aria-label="Travel Model Two" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Travel Model Two
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/BayAreaMetro/travel-model-two" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Travel Model Two
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Guide
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#computing-environment" class="md-nav__link">
+    Computing Environment
+  </a>
+  
+    <nav class="md-nav" aria-label="Computing Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hardware" class="md-nav__link">
+    Hardware
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#software" class="md-nav__link">
+    Software
+  </a>
+  
+    <nav class="md-nav" aria-label="Software">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-voyager" class="md-nav__link">
+    Citilabs Cube Voyager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-voyager-64bit-matrix-io-dll" class="md-nav__link">
+    Citilabs Cube Voyager 64bit Matrix I/O DLL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-cluster" class="md-nav__link">
+    Citilabs Cube Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#java-and-ct-ramp" class="md-nav__link">
+    Java and CT-RAMP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python" class="md-nav__link">
+    Python
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-rtree-library" class="md-nav__link">
+    Python Rtree library
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#microsoft-excel" class="md-nav__link">
+    Microsoft Excel
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remote-execution-and-stop-utilities" class="md-nav__link">
+    Remote Execution and Stop Utilities
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-design" class="md-nav__link">
+    System Design
+  </a>
+  
+    <nav class="md-nav" aria-label="System Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#distributed-computing" class="md-nav__link">
+    Distributed Computing
+  </a>
+  
+    <nav class="md-nav" aria-label="Distributed Computing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cube-cluster" class="md-nav__link">
+    Cube Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ct-ramp" class="md-nav__link">
+    CT-RAMP
+  </a>
+  
+    <nav class="md-nav" aria-label="CT-RAMP">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#household-manager-and-matrix-manager" class="md-nav__link">
+    Household Manager and Matrix Manager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#taz-maz-and-tap-data-manager" class="md-nav__link">
+    TAZ, MAZ, and TAP Data Manager
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-and-configuration" class="md-nav__link">
+    Setup and Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup and Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-create-the-required-folder-structure" class="md-nav__link">
+    Step 1: Create the required folder structure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-map-a-network-drive-to-share-across-computers" class="md-nav__link">
+    Step 2: Map a network drive to share across computers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-configure-the-ct-ramp-and-jppf-services" class="md-nav__link">
+    Step 3: Configure the CT-RAMP and JPPF Services
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-configure-runmodelbat-and-ctrampenvbat" class="md-nav__link">
+    Step 4: Configure RunModel.bat and CTRampEnv.bat
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-execution" class="md-nav__link">
+    Model Execution
+  </a>
+  
+    <nav class="md-nav" aria-label="Model Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-set-globally-available-environmental-variables" class="md-nav__link">
+    Step 1: Set globally-available environmental variables
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-set-relevant-paths-to-access-software" class="md-nav__link">
+    Step 2: Set relevant paths to access software
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-create-and-populate-a-working-directory-of-input-files" class="md-nav__link">
+    Step 3: Create and populate a working directory of input files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-pre-process-steps" class="md-nav__link">
+    Step 4: Pre-process steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-build-walk-bicycle-and-nearby-automobile-level-of-service-matrices" class="md-nav__link">
+    Step 5:  Build walk, bicycle, and nearby automobile level-of-service matrices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-build-air-passenger-demand-matrices" class="md-nav__link">
+    Step 6: Build air passenger demand matrices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-build-highway-and-transit-skims" class="md-nav__link">
+    Step 7: Build highway and transit skims
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-execute-the-ct-ramp-models" class="md-nav__link">
+    Step 8:  Execute the CT-RAMP models
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-9-execute-the-internalexternal-and-commercial-vehicle-models" class="md-nav__link">
+    Step 9:  Execute the internal/external and commercial vehicle models
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-10-network-assignment" class="md-nav__link">
+    Step 10: Network Assignment
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-11-clean-up" class="md-nav__link">
+    Step 11: Clean up
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ct-ramp-properties-file" class="md-nav__link">
+    CT-RAMP Properties File
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-schematic" class="md-nav__link">
+    Model Schematic
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#level-of-service-information" class="md-nav__link">
+    Level of Service Information
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../input/" class="md-nav__link">
+        Input
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../process/" class="md-nav__link">
+        Process
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../geographies/" class="md-nav__link">
+        Geographies
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../papers/" class="md-nav__link">
+        Papers
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_qa/" class="md-nav__link">
+        Network QA
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#computing-environment" class="md-nav__link">
+    Computing Environment
+  </a>
+  
+    <nav class="md-nav" aria-label="Computing Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hardware" class="md-nav__link">
+    Hardware
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#software" class="md-nav__link">
+    Software
+  </a>
+  
+    <nav class="md-nav" aria-label="Software">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-voyager" class="md-nav__link">
+    Citilabs Cube Voyager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-voyager-64bit-matrix-io-dll" class="md-nav__link">
+    Citilabs Cube Voyager 64bit Matrix I/O DLL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-cluster" class="md-nav__link">
+    Citilabs Cube Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#java-and-ct-ramp" class="md-nav__link">
+    Java and CT-RAMP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python" class="md-nav__link">
+    Python
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-rtree-library" class="md-nav__link">
+    Python Rtree library
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#microsoft-excel" class="md-nav__link">
+    Microsoft Excel
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remote-execution-and-stop-utilities" class="md-nav__link">
+    Remote Execution and Stop Utilities
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-design" class="md-nav__link">
+    System Design
+  </a>
+  
+    <nav class="md-nav" aria-label="System Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#distributed-computing" class="md-nav__link">
+    Distributed Computing
+  </a>
+  
+    <nav class="md-nav" aria-label="Distributed Computing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cube-cluster" class="md-nav__link">
+    Cube Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ct-ramp" class="md-nav__link">
+    CT-RAMP
+  </a>
+  
+    <nav class="md-nav" aria-label="CT-RAMP">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#household-manager-and-matrix-manager" class="md-nav__link">
+    Household Manager and Matrix Manager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#taz-maz-and-tap-data-manager" class="md-nav__link">
+    TAZ, MAZ, and TAP Data Manager
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-and-configuration" class="md-nav__link">
+    Setup and Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup and Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-create-the-required-folder-structure" class="md-nav__link">
+    Step 1: Create the required folder structure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-map-a-network-drive-to-share-across-computers" class="md-nav__link">
+    Step 2: Map a network drive to share across computers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-configure-the-ct-ramp-and-jppf-services" class="md-nav__link">
+    Step 3: Configure the CT-RAMP and JPPF Services
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-configure-runmodelbat-and-ctrampenvbat" class="md-nav__link">
+    Step 4: Configure RunModel.bat and CTRampEnv.bat
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-execution" class="md-nav__link">
+    Model Execution
+  </a>
+  
+    <nav class="md-nav" aria-label="Model Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-set-globally-available-environmental-variables" class="md-nav__link">
+    Step 1: Set globally-available environmental variables
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-set-relevant-paths-to-access-software" class="md-nav__link">
+    Step 2: Set relevant paths to access software
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-create-and-populate-a-working-directory-of-input-files" class="md-nav__link">
+    Step 3: Create and populate a working directory of input files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-pre-process-steps" class="md-nav__link">
+    Step 4: Pre-process steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-build-walk-bicycle-and-nearby-automobile-level-of-service-matrices" class="md-nav__link">
+    Step 5:  Build walk, bicycle, and nearby automobile level-of-service matrices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-build-air-passenger-demand-matrices" class="md-nav__link">
+    Step 6: Build air passenger demand matrices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-build-highway-and-transit-skims" class="md-nav__link">
+    Step 7: Build highway and transit skims
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-execute-the-ct-ramp-models" class="md-nav__link">
+    Step 8:  Execute the CT-RAMP models
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-9-execute-the-internalexternal-and-commercial-vehicle-models" class="md-nav__link">
+    Step 9:  Execute the internal/external and commercial vehicle models
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-10-network-assignment" class="md-nav__link">
+    Step 10: Network Assignment
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-11-clean-up" class="md-nav__link">
+    Step 11: Clean up
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ct-ramp-properties-file" class="md-nav__link">
+    CT-RAMP Properties File
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-schematic" class="md-nav__link">
+    Model Schematic
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#level-of-service-information" class="md-nav__link">
+    Level of Service Information
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/BayAreaMetro/travel-model-two/edit/master/docs/guide.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="user-guide">User Guide</h1>
+<p><em>Work in Progress</em></p>
+<p><em>Model Version TM2.1 - transit-ccr</em></p>
+<h2 id="computing-environment">Computing Environment</h2>
+<p>The hardware and software MTC uses to execute Travel Model Two are described on this page. To date, MTC has not experimented enough with the model to define the minimum or ideal hardware configuration. As such, the description here is for a hardware set up that is sufficient -- not optimal. It is important to note that both the software and model structure are highly configurable and flexible; depending on the analysis needs, the required computing power could vary dramatically.</p>
+<h3 id="hardware">Hardware</h3>
+<p>MTC uses four identical servers with the following characteristics:</p>
+<ul>
+<li>Operating system: Microsoft Windows Server 2007 with Service Pack 2, 64-bit edition;</li>
+<li>Processors: Two Intel Xeon X5570 @ 2.93 GHz (i.e., two quad-core processors with hyper-threading capability);</li>
+<li>Memory (RAM): 96.0 GB</li>
+</ul>
+<p>As discussed in the <a href="#system-design">System Design</a> section, these four computers can act in different roles, each requiring different amounts of memory and computing power. The four computers are named as follows: <code>mainmodel</code>, <code>satmodel</code> (for satellite), <code>satmodel2</code>, and <code>satmodel3</code>. As discussed in the <a href="#system-design">System Design</a> section, the <code>mainmodel</code> computer plays a specialized role in the system design; the satellite machines each play identical and completely interchangeable roles.</p>
+<h3 id="software">Software</h3>
+<p>The following software are required to execute the MTC travel model.</p>
+<h4 id="citilabs-cube-voyager">Citilabs Cube Voyager</h4>
+<p>The travel model currently uses version 6.4.2 of <a href="http://www.citilabs.com/">Citilabs Cube</a> software. The Cube software is used to build skims, manipulate networks, manipulate matrices, and perform assignments. </p>
+<h4 id="citilabs-cube-voyager-64bit-matrix-io-dll">Citilabs Cube Voyager 64bit Matrix I/O DLL</h4>
+<p>The CT-RAMP software, as discussed below, needs to access data stored in a format dictated by Cube. This is accomplished through a 64-bit DLL library specifically for matrix I/O,which must be accessible through the <code>PATH</code> environment variable.  To install the DLL:</p>
+<ul>
+<li>Run <code>VoyagerFileAPIInstaller.msi</code>, which is included in the <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/runtime"><code>CTRAMP\runtime</code></a> folder</li>
+<li>Ensure <code>VoyagerFileAccess.dll</code> is in the <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/runtime"><code>CTRAMP\runtime</code></a> folder</li>
+<li>Ensure the Microsoft Visual C++ 2012 redistributable is installed on the matrix server machine.  Make sure to get version “110” DLLs (<code>MSVCR110.dll</code> and <code>MSVCP110.dll</code>).  These files can be obtained from the <a href="http://www.microsoft.com/en-us/default.aspx">Microsoft</a>. Download and install <code>vcredist_x64.exe</code>.</li>
+</ul>
+<h4 id="citilabs-cube-cluster">Citilabs Cube Cluster</h4>
+<p>The <a href="http://citilabs.com/software/products/cube/cube-cluster">Cube Cluster software</a> allows Cube scripts to be multi-threaded. In the current approach, the travel model uses 64 computing nodes across four machines. The Cube scripts can be manipulated to use any number of computing nodes across any number of machines, provided each machine has, at a minimum, a Cube Voyager node license (for the time being, MTC has found 64 nodes on a single machine to be the most effective approach -- in terms of reliability and run time). Cube Cluster is not strictly necessary, as the Cube scripts can be modified to use only a single computing node. Such an approach would dramatically increase run times.</p>
+<h4 id="java-and-ct-ramp">Java and CT-RAMP</h4>
+<p>MTC's travel model operates on the open-source Coordinated Travel - Regional Activity-based Modeling Platform (or CT-RAMP) developed by <a href="pbworld.com">Parsons Brinckerhoff</a>. The software is written in the <a href="http://java.com/en">Java</a> programming language.  CT-RAMP requires the 64-bit Java Development Kit version 1.8 or later to be installed on each computer running the CT-RAMP software. The Java Development Kit includes the Java Runtime Environment. The 64-bit version of the software allows CT-RAMP to take advantage of larger memory addresses. The details of setting up and configuring the software are presented in the <a href="#setup-and-configuration">Setup and Configuration section</a> of this guide.</p>
+<h4 id="python">Python</h4>
+<p>Certain network processing programs are written in <a href="https://www.python.org/">Python</a>. Python must be installed on the computer executing the Cube scripts -- <code>mainmodel</code> in MTC's configuration.</p>
+<h4 id="python-rtree-library">Python Rtree library</h4>
+<p>The open source <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#rtree">Python <code>rtree</code> library</a> is required for a script that dynamically codes link area type based on land use data.  The <code>rtree</code> library provides an efficient spatial index for looking up all spatial units within a buffered distance from each spatial unit. To install, open a dos prompt, navigate to the directory and type: pip install Rtree-0.8.2-cp27-cp27m-win_amd64.whl</p>
+<h4 id="microsoft-excel">Microsoft Excel</h4>
+<p>The CT-RAMP software allows discrete choice models to be specified via so-called <a href="http://analytics.mtc.ca.gov/foswiki/Main/UtilityExpressionCalculator">Utility Expression Calculators</a>. These files are Excel-based.</p>
+<h4 id="remote-execution-and-stop-utilities">Remote Execution and Stop Utilities</h4>
+<p>The Microsoft <a href="http://technet.microsoft.com/en-us/sysinternals/bb896683.aspx"><code>PsKill</code></a> and <a href="http://technet.microsoft.com/en-us/sysinternals/bb897553.aspx"><code>PsExec</code></a> programs are used to remotely kill programs and execute programs.</p>
+<h2 id="system-design">System Design</h2>
+<p>Here, we describe the manner in which the software is configured to take advantage of the available hardware (see the <a href="#computing-environment">Computing Environment</a> section for details on the hardware and software used in the travel model; see the <a href="#setup-and-configuration">Setup and Configuration</a> section for details on setting up and configuring the MTC to run on a given set of hardware).</p>
+<h3 id="distributed-computing">Distributed Computing</h3>
+<p>The MTC travel model uses two types of distributed applications. The first is facilitated by the Cube Cluster software and allows the skim building and assignment steps to utilize multiple threads. The second is faciltated by the CT-RAMP software, which allows the choice models to be distributed across multiple threads and multiple computers. A brief overview of both of these applications is provided below.</p>
+<h4 id="cube-cluster">Cube Cluster</h4>
+<p>Citilabs Cube scripts facilitate two types of distribution, both of which are highly configurable through the Cube scripting language and the Cube Cluster thread management system; the two distinct types of multi-threading are as follows:</p>
+<ul>
+<li>Intra-step threading: The <code>DistributeINTRAStep</code> keyword keyword allows calculations that are performed across a matrix of data to be performed in blocks -- specifically rows of data -- across multiple threads. MTC uses intra-step threading in highway assignment, allowing shortest paths to be constructed for more than one origin at a time. Complex matrix calculations can also benefit from intra-step threading.</li>
+<li>Multi-step threading: The <code>DistributeMULTIStep</code> keyword allows blocks of code to be distributed across multiple threads. For example, if the same calculations are being performed for five different time periods, the same block of code (with variables) can be distributed across computers for parallel processing. This type of Cube multi-threading is a bit less flexible than the intra-step threading as it requires threads to be identified <em>a priori</em> (e.g., thread one will do the calculations for time period A), where the intra-step threading can be given a list of available processes and use what is available. MTC uses multi-step threading for highwway skimming, transit skimming, highway assignment, the conversion of trip lists to trip matrices, highway assignment, and transit assignment.</li>
+</ul>
+<p>As noted in the <a href="#computing-environment">Computing Environment</a> section, the MTC travel model specifies the Cube scripts to take advantage of 64 threads. A knowledgeable user can easily adjust the necessary scripts to take advantage of more or fewer processors.</p>
+<h4 id="ct-ramp">CT-RAMP</h4>
+<p>The CT-RAMP software allows for the choice models to be distributed across threads and machines. The MTC application currently uses four machines, but the CT-RAMP software can be configured fairly easy to utilize fewer or more machines. CT-RAMP uses the <a href="http://www.jppf.org/">Java Parallel Processing Framework</a>, or JPPF, to manage the distribution of tasks. JPPF is an open-source Java package. The JPPF framework consists of three main parts as follows: </p>
+<ol>
+<li>a driver, also referred to as the JPPF server; </li>
+<li>one or more nodes, typically one node is established on each machine; and,</li>
+<li>a client, the CT-RAMP software in this case.</li>
+</ol>
+<p>As noted on the <a href="#computing-environment">Computing Environment</a> section, MTC uses four computers with the names <code>mainmodel</code>, <code>satmodel</code>, <code>satmodel2</code>, and <code>satmodel3</code>. The JPPF driver process is executed on <code>mainmodel</code> and acts like a traffic cop by acquiring tasks from the client and distributing those tasks to the node processes. When the node processes complete tasks, the results are returned back to the client via the JPPF driver. Three nodes are used in the MTC application, one each on <code>satmodel</code>, <code>satmodel2</code>, and <code>satmodel3</code> (each node runs 12 processes). These three nodes are created prior to executing a model run. After being created, each node listens for tasks from the JPPF driver.</p>
+<p>Node processes receive tasks, perform those tasks, and return the results. Nodes are configured to communicate with the driver process when they are started. MTC configures the nodes to use 90 GB of memory and 12 threads (see the <a href="#setup-and-configuration">Setup and Configuration</a> section for details on where these parameters are specified). The JPPF driver attempts to balance computational loads across available nodes. The driver also retrieves class files, i.e. sets of Java code, from the client application and passes those to the nodes as needed.</p>
+<p>The CT-RAMP software, which serves as the client, is responsible for creating task objects that can be run in parallel and submitting those to the driver. Because the MTC travel model simulates households, the CT-RAMP software creates packets of <code>N</code> (a user-configurable quantity, e.g. 500) households and sends those packets to the nodes for processing. As the nodes complete tasks and returns them to the driver, the driver gives the nodes new tasks, attempting to keep each node uniformly busy.</p>
+<h5 id="household-manager-and-matrix-manager">Household Manager and Matrix Manager</h5>
+<p>Before executing a model run, the travel model requires a <code>Household Manager</code> and a <code>Matrix Manager</code> be created. In the MTC application, both the Managers reside on the <code>satmodel</code> computer during execution. The Household Manager is tasked with managing the simulated households, as well as each simulated person in each simulated household. The <code>Household Manager</code> provides the JPPF nodes with information regarding the households for which the JPPF nodes are applying choice models and stores the resulting information computed by the JPPF nodes. To help keep run time down, the synthetic population is read from disk and stored in memory at the beginning of the application and then continuously updated as choice models are completed and iterations are performed. When the last iteration is complete, the necessary information is written to disk.</p>
+<p>The <code>Matrix Manager</code> is tasked with managing all of the skim matrices used by the choice models. When a skim is needed, a request is made to the Matrix Manager, which then reads the required skim from disk and stores it in memory. Once in memory, each matrix is available to any other JPPF node process that may need it.</p>
+<p>Both the <code>Household Manager</code> and <code>Matrix Manager</code> have substantial memory footprints, currently 35GB and 44GB respectively.</p>
+<h5 id="taz-maz-and-tap-data-manager">TAZ, MAZ, and TAP Data Manager</h5>
+<p>The main CT-RAMP model process includes the following internal data management interfaces for managing zone-type data: </p>
+<ul>
+<li>TAZ data manager, </li>
+<li>MAZ data manager, and </li>
+<li>TAP data manager.  </li>
+</ul>
+<p>These data managers provide TAZ, MAZ, and TAP level data to the various sub-models.  The TAZ data manager provides TAZ attribute data.  The MAZ data manager provides MAZ attribute data, as well as MAZ to MAZ impedances.  The TAP data manager provides TAP attribute data, as well as MAZ to TAP impedances.  These data managers are copied to JPPF nodes during execution, which increases the memory required by JPPF nodes. </p>
+<h2 id="setup-and-configuration">Setup and Configuration</h2>
+<p>This section provides details on setting up the travel model to run on a cluster of computers, including descriptions of the necessary configuration files.</p>
+<h3 id="step-1-create-the-required-folder-structure">Step 1: Create the required folder structure</h3>
+<p>The MTC travel model folder structure is shown below. Typically the parent directory will be named for the scenario to be run (e.g. '2010_base'). The parent directory contains two subfolders <code>ctramp</code> and <code>input</code>, and one MS-DOS batch file, <code>RunModel.bat</code>. This folder can be placed in any directory on a computer designated as the main controller of the program flow. On MTC's set up, these files are placed on the <code>mainmodel</code> computer (see <a href="#system-design">System Design</a> section for more details).</p>
+<p>\Scenario_Folder
+  \ct-ramp
+  \input
+  RunModel.bat</p>
+<p>The <code>CTRAMP</code> directory contains all of the model configuration files, Java instructions, and Cube scripts required to run the travel model, organized in the following three folders:</p>
+<ul>
+<li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/model">model</a> -- contains all of the <a href="http://analytics.mtc.ca.gov/foswiki/Main/UtilityExpressionCalculator">Utility Expression Calculators</a> files that specify the choice models;</li>
+<li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/runtime">runtime</a> -- contains all of the Java configuration and <code>JAR</code> (executable) files, as well as the files necessary for Java to communicate with Cube;</li>
+<li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/scripts">scripts</a> -- contains all of the Cube scripts and associated helper files.</li>
+</ul>
+<p>The <code>INPUT</code> directory contains all of the input files (see the <a href="#input-files">Input Files</a> section) required to run a specific scenario. MTC will deliver the model with a set of scenario-specific set of inputs. When configuring the model on a new computing system, one should make sure that the results from an established scenario can be recreated before developing and analyzing a new scenario. The <code>INPUT</code> directory contains the following folders:</p>
+<ul>
+<li><code>hwy</code> -- contains the input master network with all zone centroids as well (TAZ, MAZ, and TAP) (see the <a href="#networks">Networks</a> section);</li>
+<li><code>trn</code> -- contains all of the input transit network files (see the <a href="#networks">Networks</a> section);</li>
+<li><code>landuse</code> -- contains the MAZ and TAZ level socio-economic input land use files;</li>
+<li><code>nonres</code> -- contains the fixed, year-specific internal/external trip tables, the fixed, year-specific air passenger trip tables, and files used to support the commercial vehicle model;</li>
+<li><code>popsyn</code> -- contains the synthetic population files;</li>
+<li><code>warmstart</code> -- contains trip tables for warm-starting the model.</li>
+</ul>
+<p>The <code>RunModel.bat</code> script contains a list of MS-DOS instructions that control model flow.</p>
+<h3 id="step-2-map-a-network-drive-to-share-across-computers">Step 2: Map a network drive to share across computers</h3>
+<p>As noted in the previous section, the MTC model files can be placed within any directory. After establishing this location, the user must map a network drive to a shared folder to allow other computers access. On MTC's machine, the directory <code>E:\MainModelShare</code> is first mapped to the letter drive <code>M:\</code> and this directory is then shared across on the network (<code>M:\ = \\MainModel\MainModelShare\</code>).</p>
+<p>Satellite computers should also map the letter drive <code>M:\</code> to this network location.</p>
+<p>Please note that the model components running on the main machine should use the local version of the directory (i.e. <code>M:\Projects\</code>) rather than the network version (i.e. <code>\\MainModel\MainModelShare\Projects\</code>).</p>
+<p>MTC has created scenarios for 2000, 2005, 2010 and 2015. The model is calibrated and validated to 2010 observed data.</p>
+<h3 id="step-3-configure-the-ct-ramp-and-jppf-services">Step 3: Configure the CT-RAMP and JPPF Services</h3>
+<p>Much of the configuration of the CT-RAMP software is done automatically by the <code>RunModel.bat</code> batch file.  However, prior to executing a model run, the files controlling the CT-RAMP and JPPF services may need to be configured. Please see the <a href="#system-design">System Design</a> section for a broad overview of these services. When executing the travel model, the following start-up scripts need to be run separately on each computer. Each script specifies the tasks assigned to each computer and need not be configured exactly as described on the <a href="#system-design">System Design</a> section (we describe MTC's setup; numerous other configurations are possible). In the MTC setup, the following commands are executed:</p>
+<ol>
+<li><code>runDriver.cmd</code> starts the JPPF Driver required for distributed model running; </li>
+<li><code>runHhMgr.cmd</code> starts the household manager on <code>satmodel1</code>;</li>
+<li><code>runMtxMgr.cmd</code> starts the matrix manager on <code>satmodel1</code>;</li>
+<li><code>runNode{X}.cmd</code> starts up JPPF worker nodes on the remaining node {X} machine(s);</li>
+</ol>
+<p>The <code>.cmd</code> files are MS-DOS batch scripts and can be edited in a text editor, such as Notepad.</p>
+<p>Each program requires an explicit amount of memory to be allocated to it.  The amount of memory allocated to each program is identified by the <code>-Xmx</code> parameter (<code>XXXm</code> allocates XXX megabytes; <code>Xg</code> allocates X gigabytes.  This may need to be adjusted depending on the model and hardware configurations.  An example is as follows:</p>
+<pre><code class="language-dosbatch">.. %JAVA_PATH%\bin\java -server -Xmx35000m ...
+</code></pre>
+<p>Most of the JPPF-related configuration parameters have been optimized for the MTC travel model application and, as such, need not be modified. There are, however, a handful of parameters described in the table below that may need to be modified to meet the specifications of the computing environment upon which the model is being executed. Each of the files listed below can be found in the <code>CTRAMP\runtime\config\</code> directory. </p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>File Name</strong></th>
+<th><strong>File Function</strong></th>
+<th><strong>Statement</strong></th>
+<th><strong>Purpose</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>jppf-clientDistributed.properties</code></td>
+<td>JPPF Client Driver Control file</td>
+<td><code>driver1.jppf.server.host = 192.168.1.200</code></td>
+<td>IP address of the main computer (<code>mainmodel</code> at MTC)</td>
+</tr>
+<tr>
+<td align="left"><code>jppf-clientLocal.properties</code></td>
+<td>JPPF Client Local Control file</td>
+<td><code>jppf.local.execution.threads = 22</code></td>
+<td>Number of threads to use for running the model on one machine for testing (mainly for debugging)</td>
+</tr>
+<tr>
+<td align="left"><code>jppf-driver.properties</code></td>
+<td>JPPF Driver Control file</td>
+<td><code>jppf.server.host = 192.168.1.200</code></td>
+<td>IP address of the main computer (<code>mainmodel</code> at MTC)</td>
+</tr>
+<tr>
+<td align="left"><code>jppf-node{x}.properties</code></td>
+<td>Remote JPPF Node Control file</td>
+<td><code>jppf.server.host = 192.168.1.200</code></td>
+<td>IP address of the main computer (<code>mainmodel</code> at MTC)</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td></td>
+<td><code>processing.threads = 12</code></td>
+<td>Number of computing cores on node {X}</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td></td>
+<td><code>other.jvm.options = -Xms48000m -Xmx48000m -Dnode.name=node0</code></td>
+<td>Maximum amount of memory, in MB, to allocate to node {X} and node name for logging</td>
+</tr>
+</tbody>
+</table>
+<p>A file that needs to be edited prior to executing a model run is the <code>mtctm2.properties</code> file located in <code>CTRAMP\runtime\</code>. This file serves as the general control module for the entire CT-RAMP application. At this stage, the following variables need to be modified for the software to execute the model properly.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Statement</strong></th>
+<th><strong>Purpose</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RunModel.MatrixServerAddress = 192.168.1.200</code></td>
+<td>The IP address of the machine upon which the Matrix Manager is being executed (<code>satmodel1</code> at MTC)</td>
+</tr>
+<tr>
+<td><code>RunModel.HouseholdServerAddress = 192.168.1.200</code></td>
+<td>The IP address of the machine upon which the Household Manager is being executed (<code>satmodel1</code> at MTC)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-4-configure-runmodelbat-and-ctrampenvbat">Step 4: Configure <code>RunModel.bat</code> and <code>CTRampEnv.bat</code></h3>
+<p>The file <code>RunModel.bat</code> MS-DOS batch file that executes the model stream needs to be consistent with the network and if a specialized model run is being executed, the model flow logic and/or sample rates may need to be adjusted. The following statements may need to be configured within this file:</p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>Statement</strong></th>
+<th><strong>Purpose</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>set SAMPLERATE_ITERATION{iteration}=0.1</code></td>
+<td>Set choice model household sample rate by iteration</td>
+</tr>
+<tr>
+<td align="left">model run</td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>set MODEL_YEAR=2010</code></td>
+<td>Set model year</td>
+</tr>
+<tr>
+<td align="left"><code>set BASE_SCRIPTS=CTRAMP\scripts</code></td>
+<td>Set scripts folder</td>
+</tr>
+<tr>
+<td align="left"><code>set /A MAX_ITERATION=2</code></td>
+<td>Set the model feedback iterations</td>
+</tr>
+<tr>
+<td align="left"><code>set TAZ_COUNT=4509</code></td>
+<td>The number of tazs</td>
+</tr>
+<tr>
+<td align="left"><code>set TAZ_EXTS_COUNT=4530</code></td>
+<td>The number of tazs + externals</td>
+</tr>
+<tr>
+<td align="left"><code>set TAP_COUNT=6172</code></td>
+<td>The number of transit access point zones</td>
+</tr>
+</tbody>
+</table>
+<p>The file <code>CTRampEnv.bat</code> MS-DOS batch file points to locations of executables and contains some additional information on machine configuration. The following statements may need to be configured within this file:</p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>Statement</strong></th>
+<th><strong>Purpose</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>set JAVA_PATH=C:\Program Files\Java\jdk1.8.0_111</code></td>
+<td>Specify the 64-bit Java path; version 1.8.0+</td>
+</tr>
+<tr>
+<td align="left"><code>set TPP_PATH=C:\Progam Files\Citilabs\CubeVoyager</code></td>
+<td>Specify the Cube Voyager path</td>
+</tr>
+<tr>
+<td align="left"><code>set CUBE_PATH=C:\Progam Files (x86)\Citilabs\Cube</code></td>
+<td>Specify the Cube path</td>
+</tr>
+<tr>
+<td align="left"><code>set PYTHON_PATH=C:\Program Files\anaconda2</code></td>
+<td>Specify the Python path</td>
+</tr>
+<tr>
+<td align="left"><code>set RUNTIME=CTRAMP\runtime</code></td>
+<td>Specify the location of the CT-RAMP software (relative to the project directory)</td>
+</tr>
+<tr>
+<td align="left"><code>set JAVA_32_PORT=1190</code></td>
+<td>Specify the port for Java 32 bit matrix reader\writer (not currently used)</td>
+</tr>
+<tr>
+<td align="left"><code>set MATRIX_MANAGER_PORT=1191</code></td>
+<td>Specify the port for the matrix manager</td>
+</tr>
+<tr>
+<td align="left"><code>set HH_MANAGER_PORT=1129</code></td>
+<td>Specify the port for the household manager</td>
+</tr>
+<tr>
+<td align="left"><code>set HHMGR_IP=172.24.0.100</code></td>
+<td>Specify IP address of household manager</td>
+</tr>
+<tr>
+<td align="left"><code>set MATRIX_SERVER=\\w-ampdx-d-sag02</code></td>
+<td>Machine running matrix data manager</td>
+</tr>
+<tr>
+<td align="left"><code>set MATRIX_SERVER_BASE_DIR=%MATRIX_SERVER%\c$\projects\mtc\%SCEN%</code></td>
+<td>Machine running matrix data manager base directory</td>
+</tr>
+<tr>
+<td align="left"><code>set MATRIX_SERVER_ABSOLUTE_BASE_DIR=c:\projects\mtc\%SCEN%</code></td>
+<td>Machine running matrix data manager absolute directory</td>
+</tr>
+<tr>
+<td align="left"><code>set MATRIX_SERVER_JAVA_PATH=C:\Program Files\Java\jdk1.7.0_25</code></td>
+<td>Machine running matrix data manager Java install</td>
+</tr>
+<tr>
+<td align="left"><code>set HH_SERVER=\\w-ampdx-d-sag02</code></td>
+<td>Machine running household data manager</td>
+</tr>
+<tr>
+<td align="left"><code>set HH_SERVER_BASE_DIR=%HH_SERVER%\c$\projects\mtc\%SCEN%</code></td>
+<td>Machine running household data manager base directory</td>
+</tr>
+<tr>
+<td align="left"><code>set HH_SERVER_ABSOLUTE_BASE_DIR=c:\projects\mtc\%SCEN%</code></td>
+<td>Machine running household data manager absolute directory</td>
+</tr>
+<tr>
+<td align="left"><code>set HH_SERVER_JAVA_PATH=C:\Program Files\Java\jdk1.7.0_25</code></td>
+<td>Machine running household data manager Java install</td>
+</tr>
+<tr>
+<td align="left"><code>set UN=</code></td>
+<td>Username for logging in to remote machines</td>
+</tr>
+<tr>
+<td align="left"><code>set PWD=</code></td>
+<td>Password for logging in to remote machines</td>
+</tr>
+</tbody>
+</table>
+<p>Now that the model is configured, the user can run the model, as described in the <a href="#model-execution">Model Execution</a> section.</p>
+<h2 id="model-execution">Model Execution</h2>
+<p>This page describes how <code>RunModel.bat</code> executes the travel model. For: </p>
+<ul>
+<li>a description of the underlying computing environment, see <a href="#computing-environment">Computing Environment</a>; </li>
+<li>for a general description of the underlying system design, see <a href="#system-design">System Design</a>; </li>
+<li>for a description of the configuration files that may need to be modified before executing the model, see <a href="#setup-and-configuration">Setup and Configuration</a>.</li>
+</ul>
+<h3 id="step-1-set-globally-available-environmental-variables">Step 1: Set globally-available environmental variables</h3>
+<p>See  <a href="#setup-and-configuration">Setup and Configuration</a> for complete details.</p>
+<h3 id="step-2-set-relevant-paths-to-access-software">Step 2: Set relevant paths to access software</h3>
+<p>See  <a href="#setup-and-configuration">Setup and Configuration</a> for complete details.</p>
+<h3 id="step-3-create-and-populate-a-working-directory-of-input-files">Step 3: Create and populate a working directory of input files</h3>
+<p>A working directory is created and populated with the input files, leaving the input files untouched in the process.  This step also creates the necessary directory structure for the household and matrix data servers on the remote machine and copies over needed files.</p>
+<pre><code class="language-dosbatch">mkdir hwy
+mkdir trn
+mkdir skims
+mkdir landuse
+mkdir popsyn
+mkdir nonres
+mkdir main
+mkdir logs
+mkdir database
+mkdir ctramp_output
+
+:: Stamp the feedback report with the date and time of the model start
+echo STARTED MODEL RUN  %DATE% %TIME% &gt;&gt; logs\feedback.rpt 
+
+:: Move the input files, which are not accessed by the model, to the working directories
+copy INPUT\hwy\                 hwy\
+copy INPUT\trn\                 trn\
+copy INPUT\trn\transit_lines\   trn\
+copy INPUT\trn\transit_fares\   trn\ 
+copy INPUT\trn\transit_support\ trn\
+copy INPUT\landuse\             landuse\
+copy INPUT\popsyn\              popsyn\
+copy INPUT\nonres\              nonres\
+copy INPUT\warmstart\main\      main\
+copy INPUT\warmstart\nonres\    nonres\
+</code></pre>
+<p>After the directories are created, copies are made to the remote machines for access by the household and matrix servers.</p>
+<pre><code class="language-dosbatch">SET HH_DEPENDENCIES=(hwy popsyn landuse skims trn CTRAMP logs)
+IF NOT EXIST %HH_SERVER_BASE_DIR% MKDIR %HH_SERVER_BASE_DIR%
+FOR %%A IN %HH_DEPENDENCIES% DO (
+    IF NOT EXIST %HH_SERVER_BASE_DIR%\%%A MKDIR %HH_SERVER_BASE_DIR%\%%A
+)
+ROBOCOPY CTRAMP %HH_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
+
+SET MATRIX_DEPENDENCIES=(skims CTRAMP logs ctramp_output)
+IF NOT EXIST %MATRIX_SERVER_BASE_DIR% MKDIR %MATRIX_SERVER_BASE_DIR%
+FOR %%A IN %MATRIX_DEPENDENCIES% DO (
+    IF NOT EXIST %MATRIX_SERVER_BASE_DIR%\%%A MKDIR %MATRIX_SERVER_BASE_DIR%\%%A
+)
+ROBOCOPY CTRAMP %MATRIX_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
+</code></pre>
+<h3 id="step-4-pre-process-steps">Step 4: Pre-process steps</h3>
+<p>Several steps are needed to prepare the inputs for use in the model.  The following Cube scripts are executed to perform the following:</p>
+<ul>
+<li><code>zone_seq_net_builder.job</code> -- build an internal numbering scheme for the network nodes to play nice with Cube</li>
+<li><code>CreateNonMotorizedNetwork.job</code> -- convert the roadway network into bike and ped networks</li>
+<li><code>tap_to_taz_for_parking.job</code> -- create the transit access point (TAP) data</li>
+<li><code>SetTolls.job</code> -- set network prices (i.e., bridge tolls, express lane tolls) in the roadway network</li>
+<li><code>SetHovKferPenalties.job</code> -- add a penalty of X seconds for dummy links connecting HOV/express lanes and general purpose lanes</li>
+<li><code>SetCapClass.job</code> -- compute area type and populate the <code>CAPCLASS</code> network variable</li>
+<li><code>CreateFiveHighwayNetworks.job</code> -- create time-of-day-specific roadway networks</li>
+<li><code>BuildTazNetworks.job</code> -- create TAZ-scale networks for TAZ-scale roadway assignment</li>
+</ul>
+<h3 id="step-5-build-walk-bicycle-and-nearby-automobile-level-of-service-matrices">Step 5:  Build walk, bicycle, and nearby automobile level-of-service matrices</h3>
+<p>Two scripts create the level-of-service information for the non-motorized modes and nearby automobile skims (for which, as a simplification, congestion is constant).  The following Cube scripts do the job:</p>
+<ul>
+<li><code>NonMotorizedSkims.job</code> -- skim the walk and bicycle networks</li>
+<li><code>MazMazSkims.job</code> -- builds short-distance MAZ-to-MAZ automobile skims</li>
+</ul>
+<h3 id="step-6-build-air-passenger-demand-matrices">Step 6: Build air passenger demand matrices</h3>
+<p>The <code>BuildAirPax.job</code> Cube script creates the air passenger demand estimates.  Air passenger demand is assumed to be independent of roadway level-of-service and, as such, can be computed a single time. </p>
+<h3 id="step-7-build-highway-and-transit-skims">Step 7: Build highway and transit skims</h3>
+<p>The following steps create the highway and transit level-of-service matrices:</p>
+<ul>
+<li>Copy data files to the remote househould data manager machine</li>
+<li>Set the sampling rate based on `SAMPLERATE_ITERATION<iteration> global variable</li>
+<li><code>HwySkims.job</code> -- build the roadway skims</li>
+<li><code>BuildTransitNetworks.job</code> -- build the transit networks using the congested roadway times</li>
+<li><code>TransitSkims.job</code> -- build the transit skims</li>
+<li>Copy the skims and related files to the remote household and matrix data manager machines</li>
+</ul>
+<h3 id="step-8-execute-the-ct-ramp-models">Step 8:  Execute the CT-RAMP models</h3>
+<p>The core passenger travel demand models are executed via the CT-RAMP Java code via the following steps:</p>
+<ul>
+<li>Remote worker node(s), as specified, are started using <code>psexec</code></li>
+<li>Remote household and matrix servers are started using <code>psexec</code></li>
+<li>JPPF driver, as needed, is started via <code>CTRAMP/runtime/runDriver.cmd</code></li>
+<li>CT-RAMP models are executed via <code>CTRAMP/runMTCTM2ABM.cmd</code></li>
+<li>Stops remote servers using <code>pskill</code></li>
+<li>Copies output matrices from the matrix manager machine back to the main machine</li>
+<li><code>merge_demand_matrices.s</code> -- merges the output demand matrices</li>
+</ul>
+<h3 id="step-9-execute-the-internalexternal-and-commercial-vehicle-models">Step 9:  Execute the internal/external and commercial vehicle models</h3>
+<p>These ancillary demand models are executed via a series of Cube scripts as follows:</p>
+<ul>
+<li><code>IxForecasts.job</code> -- create the internal/external demand matrices</li>
+<li><code>IxTimeOfDay.job</code> -- apply diurnal factors to the daily internal/external demand matrices</li>
+<li><code>IxTollChoice.job</code> -- apply a toll choice model for express lanes to the internal/external demand</li>
+<li><code>TruckTripGeneration.job</code> -- apply the commercial vehicle generation models</li>
+<li><code>TruckTripDistribution.job</code> -- apply the commercial vehicle distribution models</li>
+<li><code>TruckTimeOfDay.job</code> -- apply the commercial vehicle diurnal factors</li>
+<li><code>TruckTollChoice.job</code> -- apply a toll choice model for express lanes to the commercial vehicle demand</li>
+</ul>
+<h3 id="step-10-network-assignment">Step 10: Network Assignment</h3>
+<p>Demand is located on mode-specific paths through the networks in the assignement step via the following steps:</p>
+<ul>
+<li><code>build_and_assign_maz_to_maz_auto.job</code> -- nearby automobile demand assigned to best path on MAZ-scale network</li>
+<li><code>HwyAssign.job</code> -- using nearby demand as background demand, demand assigned to TAZ-scale network</li>
+<li><code>AverageNetworkVolumes.job</code> -- method of successive averages (MSA) applied across overall model iterations</li>
+<li><code>CalculateAverageSpeed.job</code> -- using the averaged volumes, compute speeds</li>
+<li><code>MergeNetworks.job</code> -- merge time-of-day-specific networks into a single network</li>
+<li><code>IF</code> additional <code>ITERATION</code>s are needed, <code>GOTO</code> <a href="#step-7:-build-highway-and-transit-skims">Step 7: Build highway and transit skims</a></li>
+<li><code>ELSE</code> perform transit assignment with <code>TransitAssign.job</code></li>
+</ul>
+<h3 id="step-11-clean-up">Step 11: Clean up</h3>
+<p>The final step of the model run moves all the TP+ printouts to the <code>/logs</code> folder and deletes all the temporary Cube printouts and cluster files. </p>
+<h2 id="ct-ramp-properties-file">CT-RAMP Properties File</h2>
+<p>The CT-RAMP software is controlled by a standard Java <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties">properties file</a>.  The <em>forthcoming</em> {table, link} below identifies, describes, and provides on example of, each of the variables CT-RAMP expects to be in the properties file.  After the initial configuration, only a handful of these properties willl be modified in a typical application of the travel model.  The primary use for many of the variables is to facilitate model calibration and/or debugging.  Comments in the properties file preceeded with a pound (#) are ignored.</p>
+<h2 id="model-schematic">Model Schematic</h2>
+<h2 id="level-of-service-information">Level of Service Information</h2>
+<p>Travel Model Two employs a tiered spatial system to allow level-of-service indicators to be computed at a fine or coarser geography, as appropriate.  Two spatial systems are defined: 1) a travel analysis zone (TAZ) system and 2) a micro-analysis zone (MAZ) system.  MAZs nest within TAZs.  For travel done at a "micro" scale (in the regional context, meaning less than five miles or so), the MAZ system is used; for travel done at a larger scale, the TAZ system is used.</p>
+<p>Further, transit travel is represented as a combination of the following three movements:</p>
+<ol>
+<li>Access.  An access movement from an MAZ to a so-called transit access point (or TAP), which is a single transit stop or an abstract location representing a collection of bus stops.</li>
+<li>Line haul.  A line-haul movement from a boarding TAP to an alighting TAP, which can include a transfer (moving from one TAP to another TAP) between services.</li>
+<li>Egress.  An egress movement from the alighting TAP to the destination MAZ. </li>
+</ol>
+<p>The motivation for the MAZ and TAP model design was to more precisely represent neighborhood-level travel while avoiding the steep computational price required to maintain a full set of MAZ-to-MAZ level-of-service matrices.  This design concept originated at the San Diego Association of Governments (SANDAG) and is being adopted by other planning organizations.</p>
+<p>The MAZ and TAP model design requires transit paths be built "on the fly" (i.e. outside the commercial software used by the travel model) by intelligently building and combining the MAZ-to-TAP, TAP-to-TAP, and TAP-to-MAZ trip components into logical, efficient potential paths for evaluation in probabilistic models of mode/transit route choice. </p>
+<p>The table below presents the manner in which level-of-service indicators are extracted from the model network.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Level-of-service component</strong></th>
+<th><strong>Separation of origin and destination</strong></th>
+<th><strong>Geography</strong></th>
+<th><strong>Source</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Automobile times, distances, and costs</td>
+<td>Near</td>
+<td>MAZ to MAZ</td>
+<td>MAZ-scale single best least-cost path</td>
+</tr>
+<tr>
+<td>Automobile times, distances, and costs</td>
+<td>Far</td>
+<td>TAZ to TAZ</td>
+<td>TAZ-scale equilibrium assignment path</td>
+</tr>
+<tr>
+<td>Transit line-haul</td>
+<td>All</td>
+<td>TAP to TAP</td>
+<td>N least-cost path determination</td>
+</tr>
+<tr>
+<td>Transit walk access and egress</td>
+<td>All</td>
+<td>MAZ to TAP</td>
+<td>N least-cost path determination</td>
+</tr>
+<tr>
+<td>Transit bicycle access and egress</td>
+<td>All</td>
+<td>MAZ to TAP</td>
+<td>N least-cost path determination</td>
+</tr>
+<tr>
+<td>Transit drive access and egress</td>
+<td>All</td>
+<td>TAZ to nearest TAP TAZ</td>
+<td>TAZ-scale equilibrium assignment path</td>
+</tr>
+<tr>
+<td>Walk</td>
+<td>Near (assume all walk travel is near)</td>
+<td>MAZ to MAZ</td>
+<td>MAZ-scale single best least-cost path</td>
+</tr>
+<tr>
+<td>Bicycle</td>
+<td>Near</td>
+<td>MAZ to MAZ</td>
+<td>MAZ-scale single best least-cost path</td>
+</tr>
+<tr>
+<td>Bicycle</td>
+<td>Far</td>
+<td>TAZ to TAZ</td>
+<td>TAZ-scale single best least-cost path</td>
+</tr>
+</tbody>
+</table>
+<p>Three distinct methods of extracting times from the network are employed, as follows:</p>
+<ol>
+<li>Equilibrium assignment. For automobile travel, congestion effects impact path choice, so a traditional equilibrium assignment is performed at the TAZ-scale.</li>
+<li>N best least-cost paths. For transit movements, the model builds, &ldquo;on the fly&rdquo;, the N best least-cost paths between MAZ pairs. The N best least-cost paths are then evaluated in the mode/transit route choice model.</li>
+<li>Single best least-cost path. For close-proximity automobile, bicycle, and walk travel, a single best mode-specific least-cost path is computed from the MAZ level all streets network. Because the full MAZ level network is not assigned due to computational cost, the impact of congestion on MAZ level path decisions is not taken into account. As a compromise (for gaining the spatial fidelity offered by the MAZ level network), the model implicitly assumes that automobile, pedestrian, and bicycle congestion have a negligible impact on path choice decisions and assigns each MAZ-to-MAZ movement to a single best least-cost path.</li>
+</ol>
+
+              
+            </article>
+            
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Travel Model Two" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Travel Model Two
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../input/" class="md-footer__link md-footer__link--next" aria-label="Next: Input" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Input
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "content.code.annotate", "content.tabs.link", "navigation.indexes"], "search": "../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>
