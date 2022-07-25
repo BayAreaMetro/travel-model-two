@@ -11,7 +11,7 @@
         <link rel="canonical" href="http://bayareametro.github.io/travel-model-two/transit-ccr/input/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
     
     
       
@@ -858,108 +858,85 @@
 
 <h1 id="input">Input</h1>
 <h2 id="input-file-list">Input File List</h2>
-<p>The table below contains brief descriptions of the input files required to execute the travel model. </p>
+<p>The table below contains brief descriptions of the input files required to execute the travel model.</p>
 <table>
 <thead>
 <tr>
-<th><strong>File name</strong></th>
-<th><strong>Purpose</strong></th>
-<th><strong>Folder location</strong></th>
-<th><strong>File type</strong></th>
-<th><strong>File format</strong></th>
+<th><strong>Directory</strong></th>
+<th><strong>File</strong></th>
+<th><strong>Description</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>mtc_final_network.net</code></td>
-<td>Highway, bike, walk network</td>
 <td>hwy\</td>
-<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
-<td><a href="#roadway-network">Roadway Network</a></td>
+<td><a href="#roadway-network"><code>complete_network.net</code></a></td>
+<td>Highway, bike, walk network</td>
 </tr>
 <tr>
+<td>landuse\</td>
 <td><code>mazData.csv</code></td>
 <td>Micro zone data</td>
-<td>landuse\</td>
-<td>CSV</td>
-<td><a href="#micro-zonal-data">Micro Zonal Data</a></td>
 </tr>
 <tr>
+<td>landuse\</td>
 <td><code>tazData.csv</code></td>
 <td>Travel analysis zone data</td>
-<td>landuse\</td>
-<td>CSV</td>
-<td><a href="#zonal-data">Zonal Data</a></td>
 </tr>
 <tr>
+<td>nonres\</td>
 <td><code>truckFF.dat</code></td>
 <td>Friction factors for the commercial vehicle distribution models</td>
-<td>nonres\</td>
-<td>ASCII</td>
-<td><a href="#truck-distribution">Truck Distribution</a></td>
 </tr>
 <tr>
+<td>nonres\</td>
 <td><code>truckkfact.k22.z1454.mat</code></td>
 <td>"K-factors" for the commercial vehicle distribution models</td>
-<td>nonres\</td>
-<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
-<td><a href="#truck-distribution">Truck Distribution</a></td>
 </tr>
 <tr>
+<td>nonres\</td>
 <td><code>truck_kfactors_taz.csv</code></td>
 <td>"K-factors" for the commercial vehicle distribution models</td>
-<td>nonres\</td>
-<td>CSV</td>
-<td><a href="#truck-distribution">Truck Distribution</a></td>
 </tr>
 <tr>
-<td><code>ixDailyYYYY.tpp</code></td>
+<td>nonres\</td>
+<td><code>ixDaily2015.tpp</code></td>
 <td>Internal-external fixed trip table for year YYYY</td>
-<td>nonres\</td>
-<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
-<td><a href="#fixed-demand">Fixed Demand</a></td>
 </tr>
 <tr>
-<td><code>IXDaily2006x4.may2208.new</code></td>
+<td>nonres\</td>
+<td><code>IXDaily2006x4.may2208.new.mat</code></td>
 <td>Internal-external input fixed trip table</td>
-<td>nonres\</td>
-<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
-<td><a href="#fixed-demand">Fixed Demand</a></td>
 </tr>
 <tr>
+<td>nonres\</td>
 <td><code>YYYY_fromtoAAA.csv</code></td>
 <td>Airport passenger fixed trips for year YYYY and airport AAA</td>
-<td>nonres\</td>
-<td>CSV</td>
-<td><a href="#fixed-demand">Fixed Demand</a></td>
 </tr>
 <tr>
+<td>popsyn\</td>
 <td><code>households.csv</code></td>
 <td>Synthetic population household file</td>
-<td>popsyn\</td>
-<td>CSV</td>
-<td>PopSynHousehold</td>
 </tr>
 <tr>
+<td>popsyn\</td>
 <td><code>persons.csv</code></td>
 <td>Synthetic population person file</td>
-<td>popsyn\</td>
-<td>CSV</td>
+</tr>
+<tr>
+<td>trn\</td>
+<td><code>transitLines.lin</code></td>
+<td>Transit lines</td>
+</tr>
+<tr>
+<td>trn\</td>
+<td><code>fareMatrix.txt</code></td>
 <td></td>
 </tr>
 <tr>
-<td><code>transitLines.lin</code></td>
-<td>Transit lines</td>
-<td>trn\transit_lines</td>
-<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
-<td>TransitNetwork</td>
-</tr>
-<tr>
-<td><code>transitFactors_MMMM.fac</code></td>
-<td>Cube Public Transport (PT) factor files by transit line haul mode MMMM</td>
-<td>trn\transit_support</td>
-<td><a href="http://citilabs.com/products/cube">Citilabs Cube</a></td>
-<td>TransitNetwork</td>
+<td>trn\</td>
+<td><code>station_attribute_data_input.csv</code></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -1661,7 +1638,7 @@
 </table>
 <h2 id="transit-network">Transit Network</h2>
 <p>The transit network is made up of three core components: transit lines, transit modes, and transit fares.  The transit lines were built GTFS feeds from raound 2015.  The lines are coded with a mode (see below) and serve a series of stop nodes.  Transit fares are coded according to Cube's Public Transport program (see below).</p>
-<p>Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the <a href="#level-of-service-information">Level of Service Information</a>. </p>
+<p>Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the <a href="#level-of-service-information">Level of Service Information</a>.</p>
 <h3 id="link-attributes_1">Link Attributes</h3>
 <table>
 <thead>
@@ -1760,7 +1737,7 @@
 </tbody>
 </table>
 <h3 id="transit-modes">Transit Modes</h3>
-<p>The following transit modes are defined based on the <a href="https://511.org/developers/list/apis/">Open511</a> attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology. </p>
+<p>The following transit modes are defined based on the <a href="https://511.org/developers/list/apis/">Open511</a> attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology.</p>
 <table>
 <thead>
 <tr>

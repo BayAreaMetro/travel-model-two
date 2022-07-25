@@ -11,7 +11,7 @@
         <link rel="canonical" href="http://bayareametro.github.io/travel-model-two/transit-ccr/process/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
     
     
       
@@ -913,38 +913,38 @@
 <h1 id="modeling-process">Modeling Process</h1>
 <h2 id="preprocessing">Preprocessing</h2>
 <ol>
-<li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/writeZoneSystems.job"><code>preprocess\writeZoneSystems.job</code></a></li>
+<li>
+<p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/writeZoneSystems.job"><code>preprocess\writeZoneSystems.job</code></a></p>
+<ul>
 <li>Summary: Counts tazs, mazs, taps and external zones based on <a href="/travel-model-two/input/#county-node-numbering-system">node number conventions</a></li>
 <li>Input: <code>hwy\mtc_final_network_base.net</code>, the roadway network</li>
-<li>
-<p>Output: <code>zoneSystem.bat</code>, a local batch file that defines <code>TAZ_COUNT</code>, <code>TAZ_EXTS_COUNT</code>, <code>TAP_COUNT</code>, and <code>MAZ_COUNT</code> environment variables</p>
+<li>Output: <code>zoneSystem.bat</code>, a local batch file that defines <code>TAZ_COUNT</code>, <code>TAZ_EXTS_COUNT</code>, <code>TAP_COUNT</code>, and <code>MAZ_COUNT</code> environment variables</li>
+</ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/zone_seq_net_builder.job"><code>preprocess\zone_seq_net_builder.job</code></a></p>
-</li>
-<li>Summary: Builds a sequential zone numbering system for TAZs, MAZs, TAPs and Externals 
-     given the <a href="/travel-model-two/input/#county-node-numbering-system">node number conventions</a>.</li>
+<ul>
+<li>Summary: Builds a sequential zone numbering system for TAZs, MAZs, TAPs and Externals
+ given the <a href="/travel-model-two/input/#county-node-numbering-system">node number conventions</a>.</li>
 <li>Input: <code>hwy\mtc_final_network_base.net</code>, the roadway network</li>
-<li>
-<p>Output:</p>
-<ol>
+<li>Output:<ol>
 <li><code>hwy\mtc_final_network.net</code> with additional nodeattributes, <strong>TAZSEQ</strong>, <strong>MAZSEQ</strong>, <strong>TAPSEQ</strong> and <strong>EXTSEQ</strong></li>
 <li><code>hwy\mtc_final_network_zone_seq.csv</code>, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs.  Columns are <em>N</em>, <em>TAZSEQ</em>, <em>MAZSEQ</em>, <em>TAPSEQ</em> and <em>EXTSEQ</em></li>
 </ol>
 </li>
+</ul>
+</li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/zone_seq_disseminator.py"><code>preprocess\zone_seq_disseminator.py</code></a></p>
-</li>
+<ul>
 <li>Summary: Builds other files with zone numbers</li>
-<li>Input: <ol>
+<li>Input:<ol>
 <li><code>hwy\mtc_final_network_zone_seq.csv</code>, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs</li>
 <li><code>landuse\taz_data.csv</code> - <a href="/travel-model-two/guide/#zonal-data">Zonal Data</a></li>
 <li><code>landuse\maz_data.csv</code> - <a href="/travel-model-two/guide/#micro-zonal-data">Micro Zonal Data</a></li>
 </ol>
 </li>
-<li>
-<p>Output:</p>
-<ol>
+<li>Output:<ol>
 <li><code>landuse\taz_data.csv</code> - Adds (or rewrites) column <strong>TAZ</strong> (renumbered version of <strong>TAZ_ORIGINAL</strong>)</li>
 <li><code>landuse\maz_data.csv</code> - Adds (or rewrites) columns <strong>TAZ</strong> and <strong>MTAZ</strong> (renumbered versions of <strong>TAZ_ORIGINAL</strong> and <strong>MTAZ_ORIGINAL</strong>)</li>
 <li><code>CTRAMP\model\ParkLocationAlts.csv</code> - park location alternatives,  <strong>TODO</strong>: What are these? Move this from <em>CTRAMP</em></li>
@@ -953,21 +953,23 @@
 <li><code>CTRAMP\model\ParkLocationSampleAlts.csv</code>  <strong>TODO</strong>: what are these?  Move this from <em>CTRAMP</em></li>
 </ol>
 </li>
+</ul>
+</li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/maz_densities.job"><code>preprocessing\maz_densities.job</code></a></p>
-</li>
+<ul>
 <li>Summary: Creates intermediate files for calculating maz densities: maz centroid location file and intersection location file.</li>
 <li>Input: <code>hwy\mtc_final_network_base.net</code>, the roadway network</li>
-<li>
-<p>Output:</p>
-<ol>
+<li>Output:<ol>
 <li><code>hwy\maz_nodes.csv</code>, the maz centroids and their coordinates</li>
 <li><code>hwy\intersection_nodes.csv</code>, intersection nodes and their coordinates, where intersections are defined by having 5 non-freeway, non-connector links attached</li>
 </ol>
 </li>
+</ul>
+</li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/createMazDensityFile.py"><code>preprocessing\createMazDensityFile.py</code></a></p>
-</li>
+<ul>
 <li>Summary: Calculates density-related columns to add to <a href="/travel-model-two/guide/#micro-zonal-data">Micro Zonal Data</a></li>
 <li>Input:<ol>
 <li><code>hwy\maz_nodes.csv</code>, the maz centroids and their coordinates</li>
@@ -975,25 +977,23 @@
 <li><code>landuse\maz_data.csv</code> - <a href="/travel-model-two/guide/#micro-zonal-data">Micro Zonal Data</a></li>
 </ol>
 </li>
-<li>
-<p>Output:</p>
-<ol>
+<li>Output:<ol>
 <li><code>landuse\maz_density.csv</code> - Density measures for MAZs (TotInt, EmpDen, RetDen, DUDen, PopDen, intDenBin, empDenBin, duDenBin)</li>
 <li><code>landuse\maz_data_withDensity.csv</code> - <a href="/travel-model-two/guide/#micro-zonal-data">Micro Zonal Data</a> joined with density measures</li>
 </ol>
 </li>
+</ul>
+</li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/CreateNonMotorizedNetwork.job"><code>preprocess\CreateNonMotorizedNetwork.job</code></a></p>
-</li>
-<li>Summary: Create pedestrian, bicycle and pedestrian TAP (Transit Access Point) to TAP networks.  The procedure to create the non-motorized networks (walk and bike) extracts the links from the network which have <strong>CNTYPE</strong> equal to TANA, PED/BIKE, MAZ, TAZ, or TAP and which are not freeways, or which have the BIKEPEDOK flag set to true (1). For the pedestrian network, any link that is one-way has an opposite direction link generated. </li>
-<li>Input: <ol>
+<ul>
+<li>Summary: Create pedestrian, bicycle and pedestrian TAP (Transit Access Point) to TAP networks.  The procedure to create the non-motorized networks (walk and bike) extracts the links from the network which have <strong>CNTYPE</strong> equal to TANA, PED/BIKE, MAZ, TAZ, or TAP and which are not freeways, or which have the BIKEPEDOK flag set to true (1). For the pedestrian network, any link that is one-way has an opposite direction link generated.</li>
+<li>Input:<ol>
 <li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/maxCosts.block"><code>CTRAMP\scripts\block\maxCosts.block</code></a> - sets maximum pedestrian distance, maximum bike distances, maximum driving generalized cost, maximum tap-tap pedestrian distance</li>
 <li><code>hwy\mtc_final_network.net</code>, the roadway network</li>
 </ol>
 </li>
-<li>
-<p>Output:</p>
-<ol>
+<li>Output:<ol>
 <li><code>hwy\mtc_ped_network.net</code>, the pedestrian network.  Link attributes are the same as the roadway network, plus <strong>SP_DISTANCE</strong>, or Shortest Path Distance.  This is set to:<ul>
 <li><code>@max_ped_distance@</code> for <strong>CNTYPE</strong>=<em>MAZ</em> links and <strong>CNTYPE</strong>=<em>TAP</em> links with a TAZ/MAZ/TAP origin or destination,</li>
 <li><code>@nomax_bike_distance@</code> for <em>TAZ</em> links</li>
@@ -1004,14 +1004,14 @@
 <li><code>hwy\mtc_bike_network.net</code>, the bike network.  This is extracted in a similar fashion as the pedestrian network, but <strong>CNTYPE</strong> = 'BIKE' links are included instead of <strong>CNTYPE</strong> = 'PED'.</li>
 </ol>
 </li>
+</ul>
+</li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/tap_to_taz_for_parking.job"><code>preprocess\tap_to_taz_for_parking.job</code></a></p>
-</li>
+<ul>
 <li>Summary: Finds shortest pedestrian distance from TAP nodes to TAZ nodes.  Max cost = <code>@nomax_bike_distance@ + @max_ped_distance@ + @max_ped_distance@</code>.</li>
 <li>Input: <code>hwy\mtc_ped_network.net</code>, the pedestrian network</li>
-<li>
-<p>Output: <code>hwy\tap_to_taz_for_parking.txt</code>, a CSV with columns</p>
-<ol>
+<li>Output: <code>hwy\tap_to_taz_for_parking.txt</code>, a CSV with columns<ol>
 <li>origin TAP</li>
 <li>destination TAZ</li>
 <li>destination TAZ (repeated)</li>
@@ -1019,18 +1019,18 @@
 <li>total <strong>FEET</strong></li>
 </ol>
 </li>
+</ul>
+</li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/tap_data_builder.py"><code>preprocess\tap_data_builder.py</code></a></p>
-</li>
+<ul>
 <li>Summary: Maps TAPs to the closest TAZ for that TAP (via <strong>FEET</strong>).</li>
 <li>Input:<ol>
 <li><code>hwy\mtc_final_network_zone_seq.csv</code>, the mapping of CUBE roadway nodes to renumbered TAZs, MAZs and TAPs</li>
 <li><code>hwy\tap_to_taz_for_parking.txt</code>, listing the shortest pedestrian distance from all TAPs to all TAZs</li>
 </ol>
 </li>
-<li>
-<p>Output: <code>hwy\tap_data.csv</code> (<strong>TODO</strong>: name this better?), a CSV with columns</p>
-<ol>
+<li>Output: <code>hwy\tap_data.csv</code> (<strong>TODO</strong>: name this better?), a CSV with columns<ol>
 <li>TAP - the tap number (in CTRAMP sequential numbering)</li>
 <li>TAP_original - the original tap number (in the CUBE network)</li>
 <li>lotid - the lot id; this is the same as TAP right now</li>
@@ -1038,9 +1038,11 @@
 <li>capacity - the capacity of the lot; this is set to 9999 by default, but could be changed after this process has run</li>
 </ol>
 </li>
+</ul>
+</li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/SetTolls.JOB"><code>preprocess\SetTolls.JOB</code></a></p>
-</li>
+<ul>
 <li>Summary: Converts <strong>TOLLBOOTH</strong> attribute to toll attributes (by vehicle class and time period) on the network.</li>
 <li>Input:<ol>
 <li><code>hwy\mtc_final_network.net</code>, the roadway network</li>
@@ -1048,25 +1050,23 @@
 <li><code>hwy\value_tolls.csv</code>, maps <strong>TOLLBOOTH</strong> to value tolls, which can be distance-based.</li>
 </ol>
 </li>
-<li>
-<p>Output: <code>hwy\mtc_final_network_with_tolls.net</code>, the roadway network with additional link attributes <strong>TOLLXX_YY</strong>, where XX is the timeperiod and YY is the vehicle class.</p>
+<li>Output: <code>hwy\mtc_final_network_with_tolls.net</code>, the roadway network with additional link attributes <strong>TOLLXX_YY</strong>, where XX is the timeperiod and YY is the vehicle class.</li>
+</ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/SetHovXferPenalties.JOB"><code>preprocess\SetHovXferPenalties.JOB</code></a></p>
-</li>
+<ul>
 <li>Summary: Adds <strong>HovXPen</strong> attribute to roadway network for HOV to non-HOV in theory, but actually does nothing.  <strong>TODO</strong> Deprecate script or make it do something.</li>
 <li>Input: <code>hwy\mtc_final_network_with_tolls.net</code>, the roadway network</li>
-<li>
-<p>Output: same with <strong>HovXPen</strong> attribute added if this ever comes back.  <a href="https://github.com/MetropolitanTransportationCommission/travel-model-one/blob/master/model-files/scripts/preprocess/SetHovXferPenalties.JOB">Travel Model One sets it to 0.5.</a></p>
+<li>Output: same with <strong>HovXPen</strong> attribute added if this ever comes back.  <a href="https://github.com/MetropolitanTransportationCommission/travel-model-one/blob/master/model-files/scripts/preprocess/SetHovXferPenalties.JOB">Travel Model One sets it to 0.5.</a></li>
+</ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/SetCapClass.job"><code>preprocess\SetCapClass.job</code></a></p>
-</li>
+<ul>
 <li>Summary: Adds area type and capcity class to the roadway network based on the weighted population and employment density of the nearby MAZs for the link (via <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/codeLinkAreaType.py"><code>preprocess\codeLinkAreaType.py</code></a></li>
 <li>Input: <code>hwy\mtc_final_network_with_tolls.net</code>, the roadway network</li>
-<li>
-<p>Output: same with <strong>AT</strong> attribute added to those links with <strong>CNTYPE</strong> one of ("TANA","USE","TAZ","EXT"), set to -1 otherwise.  <strong>CAPCLASS</strong> = 10x <strong>AT</strong> + <strong>FT</strong>.  Area types are as follows:</p>
-<ul>
+<li>Output: same with <strong>AT</strong> attribute added to those links with <strong>CNTYPE</strong> one of ("TANA","USE","TAZ","EXT"), set to -1 otherwise.  <strong>CAPCLASS</strong> = 10x <strong>AT</strong> + <strong>FT</strong>.  Area types are as follows:<ul>
 <li>0: regional core</li>
 <li>1: central business district</li>
 <li>2: urban business</li>
@@ -1075,34 +1075,36 @@
 <li>5: rural</li>
 </ul>
 </li>
+</ul>
+</li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/CreateFiveHighwayNetworks.job"><code>preprocess\CreateFiveHighwayNetworks.job</code></a></p>
-</li>
+<ul>
 <li>Summary: Creates per-timeperiod roadway networks for assignment and skimming<ol>
 <li>Deletes links with <strong>ASSIGNABLE</strong> = 0</li>
 <li>Deletes links with <strong>CNTYPE</strong> = 'TANA' and <strong>NUMLANES</strong> = 0</li>
 <li>Deletes links with <strong>CNTYPE</strong> not one of ("TANA","MAZ","TAZ","TAP","EXT")</li>
 <li>Sets freeflow time (in minutes) <strong>FFT</strong> based on <strong>FEET</strong> and <strong>FFS</strong>, freeflow speed.</li>
-<li>Variously deletes/changes <strong>USECLASS</strong>, <strong>NUMLANES</strong>, <strong>FFT</strong> or new field <strong>CTIM</strong> (congested time, which is set to be equal to <strong>FFT</strong> here) for special (mostly bridge) links. </li>
+<li>Variously deletes/changes <strong>USECLASS</strong>, <strong>NUMLANES</strong>, <strong>FFT</strong> or new field <strong>CTIM</strong> (congested time, which is set to be equal to <strong>FFT</strong> here) for special (mostly bridge) links.</li>
 <li><strong>TODO</strong>: <strong>CTIM</strong> == <strong>FFT</strong> so not sure why this is added here?  Also, the reversible lanes links and the shared road bypass links with their nodes are all hard-coded into the script... why not configure this?</li>
 </ol>
 </li>
 <li>Input: <code>hwy\mtc_final_network_with_tolls.net</code>, the roadway network</li>
-<li>
-<p>Output: <code>hwy\avgload[EA,AM,MD,PM,EV].net</code>, the per-timeperiod roadway networks</p>
+<li>Output: <code>hwy\avgload[EA,AM,MD,PM,EV].net</code>, the per-timeperiod roadway networks</li>
+</ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/BuildTazNetworks.job"><code>preprocess\BuildTazNetworks.job</code></a></p>
 <ul>
 <li>Summary: Create TAZ-based roadway networks for skimming and assignments by renumbering the nodes so TAZs (and externals TAZs) are sequential and start at 1 and the rest of the nodes are sequential and start at 1,000,001.</li>
-</ul>
-</li>
 <li>Input: <code>hwy\avgload[EA,AM,MD,PM,EV].net</code>, the per-timeperiod roadway networks</li>
-<li>Output: <ol>
+<li>Output:<ol>
 <li><code>hwy\avgload[EA,AM,MD,PM,EV]_taz.net</code>, the per-timeperiod roadway networks with renumbered nodes.  New node attribute <strong>OLD_NODE</strong> preserves mapping to original node number, as does new link attribues <strong>OLD_A</strong> and <strong>OLD_B</strong>.</li>
 <li><code>hwy\avgload[EA,AM,MD,PM,EV]_taz_to_node.txt</code>, text version (<strong>TODO</strong>: for what?)</li>
 <li><code>hwy\msaload[EA,AM,MD,PM,EV]_taz.net</code> is the same as <code>hwy\avgload[EA,AM,MD,PM,EV]_taz.net</code> but with new link variables <strong>vol</strong>, <strong>vc</strong>, <strong>vol_[da,s2,s3,sm,hv][T?]</strong>, and <strong>volT</strong> initialized to zero.</li>
 </ol>
+</li>
+</ul>
 </li>
 </ol>
 <h2 id="shortest-path-skims">Shortest Path Skims</h2>
@@ -1111,23 +1113,24 @@
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/NonMotorizedSkims.job"><code>skims\NonMotorizedSkims.job</code></a></p>
 <ul>
 <li>Summary: Creates 6 types of non-motorized shortest-path skims using Cube's shortest-path utility.</li>
-<li><strong>TODO</strong>: This creates uses cube to create a bunch of cube scripts which I find pretty awkward.  It also could
-  do more parallelizing and is limited to 9 (one per county) at present. 
-  Use python to create the cubescript?  It would be easier to make flexible and run the pieces
-  on an arbitrary number of nodes.</li>
-<li>Input: </li>
+<li><strong>TODO</strong>: This creates uses cube to create a bunch of cube scripts which I find pretty awkward. It also could do more parallelizing and is limited to 9 (one per county) at present. Use python to create the cubescript?  It would be easier to make flexible and run the pieces on an arbitrary number of nodes.</li>
+<li>Input:<ol>
 <li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/maxCosts.block"><code>CTRAMP\scripts\block\maxCosts.block</code></a></li>
 <li><code>hwy\mtc_ped_network.net</code>, the pedestrian network</li>
 <li><code>hwy\mtc_bike_network.net</code>, the bike network</li>
 <li><code>hwy\mtc_tap_ped_network.net</code>, the tap-tap pedestrian network</li>
 <li><code>hwy\mtc_final_network_zone_seq.csv</code>, used to <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/resequence_columns.py">resequence columns</a> in the skims</li>
-<li>Output: </li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>skims\ped_distance_maz_maz.csv</code>, the pedestrian MAZ to MAZ skims</li>
 <li><code>skims\ped_distance_maz_tap.csv</code>, the pedestrian MAZ to TAP skims</li>
 <li><code>skims\bike_distance_maz_maz.csv</code>, the bicycle MAZ to MAZ skims</li>
 <li><code>skims\bike_distance_maz_tap.csv</code>, the bicycle MAZ to TAP skims</li>
 <li><code>skims\bike_distance_taz_taz.csv</code>, the bicycle TAZ to TAZ skims</li>
 <li><code>skims\ped_distance_tap_tap.csv</code>, the pedestrian TAP to TAP skims</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
@@ -1135,11 +1138,13 @@
 <ul>
 <li>Summary: Creates auto shortest-path skims for MAZ-to-MAZ using Cube's shortest-paths utility.</li>
 <li><strong>TODO</strong>: Same note as <code>NonMotorizedSkims.job</code>.  Could share same python scripts for distributing and for creating scripts.</li>
-<li>Input:</li>
+<li>Input:<ol>
 <li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/maxCosts.block"><code>CTRAMP\scripts\block\maxCosts.block</code></a>, which limits the <em>max_drive_gencost</em></li>
 <li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyparam.block"><code>CTRAMP\scripts\block\hwyparam.block</code></a></li>
 <li><code>hwy\autoopcost.properties</code>, auto and truck operating costs</li>
 <li><code>hwy\avgload[EA,AM,MD,PM,EV].net</code>, the per-timeperiod roadway networks with renumbered nodes</li>
+</ol>
+</li>
 <li>Output: <code>skims\HWYSKIM_MAZMAZ_DA.csv</code>, the auto MAZ to MAZ skims.  Columns are: <em>ORIG_MAZ</em>, <em>DEST_MAZ</em>, <em>DEST2_MAZ</em>, <em>GENCOST</em>, <em>FEET</em>, <em>BRIDGE_TOLL</em></li>
 </ul>
 </li>
@@ -1159,14 +1164,18 @@
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/HwySkims.job"><code>skims\HwySkims.job</code></a></p>
 <ul>
 <li>Summary: Creates roadway skims.</li>
-<li>Input:</li>
+<li>Input:<ol>
 <li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/block/hwyparam.block"><code>CTRAMP\scripts\block\hwyparam.block</code></a> for value of time</li>
 <li><code>hwy\autoopcost.properties</code>, auto and truck operating costs</li>
 <li><code>hwy\avgload[EA,AM,MD,PM,EV]_taz.net</code>, the per-timeperiod roadway networks with renumbered nodes</li>
-<li>Output:</li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>skims\HWYSKM[EA,AM,MD,PM,EV]_taz.tpp</code>, level of service matrices for autos</li>
 <li><code>skims\COM_HWYSKIM[EA,AM,MD,PM,EV]_taz.tpp</code>, level of service matrices for commercial vehicles</li>
 <li><code>logs\HwySkims.debug</code>, a debug log file for a trace origin/destination</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
@@ -1174,30 +1183,38 @@
 <ul>
 <li>Summary: First, this script runs <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/build_walk_transfer_bypass_links.py"><code>build_walk_transfer_bypass_links.py</code></a>, which creates "pseudo TAP" nodes, which are the TAP nodes offset a small distance, and creates links for pseudo TAPs to stops and vice versa, as well as pseudo TAP to pseudo TAP links.  It then incorporates these new nodes and links (with CNTYPE=<code>TRWALK</code>), and adds new link attributes <strong>WALKDIST</strong>, <strong>WALKTIME</strong>, <strong>NTL_MODE</strong>, and <strong>TRANTIME</strong>.  The networks are renumbered so that all TAPS are sequential and first, and <strong>CNTYPE</strong> <code>MAZ</code>, <code>TAZ</code>, <code>PED</code>, <code>BIKE</code>, and <code>EXT</code> are dropped, and <strong>TRANTIME</strong> is imported from per-time period loaded roadway networks.</li>
 <li><strong>TODO</strong>: <strong>TRANTIME</strong> is based on assumed speeds by <strong>CNTYPE</strong> and those speeds are hardcoded into this script.</li>
-<li>Input:</li>
+<li>Input:<ol>
 <li><code>hwy\mtc_final_network.net</code>, the roadway network</li>
 <li><code>skims\ped_distance_tap_tap-origN.csv</code>, the pedestrian TAP to TAP skims</li>
 <li><code>hwy\avgload[EA,AM,MD,PM,EV].net</code>, the congested network (<strong>TODO</strong>: Is this generated with real congested times?  Currently, it's not, I don't think.)</li>
-<li>Output:</li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>hwy\mtc_transit_network_tap_to_node.txt</code>, mapping of renumbered nodes.</li>
 <li><code>hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net</code>, transit network with renumbered nodes, TAP first pseudo TAP nodes and links, and <em>TRANTIME</em> attribute from congested roadway link time.</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/build_drive_access_skims.py"><code>skims\build_drive_access_skims.py</code></a></p>
 <ul>
-<li>Summary: Called by <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job"><code>skims\TransitSkims.job</code></a>, below, this script creates drive access links from TAZs to TAPs.  This process involves:</li>
+<li>Summary: Called by <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job"><code>skims\TransitSkims.job</code></a>, below, this script creates drive access links from TAZs to TAPs.  This process involves:<ol>
 <li><code>trn\transitLines.lin</code> is read to determine the set of stops that are accessible for each (timeperiod, transit mode (see <a href="http://metropolitantransportationcommission.github.io/travel-model-two/guide/#node-attributes">network node attributes</a> for transit modes).</li>
 <li><code>hwy\mtc_final_network_tap_links.csv</code> is read to link those stops with their TAPs and find the set of TAPs we want to access for each (timeperiod, mode)</li>
 <li><code>skims\ped_distance_maz_tap.csv</code> is read to find the associate the nearest MAZ to each of those TAPs (along with the walk distance)</li>
 <li><code>landuse\maz_data.csv</code> correspondingly assocates each MAZ with its containing TAZ</li>
 <li>These are all regarded as destination TAP/MAZ/TAZs.  For each timeperiod, each origin TAZ needs a path to a TAP for each mode.  This is found by combining a generalized driving cost from the driving skim, <code>skims\DA_[EA,AM,MD,PM,EV]_taz_time.csv</code> along with the MAZ to TAP walk time to find the optimal TAZ to MAZ to TAP walk.</li>
-<li>Input: Those files listed above, plus</li>
+</ol>
+</li>
+<li>Input: Those files listed above, plus<ol>
 <li><code>CTRAMP\scripts\block\hwyParam.block</code> for value of time</li>
 <li><code>hwy\autoopcost.properties</code> for auto operating cost, to create generalized cost for drive</li>
 <li><code>hwy\mtc_final_network_zone_seq</code>, for translating between TAPs, MAZs, TAZs and their renumbered versions</li>
 <li><code>hwy\mtc_final_network_tap_nodes.csv</code> for corresponding TAPs with their transit nodes</li>
-<li>Output: <code>skims\drive_maz_taz_tap.csv</code> with the following columns:</li>
+</ol>
+</li>
+<li>Output: <code>skims\drive_maz_taz_tap.csv</code> with the following columns:<ol>
 <li>ORIG_TAZ   - Origin TAZ (sequential numbering)</li>
 <li>MODE       - The (transit) mode</li>
 <li>TIMEPERIOD - The time period</li>
@@ -1208,41 +1225,49 @@
 <li>DRIVE_DIST - Drive distance from ORIG_TAZ to DEST_TAZ (miles)</li>
 <li>DRIVE_BTOLL- Drive bridge toll from ORIG_TAZ to DEST_TAZ (in year 2010 cents)</li>
 <li>WALK_DIST  - Walk access distance from the MAZ centroid to the TAP (feet)</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/tap_lines.py"><code>skims\tap_lines.py</code></a></p>
 <ul>
 <li>Summary: Called by <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job"><code>skims\TransitSkims.job</code></a>, below, this script outputs a list of TAPs and the lines that serve that TAP</li>
-<li>Input:</li>
+<li>Input:<ol>
 <li><code>trn\transitLines.lin</code>, the transit lines</li>
 <li><code>hwy\mtc_final_network_tap_links.csv</code>, the TAP to node connectors</li>
 <li><code>hwy\mtc_final_network_zone_seq.csv</code>, for translating between TAPs, MAZs, TAZs and their renumbered versions</li>
-<li>Output: <code>trn\tapLines.csv</code> with the following columns:</li>
+</ol>
+</li>
+<li>Output: <code>trn\tapLines.csv</code> with the following columns:<ol>
 <li>TAP: TAP (sequential numbering)</li>
 <li>LINES: space-delimited list of names of lines serving the TAP</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job"><code>skims\TransitSkims.job</code></a></p>
 <ul>
 <li>Summary: In addition to running <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/build_drive_access_skims.py"><code>skims\build_drive_access_skims.py</code></a>, <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/tap_lines.py"><code>skims\tap_lines.py</code></a>, and <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/renumber_transit_line_nodes.py"><code>skims\renumber_transit_line_nodes.py</code></a>, creates 3 sets of transit skims per time period via Citilabs Public Transport Module</li>
-<li>Input:</li>
+<li>Input:<ol>
 <li><code>hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net</code>, transit network</li>
 <li><code>trn\transitLines_new_nodes.lin</code>, the transit lines with nodes renumbered</li>
 <li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/trn/transit_support/transitSystem.PTS"><code>trn\transitSystem.PTS</code></a>, the Public Transport System data file defines wait curve definitions</li>
 <li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/trn/transit_support/transitFactors_SET1.fac"><code>trn\transitFactors_SET[1,2,3].fac</code></a>, factors for each skim set</li>
 <li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/trn/transit_fares/fareMatrix.txt"><code>trn\fareMatrix.txt</code></a>, the fare matrix</li>
 <li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/trn/transit_fares/fares.far"><code>trn\fares.far</code></a>, definitions of fare systems</li>
-<li>Output:</li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>trn\mtc_transit_network_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.net</code>, transit network (??)</li>
-<li><code>skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP</code>, the transit skims, with matrices<ol>
+<li><code>skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP</code>, the transit skims, with matrices<ul>
 <li>COMPCOST: composite cost, including walk, wait, boarding transfer and in-vehicle time, and fares</li>
 <li>IWAIT: average wait time incurred at the start of the trip for all attractive routes between zones</li>
 <li>XWAIT: average actual wait incurred at the transfer points of all attractive routes between zones</li>
 <li>XPEN: average actual transfer penalty for all attractive routes between zones</li>
 <li>BRDPEN: the boarding penalties associated with transit legs of the trip</li>
-<li>XFERS: the average number of transfers used by the attractive routes between zone pairs </li>
+<li>XFERS: the average number of transfers used by the attractive routes between zone pairs</li>
 <li>FARE: the average fare, in monetary units, for all attractive routes between zones</li>
 <li>XWTIME: transfer walk time</li>
 <li>AEWTIME: acess/egress walk time</li>
@@ -1252,12 +1277,14 @@
 <li>HR_TIME: heavy rail time</li>
 <li>CR_TIME: commuter rail time</li>
 <li>BEST_MODE: the "highest" mode with positive time, where commuter rail=5, heavy rail=4, light rail=3, express bus=2, local bus=1</li>
-</ol>
+</ul>
 </li>
 <li><code>trn\mtc_transit_lines_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.lin</code></li>
 <li><code>trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.ntl</code>, nontransit legs file</li>
 <li><code>trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rte</code>, enumerated routes</li>
 <li><code>trn\mtc_transit_report_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rpt</code>, reports from the route-enumeration and route-evaluation processes</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
@@ -1272,17 +1299,13 @@
 <h2 id="core">Core</h2>
 <ul>
 <li>Summary: The series of behavioral models where households and persons make decisions that ultimately result in daily trips.</li>
-<li>Configuration:<ol>
-<li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties"><code>mtctm2.properties</code></a> is the primary configuration file for all models</li>
-</ol>
-</li>
+<li>Configuration:
+        1. <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties"><code>mtctm2.properties</code></a> is the primary configuration file for all models</li>
 </ul>
 <h3 id="accessibilities"><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/accessibilities/BuildAccessibilities.java">Accessibilities</a></h3>
-<p>Summary: All accessibility measures for are calculated at the MAZ level. The auto travel times and cost are TAZ-based and the size variables are MAZ-based. This necessitates that auto accessibilities be calculated at the MAZ level.</p>
-<ul>
-<li>UEC: <a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities.xls</a></li>
-<li>Output: <code>acc.output.file = /ctramp_output/accessibilities.csv</code></li>
-</ul>
+<p>Summary: All accessibility measures for are calculated at the MAZ level. The auto travel times and cost are TAZ-based and the size variables are MAZ-based. This necessitates that auto accessibilities be calculated at the MAZ level.
+* UEC: <a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/model/Accessibilities.xls">Accessibilities.xls</a>
+* Output: <code>acc.output.file = /ctramp_output/accessibilities.csv</code></p>
 <h3 id="preautoownership"><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/core/src/java/com/pb/mtctm2/abm/ctramp/HouseholdAutoOwnershipModel.java">PreAutoOwnership</a></h3>
 <p>This step selects the preliminary auto ownership level for the household, based upon household demographic variables, household ‘4D’ variables, and destination-choice accessibility terms created in the <em>Accessibilities</em> sub-model (see above). This auto ownership level is used to create mode choice logsums for workers and students in the household, which are then used to select work and school locations in model <strong>UsualWorkAndSchoolLocationChoice</strong>. The auto ownership model is re-run (<em>AutoOwnership</em>) in order to select the actual auto ownership for the household, but this subsequent version is informed by the work and school locations chosen by the <strong>UsualWorkAndSchoolLocationChoice</strong> model. All other variables and coefficients are held constant between the two models, except for alternativespecific constants.</p>
 <ul>
@@ -1350,7 +1373,7 @@
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/merge_demand_matrices.s"><code>assign\merge_demand_matrices.s</code></a></p>
 <ul>
 <li>Summary: Consolidates the output matrix files from the core into TAZ- and TAP-level demand matrices.</li>
-<li>Input:</li>
+<li>Input:<ol>
 <li><code>ctramp_output\auto_[EA,AM,MD,PM,EV]_SOV_GP_[EA,AM,MD,PM,EV].mat</code>, auto single occupancy vehicle general purpose lane TAZ-to-TAZ demand matrix</li>
 <li><code>ctramp_output\auto_[EA,AM,MD,PM,EV]_SOV_PAY_[EA,AM,MD,PM,EV].mat</code>, auto single occupancy vehicle pay lane TAZ-to-TAZ demand matrix</li>
 <li><code>ctramp_output\auto_[EA,AM,MD,PM,EV]_SR2_GP_[EA,AM,MD,PM,EV].mat</code>, auto shared ride 2 general purpose lane TAZ-to-TAZ demand matrix</li>
@@ -1365,9 +1388,13 @@
 <li><code>ctramp_output\transit_[EA,AM,MD,PM,EV]_KNR_SET_set[1,2,3]_[EA,AM,MD,PM,EV].mat</code>, kiss-and-ride TAP-to-TAP transit demand matrix sets</li>
 <li><code>ctramp_output\transit_[EA,AM,MD,PM,EV]_PNR_SET_set[1,2,3]_[EA,AM,MD,PM,EV].mat</code>, park-and-ride TAP-to-TAP transit demand matrix sets</li>
 <li><code>ctramp_output\transit_[EA,AM,MD,PM,EV]_WLK_SET_set[1,2,3]_[EA,AM,MD,PM,EV].mat</code>, walk to transit TAP-to-TAP transit demand matrix sets</li>
-<li>Output:</li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>ctramp_output\TAZ_Demand_[EA,AM,MD,PM,EV].mat</code>, TAZ-to-TAZ demand matrices for the time period with matrices 1-11 direct from input files.</li>
 <li><code>ctramp_output\TAP_Demand_set[1,2,3]_[EA,AM,MD,PM,EV].mat</code>, TAP-to-TAP demand matrices for the time period and transit set</li>
+</ol>
+</li>
 </ul>
 </li>
 </ul>
@@ -1377,11 +1404,15 @@
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/nonres/IxForecasts.job"><code>nonres\IxForecasts.job</code></a></p>
 <ul>
 <li>Summary: Creates Internal/External production/attraction matrices for the model year.  Growth rates are embedded in the script.</li>
-<li>Input:</li>
+<li>Input:<ol>
 <li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two-networks/blob/master/INPUT_tm2_2000/nonres/IXDaily2006x4.may2208.new.mat"><code>nonres\ixDaily2006x4.may2208.new.mat</code></a>, base production/attraction matrix from Census journey-to-work data for 2006</li>
 <li>%MODEL_YEAR% in the environment</li>
-<li>Output</li>
+</ol>
+</li>
+<li>Output<ol>
 <li><code>nonres\ixDaily[%MODEL_YEAR%].tpp</code>, the internal/external daily P/A matrices.  Tables are: <em>ix_daily_da</em>, <em>ix_daily_sr2</em>, <em>ix_daily_sr3</em>, <em>ix_daily_total</em></li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
@@ -1396,13 +1427,17 @@
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/nonres/IxTollChoice.job"><code>nonres\IxTollChoice.job</code></a></p>
 <ul>
 <li>Summary: Applies a binomial choice model to drive alone, shared ride 2 and shared ride 3+ internal/external travel to determine of the traveler chooses the tolled path (if available) or non-tolled path.</li>
-<li>Input: </li>
+<li>Input:<ol>
 <li><code>nonres\tripsIx[EA,AM,MD,PM,EV]x.tpp</code>, the internal/external trips for the given time period, with no distinction between toll/notoll trips</li>
 <li><code>skims\HWYSKM[EA,AM,MD,PM,EV]_taz.tpp</code>, level of service matrices for autos</li>
 <li><code>ctramp\scripts\block\hwyparam.block</code> for <em>SR2COSTSHARE</em> and <em>SR3COSTSHARE</em></li>
 <li><code>hwy\autoopcost.properties</code> for auto operating cost</li>
-<li>Output:</li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>nonres\tripIx[EA,AM,MD,PM,EV].tpp</code>, the internal/external trips for the given time period.  Tables are <em>DA</em>, <em>SR2</em>, <em>SR3</em>, <em>DATOLL</em>, <em>SR2TOLL</em>, <em>SR3TOLL</em></li>
+</ol>
+</li>
 </ul>
 </li>
 </ol>
@@ -1411,20 +1446,24 @@
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/build_and_assign_maz_to_maz_auto.job"><code>assign\build_and_assign_maz_to_maz_auto.job</code></a></p>
 <ul>
-<li>Summary: Assigns short auto trips to highway network using MAZ centroids based on shortest paths. </li>
-<li>Input:  </li>
+<li>Summary: Assigns short auto trips to highway network using MAZ centroids based on shortest paths.</li>
+<li>Input:  <ol>
 <li><code>hwy\avgload@token_period@.net</code>, TAZ output network for skimming by time period</li>
 <li><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block"><code>hwy\hwyParam.block</code></a>, highway assignment generalized cost parameters</li>
 <li><code>MAZ_Demand_[MAZSET]_[EA,AM,MD,PM,EV].mat</code>, MAZ to MAZ auto demand for each local network</li>
-<li>Output: </li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>maz_preload_[EA,AM,MD,PM,EV].net</code>, Network by time period with link attribute MAZMAZVOL for copying over to the TAZ to TAZ highway assignment    </li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/hwyassign.job"><code>scripts\assign\HwyAssign.job</code></a></p>
 <ul>
 <li>Summary: Assigns trips to highway network using TAZ centroids and equilibrium capacity restraint assignment. Uses trimmed highway network which excludes lower-functional class links to improve runtime.</li>
-<li>Input: </li>
+<li>Input:<ol>
 <li><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block"><code>block\hwyParam.block</code></a>, highway assignment generalized cost parameters</li>
 <li><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/SpeedCapacity_1hour.block"><code>block\SpeedCapacity_1hour.block</code></a>, speed-capacity table</li>
 <li><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/FreeFlowSpeed.block"><code>block\FreeFlowSpeed.block</code></a>, free-flow speed table</li>
@@ -1434,63 +1473,83 @@
 <li><code>nonres\tripsIx[EA,AM,MD,PM,EV].tpp</code>, internal-external travel demand</li>
 <li><code>nonres\tripsTrk[EA,AM,MD,PM,EV].tpp</code>, commercial vehicle travel demand</li>
 <li><code>nonres\tripsAirPax[EA,AM,MD,PM,EV].mtx</code>, airport travel demand</li>
-<li>Output:</li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>hwy\load[EA,AM,MD,PM,EV].net</code>, loaded highway network</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/averagenetworkvolumes.job"><code>scripts\assign\AverageNetworkVolumes.job</code></a></p>
 <ul>
 <li>Summary: Compute the weighted average of roadway volumes for successive iterations of the entire model stream.  The iteration weights are set in the primary model stream file, RunModel.  This script averages the volumes from the current iteration with the averaged volumes for ALL previous iterations.  This method of successive averages "forces" model convergence.</li>
-<li>Input: </li>
+<li>Input:<ol>
 <li><code>hwy\msaload[EA,AM,MD,PM,EV]_taz.net</code>, an MSA network used to store averaged volumes for all previous iterations</li>
 <li><code>hwy\load[EA,AM,MD,PM,EV].net</code>, the loaded highway network from the current iteration</li>
-<li>Output:</li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>hwy\msaload[EA,AM,MD,PM,EV]_taz.net</code>, the new MSA network with averaged volumes for all iterations including the current iteration</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/calculateaveragespeed.job"><code>scripts\assign\CalculateAverageSpeed.job</code></a></p>
 <ul>
 <li>Summary: Computes the speeds from a highway network with successively averaged roadway volumes.</li>
-<li>Input: </li>
+<li>Input:<ol>
 <li><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/hwyParam.block"><code>block\hwyParam.block</code></a>, highway assignment generalized cost parameters</li>
 <li><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/SpeedCapacity_1hour.block"><code>block\SpeedCapacity_1hour.block</code></a>, speed-capacity table</li>
 <li><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/FreeFlowSpeed.block"><code>block\FreeFlowSpeed.block</code></a>, free-flow speed table</li>
 <li><a href="https://github.com/BayAreaMetro/travel-model-two/blob/master/model-files/scripts/block/SpeedFlowCurve.block"><code>block\SpeedFlowCurve.block</code></a>, volume-delay functions</li>
 <li><code>hwy\msaload[EA,AM,MD,PM,EV]_taz.net</code>, the new MSA network with averaged volumes for all iterations including the current iteration</li>
-<li>Output:</li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>hwy\avgload[EA,AM,MD,PM,EV]_taz.net</code>, a highway network with congested speeds according to MSA volumes by period</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/mergenetworks.job"><code>scripts\assign\MergeNetworks.job</code></a></p>
 <ul>
-<li>Summary: Merges time-period-specific assignment results into a single TP+ and CSV network.  The combined network is not used by the model stream.  Variables are first given time-period-specific names in the first step of the script and then the five networks are merged. Daily volumes, delay, vehicle-miles traveled, and vehicle-hours traveled calculations are performed.  Note that delay is computed as the difference between congested time and free-flow time. </li>
-<li>Input: </li>
+<li>Summary: Merges time-period-specific assignment results into a single TP+ and CSV network.  The combined network is not used by the model stream.  Variables are first given time-period-specific names in the first step of the script and then the five networks are merged. Daily volumes, delay, vehicle-miles traveled, and vehicle-hours traveled calculations are performed.  Note that delay is computed as the difference between congested time and free-flow time.</li>
+<li>Input:<ol>
 <li><code>hwy\msaload[EA,AM,MD,PM,EV]_taz.net</code>, highway networks with congested speeds according to MSA volumes by period</li>
-<li><code>hwy\msa[EA,AM,MD,PM,EV]_speeds.csv</code>, a comma-separated value file of speeds </li>
-<li>Output:</li>
+<li><code>hwy\msa[EA,AM,MD,PM,EV]_speeds.csv</code>, a comma-separated value file of speeds</li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>hwy\msamerge[ITERATION].net</code>, a merged network with assignment data for all time periods</li>
 <li><code>hwy\msamerge[ITERATION].csv</code>, a comma-separated value dump of the above network</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>
 <p><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/transitassign.job"><code>scripts\assign\TransitAssign.job</code></a></p>
 <ul>
 <li>Summary: Assigns transit trips for all time periods</li>
-<li>Input: </li>
+<li>Input:<ol>
 <li><code>trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net</code>, the auto network consistent with transit node numbers</li>
 <li><code>trn\transitLines_new_nodes.lin</code>, transit line file</li>
 <li><code>trn\transitSystem.PTS</code>, transit system file</li>
 <li><code>transitFactors_[SKIMSET=1,2,3].fac</code>, transit assignment factors</li>
 <li><code>trn\fareMatrix.txt</code>, transit fare matrix</li>
 <li><code>trn\fares.far</code>, transit fares by route</li>
-<li><code>ctramp_output\TAP_Demand_set[SKIMSET=1,2,3]_[EA,AM,MD,PM,EV].mat</code>, resident model transit demand matrix (TAP-TAP) </li>
-<li>Output:</li>
+<li><code>ctramp_output\TAP_Demand_set[SKIMSET=1,2,3]_[EA,AM,MD,PM,EV].mat</code>, resident model transit demand matrix (TAP-TAP)</li>
+</ol>
+</li>
+<li>Output:<ol>
 <li><code>trn\mtc_transit_network_[EA,AM,MD,PM,EV]_[SKIMSET=1,2,3]_with_transit_assign.net</code>, auto network with transit assignment results</li>
 <li><code>trn\mtc_transit_routes_[EA,AM,MD,PM,EV]_[SKIMSET=1,2,3]_with_transit_assign.rte</code>, transit routes with assignment results</li>
 <li><code>trn\mtc_transit_report_[EA,AM,MD,PM,EV]_[SKIMSET=1,2,3]_with_transit_assign.rpt</code>, transit assignment report file</li>
+</ol>
+</li>
 </ul>
 </li>
 </ol>
