@@ -98,12 +98,12 @@
     * Summary: Adds area type and capcity class to the roadway network based on the weighted population and employment density of the nearby MAZs for the link (via [`preprocess\codeLinkAreaType.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/codeLinkAreaType.py)
     * Input: `hwy\mtc_final_network_with_tolls.net`, the roadway network
     * Output: same with **AT** attribute added to those links with **CNTYPE** one of ("TANA","USE","TAZ","EXT"), set to -1 otherwise.  **CAPCLASS** = 10x **AT** + **FT**.  Area types are as follows:
-        * 0: regional core
-        * 1: central business district
-        * 2: urban business
-        * 3: urban
-        * 4: suburban
-        * 5: rural
+        - 0: regional core
+        - 1: central business district
+        - 2: urban business
+        - 3: urban
+        - 4: suburban
+        - 5: rural
 
 1. [`preprocess\CreateFiveHighwayNetworks.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/CreateFiveHighwayNetworks.job)
     * Summary: Creates per-timeperiod roadway networks for assignment and skimming

@@ -6,20 +6,26 @@ The table below contains brief descriptions of the input files required to execu
 
 | **Directory** | **File** | **Description** |
 |---------------|----------|-----------------|
-|  hwy\  |  [`complete_network.net`](#roadway-network)  |  Highway, bike, walk network  |
-|  landuse\  |  `mazData.csv`  |  Micro zone data   |
-|  landuse\  |  `tazData.csv`  |  Travel analysis zone data  |
-|  nonres\  |  `truckFF.dat`  |  Friction factors for the commercial vehicle distribution models  |
-|  nonres\  |  `truckkfact.k22.z1454.mat`  |  "K-factors" for the commercial vehicle distribution models  |
-|  nonres\  |  `truck_kfactors_taz.csv`  |  "K-factors" for the commercial vehicle distribution models  |
-|  nonres\  |  `ixDaily2015.tpp`  |  Internal-external fixed trip table for year YYYY  |
-|  nonres\  |  `IXDaily2006x4.may2208.new.mat`  |  Internal-external input fixed trip table  |
-|  nonres\  |   `YYYY_fromtoAAA.csv`  |  Airport passenger fixed trips for year YYYY and airport AAA   |
-|  popsyn\  |  `households.csv`  |  Synthetic population household file  |
-|  popsyn\  |  `persons.csv`  |  Synthetic population person file  |
-|  trn\ |  `transitLines.lin`  |  Transit lines  |
-|  trn\ |  `fareMatrix.txt`  |  |
-|  trn\ |  `station_attribute_data_input.csv`  |  |
+|  hwy\  | [ `complete_network.net` ](#roadway-network) | Highway, bike, walk network  |
+|  hwy\  | [ `tolls.csv` ](#roadway-network) | Contains toll prices for all facilities and all time periods |
+|  hwy\  | [ `interchange_nodes.csv` ](#roadway-network) | Identifies nodes connected to interchanges |
+|  landuse\  | [ `mazData.csv` ](#micro-zonal-data) | Micro zone data   |
+|  landuse\  | [ `tazData.csv` ](#zonal-data) | Travel analysis zone data  |
+|  nonres\  | [ `truckFF.dat` ](#truck-distribution) | Friction factors for the commercial vehicle distribution models  |
+|  nonres\  | [ `truck_kfactors_taz.csv` ](#truck-distribution) | "K-factors" for the commercial vehicle distribution models  |
+|  nonres\  | [ `ixDaily2015.tpp` ](#fixed-demand) | Internal-external fixed trip table for year 2015  |
+|  nonres\  | [ `ixDaily2015_totals.dbf` ](#fixed-demand) | Internal-external total trips table for year 2015  |
+|  nonres\  | [  `YYYY_fromtoAAA.csv` ](#fixed-demand) | Airport passenger fixed trips for year YYYY and airport AAA   |
+|  nonres\  | [ `ixex_config.dbf` ](#fixed-demand) | Station-specific growth rates and commute shares for each forecast year |
+|  popsyn\  | [ `households.csv` ](#synthetic-population) | Synthetic population household file  |
+|  popsyn\  | [ `persons.csv` ](#synthetic-population) | Synthetic population person file  |
+|  trn\ | [ `transitLines.lin` ](#transit-network) | Transit lines  |
+|  trn\ | [ `station_attribute_data_input.csv` ](#transit-network) | Station attributes |
+|  trn\ | [ `vehtype.pts` ](#transit-network) | Vehicle types |
+|  trn\ | [ `roadway-assignment-names-helper.csv` ](#transit-network) | Names for model links |
+|  trn\ | [ `fareMatrix.txt` ](#transit-fares) | Matrix containing transit fares |
+|  trn\ | [ `fares.far` ](#transit-fares) | Used to run fare calculations for Emme scenario |
+|
 
 
 ## Time Periods
@@ -267,14 +273,14 @@ The following transit modes are defined based on the [Open511](https://511.org/d
 ### Transit Fares
 
 Transit fares are modeled in Cube's Public Transport (PT) program as follows:
-  1. Each transit mode is assigned a fare system in the Cube factor files
-  1. Each fare system is defined in the fares.far fare file
-  1. Each fare system is either FROMTO (fare zone based) or FLAT (initial + transfer in fare)
-  1. For FROMTO fare systems:
+* Each transit mode is assigned a fare system in the Cube factor files
+* Each fare system is defined in the fares.far fare file
+* Each fare system is either FROMTO (fare zone based) or FLAT (initial + transfer in fare)
+* For FROMTO fare systems:
     1. Each stop node is assigned a FAREZONE ID in the master network
     1. The fare is looked up from the fare matrix (fareMatrix.txt), which is a text file with the following columns: MATRIX ZONE_I ZONE_J VALUE
     1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file
-  1. For FLAT fare systems:
+* For FLAT fare systems:
     1. The initial fare is defined via the IBOARDFARE in the fares.far file
     1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file
 
