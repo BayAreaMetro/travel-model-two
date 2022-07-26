@@ -870,72 +870,102 @@
 <tbody>
 <tr>
 <td>hwy\</td>
-<td><a href="#roadway-network"><code>complete_network.net</code></a></td>
+<td><a href="#roadway-network"> <code>complete_network.net</code> </a></td>
 <td>Highway, bike, walk network</td>
 </tr>
 <tr>
+<td>hwy\</td>
+<td><a href="#roadway-network"> <code>tolls.csv</code> </a></td>
+<td>Contains toll prices for all facilities and all time periods</td>
+</tr>
+<tr>
+<td>hwy\</td>
+<td><a href="#roadway-network"> <code>interchange_nodes.csv</code> </a></td>
+<td>Identifies nodes connected to interchanges</td>
+</tr>
+<tr>
 <td>landuse\</td>
-<td><code>mazData.csv</code></td>
+<td><a href="#micro-zonal-data"> <code>mazData.csv</code> </a></td>
 <td>Micro zone data</td>
 </tr>
 <tr>
 <td>landuse\</td>
-<td><code>tazData.csv</code></td>
+<td><a href="#zonal-data"> <code>tazData.csv</code> </a></td>
 <td>Travel analysis zone data</td>
 </tr>
 <tr>
 <td>nonres\</td>
-<td><code>truckFF.dat</code></td>
+<td><a href="#truck-distribution"> <code>truckFF.dat</code> </a></td>
 <td>Friction factors for the commercial vehicle distribution models</td>
 </tr>
 <tr>
 <td>nonres\</td>
-<td><code>truckkfact.k22.z1454.mat</code></td>
+<td><a href="#truck-distribution"> <code>truck_kfactors_taz.csv</code> </a></td>
 <td>"K-factors" for the commercial vehicle distribution models</td>
 </tr>
 <tr>
 <td>nonres\</td>
-<td><code>truck_kfactors_taz.csv</code></td>
-<td>"K-factors" for the commercial vehicle distribution models</td>
+<td><a href="#fixed-demand"> <code>ixDaily2015.tpp</code> </a></td>
+<td>Internal-external fixed trip table for year 2015</td>
 </tr>
 <tr>
 <td>nonres\</td>
-<td><code>ixDaily2015.tpp</code></td>
-<td>Internal-external fixed trip table for year YYYY</td>
+<td><a href="#fixed-demand"> <code>ixDaily2015_totals.dbf</code> </a></td>
+<td>Internal-external total trips table for year 2015</td>
 </tr>
 <tr>
 <td>nonres\</td>
-<td><code>IXDaily2006x4.may2208.new.mat</code></td>
-<td>Internal-external input fixed trip table</td>
-</tr>
-<tr>
-<td>nonres\</td>
-<td><code>YYYY_fromtoAAA.csv</code></td>
+<td><a href="#fixed-demand">  <code>YYYY_fromtoAAA.csv</code> </a></td>
 <td>Airport passenger fixed trips for year YYYY and airport AAA</td>
 </tr>
 <tr>
+<td>nonres\</td>
+<td><a href="#fixed-demand"> <code>ixex_config.dbf</code> </a></td>
+<td>Station-specific growth rates and commute shares for each forecast year</td>
+</tr>
+<tr>
 <td>popsyn\</td>
-<td><code>households.csv</code></td>
+<td><a href="#synthetic-population"> <code>households.csv</code> </a></td>
 <td>Synthetic population household file</td>
 </tr>
 <tr>
 <td>popsyn\</td>
-<td><code>persons.csv</code></td>
+<td><a href="#synthetic-population"> <code>persons.csv</code> </a></td>
 <td>Synthetic population person file</td>
 </tr>
 <tr>
 <td>trn\</td>
-<td><code>transitLines.lin</code></td>
+<td><a href="#transit-network"> <code>transitLines.lin</code> </a></td>
 <td>Transit lines</td>
 </tr>
 <tr>
 <td>trn\</td>
-<td><code>fareMatrix.txt</code></td>
-<td></td>
+<td><a href="#transit-network"> <code>station_attribute_data_input.csv</code> </a></td>
+<td>Station attributes</td>
 </tr>
 <tr>
 <td>trn\</td>
-<td><code>station_attribute_data_input.csv</code></td>
+<td><a href="#transit-network"> <code>vehtype.pts</code> </a></td>
+<td>Vehicle types</td>
+</tr>
+<tr>
+<td>trn\</td>
+<td><a href="#transit-network"> <code>roadway-assignment-names-helper.csv</code> </a></td>
+<td>Names for model links</td>
+</tr>
+<tr>
+<td>trn\</td>
+<td><a href="#transit-fares"> <code>fareMatrix.txt</code> </a></td>
+<td>Matrix containing transit fares</td>
+</tr>
+<tr>
+<td>trn\</td>
+<td><a href="#transit-fares"> <code>fares.far</code> </a></td>
+<td>Used to run fare calculations for Emme scenario</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
 <td></td>
 </tr>
 </tbody>
@@ -2173,14 +2203,14 @@
 </table>
 <h3 id="transit-fares">Transit Fares</h3>
 <p>Transit fares are modeled in Cube's Public Transport (PT) program as follows:
-  1. Each transit mode is assigned a fare system in the Cube factor files
-  1. Each fare system is defined in the fares.far fare file
-  1. Each fare system is either FROMTO (fare zone based) or FLAT (initial + transfer in fare)
-  1. For FROMTO fare systems:
+* Each transit mode is assigned a fare system in the Cube factor files
+* Each fare system is defined in the fares.far fare file
+* Each fare system is either FROMTO (fare zone based) or FLAT (initial + transfer in fare)
+* For FROMTO fare systems:
     1. Each stop node is assigned a FAREZONE ID in the master network
     1. The fare is looked up from the fare matrix (fareMatrix.txt), which is a text file with the following columns: MATRIX ZONE_I ZONE_J VALUE
     1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file
-  1. For FLAT fare systems:
+* For FLAT fare systems:
     1. The initial fare is defined via the IBOARDFARE in the fares.far file
     1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file</p>
 <h2 id="micro-zonal-data">Micro Zonal Data</h2>
