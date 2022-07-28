@@ -2,23 +2,31 @@
 
 ## Input File List
 
-The table below contains brief descriptions of the input files required to execute the travel model. 
+The table below contains brief descriptions of the input files required to execute the travel model.
 
-| **File name** | **Purpose** | **Folder location** | **File type** | **File format** |
-|---------------|-------------|---------------------|---------------|-----------------|
-| `mtc_final_network.net` | Highway, bike, walk network | hwy\ | [Citilabs Cube](http://citilabs.com/products/cube)| [Roadway Network](#roadway-network) |
-| `mazData.csv` | Micro zone data  | landuse\ | CSV | [Micro Zonal Data](#micro-zonal-data) |
-| `tazData.csv` | Travel analysis zone data | landuse\ | CSV | [Zonal Data](#zonal-data) |
-| `truckFF.dat` | Friction factors for the commercial vehicle distribution models | nonres\ | ASCII | [Truck Distribution](#truck-distribution) |
-| `truckkfact.k22.z1454.mat` | "K-factors" for the commercial vehicle distribution models | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Truck Distribution](#truck-distribution) |
-| `truck_kfactors_taz.csv` | "K-factors" for the commercial vehicle distribution models | nonres\ | CSV | [Truck Distribution](#truck-distribution) |
-| `ixDailyYYYY.tpp` | Internal-external fixed trip table for year YYYY | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Fixed Demand](#fixed-demand) |
-| `IXDaily2006x4.may2208.new` | Internal-external input fixed trip table | nonres\ | [Citilabs Cube](http://citilabs.com/products/cube) | [Fixed Demand](#fixed-demand) |
-|  `YYYY_fromtoAAA.csv` |  Airport passenger fixed trips for year YYYY and airport AAA  | nonres\ | CSV | [Fixed Demand](#fixed-demand) |
-| `households.csv` | Synthetic population household file | popsyn\ | CSV | PopSynHousehold |
-| `persons.csv` | Synthetic population person file | popsyn\ | CSV |   |
-| `transitLines.lin` | Transit lines | trn\transit_lines | [Citilabs Cube](http://citilabs.com/products/cube)| TransitNetwork  |
-| `transitFactors_MMMM.fac` | Cube Public Transport (PT) factor files by transit line haul mode MMMM | trn\transit_support | [Citilabs Cube](http://citilabs.com/products/cube) | TransitNetwork |
+| **Directory** | **File** | **Description** |
+|---------------|----------|-----------------|
+|  hwy\  | [ `complete_network.net` ](#roadway-network) | Highway, bike, walk network  |
+|  hwy\  | [ `tolls.csv` ](#roadway-network) | Contains toll prices for all facilities and all time periods |
+|  hwy\  | [ `interchange_nodes.csv` ](#roadway-network) | Identifies nodes connected to interchanges |
+|  landuse\  | [ `mazData.csv` ](#micro-zonal-data) | Micro zone data   |
+|  landuse\  | [ `tazData.csv` ](#zonal-data) | Travel analysis zone data  |
+|  nonres\  | [ `truckFF.dat` ](#truck-distribution) | Friction factors for the commercial vehicle distribution models  |
+|  nonres\  | [ `truck_kfactors_taz.csv` ](#truck-distribution) | "K-factors" for the commercial vehicle distribution models  |
+|  nonres\  | [ `ixDaily2015.tpp` ](#fixed-demand) | Internal-external fixed trip table for year 2015  |
+|  nonres\  | [ `ixDaily2015_totals.dbf` ](#fixed-demand) | Internal-external total trips table for year 2015  |
+|  nonres\  | [  `YYYY_fromtoAAA.csv` ](#fixed-demand) | Airport passenger fixed trips for year YYYY and airport AAA   |
+|  nonres\  | [ `ixex_config.dbf` ](#fixed-demand) | Station-specific growth rates and commute shares for each forecast year |
+|  popsyn\  | [ `households.csv` ](#synthetic-population) | Synthetic population household file  |
+|  popsyn\  | [ `persons.csv` ](#synthetic-population) | Synthetic population person file  |
+|  trn\ | [ `transitLines.lin` ](#transit-network) | Transit lines  |
+|  trn\ | [ `station_attribute_data_input.csv` ](#transit-network) | Station attributes |
+|  trn\ | [ `vehtype.pts` ](#transit-network) | Vehicle types |
+|  trn\ | [ `roadway-assignment-names-helper.csv` ](#transit-network) | Names for model links |
+|  trn\ | [ `fareMatrix.txt` ](#transit-fares) | Matrix containing transit fares |
+|  trn\ | [ `fares.far` ](#transit-fares) | Used to run fare calculations for Emme scenario |
+|
+
 
 ## Time Periods
 
@@ -52,7 +60,7 @@ Code  | County | TAZs | MAZs |  TAPs | Network Node | HOV Lane Node
 6 |	Solano |	500,001 – 509,999 |	510,001 – 589,999 |	590,001 – 599,999 |	3,500,000 – 4,000,000 |	8,000,000 – 8,500,000
 7 |	Napa |	600,001 – 609,999 |	610,001 – 689,999 |	690,001 – 699,999 |	4,000,000 – 4,500,000 |	8,500,000 – 9,000,000
 8 |	Sonoma |	700,001 – 709,999 |	710,001 – 789,999 |	790,001 – 799,999 |	4,500,000 – 5,000,000 |	9,000,000 – 9,000,000
-9 |	Marin |	800,001 – 809,999 |	810,001 – 889,999 |	890,001 – 899,999 |	5,000,000 – 5,500,000 |	9,500,000 – 9,999,999 
+9 |	Marin |	800,001 – 809,999 |	810,001 – 889,999 |	890,001 – 899,999 |	5,000,000 – 5,500,000 |	9,500,000 – 9,999,999
   | External | 900,001 - 999,999
 
 ### Node Attributes
@@ -169,7 +177,7 @@ The following link attributes are included on the master network.
 
 The transit network is made up of three core components: transit lines, transit modes, and transit fares.  The transit lines were built GTFS feeds from raound 2015.  The lines are coded with a mode (see below) and serve a series of stop nodes.  Transit fares are coded according to Cube's Public Transport program (see below).
 
-Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the [Level of Service Information](#level-of-service-information). 
+Transit trips are assigned between transit access points (TAPs), which represent individual or collections of transit stops for transit access/egress.  TAPs are essentially transit specific TAZs that are automatically coded based on the transit network.  See the [Level of Service Information](#level-of-service-information).
 
 ### Link Attributes
 
@@ -196,7 +204,7 @@ Transit trips are assigned between transit access points (TAPs), which represent
 
 ### Transit Modes
 
-The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology. 
+The following transit modes are defined based on the [Open511](https://511.org/developers/list/apis/) attributes (but not completely, since they came from the GTFS database predecessor, the Regional Transit Database).  These modes represent combinations of operators and technology.
 
 |TM2_operator|agency_name|TM2_mode                                     |TM2_line_haul_name|faresystem   |
 |------------|-----------|---------------------------------------------|------------------|-------------|
@@ -265,14 +273,14 @@ The following transit modes are defined based on the [Open511](https://511.org/d
 ### Transit Fares
 
 Transit fares are modeled in Cube's Public Transport (PT) program as follows:
-  1. Each transit mode is assigned a fare system in the Cube factor files
-  1. Each fare system is defined in the fares.far fare file
-  1. Each fare system is either FROMTO (fare zone based) or FLAT (initial + transfer in fare)
-  1. For FROMTO fare systems:
+* Each transit mode is assigned a fare system in the Cube factor files
+* Each fare system is defined in the fares.far fare file
+* Each fare system is either FROMTO (fare zone based) or FLAT (initial + transfer in fare)
+* For FROMTO fare systems:
     1. Each stop node is assigned a FAREZONE ID in the master network
     1. The fare is looked up from the fare matrix (fareMatrix.txt), which is a text file with the following columns: MATRIX ZONE_I ZONE_J VALUE
     1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file
-  1. For FLAT fare systems:
+* For FLAT fare systems:
     1. The initial fare is defined via the IBOARDFARE in the fares.far file
     1. The fare to transfer in from other modes is defined via the FAREFROMFS array (of modes) in the fares.far file
 
@@ -412,7 +420,7 @@ MTC uses a simple three-step (generation, distribution, and assignment) commerci
 ### Friction Factors
 
 The trip distribution step uses a standard gravity model with a blended travel time impedance measure. This file sets the friction factors, which are vehicle type specific, using an ASCII fixed format text file with the following data:
- 
+
  * Travel time in minutes (integer, starting in column 1, left justified);
  * Friction factors for very small trucks (integer, starting in column 9, left justified);
  * Friction factors for small trucks (integer, starting in column 17, left justified);
