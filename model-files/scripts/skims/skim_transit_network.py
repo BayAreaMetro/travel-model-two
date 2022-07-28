@@ -559,7 +559,7 @@ def perform_assignment_and_skim(modeller, scenario, period, assignment_only=Fals
     #     element_types=["TRANSIT_LINE", "TRANSIT_SEGMENT"], include_attributes=True)
 
     with _m.logbook_trace("Transit assignment and skims for period %s" % period):
-        # run_assignment(modeller, scenario, period, params, network, num_processors, use_fares, use_ccr)
+        run_assignment(modeller, scenario, period, params, network, num_processors, use_fares, use_ccr)
         network = scenario.get_network()
 
         if not assignment_only:

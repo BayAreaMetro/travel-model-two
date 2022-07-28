@@ -12,7 +12,8 @@
 :: RunModel.bat > model_run_out.txt 2>&1
 ::~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:: Step 0: Copy over CTRAMP from %GITHUB_DIR%, which should be set prior to this (e.g. in SetUpModel.bat)
+:: Step 0: Copy over CTRAMP from %GITHUB_DIR%
+ set GITHUB_DIR=F:\Projects\Clients\mtc\updated_networks\travel-model-two
  if not exist CTRAMP (
   mkdir CTRAMP\model
   mkdir CTRAMP\runtime
@@ -42,7 +43,7 @@ CALL CTRAMP\runtime\CTRampEnv.bat
 SET /A MAX_ITERATION=3
 
 :: Set the inner transit capacity restraint iterations
-SET /A MAX_INNER_ITERATION=1
+SET /A MAX_INNER_ITERATION=2
 
 ::  Set choice model household sample rate
 REM SET SAMPLERATE_ITERATION1=0.005
@@ -60,20 +61,21 @@ SET AV_SCENARIO=0
 SET BASE_SCRIPTS=CTRAMP\scripts
 
 :: expect conda to be in PATH
+set PATH=%CD%\CTRAMP\runtime;C:\Windows\System32;%JAVA_PATH%\bin;%TPP_PATH%;%CUBE_PATH%;%CUBE_DLL_PATH%;%PYTHON_PATH%;%PYTHON_PATH%\condabin;%PYTHON_PATH%\envs
 CALL conda activate %TM2_PYTHON_CONDA_ENV%
 IF ERRORLEVEL 2 goto done
 
 :: --------- restart block ------------------------------------------------------------------------------
 :: Use these only if restarting
-SET /A ITERATION=4
+SET /A ITERATION=1
 SET /A INNER_ITERATION=1
 IF %ITERATION% EQU 1 SET SAMPLERATE=%SAMPLERATE_ITERATION1%
 IF %ITERATION% EQU 2 SET SAMPLERATE=%SAMPLERATE_ITERATION2%
 IF %ITERATION% EQU 3 SET SAMPLERATE=%SAMPLERATE_ITERATION3%
 IF %ITERATION% EQU 4 SET SAMPLERATE=%SAMPLERATE_ITERATION4%
 IF %ITERATION% EQU 5 SET SAMPLERATE=%SAMPLERATE_ITERATION5%
-REM call zoneSystem.bat
-REM goto core
+REM CALL zoneSystem.bat
+REM goto nonres
 :: ------------------------------------------------------------------------------------------------------
 
 
@@ -315,8 +317,8 @@ IF ERRORLEVEL 1 goto done
 "%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\create_emme_network.py -p "trn" --name "mtc_emme" --first_iteration "yes"
 IF ERRORLEVEL 1 goto done
 
-:: Passing the port specified in the Emme Desktop GUI 
-:: see Tools > Application Options > Advanced.  
+:: Passing the port specified in the Emme Desktop GUI
+:: see Tools > Application Options > Advanced.
 :: At the bottom of the pane, there is text: "Desktop API is listening on port 4242."
 "%PYTHON_PATH%\python" %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --iteration 1 --skip_import_demand --port 4242
 IF ERRORLEVEL 1 goto done
@@ -402,9 +404,11 @@ IF %RUNTYPE%==DISTRIBUTED (
 )
 
 copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
+copy CTRAMP\runtime\mtcpcrm.properties mtcpcrm.properties    /Y
 call CTRAMP\runtime\runMTCTM2ABM.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
 if ERRORLEVEL 2 goto done
 del mtctm2.properties
+del mtcpcrm.properties
 
 taskkill /im "java.exe" /F
 
@@ -423,6 +427,8 @@ IF NOT %HH_SERVER%==localhost (
 :: copy results back over here
 ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.mat /NDL /NFL
 ROBOCOPY "%MATRIX_SERVER_BASE_DIR%\ctramp_output" ctramp_output *.omx /NDL /NFL
+
+echo FINISHED CTRAMP ITERATION %ITERATION%  %DATE% %TIME% >> logs\feedback.rpt
 
 :afterrobocopy
 "%TPP_PATH%\runtpp" CTRAMP\scripts\assign\merge_auto_matrices.s
@@ -465,6 +471,7 @@ if ERRORLEVEL 2 goto done
 "%TPP_PATH%\runtpp" CTRAMP\scripts\nonres\TruckTollChoice.job
 if ERRORLEVEL 2 goto done
 
+echo FINISHED NON-RES  %DATE% %TIME% >> logs\feedback.rpt
 :hwyasgn
 
 :: ------------------------------------------------------------------------------------------------------
@@ -496,6 +503,8 @@ IF %ITERATION% LSS %MAX_ITERATION% (
   if ERRORLEVEL 2 goto done
 )
 
+echo FINISHED HWY SKIMS %DATE% %TIME% >> logs\feedback.rpt
+
 "%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\BuildTransitNetworks.job
 if ERRORLEVEL 2 goto done
 
@@ -503,11 +512,8 @@ if ERRORLEVEL 2 goto done
 if ERRORLEVEL 2 goto done
 
 :emmeseconditeration
-:: changing to python 3 environment for emme
-CALL conda deactivate
-CALL conda activate mtc
 :: Emme project already created, just updating congested link times
-python %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "no"
+%EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\cube_to_emme_network_conversion.py -p "trn" --first_iteration "no"
 IF ERRORLEVEL 1 goto done
 
 :emmeseconditerationnetwork
@@ -534,44 +540,72 @@ SET /A INNER_ITERATION+=1
   CALL conda deactivate
   CALL conda activate mtc
 
-  %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network.py -p "trn" -s "skims" --iteration %INNER_ITERATION% --output_transit_boardings
+  IF %INNER_ITERATION% EQU 1 (
+     %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network_py2.py -p "trn" -s "skims" --iteration %INNER_ITERATION% --output_transit_boardings --time_periods "ALL"
   IF ERRORLEVEL 1 goto done
+  ) ELSE (
+    :: Only need to run congested periods when resimulating transit
+     %EMME_PYTHON_PATH%\python %BASE_SCRIPTS%\skims\skim_transit_network_py2.py -p "trn" -s "skims" --iteration %INNER_ITERATION% --output_transit_boardings --time_periods "AM,PM"
+     IF ERRORLEVEL 1 goto done
+  )
+  echo FINISHED TRANSIT SKIMS %DATE% %TIME% >> logs\feedback.rpt
 
   :: changing back to python 2 environment
   CALL conda deactivate
   CALL conda activate mtc_py2
 :afterinnerskim
 
-  :: Run Transit Assignment
-  REM "%TPP_PATH%\runtpp" CTRAMP\scripts\assign\TransitAssign.job
-  REM if ERRORLEVEL 2 goto done
+  ::Do not perform inner loop for first model iteration
+  if %ITERATION% LEQ 1 GOTO iteration_start
 
-  REM "%TPP_PATH%\runtpp" %BASE_SCRIPTS%\skims\SkimSetsAdjustment.job
-  REM if ERRORLEVEL 2 goto done
+:afterinnerskim
 
   :: Start Matrix Server remotely or locally
-  REM IF %RUNTYPE%==LOCAL (
-  REM     rem =========== local ========================
-  REM     call CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%JAVA_PATH%"
-  REM     echo Started matrix manager
-  REM ) ELSE (
-  REM     rem =========== remote ========================
-  REM     rem (wait 10 seconds between each call because otherwise psXXX sometimes bashes on its own authentication/permissions)
-  REM     CTRAMP\runtime\config\pskill %MATRIX_SERVER% u %UN% -p %PWD% java
-  REM     ping -n 10 localhost
-  REM     CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d "%MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd" "%MATRIX_SERVER_JAVA_PATH%"
-  REM     ping -n 10 localhost
-  REM )
+  IF %RUNTYPE%==LOCAL (
+      rem =========== local ========================
+      call CTRAMP\runtime\runMtxMgr.cmd %HOST_IP_ADDRESS% "%JAVA_PATH%"
+      echo Started matrix manager
+  ) ELSE (
+      rem =========== remote ========================
+      rem (wait 10 seconds between each call because otherwise psXXX sometimes bashes on its own authentication/permissions)
+      CTRAMP\runtime\config\pskill %MATRIX_SERVER% u %UN% -p %PWD% java
+      ping -n 10 localhost
+      CTRAMP\runtime\config\psexec %MATRIX_SERVER% -u %UN% -p %PWD% -d "%MATRIX_SERVER_ABSOLUTE_BASE_DIR%\CTRAMP\runtime\runMtxMgr.cmd" "%MATRIX_SERVER_JAVA_PATH%"
+      ping -n 10 localhost
+  )
 
    :: Run Transit Best Path Recalculation (uncomment for transit capacity restraint)
-   :: copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
-   :: call CTRAMP\runtime\runTransitPathRecalculator.cmd %ITERATION% "%JAVA_PATH%"
-   :: if ERRORLEVEL 2 goto done
-   :: del mtctm2.properties
+  copy CTRAMP\runtime\mtctm2.properties mtctm2.properties    /Y
+  call CTRAMP\runtime\runTransitPathRecalculator.cmd %SAMPLERATE% %ITERATION% "%JAVA_PATH%"
+  if ERRORLEVEL 2 goto done
+  REM del mtctm2.properties
+
+  taskkill /im "java.exe" /F
 
 	:: backup the trip files
-	:: copy ctramp_output\indivTripDataResim_%ITERATION%.csv ctramp_output\indivTripDataResim_%ITERATION%_%INNER_ITERATION%.csv
- 	:: copy ctramp_output\jointTripDataResim_%ITERATION%.csv ctramp_output\jointTripDataResim_%ITERATION%_%INNER_ITERATION%.csv
+	copy ctramp_output\indivTripDataResim_%ITERATION%.csv ctramp_output\indivTripDataResim_%ITERATION%_%INNER_ITERATION%.csv
+ 	copy ctramp_output\jointTripDataResim_%ITERATION%.csv ctramp_output\jointTripDataResim_%ITERATION%_%INNER_ITERATION%.csv
+
+  :: backup the transit files
+  copy trn\boardings_by_segment_EA.csv trn\boardings_by_segment_EA_%ITERATION%_%INNER_ITERATION%.csv
+  copy trn\boardings_by_segment_AM.csv trn\boardings_by_segment_AM_%ITERATION%_%INNER_ITERATION%.csv
+  copy trn\boardings_by_segment_MD.csv trn\boardings_by_segment_MD_%ITERATION%_%INNER_ITERATION%.csv
+  copy trn\boardings_by_segment_PM.csv trn\boardings_by_segment_PM_%ITERATION%_%INNER_ITERATION%.csv
+  copy trn\boardings_by_segment_EV.csv trn\boardings_by_segment_EV_%ITERATION%_%INNER_ITERATION%.csv
+
+  copy trn\boardings_by_line_EA.csv trn\boardings_by_line_EA_%ITERATION%_%INNER_ITERATION%.csv
+  copy trn\boardings_by_line_AM.csv trn\boardings_by_line_AM_%ITERATION%_%INNER_ITERATION%.csv
+  copy trn\boardings_by_line_MD.csv trn\boardings_by_line_MD_%ITERATION%_%INNER_ITERATION%.csv
+  copy trn\boardings_by_line_PM.csv trn\boardings_by_line_PM_%ITERATION%_%INNER_ITERATION%.csv
+  copy trn\boardings_by_line_EV.csv trn\boardings_by_line_EV_%ITERATION%_%INNER_ITERATION%.csv
+
+  copy skims\transit_skims_EA.omx skims\transit_skims_EA_%ITERATION%_%INNER_ITERATION%.omx
+  copy skims\transit_skims_AM.omx skims\transit_skims_AM_%ITERATION%_%INNER_ITERATION%.omx
+  copy skims\transit_skims_MD.omx skims\transit_skims_MD_%ITERATION%_%INNER_ITERATION%.omx
+  copy skims\transit_skims_PM.omx skims\transit_skims_PM_%ITERATION%_%INNER_ITERATION%.omx
+  copy skims\transit_skims_EV.omx skims\transit_skims_EV_%ITERATION%_%INNER_ITERATION%.omx
+
+  echo FINISHED INNER ITERATION %INNER_ITERATION% %DATE% %TIME% >> logs\feedback.rpt
 
 	IF %INNER_ITERATION% LSS %MAX_INNER_ITERATION% GOTO inner_iteration_start
 
@@ -610,5 +644,5 @@ ECHO FINISHED SUCCESSFULLY!
 
 :: Complete target and message
 :done
-
+echo FINISHED %DATE% %TIME% >> logs\feedback.rpt
 ECHO FINISHED.
