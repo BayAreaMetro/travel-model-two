@@ -1,6 +1,6 @@
 # Travel Model Two
 
-Travel Model Two, currently under development, is an important extension of Travel Model One. Fundamental to the foundation of Travel Model Two is the use of a wide ranging set of on-board transit rider surveys as well as the California Household travel survey, which obtained a statistical larger sample in the nine-county Bay Area. 
+Travel Model Two, currently under development, is an important extension of Travel Model One. Fundamental to the foundation of Travel Model Two is the use of a wide ranging set of on-board transit rider surveys as well as the California Household travel survey, which obtained a statistical larger sample in the nine-county Bay Area.
 
 ## Changes from Travel Model One
 Important travel behavior enhancements in Travel Model Two include:
@@ -18,7 +18,7 @@ Important travel behavior enhancements in Travel Model Two include:
 
 * TM2.0: Initial TM2 with Cube, CTRAMP core, 3-zone system. In use by TAM (Marin)
 * TM2.1: TM2 with transit CCR implemented in Emme (uses Cube and Emme), CTRAMP core. Anticipated release: Summer 2022. This work is being performed in the branch [transit-ccr](https://github.com/BayAreaMetro/travel-model-two/tree/transit-ccr) -- **these docs are for this version**
-* TM2.2: TM2.2: TM2 with Emme only (not Cube). CTRAMP core. This work is being performed in the [tm2py repository](https://github.com/BayAreaMetro/tm2py)
+* TM2.2: TM2 with Emme only (No Cube), CTRAMP core. This work is being performed in the [tm2py repository](https://github.com/BayAreaMetro/tm2py)
 * TM2.3: TM2 with Emme only and ActivitySim core.
 
 ## References

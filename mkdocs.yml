@@ -15,6 +15,7 @@ nav:
 - Guide: 'guide.md'
 - Input: 'input.md'
 - Process: 'process.md'
+- Output: 'output.md'
 - Geographies: 'geographies.md'
 - Papers: 'papers.md'
 - Network QA: 'network_qa.md'
