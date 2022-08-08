@@ -100,6 +100,13 @@ TM2 produces multiple types of network LOS indicators, often called skim matrice
 
 TM2 produces the following tour and trip microsimulation trip lists for both individual and joint travel. The files output are listed below. The modes are defined in [Tour and Trip Modes](#tour-and-trip-modes-codes) below.  
 
+* Accessibilities - ctramp_output/accessibilities.csv
+* PreAutoOwnership - ctramp_output/aoResults_pre.csv
+* AutoOwnership - ctramp_output/aoResults.csv
+* Household Data - ctramp_output/householdData_[iteration].csv
+* Person Data - ctramp_output/personData_[iteration].csv
+* Work and School Location Choice - ctramp_output/wsLocResults_[iteration].csv
+* Shadow Pricing - ctramp_output/ShadowPricingOutput_[work/school]_0.csv
 * Individual Tours - ctramp_output/indivTourData_[iteration].csv
 * Individual Trips - ctramp_output/indivTripData_[iteration].csv
 * Joint Tours – ctramp_output/jointTourData_[iteration].csv
@@ -484,3 +491,118 @@ Other CTRAMP outputs, including key fields, are described below:
     * SchoolLocationDistance – school location distance
     * SchoolLocationLogsum – school location logsum
 * Shadow price by microzone, market segment, and iteration – ctramp_output/ShadowPricingOutput_school_0.csv and ctramp_output/ShadowPricingOutput_work_0.csv
+
+## Assignment Outputs
+TM2 produces multiple types of assigned network skims, often called loaded networks. The following files are output and some are generated for each of the five time periods.  
+
+### Highway Assignment Networks
+
+### hwy\maz_preload_[TimePeriod].net
+With a MAZMAZVOL link attribute providing MAZ to MAZ lik volumes after highway assignment.
+
+### hwy\load[TimePeriod].net
+Five loaded highway networks, one for each time period, containing the following attributes for each link:
+
+| Attribute Name | Description |
+|----------------|-------------|
+| V_1  | volume, in passenger car equivalents (if assigned again, volume would be labeled V_2) |
+| TIME_1  | congested time, in minutes |
+| VC_1  | volume to capacity ratio |
+| CSPD_1  | congested speed, in miles per hour |
+| VDT_1  | vehicle distance traveled, in vehicle miles |
+| VHT_1  | vehicle hours traveled |
+| V1_1   | volume of vehicles in assigment class one: drive alone, no value toll |
+| V2_1   | volume of vehicles in assigment class two: two-occupant vehicles, no value toll |
+| V3_1   | volume of vehicles in assigment class three: three-or-more-occupant vehicles, no value toll |
+| V4_1   | volume of vehicles in assigment class four: very small, small, and medium trucks, no value toll |
+| V5_1   | volume of vehicles in assigment class five: combination trucks, no value toll |
+| V6_1   | volume of vehicles in assigment class six: drive alone, value toll |
+| V7_1   | volume of vehicles in assigment class seven: two-occupant vehicles, value toll |
+| V8_1   | volume of vehicles in assigment class eight: three-or-more-occupant vehicles, value toll |
+| V9_1   | volume of vehicles in assigment class nine: very small, small, and medium trucks, value toll |
+| V10_1  | volume of vehicles in assigment class ten: combination trucks, value toll |
+| VT_1 and VXT_1 | where X is 1 through 10, are the b-to-a volumes |
+
+### hwy\msaload[TimePeriod]_taz.net
+Five highway networks with the averaged volume, one for each time period, stored in the same variables as the input variables.
+
+### hwy\msaspeed[TimePeriod].net
+Five time-period specific loaded highway networks with the following link specific variables which represent the composite roadway conditions of all previous model iterations:
+
+| Attribute Name | Description |
+|----------------|-------------|
+| CTIM  | congested travel time (minutes) |
+| VC  | volume-to-capacity ratio |
+| CSPD  | congested travel speed (miles per hour) |
+| VDT  | vehicle-distance traveled on each link (in vehicle times miles) |
+| VHT  | vehicle hours traveled on each link |
+
+### hwy\msamerge[ITERATION]_[TimePeriod].net and
+Highway networks loaded with core variables mentioned below:
+
+| Attribute Name | Description |
+|----------------|-------------|
+| CTIM  | congested travel time (minutes) |
+| TSIN  | if 1, indicating that the link is immune to congestion and has a fixed travel time |
+| DISTANCE  | link distance (miles) |
+| VX_1  | corresponding to the ten vehicle classes, where X takes on the integers one through ten |
+| LANES  | number of travel lanes |
+| GL  | county code |
+| USE  | link use code |
+| FT  | facility type |
+| AT  | area type |
+| CAP  | link capacity in vehicles per hour per lane |
+| FFS  | link free-flow speed (miles per hour) |
+| FFT  | link free-flow travel time (minutes) |
+
+### hwy\msamerge[ITERATION].csv
+The loaded highway network in CSV format with some core variables noted above as well as the following output variables:
+
+| Attribute Name | Description |
+|----------------|-------------|
+| ctimXX  | congested travel time (minutes), where XX indicates time-of-day |
+| cspdXX  | congested travel speed (miles per hour) |
+| volXX_YYY  | daily volume, where YYY indicates assigned vehicle class |
+| delayXX  | link delay, calculated as the difference between the congested time and the free-flow travel time |
+| vmtXX  | link vehicle-miles traveled |
+| vhtXX | link vehicle-hours traveled |
+
+### Transit Assignment Tables
+
+### trn\boardings_by_line_[TimePeriod].txt
+
+| Field | Description |
+|-------|-------------|
+| line_name | Line Name |
+| description | Description of line |
+| total_boardings | Total daily boardings in line |
+| mode | Transit mode |
+| line_mode | Line mode |
+
+### trn\boardings_by_segment_[TimePeriod].txt
+
+| Field | Description |
+|-------|-------------|
+| i_node | Start node |
+| j_node | End node |
+| line_name | Line name |
+| description | Description |
+| volume | Volume |
+| boardings | Boardings |
+| alightings | Alightings |
+| mode | Transit mode |
+| line_mode | Line mode |
+| total_cap_of_line_per_hr | Total capacity per hour |
+| seated_cap_of_line_per_hr | Seated capacity per hour |
+| i_node_x | Start node - X coordinate |
+| i_node_y | Start node - Y coordinate |
+| j_node_x | End node - X coordinate |
+| j_node_y | End node - Y coordinate |
+| total_capacity | Total capacity |
+| seated_capacity | Seated capacity |
+| capacity_penalty | Capacity penalty |
+| tot_vcr | Total volume-to-capacity ratio |
+| seated_vcr | Seated volume-to-capacity ratio |
+| ccost | Congenstion cost |
+| eawt | Extra added weight time |
+| seg_rel | Segment Reliability |

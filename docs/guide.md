@@ -21,7 +21,7 @@ As discussed in the [System Design](#system-design) section, these four computer
 The following software are required to execute the MTC travel model.
 
 #### Citilabs Cube Voyager
-The travel model currently uses version 6.4.2 of [Citilabs Cube](http://www.citilabs.com/) software. The Cube software is used to build skims, manipulate networks, manipulate matrices, and perform assignments.
+The travel model currently uses version 6.4.2 of [Citilabs Cube](http://www.citilabs.com/) software. The Cube software is used to manage network, skim highways, and perform highway assignments.
 
 #### Citilabs Cube Voyager 64bit Matrix I/O DLL
 The CT-RAMP software, as discussed below, needs to access data stored in a format dictated by Cube. This is accomplished through a 64-bit DLL library specifically for matrix I/O,which must be accessible through the `PATH` environment variable.  To install the DLL:
@@ -33,11 +33,186 @@ The CT-RAMP software, as discussed below, needs to access data stored in a forma
 #### Citilabs Cube Cluster
 The [Cube Cluster software](http://citilabs.com/software/products/cube/cube-cluster) allows Cube scripts to be multi-threaded. In the current approach, the travel model uses 64 computing nodes across four machines. The Cube scripts can be manipulated to use any number of computing nodes across any number of machines, provided each machine has, at a minimum, a Cube Voyager node license (for the time being, MTC has found 64 nodes on a single machine to be the most effective approach -- in terms of reliability and run time). Cube Cluster is not strictly necessary, as the Cube scripts can be modified to use only a single computing node. Such an approach would dramatically increase run times.
 
+#### EMME
+The travel model currently uses version 4.4.5.1 of [EMME](https://www.inrosoftware.com/en/products/emme/) software. EMME software converts the CUBE network to use it for transit skimming and assignment, while incorporating transit capacity constraints.
+
 #### Java and CT-RAMP
 MTC's travel model operates on the open-source Coordinated Travel - Regional Activity-based Modeling Platform (or CT-RAMP) developed by [Parsons Brinckerhoff](pbworld.com). The software is written in the [Java](http://java.com/en) programming language.  CT-RAMP requires the 64-bit Java Development Kit version 1.8 or later to be installed on each computer running the CT-RAMP software. The Java Development Kit includes the Java Runtime Environment. The 64-bit version of the software allows CT-RAMP to take advantage of larger memory addresses. The details of setting up and configuring the software are presented in the [Setup and Configuration section](#setup-and-configuration) of this guide.
 
 #### Python
-Certain network processing programs are written in [Python](https://www.python.org/). Python must be installed on the computer executing the Cube scripts -- `mainmodel` in MTC's configuration.
+Certain network processing programs are written in [Python](https://www.python.org/). Python must be installed on the computer executing the Cube and EMME scripts -- `mainmodel` in MTC's configuration. The following table contains the list of python packages that are required by MTC's travel model.
+
+You should also list the python packages required and the environments required
+
+| **Library** | **Version** |
+|----------|-------------|
+| argon2-cffi | 20.1.0 |
+| async_generator | 1.1 |
+| attrs | 20.2.0 |
+| backcall | 0.2.0 |
+| backports | 1 |
+| backports.functools_lru_cache | 1.6.1 |
+| blas | 1 |
+| bleach | 3.2.1 |
+| brotlipy | 0.7.0 |
+| bzip2 | 1.0.8 |
+| ca-certificates | 2022.2.1 |
+| certifi | 2021.10.8 |
+| cffi | 1.14.3 |
+| cfitsio | 3.47 |
+| chardet | 3.0.4 |
+| click | 7.1.2 |
+| click-plugins | 1.1.1 |
+| cligj | 0.5.0 |
+| colorama | 0.4.4 |
+| cryptography | 3.1.1 |
+| curl | 7.67.0 |
+| cycler | 0.10.0 |
+| dbfpy3 | 4.1.5 |
+| decorator | 4.4.2 |
+| defusedxml | 0.6.0 |
+| entrypoints | 0.3 |
+| et_xmlfile | 1.0.1 |
+| expat | 2.2.10 |
+| fiona | 1.8.13.post1 |
+| freetype | 2.10.4 |
+| freexl | 1.0.5 |
+| gdal | 3.0.2 |
+| geopandas | 0.8.1 |
+| geos | 3.8.0 |
+| geotiff | 1.5.1 |
+| hdf4 | 4.2.13 |
+| hdf5 | 1.10.4 |
+| icc_rt | 2019.0.0 |
+| icu | 58.2 |
+| idna | 2.1 |
+| importlib-metadata | 2.0.0 |
+| importlib_metadata | 2.0.0 |
+| intel-openmp | 2020.2 |
+| ipykernel | 5.3.4 |
+| ipython | 7.18.1 |
+| ipython_genutils | 0.2.0 |
+| jdcal | 1.4.1 |
+| jedi | 0.17.2 |
+| jinja2 | 2.11.2 |
+| jpeg | 9b |
+| json5 | 0.9.5 |
+| jsonschema | 3.2.0 |
+| jupyter_client | 6.1.7 |
+| jupyter_core | 4.6.3 |
+| jupyterlab | 2.2.9 |
+| jupyterlab_pygments | 0.1.2 |
+| jupyterlab_server | 1.2.0 |
+| kealib | 1.4.7 |
+| kiwisolver | 1.2.0 |
+| krb5 | 1.16.4 |
+| libboost | 1.67.0 |
+| libcurl | 7.67.0 |
+| libgdal | 3.0.2 |
+| libiconv | 1.15 |
+| libkml | 1.3.0 |
+| libnetcdf | 4.6.1 |
+| libpng | 1.6.37 |
+| libpq | 11.2 |
+| libsodium | 1.0.18 |
+| libspatialindex | 1.9.3 |
+| libspatialite | 4.3.0a |
+| libssh2 | 1.9.0 |
+| libtiff | 4.1.0 |
+| libxml2 | 2.9.10 |
+| lz4-c | 1.8.1.2 |
+| m2w64-expat | 2.1.1 |
+| m2w64-gcc-libgfortran | 5.3.0 |
+| m2w64-gcc-libs | 5.3.0 |
+| m2w64-gcc-libs-core | 5.3.0 |
+| m2w64-gettext | 0.19.7 |
+| m2w64-gmp | 6.1.0 |
+| m2w64-libiconv | 1.14 |
+| m2w64-libwinpthread-git | 5.0.0.4634.697f757 |
+| m2w64-xz | 5.2.2 |
+| markupsafe | 1.1.1 |
+| matplotlib | 3.3.2 |
+| matplotlib-base | 3.3.2 |
+| mistune | 0.8.4 |
+| mkl | 2020.2 |
+| mkl-service | 2.3.0 |
+| mkl_fft | 1.2.0 |
+| mkl_random | 1.1.1 |
+| msys2-conda-epoch | 20160418 |
+| munch | 2.5.0 |
+| nbclient | 0.5.1 |
+| nbconvert | 6.0.7 |
+| nbformat | 5.0.8 |
+| nest-asyncio | 1.4.1 |
+| notebook | 6.1.4 |
+| numpy | 1.19.1 |
+| numpy-base | 1.19.1 |
+| olefile | 0.46 |
+| openjpeg | 2.3.0 |
+| openpyxl | 3.0.7 |
+| openssl | 1.1.1m |
+| packaging | 20.4 |
+| pandas | 1.1.3 |
+| pandoc | 2.11.0.2 |
+| pandocfilters | 1.4.2 |
+| parso | 0.7.1 |
+| pcre | 8.44 |
+| pickleshare | 0.7.5 |
+| pillow | 8.0.0 |
+| pip | 20.2.3 |
+| postgresql | 11.2 |
+| proj | 6.2.1 |
+| prometheus_client | 0.8.0 |
+| prompt-toolkit | 3.0.8 |
+| pycparser | 2.2 |
+| pygments | 2.7.1 |
+| pyopenssl | 19.1.0 |
+| pyparsing | 2.4.7 |
+| pyproj | 2.6.1.post1 |
+| pyqt | 5.9.2 |
+| pyrsistent | 0.17.3 |
+| pysocks | 1.7.1 |
+| python | 3.8.5 |
+| python-dateutil | 2.8.1 |
+| python_abi | 3.8 |
+| pytz | 2020.1 |
+| pywin32 | 228 |
+| pywinpty | 0.5.7 |
+| pyzmq | 19.0.2 |
+| qt | 5.9.7 |
+| requests | 2.24.0 |
+| rtree | 0.9.4 |
+| scipy | 1.5.2 |
+| seaborn | 0.11.2 |
+| send2trash | 1.5.0 |
+| setuptools | 50.3.0 |
+| shapely | 1.7.1 |
+| sip | 4.19.13 |
+| six | 1.15.0 |
+| sqlite | 3.33.0 |
+| tbb | 2018.0.5 |
+| terminado | 0.9.1 |
+| testpath | 0.4.4 |
+| tiledb | 1.6.3 |
+| tk | 8.6.10 |
+| tornado | 6.0.4 |
+| traitlets | 5.0.5 |
+| urllib3 | 1.25.11 |
+| vc | 14.1 |
+| vs2015_runtime | 14.16.27012 |
+| wcwidth | 0.2.5 |
+| webencodings | 0.5.1 |
+| wheel | 0.35.1 |
+| win_inet_pton | 1.1.0 |
+| wincertstore | 0.2 |
+| winpty | 0.4.3 |
+| xerces-c | 3.2.3 |
+| xlrd | 2.0.1 |
+| xz | 5.2.5 |
+| zeromq | 4.3.2 |
+| zipp | 3.3.1 |
+| zlib | 1.2.11 |
+| zstd | 1.3.7 |
 
 #### Python Rtree library
 The open source [Python `rtree` library](http://www.lfd.uci.edu/~gohlke/pythonlibs/#rtree) is required for a script that dynamically codes link area type based on land use data.  The `rtree` library provides an efficient spatial index for looking up all spatial units within a buffered distance from each spatial unit. To install, open a dos prompt, navigate to the directory and type: pip install Rtree-0.8.2-cp27-cp27m-win_amd64.whl
