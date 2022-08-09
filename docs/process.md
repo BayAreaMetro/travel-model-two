@@ -2,6 +2,13 @@
 
 ## Preprocessing
 
+1. [`preprocess\preprocess_input_net.job`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/preprocess/preprocess_input_net.job)
+    * Summary: preprocesses input network to fix some existing attributes and add a new one.
+    * Input:
+        1. `hwy\complete_network.net` - the roadway network
+        2. `hwy\interchange_nodes.csv` - the list of freeway links with distances
+    * Output: `hwy\mtc_final_network_base.net`, the updated roadway network with a new DISTANCE attribute, fixed CNTYPE and FT attributes.
+
 1. [`preprocess\writeZoneSystems.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/writeZoneSystems.job)
     * Summary: Counts tazs, mazs, taps and external zones based on [node number conventions](/travel-model-two/input/#county-node-numbering-system)
     * Input: `hwy\mtc_final_network_base.net`, the roadway network
@@ -28,6 +35,13 @@
         4. `CTRAMP\model\DestinationChoiceAlternatives.csv` - destination choice alternatives. *TODO*: what are these?  Move this from _CTRAMP_
         5. `CTRAMP\model\SoaTazDistAlternatives.csv`  **TODO**: what are these?  Move this from _CTRAMP_
         6. `CTRAMP\model\ParkLocationSampleAlts.csv`  **TODO**: what are these?  Move this from _CTRAMP_
+
+1. [`preprocess\renumber.py`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/preprocess/renumber.py)
+    * Summary: Renumbers the TAZ and MAZ labels in the households file.
+    * Input:
+        1. `popsyn\households.csv` - Households file input for renumbering
+    * Output:
+        1. `popsyn\households_renum.csv` - Output households file with renumbering
 
 1. [`preprocessing\maz_densities.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/maz_densities.job)
     * Summary: Creates intermediate files for calculating maz densities: maz centroid location file and intersection location file.
@@ -105,6 +119,24 @@
         - 4: suburban
         - 5: rural
 
+1. [`preprocess\setInterchangeDistance.job`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/preprocess/setInterchangeDistance.job)
+    * Summary: Preprocesses freeway link distances to add nearest major interchange distances. This script runs interchangeDistance.py script to calculate distances, write distances to CSV, convert to DBF, and merge into Cube network.
+    * Input: `hwy\mtc_final_network_with_tolls.net` - roadway network with toll values
+    * Output: `hwy\mtc_final_network_with_tolls.net` - Input network with added variables UPDIST and DOWNDIST in miles
+
+1. [`preprocess\interchangeDistance.py`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/preprocess/interchangeDistance.py)
+    * Summary: Cube script are provides the interchange nodes and links. This script loops through links to determine shortest paths and calculate distances to interchanges.
+    * Input: `hwy\fwy_links.csv` - Lists freeway links with their nodes, distance and FT attributes.
+    * Output:`hwy\fwy_interchange_dist.csv`, a CSV file with columns
+        1. A - Upstream node
+        2. B - Downstream node
+        3. FT - Facility type
+        4. DISTANCE - Link distance
+        5. INTXA - If 1, A is far node
+        6. INTXB - If 1, B is far node
+        7. downdist - Downstream distance
+        8. updist - Upstream distance
+
 1. [`preprocess\CreateFiveHighwayNetworks.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/preprocess/CreateFiveHighwayNetworks.job)
     * Summary: Creates per-timeperiod roadway networks for assignment and skimming
         1. Deletes links with **ASSIGNABLE** = 0
@@ -178,14 +210,14 @@
     * **TODO**: **TRANTIME** is based on assumed speeds by **CNTYPE** and those speeds are hardcoded into this script.
     * Input:
         1. `hwy\mtc_final_network.net`, the roadway network
-        2. `skims\ped_distance_tap_tap-origN.csv`, the pedestrian TAP to TAP skims
+        2. `skims\ped_distance_tap_tap.txt`, the pedestrian TAP to TAP skims
         3. `hwy\avgload[EA,AM,MD,PM,EV].net`, the congested network (**TODO**: Is this generated with real congested times?  Currently, it's not, I don't think.)
     * Output:
         1. `hwy\mtc_transit_network_tap_to_node.txt`, mapping of renumbered nodes.
         2. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, transit network with renumbered nodes, TAP first pseudo TAP nodes and links, and *TRANTIME* attribute from congested roadway link time.
 
 1. [`skims\build_drive_access_skims.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/build_drive_access_skims.py)
-    * Summary: Called by [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job), below, this script creates drive access links from TAZs to TAPs.  This process involves:
+    * Summary: Called by [`skims\TransitSkimsPrep.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job), below, this script creates drive access links from TAZs to TAPs.  This process involves:
         1. `trn\transitLines.lin` is read to determine the set of stops that are accessible for each (timeperiod, transit mode (see [network node attributes](http://metropolitantransportationcommission.github.io/travel-model-two/guide/#node-attributes) for transit modes).
         2. `hwy\mtc_final_network_tap_links.csv` is read to link those stops with their TAPs and find the set of TAPs we want to access for each (timeperiod, mode)
         3. `skims\ped_distance_maz_tap.csv` is read to find the associate the nearest MAZ to each of those TAPs (along with the walk distance)
@@ -209,7 +241,7 @@
         10. WALK_DIST  - Walk access distance from the MAZ centroid to the TAP (feet)
 
 1. [`skims\tap_lines.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/tap_lines.py)
-    * Summary: Called by [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job), below, this script outputs a list of TAPs and the lines that serve that TAP
+    * Summary: Called by [`skims\TransitSkimsPrep.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job), below, this script outputs a list of TAPs and the lines that serve that TAP
     * Input:
         1. `trn\transitLines.lin`, the transit lines
         2. `hwy\mtc_final_network_tap_links.csv`, the TAP to node connectors
@@ -218,7 +250,7 @@
         1. TAP: TAP (sequential numbering)
         2. LINES: space-delimited list of names of lines serving the TAP
 
-1. [`skims\TransitSkims.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job)
+1. [`skims\TransitSkimsPrep.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/TransitSkims.job)
     * Summary: In addition to running [`skims\build_drive_access_skims.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/build_drive_access_skims.py), [`skims\tap_lines.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/tap_lines.py), and [`skims\renumber_transit_line_nodes.py`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/renumber_transit_line_nodes.py), creates 3 sets of transit skims per time period via Citilabs Public Transport Module
     * Input:
         1. `hwy\mtc_transit_network_[EA,AM,MD,PM,EV].net`, transit network
@@ -250,10 +282,45 @@
         5. `trn\mtc_transit_ntlegs_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rte`, enumerated routes
         6. `trn\mtc_transit_report_[EA,AM,MD,PM,EV]_SET[1,2,3]_with_transit.rpt`, reports from the route-enumeration and route-evaluation processes
 
-1. [`skims\SkimSetsAdjustment.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/SkimSetsAdjustment.job)
-    * Summary: Reads the 3 transit skim sets and if any set times are the same as the times for another set for an origin/destination pair, the second set's values are updated to NA value (0).
-    * Input: `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims
-    * Output: `skims\transit_skims_[EA,AM,MD,PM,EV]_SET[1,2,3].TPP`, the transit skims with some O/Ds removed if they're duplicates of an earlier set
+1. [`skims\cube_to_emme_network_conversion.py`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/skims/cube_to_emme_network_conversion.py)
+    * Summary: Script to read in a Cube network shapefile and output EMME transaction files to load the network and attributes into EMME.
+    * Input:
+        1. `mtc_transit_network_[TimePeriod]_CONG_links.dbf` - congested network files from Cube in DBF format
+        2. `transitLines.lin` - Cube's transit lines file with updated node numbering
+        3. `vehtype.pts` - File providing vehicle types and their capacities
+        4. `station_attribute_data_input.csv` - CSV file providing station attributes
+    * Output:
+        1. `emme_network_transaction_files_[TimePeriod]` - A folder for each time of day period containing all of the EMME transaction files
+        2. `emme_network_transaction_files_[TimePeriod]\node_id_crosswalk.csv` - Node crosswalk files used for debugging between Cube and EMME
+        3. `emme_network_transaction_files_[TimePeriod]\station_attributes` - Folder with station attribute files used for the parking capacity restraint model
+
+1. [`skims\create_emme_network.py`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/skims/create_emme_network.py)
+    * Summary: Creates an EMME project folder and database, and creates a scenario for each time period. In each scenario, a network is created in accordance with the EMME transaction files generated by the cube_to_emme_network_conversion.py script.
+    * Input:
+        1. List of transaction files used from `emme_network_transaction_files_[TimePeriod]` folder:
+            + `emme_modes.txt`
+            + `emme_vehicles.txt`
+            + `emme_network.txt`
+            + `emme_extra_node_attributes.txt`
+            + `emme_extra_link_attributes.txt`
+            + `emme_transit_lines.txt`
+            + `emme_extra_line_attributes.txt`
+            + `emme_extra_segment_attributes.txt`
+            + `emme_transit_time_function.txt`
+            + `emme_extra_node_network_fields.txt`
+            + `emme_extra_link_network_fields.txt`
+            + `station_extra_attributes.txt`
+            + `station_network_fields.txt`
+            + `node_id_crosswalk.csv`
+            + `station_attributes\station_tap_attributes.csv`
+        2. `hwy\tap_to_pseudo_tap_xwalk.csv` - a crosswalk between TAPs and walk transfer nodes
+    * Output:
+        1. `mtc_emme` - EMME project folder with all time period scenarios
+
+1. [`skims\skim_transit_network.py`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/skims/skim_transit_network.py)
+    * Summary: This script performs transit skimming and assignment for MTC TM2. Output skims are in OMX format and are used as input into the CT-RAMP model. Skimming and assignment is done with the EMME networks created in create_emme_network.py.
+    * Input: `trn\mtc_emme` - EMME project and scenarios created by create_emme_network.py script
+    * Output: `transit_skims_[TimePeriod].omx` - Transit skims created by EMME for each time period
 
 ## Core
 * Summary: The series of behavioral models where households and persons make decisions that ultimately result in daily trips.
@@ -349,26 +416,7 @@ The application procedure utilizes an iterative shadow pricing mechanism in orde
 
 1. [`skims\SkimSetsAdjustment.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/skims/SkimSetsAdjustment.job)
 
-1. [`assign\merge_demand_matrices.s`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/merge_demand_matrices.s)
-    * Summary: Consolidates the output matrix files from the core into TAZ- and TAP-level demand matrices.
-    * Input:
-        1. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SOV_GP_[EA,AM,MD,PM,EV].mat`, auto single occupancy vehicle general purpose lane TAZ-to-TAZ demand matrix
-        2. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SOV_PAY_[EA,AM,MD,PM,EV].mat`, auto single occupancy vehicle pay lane TAZ-to-TAZ demand matrix
-        3. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR2_GP_[EA,AM,MD,PM,EV].mat`, auto shared ride 2 general purpose lane TAZ-to-TAZ demand matrix
-        4. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR2_HOV_[EA,AM,MD,PM,EV].mat`, auto shared ride 2 HOV lane TAZ-to-TAZ demand matrix
-        5. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR2_PAY_[EA,AM,MD,PM,EV].mat`, auto shared ride 2 pay lane TAZ-to-TAZ demand matrix
-        6. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR3_GP_[EA,AM,MD,PM,EV].mat`, auto shared ride 3+ general purpose lane TAZ-to-TAZ demand matrix
-        7. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR3_HOV_[EA,AM,MD,PM,EV].mat`, auto shared ride 3+ HOV lane TAZ-to-TAZ demand matrix
-        8. `ctramp_output\auto_[EA,AM,MD,PM,EV]_SR3_PAY_[EA,AM,MD,PM,EV].mat`, auto shared ride 3+ pay lane TAZ-to-TAZ demand matrix
-        9. `ctramp_output\nonmotor_[EA,AM,MD,PM,EV]_BIKE_[EA,AM,MD,PM,EV].mat`, bike TAZ-to-TAZ demand matrix
-        10. `ctramp_output\nonmotor_[EA,AM,MD,PM,EV]_WALK_[EA,AM,MD,PM,EV].mat`, walk TAZ-to-TAZ demand matrix
-        11. `ctramp_output\other_[EA,AM,MD,PM,EV]_SCHLBUS_[EA,AM,MD,PM,EV].mat`, school bus TAZ-to-TAZ demand matrix
-        12. `ctramp_output\transit_[EA,AM,MD,PM,EV]_KNR_SET_set[1,2,3]_[EA,AM,MD,PM,EV].mat`, kiss-and-ride TAP-to-TAP transit demand matrix sets
-        13. `ctramp_output\transit_[EA,AM,MD,PM,EV]_PNR_SET_set[1,2,3]_[EA,AM,MD,PM,EV].mat`, park-and-ride TAP-to-TAP transit demand matrix sets
-        14. `ctramp_output\transit_[EA,AM,MD,PM,EV]_WLK_SET_set[1,2,3]_[EA,AM,MD,PM,EV].mat`, walk to transit TAP-to-TAP transit demand matrix sets
-    * Output:
-        1. `ctramp_output\TAZ_Demand_[EA,AM,MD,PM,EV].mat`, TAZ-to-TAZ demand matrices for the time period with matrices 1-11 direct from input files.
-        2. `ctramp_output\TAP_Demand_set[1,2,3]_[EA,AM,MD,PM,EV].mat`, TAP-to-TAP demand matrices for the time period and transit set
+
 
 ## Non Residential
 
@@ -422,7 +470,7 @@ The application procedure utilizes an iterative shadow pricing mechanism in orde
         1. `hwy\load[EA,AM,MD,PM,EV].net`, loaded highway network
 
 3. [`scripts\assign\AverageNetworkVolumes.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/averagenetworkvolumes.job)
-    * Summary: Compute the weighted average of roadway volumes for successive iterations of the entire model stream.  The iteration weights are set in the primary model stream file, RunModel.  This script averages the volumes from the current iteration with the averaged volumes for ALL previous iterations.  This method of successive averages "forces" model convergence.
+    * Summary: Compute the weighted average of roadway volumes for successive iterations of the entire model stream.  The iteration weights are set in the primary model stream file, RunModel. This script averages the volumes from the current iteration with the averaged volumes for ALL previous iterations. This method of successive averages "forces" model convergence.
     * Input:
         1. `hwy\msaload[EA,AM,MD,PM,EV]_taz.net`, an MSA network used to store averaged volumes for all previous iterations
         2. `hwy\load[EA,AM,MD,PM,EV].net`, the loaded highway network from the current iteration
@@ -441,7 +489,7 @@ The application procedure utilizes an iterative shadow pricing mechanism in orde
         1. `hwy\avgload[EA,AM,MD,PM,EV]_taz.net`, a highway network with congested speeds according to MSA volumes by period
 
 5. [`scripts\assign\MergeNetworks.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/mergenetworks.job)
-    * Summary: Merges time-period-specific assignment results into a single TP+ and CSV network.  The combined network is not used by the model stream.  Variables are first given time-period-specific names in the first step of the script and then the five networks are merged. Daily volumes, delay, vehicle-miles traveled, and vehicle-hours traveled calculations are performed.  Note that delay is computed as the difference between congested time and free-flow time.
+    * Summary: Merges time-period-specific assignment results into a single TP+ and CSV network. The combined network is not used by the model stream. Variables are first given time-period-specific names in the first step of the script and then the five networks are merged. Daily volumes, delay, vehicle-miles traveled, and vehicle-hours traveled calculations are performed. Note that delay is computed as the difference between congested time and free-flow time.
     * Input:
         1. `hwy\msaload[EA,AM,MD,PM,EV]_taz.net`, highway networks with congested speeds according to MSA volumes by period
         2. `hwy\msa[EA,AM,MD,PM,EV]_speeds.csv`, a comma-separated value file of speeds
@@ -449,17 +497,41 @@ The application procedure utilizes an iterative shadow pricing mechanism in orde
         1. `hwy\msamerge[ITERATION].net`, a merged network with assignment data for all time periods
         2. `hwy\msamerge[ITERATION].csv`, a comma-separated value dump of the above network
 
-6. [`scripts\assign\TransitAssign.job`](https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/scripts/assign/transitassign.job)
-    * Summary: Assigns transit trips for all time periods
+6. [`skims\cube_to_emme_network_conversion.py`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/skims/cube_to_emme_network_conversion.py)
+    * Summary: Script to read in a Cube network shapefile and output updated EMME transaction files to load the network and attributes into EMME.
     * Input:
-        1. `trn\mtc_transit_network_@TOKEN_PERIOD@_@SKIMSET_NAME@.net`, the auto network consistent with transit node numbers
-        2. `trn\transitLines_new_nodes.lin`, transit line file
-        3. `trn\transitSystem.PTS`, transit system file
-        4. `transitFactors_[SKIMSET=1,2,3].fac`, transit assignment factors
-        5. `trn\fareMatrix.txt`, transit fare matrix
-        6. `trn\fares.far`, transit fares by route
-        7. `ctramp_output\TAP_Demand_set[SKIMSET=1,2,3]_[EA,AM,MD,PM,EV].mat`, resident model transit demand matrix (TAP-TAP)
+        1. `mtc_transit_network_[TimePeriod]_CONG_links.dbf` - congested network files from Cube in DBF format
+        2. `transitLines.lin` - Cube's transit lines file with updated node numbering
+        3. `vehtype.pts` - File providing vehicle types and their capacities
+        4. `station_attribute_data_input.csv` - CSV file providing station attributes
     * Output:
-        1. `trn\mtc_transit_network_[EA,AM,MD,PM,EV]_[SKIMSET=1,2,3]_with_transit_assign.net`, auto network with transit assignment results
-        2. `trn\mtc_transit_routes_[EA,AM,MD,PM,EV]_[SKIMSET=1,2,3]_with_transit_assign.rte`, transit routes with assignment results
-        3. `trn\mtc_transit_report_[EA,AM,MD,PM,EV]_[SKIMSET=1,2,3]_with_transit_assign.rpt`, transit assignment report file
+        1. `emme_network_transaction_files_[TimePeriod]` - A folder for each time of day period containing all of the EMME transaction files
+        2. `emme_network_transaction_files_[TimePeriod]\node_id_crosswalk.csv` - Node crosswalk files used for debugging between Cube and EMME
+        3. `emme_network_transaction_files_[TimePeriod]\station_attributes` - Folder with station attribute files used for the parking capacity restraint model
+
+7. [`skims\create_emme_network.py`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/skims/create_emme_network.py)
+    * Summary: Updates the EMME project folder and database with congested links times. In each scenario, a the network is updated in accordance with the updated EMME transaction files generated by the cube_to_emme_network_conversion.py script.
+    * Input:
+        1. List of transaction files used from `emme_network_transaction_files_[TimePeriod]` folder:
+            + `emme_extra_link_attributes.txt`
+            + `emme_extra_segment_attributes.txt`
+        2. `hwy\tap_to_pseudo_tap_xwalk.csv` - a crosswalk between TAPs and walk transfer nodes
+    * Output:
+        1. `mtc_emme` - EMME project folder with all time period scenarios
+
+8. [`skims\skim_transit_network.py`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/skims/skim_transit_network.py)
+    * Summary: This script performs transit skimming and assignment for MTC TM2. Skimming and assignment is done with the EMME networks created in create_emme_network.py while including demand matrices from prior CT-RAMP runs. Output skims are in OMX format and are used as input into the next iteration of CT-RAMP model. For first inner iteration, the skimming and assignment is done for all time periods, otherwise it is only done for AM and PM periods.
+    * Input:
+        1. `trn\mtc_emme` - EMME project and scenarios created by create_emme_network.py script
+        2. `ctramp_output\transit_[TimePeriod]_[WLK,PNR,KNRPRV,KNRTNC]_TRN_set[1,2,3]_[TimePeriod].omx` -
+    * Output:
+        1. `skims\transit_skims_[TimePeriod].omx` -
+        2. `boardings_by_line_[TimePeriod].csv` - Transit skims created by EMME for each time period
+        3. `boardings_by_segment_[TimePeriod].csv` -
+
+9. [`CTRAMP\runtime\runTransitPathRecalculator.cmd`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/runtime/runTransitPathRecalculator.cmd): Run the best transit path recalculator considering the transit capacity constraints and congested link times from prior skimming. After recalculating transit paths, the model runs skim_transit_network.py script one more time to resimulate the transit skimming and assignment over congested network.
+
+## Cleaning & Generating Visualizer
+
+1. Move all TP+ printouts to `\logs` folder and delete all temporary TP+ printouts and cluster files
+2. [`CTRAMP\scripts\visualizer\generateDashboard.bat`](https://github.com/BayAreaMetro/travel-model-two/blob/transit-ccr/model-files/scripts/visualizer/generateDashboard.bat) - Batch file to generate the visualizer with data from final iteration
