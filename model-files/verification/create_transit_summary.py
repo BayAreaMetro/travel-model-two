@@ -31,6 +31,7 @@ Read transit assignment link output by time period and creates a few summaries.
 import argparse,collections,os,sys
 import simpledbf
 import numpy,pandas
+import re
 
 TIME_PERIODS = collections.OrderedDict([ # time period to duration
     ("EA", 3.0),
@@ -42,6 +43,7 @@ KEY_COLS     = ["A","B","LINKSEQ","MODE","OPERATOR","NAME","LONGNAME"]
 RAW_OUTFILE  = "trn_boards_all_timeperiods.csv"
 LINE_OUTFILE = "trn_boards_lines.csv"
 MODE_OUTIFLE = "trn_boards_modes.csv"
+ROUTE_OUTFILE = "trn_boards_routes.csv"
 
 if __name__ == '__main__':
 
@@ -52,6 +54,8 @@ if __name__ == '__main__':
 
     all_linko_df = pandas.DataFrame()
     for time_period in TIME_PERIODS.keys():
+#   for testing:
+#    for time_period in ['EA']:
 
         linko_file = os.path.join(args.trn_dir, "trn_link_onoffs_{}.dbf".format(time_period))
         linko_dbf  = simpledbf.Dbf5(linko_file)
@@ -98,11 +102,39 @@ if __name__ == '__main__':
             all_linko_df = pandas.merge(left=all_linko_df, right=linko_df, how="outer")
             print("Joined to linko for all timeperiods: {} rows".format(len(all_linko_df)))
 
+#    line_group_pattern = re.compile(r"([A-Z0-9]+_[A-Z0-9]+)")
+    line_group_pattern = re.compile('[a-z]$')
+
+    #create a new column called name_set
+#    repl = lambda m: m.group(1)
+    all_linko_df["NAME_SET"]=all_linko_df["NAME"].str.replace(line_group_pattern, '')
+
     # write the raw boardings
     outfilepath = os.path.join(args.trn_dir, RAW_OUTFILE)
     all_linko_df.to_csv(outfilepath, header=True, index=False)
     print("Wrote {} links to {}".format(len(all_linko_df), outfilepath))
     print(all_linko_df.head())
+
+    aggregate_dict = collections.OrderedDict()
+    for time_period in TIME_PERIODS.keys():
+    # construct aggregation rows
+        aggregate_dict["DIST_{}".format(time_period)] = 'first'
+        aggregate_dict["TIME_{}".format(time_period)] = 'max'
+        aggregate_dict["OFFB_{}".format(time_period)] = 'sum'
+        aggregate_dict["ONA_{}".format(time_period)] = 'sum'
+        aggregate_dict["VOL_{}".format(time_period)] = 'sum'
+
+    # save a new data frame and drop a few columns
+    nameset_linko_df = all_linko_df.drop(labels=["LINKSEQ", "NAME", "LONGNAME", "HEADWAY_1_EA"], axis="columns")
+
+    # do the aggregation
+    nameset_linko_df = nameset_linko_df.groupby(by=["A", "B", "MODE","OPERATOR","NAME_SET"]).agg(aggregate_dict).reset_index(drop=False)
+    nameset_linko_df["ROUTE_A_B"]=nameset_linko_df["NAME_SET"].astype(str)+" "+nameset_linko_df["A"].astype(str)+"_"+nameset_linko_df["B"].astype(str)
+
+    # write out the name set level link volumes
+    outfilepath = os.path.join(args.trn_dir, ROUTE_OUTFILE)
+    nameset_linko_df.to_csv(outfilepath, header=True, index=False)
+    print("Wrote {} links to {}".format(len(nameset_linko_df), outfilepath))
 
     # write a line summary
     # todo: HEADWAY isn't additive
@@ -126,15 +158,15 @@ if __name__ == '__main__':
                 aggregate_dict[ "VOL_{}_{}".format(setnum,time_period)] = 'max'
 
 
-    all_linko_df = all_linko_df.groupby(by=["MODE","OPERATOR","NAME","LONGNAME"]).agg(aggregate_dict).reset_index(drop=False)
+    all_linko_df = all_linko_df.groupby(by=["MODE","OPERATOR","NAME","NAME_SET","LONGNAME"]).agg(aggregate_dict).reset_index(drop=False)
     # reorder columns
-    all_linko_df = all_linko_df[["OPERATOR","MODE","NAME","LONGNAME"] + aggregate_dict.keys()]
+    all_linko_df = all_linko_df[["OPERATOR","MODE","NAME", "NAME_SET", "LONGNAME"] + aggregate_dict.keys()]
     outfilepath = os.path.join(args.trn_dir, LINE_OUTFILE)
     all_linko_df.to_csv(outfilepath, header=True, index=False)
     print("Wrote {} lines to {}".format(len(all_linko_df), outfilepath))
 
     # write a mode summary -- drop headways since they don't combine
-    all_linko_df.drop(labels=["NAME","LONGNAME","HEADWAY_1_EA","HEADWAY_2_AM",
+    all_linko_df.drop(labels=["NAME","NAME_SET","LONGNAME","HEADWAY_1_EA","HEADWAY_2_AM",
                               "HEADWAY_3_MD","HEADWAY_4_PM","HEADWAY_5_EV"], axis="columns", inplace=True)
     all_linko_df = all_linko_df.groupby(by=["MODE","OPERATOR"]).agg(numpy.sum).reset_index(drop=False)
     # reorder columns

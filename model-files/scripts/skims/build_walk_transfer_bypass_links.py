@@ -2,6 +2,7 @@
     build_walk_transfer_bypass_links.py tap_direct_connectors mtc_tap_to_stop_connectors mtc_transit_network_node_xy output_node_file output_link_file
 
     update:  sn (11/2/2014): Added code to compute eucledian distances between pseudo-taps and stops
+             hensle (7/20/2021): Added code to write out tap to pseudo tap crosswalk for use in station attribute coding
 """
 
 import os,sys,math
@@ -11,6 +12,7 @@ mtc_tap_to_stop_connectors = sys.argv[2]
 mtc_transit_network_node_xy = sys.argv[3]
 output_node_file = sys.argv[4]
 output_link_file = sys.argv[5]
+output_tap_xwalk_file = sys.argv[6]
 
 def isTap(n):
     return (n < 900000) and ((n % 100000) > 90000)
@@ -45,12 +47,11 @@ with open(mtc_tap_to_stop_connectors) as f:
             if not b in tap_links:
                 tap_links[b] = {}
             tap_links[b][a] = None
-        
+
 #use ext space for pseudo-taps (901,000+) - leave 1,000 spots for externals
 pseudo_tap_counter = 901001
-tap_numbers = taps.keys()
-tap_numbers.sort()
-with open(output_node_file,'wb') as f:
+tap_numbers = sorted(taps.keys())
+with open(output_node_file,'w') as f:
     for tap in tap_numbers:
         (x,y) = taps[tap]
         #offset tap by 7 feet diagonally so that we are close, but not overlapping
@@ -58,6 +59,11 @@ with open(output_node_file,'wb') as f:
         #replace coordinates with pseudo-tap number
         taps[tap] = pseudo_tap_counter
         pseudo_tap_counter += 1
+
+# write crosswalk between tap and newly created pseudo tap node
+with open(output_tap_xwalk_file, 'w') as f:
+    for tap, pseudo_tap in taps.items():
+        f.write(','.join(map(str,[tap,pseudo_tap])) + os.linesep)
 
 #fetching node coordinates for all nodes [sn]
 node_coord = {}
@@ -70,7 +76,7 @@ with open(mtc_transit_network_node_xy) as f:
         node_coord[n] = (x,y)
 
 
-with open(output_link_file,'wb') as f:
+with open(output_link_file,'w') as f:
     #first write out pseudo-tap->stop links
     for tap in tap_links:
         (x1,y1) = node_coord[tap]

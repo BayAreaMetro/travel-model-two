@@ -231,7 +231,62 @@ public class AutoOwnershipChoiceDMU
     {
         studentsRailProportion = proportion;
     }
+    
+    public double getNumberOfWorkersWithTransitSubsidy() {
+    	
+    	double returnValue=0;
+    	Person[] persons = hh.getPersons();
+    	 for(int i = 1;i<persons.length;++i) {
+    		 if(persons[i].getPersonIsWorker()>0) {
+    			 if(persons[i].getTransitSubsidyChoice()==1)
+    				 ++returnValue;
+    		 }
+    	 }
+    	 
+    	 return returnValue;
+    }
 
+   public double getNumberOfWorkersWithTransitPass() {
+    	
+    	double returnValue=0;
+    	Person[] persons = hh.getPersons();
+    	 for(int i = 1;i<persons.length;++i) {
+    		 if(persons[i].getPersonIsWorker()>0) {
+    			 if(persons[i].getTransitPassChoice()==1)
+    				 ++returnValue;
+    		 }
+    	 }
+    	 
+    	 return returnValue;
+    }
+
+    public double getNumberOfStudentsWithTransitSubsidy() {
+    	
+    	double returnValue=0;
+    	Person[] persons = hh.getPersons();
+    	 for(int i = 1;i<persons.length;++i) {
+    		 if(persons[i].getPersonIsStudent()>0) {
+    			 if(persons[i].getTransitSubsidyChoice()==1)
+    				 ++returnValue;
+    		 }
+    	 }
+    	 
+    	 return returnValue;
+    }
+
+   public double getNumberOfStudentsWithTransitPass() {
+    	
+    	double returnValue=0;
+    	Person[] persons = hh.getPersons();
+    	 for(int i = 1;i<persons.length;++i) {
+    		 if(persons[i].getPersonIsStudent()>0) {
+    			 if(persons[i].getTransitPassChoice()==1)
+    				 ++returnValue;
+    		 }
+    	 }
+    	 
+    	 return returnValue;
+    }
     public int getIndexValue(String variableName)
     {
         return methodIndexMap.get(variableName);

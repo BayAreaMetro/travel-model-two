@@ -143,60 +143,19 @@ public class SandagTripModeChoiceDMU
         return inboundStops;
     }
     
-    public int getTourModeIsDA()
-    {
-        return tourModeIsDA;
+    public double getHasTransitSubsidy() {
+    	
+    	return person.getTransitSubsidyChoice();
     }
-    
-    public int getTourModeIsS2()
-    {
-        return tourModeIsS2;
+    public double getTransitSubsidyPercent() {
+    	
+    	return person.getTransitSubsidyPercent();
     }
-    
-    public int getTourModeIsS3()
-    {
-        return tourModeIsS3;
+    public double getHasTransitPass(){
+    	
+    	return person.getTransitPassChoice();
     }
-    
-    public int getTourModeIsWalk()
-    {
-        return tourModeIsWalk;
-    }
-    
-    public int getTourModeIsBike()
-    {
-        return tourModeIsBike;
-    }
-    
-    public int getTourModeIsWTran()
-    {
-        return tourModeIsWTran;
-    }
-    
-    public int getTourModeIsPnr()
-    {
-        return tourModeIsPnr;
-    }
-    
-    public int getTourModeIsKnr()
-    {
-        return tourModeIsKnr;
-    }
-    
-    public int getTourModeIsSchBus()
-    {
-        return tourModeIsSchBus;
-    }
-    
-    public int getTourModeIsTaxi()
-    {
-    	return tourModeIsTaxi;
-    }
-    
-    public int getTourModeIsTNC()
-    {
-    	return tourModeIsTNC;
-    }
+
     
     private void setupMethodIndexMap()
     {
@@ -265,6 +224,15 @@ public class SandagTripModeChoiceDMU
         methodIndexMap.put("getTourModeIsTNC",502);
         methodIndexMap.put("getWaitTimeTNC",503);
         methodIndexMap.put("getWaitTimeTaxi",504);
+        methodIndexMap.put("getHasTransitSubsidy", 600);
+        methodIndexMap.put("getTransitSubsidyPercent",601);
+        methodIndexMap.put("getHasTransitPass",602);
+        methodIndexMap.put("getInbound",605);
+        methodIndexMap.put("getTourModeIsTNCTransit",610);
+        methodIndexMap.put("getOutboundPNRTripOnTour",611);
+        methodIndexMap.put("getInboundPNRTripOnTour",612);
+        
+        
 
     }
 
@@ -459,7 +427,30 @@ public class SandagTripModeChoiceDMU
             	break;
             case 504:
             	returnValue = getWaitTimeTaxi();
-            	break;            	
+            	break;            
+            case 600:
+            	returnValue = getHasTransitSubsidy();
+            	break;
+            case 601:
+            	returnValue = getTransitSubsidyPercent();
+            	break;
+            case 602:
+            	returnValue = getHasTransitPass();
+            	break;
+            case 605:
+            	returnValue = getInbound();
+            	break;
+            case 610:
+                returnValue = getTourModeIsTNCTransit();
+                break;
+            case 611:
+            	returnValue = outboundPNRTripOnTour();
+            	break;
+            case 612:
+            	returnValue = inboundPNRTripOnTour();
+            	break;
+
+            	
             default:
                 logger.error( "method number = " + variableIndex + " not found" );
                 throw new RuntimeException( "method number = " + variableIndex + " not found" );

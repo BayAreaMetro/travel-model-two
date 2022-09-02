@@ -115,7 +115,7 @@ tap_mn = '(' + county_selector_mn + ' & ' + tap_selector + ')'
 
         
 ;start cluster nodes
-*"C:\Program Files (x86)\Citilabs\Cube\Cluster.exe" MTC_NONMOT 1-9 start exit
+*"%TPP_PATH%\Cluster.exe" MTC_NONMOT 1-9 start exit
 
 SLEEP TIME = 10
 
@@ -251,7 +251,7 @@ LOOP PROC_COUNT=1,9
              ENDRUN
             
             ;run script
-            *Voyager.exe @SFILE@_@SKIM_COUNTY@.s /Start
+            *"%TPP_PATH%\Voyager.exe" @SFILE@_@SKIM_COUNTY@.s /Start
             
             ;clean-up
 ;            *del @SFILE@_@SKIM_COUNTY@.s
@@ -272,7 +272,7 @@ Wait4Files Files=MTC_NONMOT1.script.end, MTC_NONMOT2.script.end, MTC_NONMOT3.scr
           checkreturncode=T, printfiles=MERGE, deldistribfiles=T
 
 ;stop cluster nodes
-*Cluster.exe MTC_NONMOT 1-9 close exit
+*"%TPP_PATH%\Cluster.exe" MTC_NONMOT 1-9 close exit
 
 ;merge files
 *copy skims\ped_distance_maz_maz_1.txt+skims\ped_distance_maz_maz_2.txt+skims\ped_distance_maz_maz_3.txt+skims\ped_distance_maz_maz_4.txt+skims\ped_distance_maz_maz_5.txt+skims\ped_distance_maz_maz_6.txt+skims\ped_distance_maz_maz_7.txt+skims\ped_distance_maz_maz_8.txt+skims\ped_distance_maz_maz_9.txt skims\ped_distance_maz_maz.txt
@@ -288,22 +288,22 @@ Wait4Files Files=MTC_NONMOT1.script.end, MTC_NONMOT2.script.end, MTC_NONMOT3.scr
 *copy skims\ped_distance_tap_tap_1.txt+skims\ped_distance_tap_tap_2.txt+skims\ped_distance_tap_tap_3.txt+skims\ped_distance_tap_tap_4.txt+skims\ped_distance_tap_tap_5.txt+skims\ped_distance_tap_tap_6.txt+skims\ped_distance_tap_tap_7.txt+skims\ped_distance_tap_tap_8.txt+skims\ped_distance_tap_tap_9.txt skims\ped_distance_tap_tap.txt
 *del skims\ped_distance_tap_tap_*.txt
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_maz.txt 3
+*"python" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_maz.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_tap.txt 3
+*"python" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_maz_tap.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_maz.txt 3
+*"python" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_maz.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_tap.txt 3
+*"python" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_maz_tap.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_taz_taz.txt 3
+*"python" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\bike_distance_taz_taz.txt 3
 IF (RETURNCODE > 0) abort
 
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_tap_tap.txt 3
+*"python" %BASE_SCRIPTS%\skims\skim_zone_transfer.py hwy\mtc_final_network_zone_seq.csv skims\ped_distance_tap_tap.txt 3
 IF (RETURNCODE > 0) abort
 
 ; clean up generated scripts

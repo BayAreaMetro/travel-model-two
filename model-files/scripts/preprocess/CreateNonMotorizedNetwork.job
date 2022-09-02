@@ -31,21 +31,40 @@ read file=%BASE_SCRIPTS%\block\maxCosts.block
 
 ;first create the pedestrian network
 ;create temporary network with one-way links allowing walking in both directions
+
+;add oneway info
+RUN PGM = NETWORK
+
+  NETI[1] = hwy\mtc_final_network.net
+  NETI[2] = hwy\mtc_final_network.net
+  NETO = hwy\mtc_final_network_onewayinfo.net
+  MERGE RECORD = f
+  
+  PHASE = INPUT, FILEI = li.2
+    _temp = a
+    a = b
+    b = _temp
+  ENDPHASE
+  
+  PHASE = LINKMERGE
+    IF (li.2.a == 0) ONEWAY = 1
+  ENDPHASE
+ENDRUN
+
 ;write network link dbf
 RUN PGM = NETWORK
-    NETI = hwy\mtc_final_network.net
-    LINKO = hwy\temp_mtc_final_network_links.dbf, EXCLUDE=REPRIORITIZE
+    NETI = hwy\mtc_final_network_onewayinfo.net
+    LINKO = hwy\temp_mtc_final_network_links.dbf
 ENDRUN
+
 ;swap and and b links
 RUN PGM=MATRIX
     FILEI RECI = hwy\temp_mtc_final_network_links.dbf
     FILEO RECO[1] = hwy\temp_ped_reverse_links.dbf, FIELDS=A,B,RECI.ALLFIELDS,EXCLUDERECI=A,B
     RO.A=RI.B
     RO.B=RI.A
-    IF (RI.ONEWAY == 'TF')
-        RO.ONEWAY = 'FT'
-    ELSEIF (RI.ONEWAY == 'FT') 
-        RO.ONEWAY = 'TF'
+    IF (RI.ONEWAY = 1)
+        RO.ONEWAY = 1
     ELSE
         CONTINUE
     ENDIF
@@ -59,8 +78,8 @@ RUN PGM=NETWORK
     NETO = hwy\mtc_ped_network.net
     
     PHASE=LINKMERGE
-        ;pedestrian links only; FRC != 8 is used to drop off TANA ferry and other non-street links; EXT links are not included in non-motorized network
-        IF (((FT=0 | FT=3 | FT=4 | FT=6 | FT=7) & (CNTYPE='TANA' | CNTYPE='PED' | CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='TAP')) | (BIKEPEDOK=1))
+        ;pedestrian links only
+        IF ((WALK_ACCESS=1) | (CNTYPE = 'TAZ' | CNTYPE = 'MAZ' | CNTYPE = 'TAP'))
             ;Keep record
         ELSE
             DELETE
@@ -103,7 +122,7 @@ RUN PGM=NETWORK
     
     PHASE=LINKMERGE
         ;bike links only; FRC != 8 is used to drop off TANA ferry and other non-street links
-        IF (((FT=0 | FT=3 | FT=4 | FT=6 | FT=7) & (CNTYPE='TANA' | CNTYPE='BIKE' | CNTYPE='MAZ' | CNTYPE='TAZ' | CNTYPE='TAP')) | (BIKEPEDOK=1))
+        IF ((BIKE_ACCESS=1) | (CNTYPE = 'TAZ' | CNTYPE = 'MAZ' | CNTYPE = 'TAP'))
             ;Keep record
         ELSE
             DELETE

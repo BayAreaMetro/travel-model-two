@@ -164,6 +164,7 @@ public class OutputTapPairs {
 		
 		TableDataSet mgraData = mgraManager.getMgraTableDataSet();
 		TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathCalculator.getTransitFareDiscounts());
     	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
     	double[][] bestTaps = null;
 		double[] skims = null;

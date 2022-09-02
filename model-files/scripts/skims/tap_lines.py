@@ -24,7 +24,7 @@ tap_lines_file = os.path.join(base_dir,r'trn\tapLines.csv')
 
 start_time = pytime.time()
 
-print 'reading transit lines from {}'.format(transit_line_file)
+print('reading transit lines from {}'.format(transit_line_file))
 linesByNode = dict()
 trn_line = ""
 for temp_line in open(transit_line_file):
@@ -43,12 +43,12 @@ for temp_line in open(transit_line_file):
   trn_line = trn_line + temp_line
 
   # if it ends in a comma, continue until we find the end
-  if temp_line[-1]==",":
+  if temp_line[-1]=="," or temp_line[-2] == "N":
     continue
 
   # print("trn_line={}".format(trn_line))
 
-  split_line = map(str.strip,re.split('[=,]',trn_line.strip()))
+  split_line = list(map(str.strip,re.split('[=,]',trn_line.strip())))
   if len(split_line) < 3:
     continue
   
@@ -80,16 +80,16 @@ for temp_line in open(transit_line_file):
 #        linesByNode[n] = set()
 #      linesByNode[n].add(lineName.replace('"',""))
 
-print 'reading tap connectors'
+print('reading tap connectors')
 access_links = []
-with open(network_tap_links_file, 'rb') as csvfile:
+with open(network_tap_links_file, 'r') as csvfile:
   tapreader = csv.reader(csvfile, skipinitialspace=True)
   for row in tapreader:
     access_links.append(row)
 
-print 'reading zone sequence file'
+print('reading zone sequence file')
 tapToSeqTap = dict()
-with open(zone_seq_file, 'rb') as csvfile:
+with open(zone_seq_file, 'r') as csvfile:
   tapreader = csv.DictReader(csvfile)
   for row in tapreader:
     node_id = int(row["N"])
@@ -121,7 +121,7 @@ for tap in tapToSeqTap.keys():
         linesByTap[tap].add(line)
 
 #write out tapLines file for CT-RAMP
-f = file(tap_lines_file,"wt")
+f = open(tap_lines_file,"w")
 f.write("TAP,LINES\n")
 for tap in linesByTap.keys():
   lines = " ".join(list(linesByTap[tap]))
@@ -131,4 +131,4 @@ f.close()
 print("wrote {}".format(tap_lines_file))
 
 end_time = pytime.time()
-print 'elapsed time in minutes: ' + str((end_time - start_time) / 60.0)
+print('elapsed time in minutes: {}'.format((end_time - start_time) / 60.0))

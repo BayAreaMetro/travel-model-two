@@ -69,11 +69,19 @@ if transfer:
 # shutil.copy2(skim_file, skim_file + '.bak')
 
 temp_skim_file = skim_file + '.tmp'
-f = open(temp_skim_file,'wb')
+f = open(temp_skim_file,'w')
 for line in open(skim_file):
     data = line.strip().split(',')
     for i in range(columns_to_transfer):
-        data[i] = transfer[i][int(data[i])]
+        try:
+            data[i] = transfer[i][int(data[i])]
+        except Exception as inst:
+            # for some reason this file has lots of blank lines -- workaround this
+            if data == ['']: continue
+            # handle EOF
+            if data == ['\x1a']: continue
+            print(data)
+            raise inst
     f.write(','.join(data) + os.linesep)
 f.close()
 

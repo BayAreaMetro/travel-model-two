@@ -17,7 +17,7 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;start cluster nodes
-*Cluster.exe MTC_HWYNET 1-5 start exit
+*"%TPP_PATH%\Cluster.exe" MTC_HWYNET 1-5 start exit
 
 ; do, more or less, the same skim procedure for each of the five time periods
 loop period = 1, 5
@@ -69,7 +69,9 @@ loop period = 1, 5
             B_NEW_NODE = B.NEW_NODE
             OLD_B = B
             
-            IF (CNTYPE = 'TAZ' | CNTYPE = 'TANA' | CNTYPE = 'USE' | CNTYPE = 'EXT')
+            IF (CNTYPE = 'TAZ' | CNTYPE = 'TANA')
+                ;keep
+            ELSEIF (USECLASS_EA + USECLASS_AM + USECLASS_MD + USECLASS_PM + USECLASS_EV > 0)
                 ;keep
             ELSE
                 DELETE
@@ -143,7 +145,7 @@ loop period = 1, 5
     
     
     ;old way of doing externals - keeping for the moment just in case...
-    ;*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\skims\build_external_stations.py %TAZ_COUNT% . hwy\external_stations.csv hwy\avgload@token_period@_taz_to_node.txt hwy\@token_period@_exts_node.csv hwy\@token_period@_exts_link.csv
+    ;*"python" %BASE_SCRIPTS%\skims\build_external_stations.py %TAZ_COUNT% . hwy\external_stations.csv hwy\avgload@token_period@_taz_to_node.txt hwy\@token_period@_exts_node.csv hwy\@token_period@_exts_link.csv
     ;
     ;RUN PGM=NETWORK
     ;    PAR NODES=10000000
@@ -164,4 +166,4 @@ endloop ; token_period
 Wait4Files files = MTC_HWYNET1.script.end, MTC_HWYNET2.script.end, MTC_HWYNET3.script.end, MTC_HWYNET4.script.end, MTC_HWYNET5.script.end, 
            printfiles = merge, deldistribfiles = t, CheckReturnCode = t
 ;stop cluster nodes
-*Cluster.exe MTC_HWYNET 1-5 close exit
+*"%TPP_PATH%\Cluster.exe" MTC_HWYNET 1-5 close exit

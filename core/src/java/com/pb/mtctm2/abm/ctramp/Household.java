@@ -1004,7 +1004,7 @@ public class Household
         int[] participatingPersonIndices = t.getPersonNumArray(); 
 
         // create an array to hold time window arrays for each participant
-        int[][] personWindows = new int[participatingPersonIndices.length][]; 
+        short[][] personWindows = new short[participatingPersonIndices.length][]; 
         
         // get time window arrays for each participant
         int k = 0;
@@ -1126,7 +1126,7 @@ public class Household
                         && persons[q].getPersonIsStudentDriving() == 0;
 
                 // get the length of the maximum pairwise available time window between persons p and q.
-                int maxWindow = persons[p].getMaximumContinuousPairwiseAvailableWindow( persons[q].getTimeWindows() );
+                short maxWindow = persons[p].getMaximumContinuousPairwiseAvailableWindow( persons[q].getTimeWindows() );
                 
                 // determine max time window overlap between adult pairs, children pairs, and mixed pairs in the household
                 // for max windows in all pairs in hh, don't need to check q,p once we'alread done p,q, so skip q <= p.

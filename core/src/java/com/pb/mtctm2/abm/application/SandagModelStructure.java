@@ -105,8 +105,10 @@ public class SandagModelStructure
         11                                                                                      };
     public static final int[]    PNR_SET_ALTS                                                           = {
         12                                                                          };
-    public static final int[]    KNR_SET_ALTS                                                           = {
-        13, 14                                                                          };
+    public static final int[]    KNRTRN_SET_ALTS                                                           = {
+        13                                                                         };
+    public static final int[]    TNCTRN_SET_ALTS                                                           = {
+            14                                                                         };
     public static final int[]    SCHOOL_BUS_ALTS                                                    = {
         17                                                                                     };
     public static final int[]    TRIP_SOV_ALTS                                                      = {
@@ -387,7 +389,7 @@ public class SandagModelStructure
 
     public boolean getTourModeIsDriveTransit(int tourMode)
     {
-        return (getTourModeIsPnr(tourMode) | getTourModeIsKnr(tourMode));
+        return (getTourModeIsPnr(tourMode) | getTourModeIsKnrTransit(tourMode) | getTourModeIsTNCTransit(tourMode));
     }
 
     public boolean getTourModeIsPnr(int tourMode)
@@ -404,12 +406,12 @@ public class SandagModelStructure
         return returnValue;
     }
 
-    public boolean getTourModeIsKnr(int tourMode)
+    public boolean getTourModeIsKnrTransit(int tourMode)
     {
         boolean returnValue = false;
-        for (int i = 0; i < KNR_SET_ALTS.length; i++)
+        for (int i = 0; i < KNRTRN_SET_ALTS.length; i++)
         {
-            if (KNR_SET_ALTS[i] == tourMode)
+            if (KNRTRN_SET_ALTS[i] == tourMode)
             {
                 returnValue = true;
                 break;
@@ -418,7 +420,20 @@ public class SandagModelStructure
         return returnValue;
     }
 
-    public boolean getTourModeIsSchoolBus(int tourMode)
+    public boolean getTourModeIsTNCTransit(int tourMode)
+    {
+        boolean returnValue = false;
+        for (int i = 0; i < TNCTRN_SET_ALTS.length; i++)
+        {
+            if (TNCTRN_SET_ALTS[i] == tourMode)
+            {
+                returnValue = true;
+                break;
+            }
+        }
+        return returnValue;
+    }
+   public boolean getTourModeIsSchoolBus(int tourMode)
     {
         boolean returnValue = false;
         for (int i = 0; i < SCHOOL_BUS_ALTS.length; i++)
@@ -1062,14 +1077,24 @@ public class SandagModelStructure
     public boolean getTripModeIsKnrTransit(int tripMode)
     {
 
-        for (int i = 0; i < KNR_SET_ALTS.length; i++) {
-            if ( KNR_SET_ALTS[i] == tripMode )
+        for (int i = 0; i < KNRTRN_SET_ALTS.length; i++) {
+            if ( KNRTRN_SET_ALTS[i] == tripMode )
                 return true;
         }
 
         return false;
     }
 
+    public boolean getTripModeIsTNCTransit(int tripMode)
+    {
+
+        for (int i = 0; i < TNCTRN_SET_ALTS.length; i++) {
+            if ( TNCTRN_SET_ALTS[i] == tripMode )
+                return true;
+        }
+
+        return false;
+    }
  
     
 }

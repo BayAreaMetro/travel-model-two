@@ -51,7 +51,7 @@ def map_data(filename, sequence_mapping, mapping_dict):
     dframe                = pandas.read_csv(filename)
     dframe.reset_index(inplace=True)
 
-    for mapkey, mapdef in mapping_dict.iteritems():
+    for (mapkey, mapdef) in mapping_dict.items():
         # delete mapkey if it's already there
         if mapkey in list(dframe.columns.values): dframe.drop(mapkey, axis=1, inplace=True)
 
@@ -71,7 +71,7 @@ def map_data(filename, sequence_mapping, mapping_dict):
 
     # write it
     dframe.to_csv(filename, index=False, float_format="%.9f")
-    print "Wrote %s" % filename
+    print("Wrote {}".format(filename))
     return dframe
 
 if __name__ == '__main__':
@@ -112,7 +112,7 @@ if __name__ == '__main__':
     parkarea.rename(columns={'MAZ':'mgra'}, inplace=True)
     parkarea = parkarea[['a','mgra','parkarea']]
     parkarea.to_csv(park_location_alts_file, index=False)
-    print "Wrote %s" % park_location_alts_file
+    print("Wrote {}".format(park_location_alts_file))
 
     ######### dc alternatives ?
     dcalts = maz_data[['MAZ','TAZ']]
@@ -122,16 +122,16 @@ if __name__ == '__main__':
     dcalts.rename(columns={'MAZ':'mgra', 'TAZ':'dest'}, inplace=True)
     dcalts = dcalts[['a','mgra','dest']]
     dcalts.to_csv(dc_alts_file, index=False)
-    print "Wrote %s" % dc_alts_file
+    print("Wrote {}".format(dc_alts_file))
     
     ######### these seem truly pointless
     dcalts.drop('dest', axis=1, inplace=True)
     dcalts.to_csv(parking_soa_alts_file, index=False)
-    print "Wrote %s" % parking_soa_alts_file
+    print("Wrote {}".format(parking_soa_alts_file))
 
     soa_dist_alts = taz_data[['TAZ']]
     soa_dist_alts.loc[:,'a'] = range(1, soa_dist_alts.shape[0] + 1) # ???
     soa_dist_alts.rename(columns={'TAZ':'dest'}, inplace=True)
     soa_dist_alts = soa_dist_alts[['a','dest']]
     soa_dist_alts.to_csv(soa_dist_alts_file, index=False)
-    print "Wrote %s" % soa_dist_alts_file
+    print("Wrote {}".format(soa_dist_alts_file))

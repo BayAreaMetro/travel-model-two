@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 import com.pb.common.calculator.VariableTable;
+import com.pb.common.datafile.TableDataSet;
 
 /**
  * WalkDMU is the Decision-Making Unit class for the Walk-transit choice. The class
@@ -45,6 +46,9 @@ public class TransitWalkAccessDMU
                                                             //possible that it is being called for a drive-access path!
     int                                 tourCategoryIsJoint = 0;
     float                               valueOfTime = (float) 10.0;
+    float								fareSubsidy = 0f;
+    
+    protected float[][] transitFareDiscounts;
 
     public TransitWalkAccessDMU()
     {
@@ -60,6 +64,10 @@ public class TransitWalkAccessDMU
     	this.accessEgressMode = accessEgressMode;
     }
     
+    public void setTransitFareDiscounts(float[][] transitFareDiscounts) {
+    	
+    	this.transitFareDiscounts = transitFareDiscounts;
+    }
     
     /**
      * Get the access/egress mode
@@ -196,7 +204,57 @@ public class TransitWalkAccessDMU
     	return valueOfTime;
     }
    
-    /**
+    
+    public float getLocalDiscount() {
+    	
+    	if(applicationType!=0)
+    		return transitFareDiscounts[0][personType-1];
+    	return 1.0f;
+   }
+    
+    public float getExpressDiscount() {
+    	
+    	if(applicationType!=0)
+    		return transitFareDiscounts[1][personType-1];
+    	return 1.0f;
+    }
+    
+    public float getLRTDiscount() {
+    	
+    	if(applicationType!=0)
+    		return transitFareDiscounts[2][personType-1];
+    	return 1.0f;
+    }
+
+    public float getHeavyDiscount() {
+    	
+    	if(applicationType!=0)
+    		return transitFareDiscounts[3][personType-1];
+    	return 1.0f;
+    }
+    public float getCRDiscount() {
+    	
+    	if(applicationType!=0)
+    		return transitFareDiscounts[4][personType-1];
+    	return 1.0f;
+    }
+
+    public float getFerryDiscount() {
+    	if(applicationType!=0)
+    		return transitFareDiscounts[5][personType-1];
+    	return 1.0f;
+    }
+
+    
+    public float getFareSubsidy() {
+		return fareSubsidy;
+	}
+
+	public void setFareSubsidy(float fareSubsidy) {
+		this.fareSubsidy = fareSubsidy;
+	}
+
+	/**
      * Log the DMU values.
      * 
      * @param localLogger The logger to use.
@@ -219,6 +277,16 @@ public class TransitWalkAccessDMU
         localLogger.info(String.format("accessEgressMode  :       %9s", accessEgressMode));
         localLogger.info(String.format("tourCategoryIsJoint:      %9s", tourCategoryIsJoint));
         localLogger.info(String.format("valueOfTime:              %9.4f", valueOfTime));
+ 
+        if(applicationType!=0) {
+        	localLogger.info(String.format("Local fare discount:      %9.4f", getLocalDiscount()));
+        	localLogger.info(String.format("Express fare discount:    %9.4f", getExpressDiscount()));
+        	localLogger.info(String.format("LRT fare discount:        %9.4f", getLRTDiscount()));
+        	localLogger.info(String.format("Heavy fare discount:      %9.4f", getHeavyDiscount()));
+        	localLogger.info(String.format("CR fare discount:         %9.4f", getCRDiscount()));
+        	localLogger.info(String.format("Ferry fare discount:      %9.4f", getFerryDiscount()));
+        	localLogger.info(String.format("Transit fare subsidy:     %9.4f", getFareSubsidy()));
+        }
         
 
     }
@@ -240,6 +308,18 @@ public class TransitWalkAccessDMU
         methodIndexMap.put("getAccessEgressMode", 11);
         methodIndexMap.put("getTourCategoryIsJoint", 12);
         methodIndexMap.put("getValueOfTime", 13);
+        
+        methodIndexMap.put("getLocalDiscount",20);
+        methodIndexMap.put("getExpressDiscount",21);
+        methodIndexMap.put("getLRTDiscount",22);
+        methodIndexMap.put("getHeavyDiscount",23);
+        methodIndexMap.put("getCRDiscount",24);
+        methodIndexMap.put("getFerryDiscount",25);
+        
+        methodIndexMap.put("getFareSubsidy", 26);
+        
+        
+        
 
     }
 
@@ -272,7 +352,21 @@ public class TransitWalkAccessDMU
             	return getTourCategoryIsJoint();
             case 13:
             	return getValueOfTime();
-
+            case 20:
+            	return getLocalDiscount();
+            case 21:
+            	return getExpressDiscount();
+            case 22:
+            	return getLRTDiscount();
+            case 23:
+            	return getHeavyDiscount();
+            case 24:
+            	return getCRDiscount();
+            case 25:
+            	return getFerryDiscount();
+            case 26:
+            	return getFareSubsidy();
+            	
             default:
                 logger.error("method number = " + variableIndex + " not found");
                 throw new RuntimeException("method number = " + variableIndex + " not found");

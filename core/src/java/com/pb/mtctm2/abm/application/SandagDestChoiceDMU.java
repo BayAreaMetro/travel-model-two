@@ -55,6 +55,8 @@ public class SandagDestChoiceDMU
         methodIndexMap.put("getMaxWindow", 47);
         methodIndexMap.put("getDcSizeAlt", 48);
         methodIndexMap.put("getPecasOcc", 49);
+        methodIndexMap.put("getCountyIdDestAlt", 50);
+        methodIndexMap.put("getCountyIdOrigin", 51);
     }
 
     public void setMcLogsum(int mgra, double logsum)
@@ -157,6 +159,11 @@ public class SandagDestChoiceDMU
                 return getDcSizeAlt(arrayIndex);
             case 49: 
             	return getPecasOcc();
+            case 50:
+                return getCountyIdDestAlt(arrayIndex);
+            case 51:
+            	return getCountyIdOrigin();
+
 
             default:
                 logger.error("method number = " + variableIndex + " not found");

@@ -60,7 +60,9 @@ public class HouseholdChoiceModels
 
     private String                                                   restartModelString;
 
+    
     private HouseholdAutoOwnershipModel                              aoModel;
+    private TransitSubsidyAndPassModel                               ttModel;
     private TourVehicleTypeChoiceModel                               tvtcModel;
     private TransponderChoiceModel                                   tcModel;
     private ParkingProvisionModel                                    ppModel;
@@ -171,6 +173,7 @@ public class HouseholdChoiceModels
             if (runAutoOwnershipModel) {
                 aoModel = new HouseholdAutoOwnershipModel(propertyMap, dmuFactory, accTable, mandAcc);
                 tvtcModel = new TourVehicleTypeChoiceModel(propertyMap);
+                ttModel = new TransitSubsidyAndPassModel(propertyMap, dmuFactory, accTable, logsumHelper);
                 if ( measureObjectSizes ) logger.info ( "AO size:         " + ObjectUtil.sizeOf( aoModel ) + ObjectUtil.sizeOf(tvtcModel));
             }
 
@@ -381,9 +384,10 @@ public class HouseholdChoiceModels
         // appropriately if so.
         checkRestartModel(hhObject);
 
-        if (runAutoOwnershipModel)
+        if (runAutoOwnershipModel) {
+            ttModel.applyModels(hhObject);
             aoModel.applyModel(hhObject, false);
-
+        }  
         if (runTransponderModel)
             tcModel.applyModel(hhObject);
 
@@ -458,6 +462,7 @@ public class HouseholdChoiceModels
             long check = System.nanoTime();
             //long hhSeed = globalSeed + hhObject.getHhId() + AO_SEED_OFFSET; 
             //hhObject.getHhRandom().setSeed( hhSeed );
+            ttModel.applyModels(hhObject);
             aoModel.applyModel( hhObject, false );
             aoTime += ( System.nanoTime() - check );
         }

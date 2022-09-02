@@ -170,10 +170,11 @@ public class SandagHouseholdDataManager2
                 hh.setHhAutos(numAutos);
 
                 // set the hhSize variable and create Person objects for each person
-                // read sample rate from file if it exists, if not set it to the global sample rate
-                float hhSampleRate = sampleRate;
+                // read sample rate from file if it exists, and multiply by the global sample rate since there might be a sample of households
+                // that doesn't vary by TAZ
+                float hhSampleRate = sampleRate; //the global sample rate
                 if(hasSampleRate)
-                	hhSampleRate = hhTable.getValueAt(r,  hhTable.getColumnPosition(HH_SAMPLERATE_FIELD_NAME));
+                	hhSampleRate = hhTable.getValueAt(r,  hhTable.getColumnPosition(HH_SAMPLERATE_FIELD_NAME))*sampleRate;
                 hh.setSampleRate(hhSampleRate);
 
                 int numPersons = (int) hhTable.getValueAt(r, hhTable

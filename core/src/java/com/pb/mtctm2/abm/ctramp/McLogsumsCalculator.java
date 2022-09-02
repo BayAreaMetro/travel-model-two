@@ -364,6 +364,7 @@ public class McLogsumsCalculator implements Serializable
         
     	//setup best path dmu variables
     	TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
     	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
     	    	
     	// walk access, walk egress transit, outbound
@@ -383,6 +384,7 @@ public class McLogsumsCalculator implements Serializable
         	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
         	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
         	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
+        	walkDmu.setFareSubsidy(mcDmuObject.getFareSubsidy());
         	
         	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
         	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
@@ -396,6 +398,7 @@ public class McLogsumsCalculator implements Serializable
         
         //setup best path dmu variables
     	walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
     	driveDmu  = new TransitDriveAccessDMU();
         
         // walk access, walk egress transit, inbound
@@ -429,6 +432,7 @@ public class McLogsumsCalculator implements Serializable
         
     	//setup best path dmu variables
     	TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
     	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
     	
     	// logsum for WTD outbound is never used -> set to NA
@@ -462,6 +466,7 @@ public class McLogsumsCalculator implements Serializable
     	
         //setup best path dmu variables
     	walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
     	driveDmu  = new TransitDriveAccessDMU();
     	
         // walk access, drive egress transit, inbound
@@ -481,6 +486,7 @@ public class McLogsumsCalculator implements Serializable
         	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
         	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
         	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
+        	walkDmu.setFareSubsidy(mcDmuObject.getFareSubsidy());
         	
         	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
         	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
@@ -497,6 +503,7 @@ public class McLogsumsCalculator implements Serializable
     {
     	//setup best path dmu variables
     	TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
     	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
     	
     	// drive access, walk egress transit, outbound
@@ -515,7 +522,9 @@ public class McLogsumsCalculator implements Serializable
         	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
         	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
         	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
-
+        	walkDmu.setValueOfTime((float) mcDmuObject.getValueOfTime());
+        	walkDmu.setFareSubsidy(mcDmuObject.getFareSubsidy());
+        	
           	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
             driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
         	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
@@ -638,6 +647,7 @@ public class McLogsumsCalculator implements Serializable
     {
     	//setup best path dmu variables
     	TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
     	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
     	
         // walk access and walk egress for transit segment
@@ -654,6 +664,8 @@ public class McLogsumsCalculator implements Serializable
     	walkDmu.setTourCategoryIsJoint(tripMcDmuObject.getTourCategoryJoint());
     	walkDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : tripMcDmuObject.getPersonType());
     	walkDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
+    	walkDmu.setFareSubsidy(tripMcDmuObject.getFareSubsidy());
+    	
     	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TRIPMC);
     	driveDmu.setTourCategoryIsJoint(tripMcDmuObject.getTourCategoryJoint());
     	driveDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : tripMcDmuObject.getPersonType());
@@ -670,6 +682,7 @@ public class McLogsumsCalculator implements Serializable
     {
     	//setup best path dmu variables
     	TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
     	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
     	
         // walk access, drive egress transit, outbound
@@ -686,6 +699,8 @@ public class McLogsumsCalculator implements Serializable
     	walkDmu.setTourCategoryIsJoint(tripMcDmuObject.getTourCategoryJoint());
     	walkDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : tripMcDmuObject.getPersonType());
     	walkDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
+    	walkDmu.setFareSubsidy(tripMcDmuObject.getFareSubsidy());
+    	
     	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TRIPMC);
     	driveDmu.setTourCategoryIsJoint(tripMcDmuObject.getTourCategoryJoint());
     	driveDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : tripMcDmuObject.getPersonType());
@@ -702,6 +717,7 @@ public class McLogsumsCalculator implements Serializable
     {
     	//setup best path dmu variables
     	TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
+    	walkDmu.setTransitFareDiscounts(bestPathUEC.getTransitFareDiscounts());
     	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
     	
         // drive access, walk egress transit, outbound
@@ -718,6 +734,8 @@ public class McLogsumsCalculator implements Serializable
     	walkDmu.setTourCategoryIsJoint(tripMcDmuObject.getTourCategoryJoint());
     	walkDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : tripMcDmuObject.getPersonType());
     	walkDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
+    	walkDmu.setFareSubsidy(tripMcDmuObject.getFareSubsidy());
+    	
     	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TRIPMC);
     	driveDmu.setTourCategoryIsJoint(tripMcDmuObject.getTourCategoryJoint());
     	driveDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : tripMcDmuObject.getPersonType());

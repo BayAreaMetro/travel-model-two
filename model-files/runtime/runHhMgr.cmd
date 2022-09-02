@@ -8,7 +8,7 @@ rem ### Note that a jdk is required; a jre is not sufficient, as the UEC class g
 rem ### and compiles code during the model run, and uses javac in the jdk to do this.
 set JAVA_PATH=%1
 set HOST_IP_ADDRESS=%2
-set HOST_PORT=1117
+set HOST_PORT=%HH_MANAGER_PORT%
 CD %~dp0\..\..
 set PROJECT_DIRECTORY=%CD%
 
@@ -24,7 +24,7 @@ set RUNTIME=%PROJECT_DIRECTORY%
 set CONFIG=%RUNTIME%\CTRAMP\runtime\config
 set JAR_LOCATION=%RUNTIME%\CTRAMP\runtime
 set JPPF_LIB=%JAR_LOCATION%\lib\JPPF-2.5-admin-ui\lib\*
-set LIB_JAR_PATH=%JPPF_LIB%;%JAR_LOCATION%\lib\sandagLib\*;%JAR_LOCATION%\lib\jxlLib\*;%JAR_LOCATION%\lib\ssjLib\*;%JAR_LOCATION%\lib\cmfLib\*;%JAR_LOCATION%\lib\log4jLib\*;%JAR_LOCATION%\lib\JPPF-2.5.5-admin-ui\lib\*
+set LIB_JAR_PATH=%JPPF_LIB%;%JAR_LOCATION%\lib\sandagLib\*;%JAR_LOCATION%\lib\jxlLib\*;%JAR_LOCATION%\lib\ssjLib\*;%JAR_LOCATION%\lib\cmfLib\*;%JAR_LOCATION%\lib\log4jLib\*;%JAR_LOCATION%\lib\JPPF-2.5.5-admin-ui\lib\*;%JAR_LOCATION%\lib\*
 
 rem ### Define the CLASSPATH environment variable for the classpath needed in this model run.
 set OLDCLASSPATH=%CLASSPATH%
@@ -40,10 +40,10 @@ rem ### Doing this ensures that the JAVA_HOME path we defined above is the on th
 set PATH=%JAVA_PATH%\bin;%OLDPATH%
 
 rem ### Change current directory to RUNTIME, and issue the java command to run the model.
-ECHO ***calling: java -server -Xmx35000m -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_hh.xml com.pb.mtctm2.abm.application.SandagHouseholdDataManager2 -hostname %HOST_IP_ADDRESS% -port %HOST_PORT%
-START "Household Manager" %JAVA_PATH%\bin\java -server -Xmx35000m -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_hh.xml com.pb.mtctm2.abm.application.SandagHouseholdDataManager2 -hostname %HOST_IP_ADDRESS% -port %HOST_PORT%
+ECHO ***calling: java -server -Xmx30000m -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_hh.xml com.pb.mtctm2.abm.application.SandagHouseholdDataManager2 -hostname %HOST_IP_ADDRESS% -port %HOST_PORT%
+START "Household Manager" java -server -Xmx30000m -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_hh.xml com.pb.mtctm2.abm.application.SandagHouseholdDataManager2 -hostname %HOST_IP_ADDRESS% -port %HOST_PORT%
 rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1044,server=y,suspend=y -server -Xms40000m -Xmx40000m -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_hh.xml com.pb.mtctm2.abm.application.SandagHouseholdDataManager2 -hostname %HOST_IP_ADDRESS% -port %HOST_PORT%
- 
+
 rem ### restore saved environment variable values, and change back to original current directory
 set JAVA_PATH=%OLDJAVAPATH%
 set PATH=%OLDPATH%

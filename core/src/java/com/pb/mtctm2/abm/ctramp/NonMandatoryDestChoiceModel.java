@@ -389,7 +389,7 @@ public class NonMandatoryDestChoiceModel implements Serializable {
             
             int currentTourNum = 0;
             for ( Tour tour : tourList ) {
-
+                float dcLogsum = -99;
                 int chosen = -1;
                 try {
 
@@ -424,11 +424,16 @@ public class NonMandatoryDestChoiceModel implements Serializable {
                         
                     // get the tour location alternative chosen from the sample                    
                     if ( useNewSoaMethod ) {
-                        chosen = selectLocationFromTwoStageSampleOfAlternatives( tour, mcDmuObject );
+                    	double[] returnArray = selectLocationFromTwoStageSampleOfAlternatives( tour, mcDmuObject );
+                        chosen = (int) returnArray[0];
+                        dcLogsum = (float) returnArray[1];
                         soaRunTime += dcSoaTwoStageObject.getSoaRunTime();
                     }
                     else {
-                        chosen = selectLocationFromSampleOfAlternatives( tour, dcDmuObject, dcSoaDmuObject, mcDmuObject );
+
+                        double[] returnArray =  selectLocationFromSampleOfAlternatives( tour, dcDmuObject, dcSoaDmuObject, mcDmuObject );
+                        chosen = (int) returnArray[0];
+                        dcLogsum = (float) returnArray[1];
                         soaRunTime += dcSoaModel.getSoaRunTime();
                     }
                         
@@ -442,6 +447,7 @@ public class NonMandatoryDestChoiceModel implements Serializable {
 
                 // set chosen values in tour object
                 tour.setTourDestMgra( chosen );
+                tour.setDestinationChoiceLogsum(dcLogsum);
 
                 currentTourNum++;
             }
@@ -474,6 +480,8 @@ public class NonMandatoryDestChoiceModel implements Serializable {
         for ( Tour tour : tourList ) {
 
             int chosen = -1;
+            float dcLogsum = -99;
+
             try {
 
                 int homeTaz = hh.getHhTaz();
@@ -508,11 +516,15 @@ public class NonMandatoryDestChoiceModel implements Serializable {
                     
                 // get the tour location alternative chosen from the sample
                 if ( useNewSoaMethod ) {
-                    chosen = selectLocationFromTwoStageSampleOfAlternatives( tour, mcDmuObject );
+                    double[] returnArray = selectLocationFromTwoStageSampleOfAlternatives( tour, mcDmuObject );
+                    chosen = (int) returnArray[0];
+                    dcLogsum = (float) returnArray[1];
                     soaRunTime += dcSoaTwoStageObject.getSoaRunTime();
                 }
                 else {
-                    chosen = selectLocationFromSampleOfAlternatives( tour, dcDmuObject, dcSoaDmuObject, mcDmuObject );
+                    double[] returnArray =  selectLocationFromSampleOfAlternatives( tour, dcDmuObject, dcSoaDmuObject, mcDmuObject );
+                    chosen = (int) returnArray[0];
+                    dcLogsum = (float) returnArray[1];
                     soaRunTime += dcSoaModel.getSoaRunTime();
                 }
 
@@ -526,6 +538,7 @@ public class NonMandatoryDestChoiceModel implements Serializable {
 
             // set chosen values in tour object
             tour.setTourDestMgra( chosen );
+            tour.setDestinationChoiceLogsum(dcLogsum);
 
             currentTourNum++;
         }
@@ -538,9 +551,9 @@ public class NonMandatoryDestChoiceModel implements Serializable {
     
     /**
      * 
-     * @return chosen mgra.
+     * @return A double array whose first element is the chosen zone and the second element is the destination choice logsum.
      */
-    private int selectLocationFromSampleOfAlternatives(Tour tour, DestChoiceDMU dcDmuObject, DcSoaDMU dcSoaDmuObject, TourModeChoiceDMU mcDmuObject)
+    private double[] selectLocationFromSampleOfAlternatives(Tour tour, DestChoiceDMU dcDmuObject, DcSoaDMU dcSoaDmuObject, TourModeChoiceDMU mcDmuObject)
     {
 
         // set tour origin taz/subzone and start/end times for calculating mode
@@ -650,6 +663,8 @@ public class NonMandatoryDestChoiceModel implements Serializable {
         // compute destination choice proportions and choose alternative
         dcModel[m].computeUtilities(dcDmuObject, dcDmuObject.getDmuIndexValues(),
                 destAltsAvailable, destAltsSample);
+       
+        double dcLogsum = dcModel[m].getLogsum();
 
         Random hhRandom = household.getHhRandom();
         int randomCount = household.getHhRandomCount();
@@ -661,6 +676,7 @@ public class NonMandatoryDestChoiceModel implements Serializable {
         {
             try {
                 chosen = dcModel[m].getChoiceResult(rn);
+                
             }
             catch (Exception e)  {
                 logger.error(String.format(
@@ -745,15 +761,16 @@ public class NonMandatoryDestChoiceModel implements Serializable {
 
         }
 
-        return chosen;
+        double[] returnArray = {(double) chosen, dcLogsum};
+        return returnArray;
 
     }
 
     /**
      * 
-     * @return chosen mgra.
+     * @return A double array whose first element is the chosen zone and the second element is the destination choice logsum.
      */
-    private int selectLocationFromTwoStageSampleOfAlternatives( Tour tour, TourModeChoiceDMU mcDmuObject )
+    private double[] selectLocationFromTwoStageSampleOfAlternatives( Tour tour, TourModeChoiceDMU mcDmuObject )
     {
 
         // set tour origin taz/subzone and start/end times for calculating mode
@@ -851,7 +868,8 @@ public class NonMandatoryDestChoiceModel implements Serializable {
         // compute destination choice proportions and choose alternative
         dcModel2[m].computeUtilities(dcDistSoaDmuObject, dcDistSoaDmuObject.getDmuIndexValues(),
                 dcModel2AltsAvailable, dcModel2AltsSample);
-
+        double dcLogsum = dcModel2[m].getLogsum();
+        
         Random hhRandom = household.getHhRandom();
         int randomCount = household.getHhRandomCount();
         double rn = hhRandom.nextDouble();
@@ -924,7 +942,8 @@ public class NonMandatoryDestChoiceModel implements Serializable {
 
         }
 
-        return chosen;
+        double[] returnArray = {(double) chosen, dcLogsum};
+        return returnArray;
 
     }
 

@@ -32,23 +32,25 @@
 import os, sys
 import pandas as pd
 import numpy as np
+import random
 
 
 # Define working functions
 def sample_hhs(group):
-    #sample using the taz sample rate with replacement and a stable group seed
-    seed = int(group.taz.min()*100 + group.hhincbin.min()*10 + group.hhsizebin.min())
+
+	#sample using the taz sample rate with replacement and a stable group seed
+    seed = int(group['TAZ'].min()*100 + group['hhincbin'].min()*10 + group['hhsizebin'].min())
     sample = group.sample(frac=group.SampleRate.min(), replace=True, random_state=seed)
     
     if len(sample)==0:
-        print 'taz ',group.taz.min(),' inc ', group.hhincbin.min(), ' size ', group.hhsizebin.min(),' sample is empty. Sample rate is ',group.SampleRate.min(),' size is ',len(group)
+        print 'TAZ ',group.TAZ.min(),' inc ', group.hhincbin.min(), ' size ', group.hhsizebin.min(),' sample is empty. Sample rate is ',group.SampleRate.min(),' size is ',len(group)
         sample = group
         effectiveRate = 1.0
     else:
         #set hh expansion factor based on actual sample size since sampling is lumpy
         sample.hhexpfac = 1.0 / (len(sample)*1.0/len(group)) 
         effectiveRate = 1.0 * len(sample)/len(group)		
-        print("taz %i hhincbin %s hhsizebin %s sample rate %.2f effective rate %.2f" % (group.taz.min(), group.hhincbin.min(), group.hhsizebin.min(), group.SampleRate.min(), 1.0 / sample.hhexpfac))
+        print("TAZ %i hhincbin %s hhsizebin %s sample rate %.2f effective rate %.2f" % (group.TAZ.min(), group.hhincbin.min(), group.hhsizebin.min(), group.SampleRate.min(), 1.0 / sample.hhexpfac))
     
     # replace the target sample rate with the actual sample rate
     sample['SampleRate'] = effectiveRate
@@ -67,17 +69,19 @@ def runPopSampler(tazSampleRateFileName, hhFileName, perFileName):
     persons = pd.read_csv(perFileName, delimiter=',')
     
     #join sample rate by home taz
-    households = pd.merge(households, sampleRates, left_on='taz', right_on='TAZ_SEQ')
-    
+    households = pd.merge(households, sampleRates, left_on='TAZ', right_on='TAZ')
+	
     #bin hhs by income and size
-    incbins = [-99999, 50000, 100000, households['hincp'].max()+1]
-    households['hhincbin'] = pd.cut(households['hincp'], incbins, labels=False) # Double check household income field
-    sizebins = [-1, 1, 2, 3, households['np'].max()+1]
-    households['hhsizebin'] = pd.cut(households['np'], sizebins, labels=False) # Double check househod size field
+    incbins = [-99999, 50000, 100000, households['HHINCADJ'].max()+1]
+    households['hhincbin'] = pd.cut(households['HHINCADJ'], incbins, labels=False) # Double check household income field
+    sizebins = [-1, 1, 2, 3, households['NP'].max()+1]
+    households['hhsizebin'] = pd.cut(households['NP'], sizebins, labels=False) # Double check household size field
     
-    #group hhs by taz, hhincbin, hhsizebin and sample and reset index
-    hhsGrouped = households.groupby(["taz","hhincbin","hhsizebin"])
+   #group hhs by taz, hhincbin, hhsizebin and sample and reset index
+    hhsGrouped = households.groupby(['TAZ', 'hhincbin', 'hhsizebin'])
     new_households = hhsGrouped.apply(sample_hhs)
+	
+	
     new_households = new_households.reset_index(drop=True)
     
     #update ids and expand persons
@@ -88,15 +92,17 @@ def runPopSampler(tazSampleRateFileName, hhFileName, perFileName):
     
        #delete added fields
     del new_households['hhno_new']
-    del new_households['TAZ_SEQ']
+#    del new_households['TAZ_SEQ']
 #    del new_households['SampleRate']
     del new_households['hhincbin']
     del new_households['hhsizebin']
     del new_persons['hhno_new']
+    del new_households['ORIG_TAZ']
+    del new_households['ORIG_MAZ']
 	
 	#sort data
     new_households.sort_values('HHID', ascending=True, inplace=True)
-    new_persons.sort_values(['HHID','sporder'], ascending=[True,True], inplace=True)
+    new_persons.sort_values(['HHID','PERID'], ascending=[True,True], inplace=True)
 	
 	#reset perid to sequential number
     new_persons['PERID'] = range(1,len(new_persons)+1)

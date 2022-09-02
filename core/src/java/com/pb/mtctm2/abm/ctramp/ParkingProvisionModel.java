@@ -121,21 +121,21 @@ public class ParkingProvisionModel
                 person[i].setFreeParkingAvailableResult(chosen);
 
                 if ( chosen == FP_MODEL_REIMB_ALT ) {
-                    double logReimbPct = meanReimb + hhRandom.nextGaussian() * stdDevReimb;                
-                    person[i].setParkingReimbursement( Math.exp( logReimbPct ) );
+                    float logReimbPct = (float)( meanReimb + hhRandom.nextGaussian() * stdDevReimb);                
+                    person[i].setParkingReimbursement( (float) (Math.exp( logReimbPct )) );
                 }
                 else if ( chosen == FP_MODEL_FREE_ALT ) {
-                    person[i].setParkingReimbursement( 0.0 );
+                    person[i].setParkingReimbursement( 0.0f );
                 }
                 else if ( chosen == FP_MODEL_PAY_ALT ) {
-                    person[i].setParkingReimbursement( 0.0 );
+                    person[i].setParkingReimbursement( 0.0f );
                 }
             
             }
             else {
                 
                 person[i].setFreeParkingAvailableResult( FP_MODEL_NO_REIMBURSEMENT_CHOICE );
-                person[i].setParkingReimbursement( 0.0 );
+                person[i].setParkingReimbursement( 0.0f );
                 
             }
         }

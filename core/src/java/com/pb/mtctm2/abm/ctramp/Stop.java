@@ -19,8 +19,11 @@ public class Stop
     int     alightTap;
     boolean inbound;
     int     set;
+    short   minute;
+    float randomNumberForTapChoice;
     
-    float   sampleRate;
+
+	float   sampleRate;
 
     String  origPurpose;
     String  destPurpose;
@@ -176,6 +179,21 @@ public class Stop
 	public void setSampleRate(float sampleRate) {
 		this.sampleRate = sampleRate;
 	}
-    
+
+	public short getMinute() {
+		return minute;
+	}
+
+	public void setMinute(short minute) {
+		this.minute = minute;
+	}
+    public float getRandomNumberForTapChoice() {
+		return randomNumberForTapChoice;
+	}
+
+	public void setRandomNumberForTapChoice(float randomNumberForTapChoice) {
+		this.randomNumberForTapChoice = randomNumberForTapChoice;
+	}
+
 
 }

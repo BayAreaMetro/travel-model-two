@@ -80,8 +80,8 @@ loop period = 1, 5
               OLD_A = A
               B_NEW_NODE = B.NEW_NODE
               OLD_B = B
-              
-              IF (CNTYPE = 'TAZ' | CNTYPE = 'TANA' | CNTYPE = 'USE' | CNTYPE = 'MAZ' | CNTYPE = 'EXT')
+
+              IF (DRIVE_ACCESS = 1)
                   ;keep
               ELSE
                   DELETE
@@ -140,9 +140,9 @@ loop period = 1, 5
                   ENDIF
                   
                   ;depending on maz set
-      @SWITCH_1@  IF (MAZSEQ > 0 & (COUNTY < 4))
-      @SWITCH_2@  IF (MAZSEQ > 0 & (COUNTY > 3 & COUNTY < 6))
-      @SWITCH_3@  IF (MAZSEQ > 0 & (COUNTY > 5))
+      @SWITCH_1@  IF (MAZSEQ > 0 & (COUNTY = 'San Francisco' | COUNTY = 'San Mateo' | COUNTY = 'Santa Clara'))
+      @SWITCH_2@  IF (MAZSEQ > 0 & (COUNTY = 'Alameda' | COUNTY = 'Contra Costa'))
+      @SWITCH_3@  IF (MAZSEQ > 0 & (COUNTY = 'Solano' | COUNTY = 'Napa' | COUNTY = 'Sonoma' | COUNTY = 'Marin'))
                       NEW_NODE = _i
                       _i = _i + 1
                       PRINT, FILE="hwy\ZONES_@mazset@_@token_period@.txt", REWIND=T, LIST="ZONES=",_i(I)
@@ -154,8 +154,8 @@ loop period = 1, 5
               PHASE = LINKMERGE
                   A_NEW_NODE = A.NEW_NODE
                   B_NEW_NODE = B.NEW_NODE
-                  
-                  IF (CNTYPE = 'MAZ' | CNTYPE = 'TANA' | CNTYPE = 'USE')
+
+                  IF (DRIVE_ACCESS = 1 & (CNTYPE = 'MAZ' | CNTYPE = 'TANA'))
                       ;keep
                   ELSE
                       DELETE
@@ -292,17 +292,17 @@ loop period = 1, 5
       ENDRUN
       
       ;delete intermediate files
-      *del hwy\avgload@token_period@_maz_taz.net
-      *del hwy\load_1_@token_period@_maz.net
-      *del hwy\load_2_@token_period@_maz.net
-      *del hwy\load_3_@token_period@_maz.net
-      *del hwy\avgload_1_@token_period@_maz.net
-      *del hwy\avgload_2_@token_period@_maz.net
-      *del hwy\avgload_3_@token_period@_maz.net      
-      *del hwy\ZONES_1_@token_period@.txt
-      *del hwy\ZONES_2_@token_period@.txt
-      *del hwy\ZONES_3_@token_period@.txt
-      *del hwy\load_@token_period@_maz.net
+      ;*del hwy\avgload@token_period@_maz_taz.net
+      ;*del hwy\load_1_@token_period@_maz.net
+      ;*del hwy\load_2_@token_period@_maz.net
+      ;*del hwy\load_3_@token_period@_maz.net
+      ;*del hwy\avgload_1_@token_period@_maz.net
+      ;*del hwy\avgload_2_@token_period@_maz.net
+      ;*del hwy\avgload_3_@token_period@_maz.net      
+      ;*del hwy\ZONES_1_@token_period@.txt
+      ;*del hwy\ZONES_2_@token_period@.txt
+      ;*del hwy\ZONES_3_@token_period@.txt
+      ;*del hwy\load_@token_period@_maz.net
       
     EndDistributeMultistep
     

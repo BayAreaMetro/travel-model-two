@@ -40,6 +40,13 @@ public class MatrixDataServerRmi
         Object[] objArray = { fileName, m };
         remote.method("writeMatrixFile", objArray);
     }
+
+    public void writeMatrixFile(String fileName, Matrix[] m, MatrixType mt)
+    {
+        Object[] objArray = {fileName, m, mt};
+        remote.method("writeMatrixFile", objArray);
+    }
+
     
     public Matrix getMatrix(DataEntry dataEntry)
     {

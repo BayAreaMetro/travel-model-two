@@ -31,11 +31,11 @@ public abstract class ModelStructure
     public static final int                             LAST_TOD_INTERVAL_HOUR            = 2400;
     protected String[]                                  TOD_INTERVAL_LABELS;
     
-    public static final int      EA_SKIM_PERIOD_INDEX   = TransitWalkAccessUEC.EA;
-    public static final int      AM_SKIM_PERIOD_INDEX   = TransitWalkAccessUEC.AM;
-    public static final int      MD_SKIM_PERIOD_INDEX   = TransitWalkAccessUEC.MD;
-    public static final int      PM_SKIM_PERIOD_INDEX   = TransitWalkAccessUEC.PM;
-    public static final int      EV_SKIM_PERIOD_INDEX   = TransitWalkAccessUEC.EV;
+    public static final int      EA_SKIM_PERIOD_INDEX   = 0;
+    public static final int      AM_SKIM_PERIOD_INDEX   = 1;
+    public static final int      MD_SKIM_PERIOD_INDEX   = 2;
+    public static final int      PM_SKIM_PERIOD_INDEX   = 3;
+    public static final int      EV_SKIM_PERIOD_INDEX   = 4;
         
     
     public static final int[]    PERIODCODES    = {
@@ -318,7 +318,9 @@ public abstract class ModelStructure
 
     abstract public boolean getTourModeIsPnr(int tourMode);
 
-    abstract public boolean getTourModeIsKnr(int tourMode);
+    abstract public boolean getTourModeIsKnrTransit(int tourMode);
+
+    abstract public boolean getTourModeIsTNCTransit(int tourMode);
 
     abstract public boolean getTourModeIsSchoolBus(int tourMode);
 
@@ -330,6 +332,8 @@ public abstract class ModelStructure
     
     abstract public boolean getTripModeIsKnrTransit(int tripMode);
     
+    abstract public boolean getTripModeIsTNCTransit(int tripMode);
+
     abstract public boolean getTourModeIsTNC(int tourMode);
     
     abstract public boolean getTourModeIsTaxi(int tourMode);

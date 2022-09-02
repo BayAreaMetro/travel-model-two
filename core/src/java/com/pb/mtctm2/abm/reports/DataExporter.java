@@ -456,7 +456,9 @@ public class DataExporter {
         int[] originTaz = new int[rowCount];
         int[] destinationTaz = new int[rowCount];
 
-        SkimBuilder skimBuilder = new SkimBuilder(properties);
+        MatrixDataServerIf ms = SkimBuilder.startMatrixServer(properties);
+        
+        SkimBuilder skimBuilder = new SkimBuilder(properties, ms);
         boolean hasPurposeColumn = tripStructureDefinition.originPurposeColumn > -1;
         for (int i = 0; i < rowCount; i++) {
             int row = i+1;

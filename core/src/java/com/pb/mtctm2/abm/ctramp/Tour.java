@@ -55,12 +55,17 @@ public class Tour
     private double[][]   bestDtwTapPairsOut;
     private double[][]   bestDtwTapPairsIn;
     
+    private float randomNumberForTapChoiceOut;
+    private float randomNumberForTapChoiceIn;
+    
     private int       choosenTransitPathIn;
     private int       choosenTransitPathOut;
     
     private float     sampleRate;
     
     private boolean   useOwnedAV;
+    
+    private float destinationChoiceLogsum;
 
     // this constructor used for mandatory tour creation
     public Tour(Person perObj, int tourId, int primaryIndex)
@@ -273,6 +278,9 @@ public class Tour
         return hhObj.getHhId();
     }
 
+    public Household getHousehold() {
+    	return hhObj;
+    }
     public int getHhMgra()
     {
         return hhObj.getHhMgra();
@@ -392,7 +400,7 @@ public class Tour
 
     public String getTourWindow( String purposeAbbreviation ) {
         String returnString = String.format("      %5s:     |", purposeAbbreviation );
-        int[] windows = perObj.getTimeWindows();
+        short[] windows = perObj.getTimeWindows();
         for ( int i=1; i < windows.length; i++ ) {
             String tempString = String.format("%s", i >= tourDepartPeriod && i <= tourArrivePeriod ? purposeAbbreviation : "    " );
             if ( tempString.length() == 2 || tempString.length() == 3 )
@@ -734,6 +742,29 @@ public class Tour
 
 	public void setUseOwnedAV(boolean useOwnedAV) {
 		this.useOwnedAV = useOwnedAV;
+	}
+	public float getDestinationChoiceLogsum() {
+		return destinationChoiceLogsum;
+	}
+
+	public void setDestinationChoiceLogsum(float destinationChoiceLogsum) {
+		this.destinationChoiceLogsum = destinationChoiceLogsum;
+	}
+
+	public float getRandomNumberForTapChoiceOut() {
+		return randomNumberForTapChoiceOut;
+	}
+
+	public void setRandomNumberForTapChoiceOut(float randomNumberForTapChoiceOut) {
+		this.randomNumberForTapChoiceOut = randomNumberForTapChoiceOut;
+	}
+
+	public float getRandomNumberForTapChoiceIn() {
+		return randomNumberForTapChoiceIn;
+	}
+
+	public void setRandomNumberForTapChoiceIn(float randomNumberForTapChoiceIn) {
+		this.randomNumberForTapChoiceIn = randomNumberForTapChoiceIn;
 	}
 
 }

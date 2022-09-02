@@ -29,7 +29,7 @@ for line in reader:
     node_map[int(line["OLD_NODE"])] = int(line["N"])
 
 #now read the link file, transfer the a/b nodes, and write the new file
-f = open(out_link_file,'wb')
+f = open(out_link_file,'w')
 for line in open(link_file):
     line = line.strip().split(',')
     if len(line) < 2:

@@ -48,7 +48,7 @@
 ; ----------------------------------------------------------------------------------------------------------------
 
 ;build truck taz data
-*"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\nonres\truck_taz_data.py
+*"python" %BASE_SCRIPTS%\nonres\truck_taz_data.py
 IF (ReturnCode != 0) ABORT
 
 ; apply the generation models
@@ -69,11 +69,17 @@ run pgm = tripgen
    ; only apply the model for internal zones
    zones = %TAZ_COUNT%
    
+   
+   
+   
    ; loop through the origin zones
    phase = iloop
    
-      ; non-garage-based, or linked trips - productions (very small updated with NAICS coefficients)
-      linkedVerySmallP = round(0.4 * (0.95409 * zi.1.RETEMPN + 0.54333 * zi.1.FPSEMPN + 0.50769 * zi.1.HEREMPN + 
+      ;verySmallFactor = 0.4
+	  verySmallFactor = 0.96
+	  
+	  ; non-garage-based, or linked trips - productions (very small updated with NAICS coefficients)
+      linkedVerySmallP = round(verySmallFactor * (0.95409 * zi.1.RETEMPN + 0.54333 * zi.1.FPSEMPN + 0.50769 * zi.1.HEREMPN + 
                                       0.63558 * zi.1.OTHEMPN + 1.10181 * zi.1.AGREMPN + 0.81576 * zi.1.MWTEMPN +
                                       0.26565 * ZI.1.TOTHH) )
                                

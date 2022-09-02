@@ -70,20 +70,20 @@ run pgm = matrix
    ;          - combination trucks
    mw[14] = 0.1430 * mw[4]      
    
-   ;     - AM peak
-   mw[15] = 0.0000 * mw[1]      
+   ;     - AM peak (adjusted very small factor to 0.07, was 0.0)
+   mw[15] = 0.0700 * mw[1]      
    mw[16] = 0.2440 * mw[2]      
    mw[17] = 0.2930 * mw[3]      
    mw[18] = 0.2320 * mw[4] 
    
-   ;     - midday
-   mw[19] = 0.6080 * mw[1]     
+   ;     - midday (adjusted very small factor to 0.07, was 0.6080)
+   mw[19] = 0.6360 * mw[1]     
    mw[20] = 0.3710 * mw[2]      
    mw[21] = 0.3935 * mw[3]  
    mw[22] = 0.3315 * mw[4]      
    
-   ;     - PM peak
-   mw[23] = 0.1980 * mw[1]      
+   ;     - PM peak (adjusted very small factor to 0.10, was 0.1980)
+   mw[23] = 0.1000 * mw[1]      
    mw[24] = 0.2180 * mw[2]     
    mw[25] = 0.1730 * mw[3]      
    mw[26] = 0.1750 * mw[4]     

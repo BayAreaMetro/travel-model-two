@@ -26,4 +26,16 @@ FUNCTION
 TC[8]  = 60 * ( (DISTANCE/LI.FFS) + (0.25 * ( ( (V/C) - 1) + ( ( ( ( (V/C) - 1 )^2 ) + (16 * (Ja10000/10000) * (V/C) * (DISTANCE^2) ) )^0.5) ) ) ) 
 
 FUNCTION
-TC[10] = 60 * ( (DISTANCE/LI.FFS) + (0.25 * ( ( (V/C) - 1) + ( ( ( ( (V/C) - 1 )^2 ) + (16 * (Ja10000/10000) * (V/C) * (DISTANCE^2) ) )^0.5) ) ) )  
+TC[10] = 60 * ( (DISTANCE/LI.FFS) + (0.25 * ( ( (V/C) - 1) + ( ( ( ( (V/C) - 1 )^2 ) + (16 * (Ja10000/10000) * (V/C) * (DISTANCE^2) ) )^0.5) ) ) ) 
+
+FUNCTION
+TC[11]  = 60 * ( (DISTANCE/LI.FFS) + (0.25 * ( ( (V/C) - 1) + ( ( ( ( (V/C) - 1 )^2 ) + (16 * (Ja10000/10000) * (V/C) * (DISTANCE^2) ) )^0.5) ) ) ) 
+
+FUNCTION
+TC[12]  = 60 * ( (DISTANCE/LI.FFS) + (0.25 * ( ( (V/C) - 1) + ( ( ( ( (V/C) - 1)^2 ) + (16 * (Ja10000/10000) * (V/C) * (DISTANCE^2) ) )^0.5) ) ) )
+
+FUNCTION
+TC[13]  = 60 * ( (DISTANCE/LI.FFS) + (0.25 * ( ( (V/C) - 1) + ( ( ( ( (V/C) - 1)^2 ) + (16 * (Ja10000/10000) * (V/C) * (DISTANCE^2) ) )^0.5) ) ) )
+
+FUNCTION
+TC[14]  = 60 * ( (DISTANCE/LI.FFS) + (0.25 * ( ( (V/C) - 1) + ( ( ( ( (V/C) - 1)^2 ) + (16 * (Ja10000/10000) * (V/C) * (DISTANCE^2) ) )^0.5) ) ) )

@@ -33,6 +33,8 @@ import com.pb.mtctm2.abm.ctramp.TransitWalkAccessDMU;
 import com.pb.mtctm2.abm.ctramp.Util;
 import com.pb.common.calculator.IndexValues;
 import com.pb.common.calculator.VariableTable;
+import com.pb.common.datafile.OLD_CSVFileReader;
+import com.pb.common.datafile.TableDataSet;
 import com.pb.common.util.Tracer;
 import com.pb.common.newmodel.UtilityExpressionCalculator;
 import com.pb.common.newmodel.Alternative;
@@ -49,6 +51,8 @@ public class BestTransitPathCalculator implements Serializable
 
     private transient Logger                 logger        = Logger.getLogger(BestTransitPathCalculator.class);
 
+    protected static final String transitFareDiscountFileName = "transit.fareDiscount.file";
+    
     //TODO: combine APP_TYPE_xxx constants into a enum structure
     public static final int              APP_TYPE_GENERIC = 0;
     public static final int              APP_TYPE_TOURMC  = 1;
@@ -117,6 +121,10 @@ public class BestTransitPathCalculator implements Serializable
     private double[] expUtilities;							//exponentiated utility array for path choice
       
     private float nestingCoefficient;
+    
+    HashMap<String, String> rbMap;
+    
+    private float[][] fareDiscounts;
     /**
      * Constructor.
      * 
@@ -127,6 +135,8 @@ public class BestTransitPathCalculator implements Serializable
      */
     public BestTransitPathCalculator(HashMap<String, String> rbMap)
     {
+    	
+    	this.rbMap = rbMap;
 
         // read in resource bundle properties
         trace = Util.getBooleanValueFromPropertyMap(rbMap, "Trace");
@@ -174,7 +184,8 @@ public class BestTransitPathCalculator implements Serializable
         driveAccessUEC = createUEC(uecFile, driveAccessPage, dataPage, rbMap, new TransitDriveAccessDMU());
         walkEgressUEC = createUEC(uecFile, walkEgressPage, dataPage, rbMap, new TransitWalkAccessDMU());
         driveEgressUEC = createUEC(uecFile, driveEgressPage, dataPage, rbMap, new TransitDriveAccessDMU());
-        tapToTapUEC = createUEC(uecFile, tapToTapPage, dataPage, rbMap, new TransitWalkAccessDMU());
+        TransitWalkAccessDMU tapToTapDmu = new TransitWalkAccessDMU();
+        tapToTapUEC = createUEC(uecFile, tapToTapPage, dataPage, rbMap, tapToTapDmu);
         driveAccDisutilityUEC = createUEC(uecFile, driveAccDisutilityPage, dataPage, rbMap, new TransitDriveAccessDMU());
         driveEgrDisutilityUEC = createUEC(uecFile, driveEgrDisutilityPage, dataPage, rbMap, new TransitDriveAccessDMU());
         
@@ -207,6 +218,11 @@ public class BestTransitPathCalculator implements Serializable
         expUtilities = new double[numTransitAlts];
         
         nestingCoefficient =  new Float(Util.getStringValueFromPropertyMap(rbMap, "utility.bestTransitPath.nesting.coeff")).floatValue();
+        
+        String directoryPath = Util.getStringValueFromPropertyMap(rbMap,CtrampApplication.PROPERTIES_PROJECT_DIRECTORY);
+        String fareDiscountFileName = Paths.get(directoryPath,rbMap.get(transitFareDiscountFileName)).toString();
+        fareDiscounts = readTransitFareDiscounts(fareDiscountFileName);
+        tapToTapDmu.setTransitFareDiscounts(fareDiscounts);
         
      }
     
@@ -334,31 +350,29 @@ public class BestTransitPathCalculator implements Serializable
         //create transit path collection
         ArrayList<TransitPath> paths = new ArrayList<TransitPath>();
 
-        float[][][] tapParkingInfo = tapManager.getTapParkingInfo();
-
         int[] pTapArray = tazManager.getParkRideOrKissRideTapsForZone(pTaz, accMode);
+        int connections=0;
         for ( int pTap : pTapArray )
         {
-            // Calculate the pTaz to pTap drive access utility values
-            float accUtil;
-            float accDisutil;
-            if (storedDriveAccessUtils[pTaz][pTap] == StoredUtilityData.default_utility) {
-    			accUtil = calcDriveAccessUtility(driveDmu, pMgra, pTaz, pTap, accMode, writeCalculations, myLogger);
-    			storedDriveAccessUtils[pTaz][pTap] = accUtil;
-            } else {
-            	accUtil = storedDriveAccessUtils[pTaz][pTap];
-        		if(writeCalculations)
-        			myLogger.info("Stored drive access utility from TAZ "+pTaz+" to Tap "+pTap+" is "+accUtil);
-            }
-            
-            int lotID = (int)tapParkingInfo[pTap][0][0]; // lot ID
-            float lotCapacity = tapParkingInfo[pTap][2][0]; // lot capacity
-            
-            if ((accMode == AccessMode.PARK_N_RIDE && tapManager.getLotUse(lotID) < lotCapacity)
-                    || (accMode == AccessMode.KISS_N_RIDE))
+        	if (tapManager.getDriveAccessAllowed(pTap))
             {
+        		++connections;
+        		// Calculate the pTaz to pTap drive access utility values
+        		float accUtil;
+        		float accDisutil;
+        		if (storedDriveAccessUtils[pTaz][pTap] == StoredUtilityData.default_utility) {
+        			driveDmu.setDriveAccessWalkTime(tapManager.getDriveAccessWalkTime(pTap));
+        			driveDmu.setDriveAccessDriveTime(tapManager.getDriveAccessDriveTime(pTap));
+        			driveDmu.setParkingCost(tapManager.getParkingCost(pTap));
+        			accUtil = calcDriveAccessUtility(driveDmu, pMgra, pTaz, pTap, accMode, writeCalculations, myLogger);
+        			storedDriveAccessUtils[pTaz][pTap] = accUtil;
+        		} else {
+        			accUtil = storedDriveAccessUtils[pTaz][pTap];
+        			if(writeCalculations)
+        				myLogger.info("Stored drive access utility from TAZ "+pTaz+" to Tap "+pTap+" is "+accUtil);
+        		}
 
-                //always calculate the access disutility since it changes based on od
+        		//always calculate the access disutility since it changes based on od
                 accDisutil = calcDriveAccessRatioDisutility(driveDmu, pMgra, pTaz, pTap, odDistance, accMode, writeCalculations, myLogger);
                 for (int aTap : mgraManager.getMgraWlkTapsDistArray()[aMgra][0])
                 {
@@ -397,6 +411,10 @@ public class BestTransitPathCalculator implements Serializable
                 }
             }
             
+        	//no drive accessible taps
+        	if(connections==0)
+        		return;
+        	
             //save N best paths
             trimPaths(paths);
             if (writeCalculations) {
@@ -429,7 +447,7 @@ public class BestTransitPathCalculator implements Serializable
 
         //create transit path collection
         ArrayList<TransitPath> paths = new ArrayList<TransitPath>();
-        
+        int connections=0;
         for (int pTap : mgraManager.getMgraWlkTapsDistArray()[pMgra][0])
         {
             // Calculate the pMgra to pTap walk access utility values
@@ -446,19 +464,17 @@ public class BestTransitPathCalculator implements Serializable
             for (int aTap : tazManager.getParkRideOrKissRideTapsForZone(aTaz, accMode))
             {
 
-                int lotID = (int) tapManager.getTapParkingInfo()[aTap][0][0]; // lot
-                // ID
-                float lotCapacity = tapManager.getTapParkingInfo()[aTap][2][0]; // lot
-                // capacity
-                if ((accMode == AccessMode.PARK_N_RIDE && tapManager.getLotUse(lotID) < lotCapacity)
-                        || (accMode == AccessMode.KISS_N_RIDE))
+                if (tapManager.getDriveAccessAllowed(aTap))
                 {
-
+                	++connections;
                 	// Calculate the aTap to aMgra drive egress utility values
                     float egrUtil;
                     float egrDisutil;
                     if (storedDriveEgressUtils[aTap][aTaz] == StoredUtilityData.default_utility) {
-            			egrUtil = calcDriveEgressUtility(driveDmu, aTap, aTaz, aMgra, accMode, writeCalculations, myLogger);
+            			driveDmu.setDriveAccessWalkTime(tapManager.getDriveAccessWalkTime(aTap));
+            			driveDmu.setDriveAccessDriveTime(tapManager.getDriveAccessDriveTime(aTap));
+            			driveDmu.setParkingCost(tapManager.getParkingCost(aTap));
+                    	egrUtil = calcDriveEgressUtility(driveDmu, aTap, aTaz, aMgra, accMode, writeCalculations, myLogger);
             			storedDriveEgressUtils[aTap][aTaz] = egrUtil;
                     } else {
                     	egrUtil = storedDriveEgressUtils[aTap][aTaz];	
@@ -492,6 +508,9 @@ public class BestTransitPathCalculator implements Serializable
    
                 }
             }
+            
+            if(connections==0)
+            	return;
             
             //save N best paths
             trimPaths(paths);
@@ -1518,6 +1537,52 @@ public class BestTransitPathCalculator implements Serializable
 	public UtilityExpressionCalculator getTapToTapUEC() {
 		return tapToTapUEC;
 	}
+	
+    public static float[][] readTransitFareDiscounts(String fileName)
+    {
 
+        File discountFile = new File(fileName);
 
+        // read in the csv table
+        TableDataSet discountTable;
+        try
+        {
+            OLD_CSVFileReader reader = new OLD_CSVFileReader();
+            reader.setDelimSet("," + reader.getDelimSet());
+            discountTable = reader.readFile(discountFile);
+
+        } catch (Exception e)
+        {
+           throw new RuntimeException();
+        }
+        
+        int ptypes=8;
+        int modes=6;
+        
+        //initialize array to 1 in case the fare is missing from file for a given mode and ptype combo
+        float fareDiscounts[][] = new float[modes][];
+        for(int i = 0; i< modes;++i) {
+        	fareDiscounts[i]=new float[ptypes];
+        	for(int j=0;j<ptypes;++j)
+        		fareDiscounts[i][j]=1;
+        }
+        
+        for(int row=1;row<=discountTable.getRowCount();++row) {
+ 
+        	int mode = (int) discountTable.getValueAt(row,"mode");
+        	int ptype = (int) discountTable.getValueAt(row, "ptype");
+        	float discount = discountTable.getValueAt(row, "mean_discount");
+        	
+        	fareDiscounts[mode-1][ptype-1]=discount;
+        }
+ 
+        return fareDiscounts;
+ 
+    }
+    
+    public float[][] getTransitFareDiscounts(){
+    	
+    	return fareDiscounts;
+    }
+   
 }

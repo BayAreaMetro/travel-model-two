@@ -56,6 +56,7 @@ public class HouseholdDataWriter
     private boolean             saveUtilsProbsFlag              = false;
     private boolean writeStopsFlag 								= true; 
     private int                 setNA                           = -1;
+    private float               rnumNA                          = -1;
 
     private HashMap<String,String> rbMap;
     
@@ -270,6 +271,8 @@ public class HouseholdDataWriter
         data.add("cdap_pattern");
         data.add("jtf_choice");
         data.add("sampleRate");
+        data.add("size");
+        data.add("workers");
         return data;
     }
 
@@ -285,7 +288,9 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
-        return data;
+        data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.INTEGER);
+       return data;
     }
 
     private List<String> formHouseholdDataEntry(Household hh)
@@ -300,6 +305,9 @@ public class HouseholdDataWriter
         data.add(string(hh.getCoordinatedDailyActivityPattern()));
         data.add(string(hh.getJointTourFreqChosenAlt()));
         data.add(string(hh.getSampleRate()));
+        data.add(string(hh.getSize()));
+        data.add(string(hh.getWorkers()));
+        
         return data;
     }
 
@@ -313,12 +321,18 @@ public class HouseholdDataWriter
         data.add("gender");
         data.add("type");
         data.add("value_of_time");
+        data.add("transitSubsidy_choice");
+        data.add("transitSubsidy_percent");
+        data.add("transitPass_choice");
+        data.add("naicsCode");
         data.add("activity_pattern");
         data.add("imf_choice");
         data.add("inmf_choice");
         data.add("fp_choice");
         data.add("reimb_pct");
         data.add("sampleRate");
+        data.add("workDCLogsum");
+        data.add("schoolDCLogsum");
         return data;
     }
 
@@ -332,10 +346,16 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.REAL);
         return data;
@@ -351,6 +371,10 @@ public class HouseholdDataWriter
         data.add(string(p.getPersonIsMale() == 1 ? "m" : "f"));
         data.add(string(p.getPersonType()));
         data.add(string(p.getValueOfTime()));
+        data.add(string(p.getTransitSubsidyChoice()));
+        data.add(string(p.getTransitSubsidyPercent()));
+        data.add(string(p.getTransitPassChoice()));
+        data.add(string(p.getNaicsCode()));
         data.add(string(p.getCdapActivity()));
         data.add(string(p.getImtfChoice()));
         data.add(string(p.getInmtfChoice()));
@@ -358,6 +382,8 @@ public class HouseholdDataWriter
         data.add(string(p.getParkingReimbursement()));
         float sampleRate = p.getSampleRate();
         data.add(string(sampleRate));
+        data.add(string(p.getWorkLocationLogsum()));
+        data.add(string(p.getSchoolLocationLogsum()));
         return data;
     }
 
@@ -391,6 +417,7 @@ public class HouseholdDataWriter
         data.add("in_set");
         data.add("sampleRate");
         data.add("avAvailable");
+        data.add("dcLogsum");
 
         if (saveUtilsProbsFlag)
         {
@@ -445,7 +472,8 @@ public class HouseholdDataWriter
 
         data.add("sampleRate");
         data.add("avAvailable");
-        
+        data.add("dcLogsum");
+
         if (saveUtilsProbsFlag)
         {
             int numModeAlts = modelStructure.getMaxTourModeIndex();
@@ -500,6 +528,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
         
         if (saveUtilsProbsFlag)
         {
@@ -551,6 +580,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
 
         if (saveUtilsProbsFlag)
         {
@@ -622,7 +652,8 @@ public class HouseholdDataWriter
         data.add(string(sampleRate));
         int avAvailable = t.getUseOwnedAV() ? 1 : 0;
         data.add(string(avAvailable));
-        
+        data.add(string(t.getDestinationChoiceLogsum()));
+
         if (saveUtilsProbsFlag)
         {
             int numModeAlts = modelStructure.getMaxTourModeIndex();
@@ -829,7 +860,7 @@ public class HouseholdDataWriter
         data.add("tour_mode");
         
         data.add("set");
-        
+        data.add("tranpath_rnum");
         data.add("sampleRate");
         data.add("avAvailable");
         return data;
@@ -857,6 +888,7 @@ public class HouseholdDataWriter
         data.add("tour_mode");
         
         data.add("set");
+        data.add("tranpath_rnum");
         
         data.add("sampleRate");
         data.add("avAvailable");
@@ -886,6 +918,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
+        data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.INTEGER);
         return data;
     }
@@ -911,6 +944,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.INTEGER);
         return data;
@@ -1000,11 +1034,14 @@ public class HouseholdDataWriter
         data.add(string(t.getTourModeChoice()));
         
         int set = setNA;
+        float rnum = rnumNA;
         
         if(modelStructure.getTripModeIsTransit(s.getMode())) {
         	set = s.getSet();
+        	rnum = s.getRandomNumberForTapChoice();
         }
         data.add(string(set));
+        data.add(String.format("%.5f", rnum));
         float sampleRate = s.getSampleRate();
         data.add(string(sampleRate));
         int avAvailable = t.getUseOwnedAV() ? 1 : 0;
@@ -1102,11 +1139,14 @@ public class HouseholdDataWriter
         data.add(string(t.getTourModeChoice()));
 
         int set = setNA;
+        float rnum = rnumNA;
         
         if(modelStructure.getTripModeIsTransit(s.getMode())) {
+        	rnum = s.getRandomNumberForTapChoice();
         	set = s.getSet();
         }
         data.add(string(set));
+        data.add(String.format("%.5f", rnum));
         float sampleRate = s.getSampleRate();
         data.add(string(sampleRate));
         int avAvailable = t.getUseOwnedAV() ? 1 : 0;
@@ -1165,6 +1205,7 @@ public class HouseholdDataWriter
         data.add(string(t.getTourModeChoice()));
        
         data.add(string(0));							// set
+        data.add(String.format("%.5f",0f));             //random 
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
         int avAvailable = t.getUseOwnedAV() ? 1 : 0;
@@ -1238,6 +1279,7 @@ public class HouseholdDataWriter
         data.add(string(t.getTourModeChoice()));
        
         data.add(string(0));							// set
+        data.add(String.format("%.5f",0f));             //random 
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
         int avAvailable = t.getUseOwnedAV() ? 1 : 0;

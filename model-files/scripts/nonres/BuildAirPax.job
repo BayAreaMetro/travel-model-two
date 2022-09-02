@@ -66,7 +66,7 @@
 
 
 ;start cluster nodes
-*Cluster.exe MTC_AIRPAX 1-12 start exit
+*"%TPP_PATH%\Cluster.exe" MTC_AIRPAX 1-12 start exit
 
 token_taz_count = %TAZ_COUNT%
 
@@ -92,7 +92,7 @@ loop year = 1,2
         ; do each as a separate process
         DistributeMultistep processid = 'MTC_AIRPAX', processNum = @processIdx@
              
-             *"%PYTHON_PATH%\python.exe" %BASE_SCRIPTS%\assign\taz_matrix_transfer.py . nonres\@token_year@_@token_toFrom@@token_airport@.csv nonres\@token_year@_@token_toFrom@@token_airport@_seq.csv
+             *"python" %BASE_SCRIPTS%\assign\taz_matrix_transfer.py . nonres\@token_year@_@token_toFrom@@token_airport@.csv nonres\@token_year@_@token_toFrom@@token_airport@_seq.csv
              IF (RETURNCODE > 0) abort
 
              run pgm = matrix
@@ -511,4 +511,4 @@ endrun
 *DEL nonres\2035*.mtx
 
 ;stop cluster nodes
-*Cluster.exe MTC_AIRPAX 1-12 close exit
+*"%TPP_PATH%\Cluster.exe" MTC_AIRPAX 1-12 close exit

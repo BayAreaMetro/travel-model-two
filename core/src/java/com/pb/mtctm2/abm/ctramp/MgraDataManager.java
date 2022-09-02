@@ -71,6 +71,7 @@ public final class MgraDataManager
     private static final String         MGRA_GRADE_SCHOOL_DISTRICT_FIELD_NAME            = "ech_dist";
     private static final String         MGRA_HIGH_SCHOOL_DISTRICT_FIELD_NAME             = "hch_dist";
     public static final String         MGRA_COUNTY_FIELD_NAME                           = "CountyID";
+    public static final String           MGRA_TOTAL_EMPLOYMENT_FIELD_NAME                = "emp_total";
 
     private static final String PROPERTIES_PARKING_COST_OUTPUT_FILE = "mgra.avg.cost.output.file";
     
@@ -148,11 +149,12 @@ public final class MgraDataManager
     private int[]                       mstallssam;
     private float[]                     mparkcost;
     
-    private int[] 					 	countyId;
-    
     private TableDataSet tapLinesTable;
     private HashMap<Integer,String> taplines;
-    
+    protected HashMap<Integer, double[]> naicsProbabilitiesByMAZ;
+
+	protected HashMap<String, String> rbMap;
+
     /**
      * Constructor.
      * 
@@ -162,6 +164,8 @@ public final class MgraDataManager
     private MgraDataManager(HashMap<String, String> rbMap)
     {
         logger.info("MgraDataManager Started");
+     
+        this.rbMap = rbMap;
         
         if(rbMap.containsKey("maz.tap.maxWalkTapDistInMiles")){
         
@@ -191,7 +195,9 @@ public final class MgraDataManager
         process4ddensityData(rbMap);
         
         calculateMgraAvgParkingCosts( rbMap );
-        
+       
+        setupNaicsArrays();
+       
         printMgraStats();
     }
 
@@ -1095,11 +1101,19 @@ public final class MgraDataManager
     }
     
     
-public TableDataSet getMgraTableDataSet() {
+    public TableDataSet getMgraTableDataSet() {
 		return mgraTableDataSet;
 	}
 
-private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) {
+  	public int getCountyId(int mgra){
+		
+        int row = mgraDataTableMgraRowMap.get(mgra);
+        return (int)mgraTableDataSet.getValueAt(row, MGRA_COUNTY_FIELD_NAME);
+
+	}
+
+	
+	private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) {
         
         // open output file to write average parking costs for each mgra
         PrintWriter out = null;
@@ -1432,4 +1446,59 @@ private void calculateMgraAvgParkingCosts( HashMap<String,String> propertyMap ) 
     	}
     }
     
+    /**
+     * A private method to create probability arrays for each NAICS code listed in properties file as:
+     *   tt.naics.NAICSCODE where NAICSCODE is a two digit number 10,20,30,..90.
+     * Probabilities are stored in naicsProbabilitiesByMAZ HashMap, indexed by maz, which is used for
+     * sampling for each worker in sampleNaicsCodeForMAZ().
+     * 
+     */
+    private void setupNaicsArrays() {
+    	
+    	TableDataSet mgraDataTable = this.getMgraTableDataSet();
+        
+    	//initialize the hashmap. 
+    	naicsProbabilitiesByMAZ = new HashMap<Integer, double[]>();
+    	
+		//iterate through mazs
+		for(int row = 1; row < mgraDataTable.getRowCount();++row) {
+    	
+			int maz =  (int) mgraDataTable.getValueAt(row,this.MGRA_FIELD_NAME);
+				 
+			//create a new probability array to store the probability of selection for each naics for each maz
+			double[] probabilityArray = new double[10]; //0=10, 9=90
+
+			//iterate through naics codes
+			for(int naics2Digit = 10; naics2Digit < 100; naics2Digit+=10) {
+    		
+				//if the property map has the naics code
+				if(rbMap.containsKey("tt.naics."+String.valueOf(naics2Digit))){
+				
+					//get the employment field names associated with the naics category from the properties file
+					String[] mazFields = rbMap.get("tt.naics."+String.valueOf(naics2Digit)).split(",");
+
+    				//get the total employment for all the employment fields associated with the naics category for this maz
+    				double naicsTotalEmp = 0;
+    				for(String mazField : mazFields) {
+    					
+    					naicsTotalEmp += mgraDataTable.getValueAt(row,mazField);
+    					
+    				}
+    				
+    				//calculate the probabilities for each naics category for this maz
+    				double totalEmp =  mgraDataTable.getValueAt(row,this.MGRA_TOTAL_EMPLOYMENT_FIELD_NAME);
+    				probabilityArray[naics2Digit/10] = naicsTotalEmp/totalEmp;
+    				
+     			}
+   				//store the probability array for this maz in the hashmap
+				naicsProbabilitiesByMAZ.put(maz, probabilityArray);
+			}
+    		
+		}
+    }
+    public HashMap<Integer, double[]> getNaicsProbabilitiesByMAZ() {
+		return naicsProbabilitiesByMAZ;
+	}
+
+
 }

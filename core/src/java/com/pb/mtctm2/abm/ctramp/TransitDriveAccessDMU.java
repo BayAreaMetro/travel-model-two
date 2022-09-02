@@ -29,8 +29,6 @@ public class TransitDriveAccessDMU
     double                              OrigDestDistance;
     double                              tapToMgraWalkTime;
     double                              mgraToTapWalkTime;
-    double                              carToStationWalkTime;
-    double                              escalatorTime;
     int                                 accessMode;
     int 								period;
     int 								set;
@@ -40,6 +38,11 @@ public class TransitDriveAccessDMU
     int                                 tourCateogryIsJoint = 0;
     int                                 personType = 1;
     float                               valueOfTime = (float) 10.0;
+    
+    float               parkingCost;
+    float               driveAccessWalkTime;
+    float               driveAccessDriveTime;
+    
 
 
     public TransitDriveAccessDMU()
@@ -85,46 +88,6 @@ public class TransitDriveAccessDMU
     public void setMgraTapWalkTime(double walkTime)
     {
         mgraToTapWalkTime = walkTime;
-    }
-
-    /**
-     * Get the walk time from the lot to the station.
-     * 
-     * @return The time in minutes.
-     */
-    public double getCarToStationWalkTime()
-    {
-        return carToStationWalkTime;
-    }
-
-    /**
-     * Set the walk time from the lot to the station.
-     * 
-     * @param carToStationWalkTime The time in minutes.
-     */
-    public void setCarToStationWalkTime(double carToStationWalkTime)
-    {
-        this.carToStationWalkTime = carToStationWalkTime;
-    }
-
-    /**
-     * Get the time to get to the platform.
-     * 
-     * @return The time in minutes.
-     */
-    public double getEscalatorTime()
-    {
-        return escalatorTime;
-    }
-
-    /**
-     * Set the time to get to the platform.
-     * 
-     * @param escalatorTime The time in minutes.
-     */
-    public void setEscalatorTime(double escalatorTime)
-    {
-        this.escalatorTime = escalatorTime;
     }
 
     /**
@@ -282,7 +245,31 @@ public class TransitDriveAccessDMU
     	return valueOfTime;
     }
 
-    /**
+    public float getParkingCost() {
+		return parkingCost;
+	}
+
+	public void setParkingCost(float parkingCost) {
+		this.parkingCost = parkingCost;
+	}
+
+	public float getDriveAccessWalkTime() {
+		return driveAccessWalkTime;
+	}
+
+	public void setDriveAccessWalkTime(float driveAccessWalkTime) {
+		this.driveAccessWalkTime = driveAccessWalkTime;
+	}
+
+	public float getDriveAccessDriveTime() {
+		return driveAccessDriveTime;
+	}
+
+	public void setDriveAccessDriveTime(float driveAccessDriveTime) {
+		this.driveAccessDriveTime = driveAccessDriveTime;
+	}
+
+	/**
      * Log the DMU values.
      * 
      * @param localLogger The logger to use.
@@ -299,8 +286,6 @@ public class TransitDriveAccessDMU
         localLogger.info(String.format("Drive Dist From Tap:     %9.4f", driveDistFromTap));
         localLogger.info(String.format("TAP to MGRA walk time:    %9.4f", tapToMgraWalkTime));
         localLogger.info(String.format("MGRA to TAP walk time:    %9.4f", mgraToTapWalkTime));
-        localLogger.info(String.format("Car to station walk time: %9.4f", carToStationWalkTime));
-        localLogger.info(String.format("Escalator time:           %9.4f", escalatorTime));
         localLogger.info(String.format("Period:                   %9s", period));
         localLogger.info(String.format("Set:                      %9s", set));
         localLogger.info(String.format("applicationType:          %9s", applicationType));
@@ -308,6 +293,10 @@ public class TransitDriveAccessDMU
         localLogger.info(String.format("personType:               %9s", personType));
         localLogger.info(String.format("valueOfTime:              %9.4f", valueOfTime));
         localLogger.info(String.format("origDestDistance          %9.4f, origDestDistance"));
+        localLogger.info(String.format("Parking Cost:             %9.2f", parkingCost));
+        localLogger.info(String.format("Drive access walk time:   %9.2f", driveAccessWalkTime));
+        localLogger.info(String.format("Drive access drive time:  %9.2f, driveAccessDriveTime"));
+        
 
 
         AccessMode[] accessModes = AccessMode.values();
@@ -320,12 +309,10 @@ public class TransitDriveAccessDMU
         methodIndexMap = new HashMap<String, Integer>();
 
         methodIndexMap.put("getAccessMode", 0);
-        methodIndexMap.put("getCarToStationWalkTime", 1);
         methodIndexMap.put("getDriveDistToTap", 2);
         methodIndexMap.put("getDriveTimeToTap", 3);
         methodIndexMap.put("getDriveDistFromTap", 4);
         methodIndexMap.put("getDriveTimeFromTap", 5);
-        methodIndexMap.put("getEscalatorTime", 6);
         methodIndexMap.put("getTapMgraWalkTime", 7);
         methodIndexMap.put("getMgraTapWalkTime", 8);
         methodIndexMap.put("getTOD", 9);
@@ -336,7 +323,11 @@ public class TransitDriveAccessDMU
         methodIndexMap.put("getPersonType", 14);
         methodIndexMap.put("getValueOfTime", 15);
         methodIndexMap.put("getOrigDestDistance",17);
-
+        
+        
+        methodIndexMap.put("getParkingCost", 20);
+        methodIndexMap.put("getDriveAccessWalkTime", 21);
+        methodIndexMap.put("getDriveAccessDriveTime", 22);
 
     }
 
@@ -347,8 +338,6 @@ public class TransitDriveAccessDMU
         {
             case 0:
                 return getAccessMode();
-            case 1:
-                return getCarToStationWalkTime();
             case 2:
                 return getDriveDistToTap();
             case 3:
@@ -357,8 +346,6 @@ public class TransitDriveAccessDMU
                 return getDriveDistFromTap();
             case 5:
                 return getDriveTimeFromTap();
-            case 6:
-                return getEscalatorTime();
             case 7:
                 return getTapMgraWalkTime();
             case 8:
@@ -379,6 +366,12 @@ public class TransitDriveAccessDMU
             case 17:
             	return getOrigDestDistance();
 
+            case 20:
+            	return getParkingCost();
+            case 21:
+            	return getDriveAccessWalkTime();
+            case 22:
+            	return getDriveAccessDriveTime();
 
 
             default:

@@ -85,7 +85,7 @@ public class SubtourDepartureAndDurationTime implements Serializable {
     private boolean[] needToComputeLogsum;
     private double[] modeChoiceLogsums;
 
-    private int[] tempWindow;
+    private short[] tempWindow;
     
     // create an array to count the subtours propcessed within work tours
     // there are at most 2 work tours per person
@@ -201,7 +201,7 @@ public class SubtourDepartureAndDurationTime implements Serializable {
         tourDepartureTimeChoiceSample = new int[numDepartureTimeChoiceAlternatives+1];
         Arrays.fill ( tourDepartureTimeChoiceSample, 1 );
 
-        tempWindow = new int[modelStructure.getNumberOfTimePeriods()+1];
+        tempWindow = new short[modelStructure.getNumberOfTimePeriods()+1];
         
     }
     
@@ -231,7 +231,7 @@ public class SubtourDepartureAndDurationTime implements Serializable {
             int numWorkTours = workTourList.size();
 
             // save a copy of this person's original time windows
-            int[] personWindow = person.getTimeWindows(); 
+            short[] personWindow = person.getTimeWindows(); 
             for (int w=0; w < personWindow.length; w++)
                 tempWindow[w] = personWindow[w];
             
