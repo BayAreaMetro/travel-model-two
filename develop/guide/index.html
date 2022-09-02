@@ -1,0 +1,4770 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="http://bayareametro.github.io/travel-model-two/develop/guide/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.2">
+    
+    
+      
+        <title>Guide - Travel Model Two</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.69437709.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#user-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Travel Model Two" class="md-header__button md-logo" aria-label="Travel Model Two" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Travel Model Two
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/BayAreaMetro/travel-model-two" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Travel Model Two
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  <li class="md-tabs__item">
+    <a href="./" class="md-tabs__link md-tabs__link--active">
+      Guide
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../input/" class="md-tabs__link">
+      Input
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../process/" class="md-tabs__link">
+      Process
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../output/" class="md-tabs__link">
+      Output
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../geographies/" class="md-tabs__link">
+      Geographies
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../papers/" class="md-tabs__link">
+      Papers
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../network_qa/" class="md-tabs__link">
+      Network QA
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Travel Model Two" class="md-nav__button md-logo" aria-label="Travel Model Two" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Travel Model Two
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/BayAreaMetro/travel-model-two" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Travel Model Two
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Guide
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#computing-environment" class="md-nav__link">
+    Computing Environment
+  </a>
+  
+    <nav class="md-nav" aria-label="Computing Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hardware" class="md-nav__link">
+    Hardware
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#software" class="md-nav__link">
+    Software
+  </a>
+  
+    <nav class="md-nav" aria-label="Software">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-voyager" class="md-nav__link">
+    Citilabs Cube Voyager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-voyager-64bit-matrix-io-dll" class="md-nav__link">
+    Citilabs Cube Voyager 64bit Matrix I/O DLL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-cluster" class="md-nav__link">
+    Citilabs Cube Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#emme" class="md-nav__link">
+    EMME
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#java-and-ct-ramp" class="md-nav__link">
+    Java and CT-RAMP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python" class="md-nav__link">
+    Python
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-rtree-library" class="md-nav__link">
+    Python Rtree library
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#microsoft-excel" class="md-nav__link">
+    Microsoft Excel
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remote-execution-and-stop-utilities" class="md-nav__link">
+    Remote Execution and Stop Utilities
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-design" class="md-nav__link">
+    System Design
+  </a>
+  
+    <nav class="md-nav" aria-label="System Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#distributed-computing" class="md-nav__link">
+    Distributed Computing
+  </a>
+  
+    <nav class="md-nav" aria-label="Distributed Computing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cube-cluster" class="md-nav__link">
+    Cube Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ct-ramp" class="md-nav__link">
+    CT-RAMP
+  </a>
+  
+    <nav class="md-nav" aria-label="CT-RAMP">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#household-manager-and-matrix-manager" class="md-nav__link">
+    Household Manager and Matrix Manager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#taz-maz-and-tap-data-manager" class="md-nav__link">
+    TAZ, MAZ, and TAP Data Manager
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-and-configuration" class="md-nav__link">
+    Setup and Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup and Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-create-the-required-folder-structure" class="md-nav__link">
+    Step 1: Create the required folder structure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-map-a-network-drive-to-share-across-computers" class="md-nav__link">
+    Step 2: Map a network drive to share across computers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-configure-the-ct-ramp-and-jppf-services" class="md-nav__link">
+    Step 3: Configure the CT-RAMP and JPPF Services
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-configure-runmodelbat-and-ctrampenvbat" class="md-nav__link">
+    Step 4: Configure RunModel.bat and CTRampEnv.bat
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-execution" class="md-nav__link">
+    Model Execution
+  </a>
+  
+    <nav class="md-nav" aria-label="Model Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-set-globally-available-environmental-variables" class="md-nav__link">
+    Step 1: Set globally-available environmental variables
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-set-relevant-paths-to-access-software" class="md-nav__link">
+    Step 2: Set relevant paths to access software
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-create-and-populate-a-working-directory-of-input-files" class="md-nav__link">
+    Step 3: Create and populate a working directory of input files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-pre-process-steps" class="md-nav__link">
+    Step 4: Pre-process steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-build-walk-bicycle-and-nearby-automobile-level-of-service-matrices" class="md-nav__link">
+    Step 5:  Build walk, bicycle, and nearby automobile level-of-service matrices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-build-air-passenger-demand-matrices" class="md-nav__link">
+    Step 6: Build air passenger demand matrices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-build-highway-and-transit-skims" class="md-nav__link">
+    Step 7: Build highway and transit skims
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-execute-the-ct-ramp-models" class="md-nav__link">
+    Step 8:  Execute the CT-RAMP models
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-9-execute-the-internalexternal-and-commercial-vehicle-models" class="md-nav__link">
+    Step 9:  Execute the internal/external and commercial vehicle models
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-10-network-assignment" class="md-nav__link">
+    Step 10: Network Assignment
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-11-clean-up" class="md-nav__link">
+    Step 11: Clean up
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-12-visualizer" class="md-nav__link">
+    Step 12: visualizer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ct-ramp-properties-file" class="md-nav__link">
+    CT-RAMP Properties File
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../input/" class="md-nav__link">
+        Input
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../process/" class="md-nav__link">
+        Process
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../output/" class="md-nav__link">
+        Output
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../geographies/" class="md-nav__link">
+        Geographies
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../papers/" class="md-nav__link">
+        Papers
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_qa/" class="md-nav__link">
+        Network QA
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#computing-environment" class="md-nav__link">
+    Computing Environment
+  </a>
+  
+    <nav class="md-nav" aria-label="Computing Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hardware" class="md-nav__link">
+    Hardware
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#software" class="md-nav__link">
+    Software
+  </a>
+  
+    <nav class="md-nav" aria-label="Software">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-voyager" class="md-nav__link">
+    Citilabs Cube Voyager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-voyager-64bit-matrix-io-dll" class="md-nav__link">
+    Citilabs Cube Voyager 64bit Matrix I/O DLL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#citilabs-cube-cluster" class="md-nav__link">
+    Citilabs Cube Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#emme" class="md-nav__link">
+    EMME
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#java-and-ct-ramp" class="md-nav__link">
+    Java and CT-RAMP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python" class="md-nav__link">
+    Python
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-rtree-library" class="md-nav__link">
+    Python Rtree library
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#microsoft-excel" class="md-nav__link">
+    Microsoft Excel
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remote-execution-and-stop-utilities" class="md-nav__link">
+    Remote Execution and Stop Utilities
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-design" class="md-nav__link">
+    System Design
+  </a>
+  
+    <nav class="md-nav" aria-label="System Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#distributed-computing" class="md-nav__link">
+    Distributed Computing
+  </a>
+  
+    <nav class="md-nav" aria-label="Distributed Computing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cube-cluster" class="md-nav__link">
+    Cube Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ct-ramp" class="md-nav__link">
+    CT-RAMP
+  </a>
+  
+    <nav class="md-nav" aria-label="CT-RAMP">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#household-manager-and-matrix-manager" class="md-nav__link">
+    Household Manager and Matrix Manager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#taz-maz-and-tap-data-manager" class="md-nav__link">
+    TAZ, MAZ, and TAP Data Manager
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-and-configuration" class="md-nav__link">
+    Setup and Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup and Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-create-the-required-folder-structure" class="md-nav__link">
+    Step 1: Create the required folder structure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-map-a-network-drive-to-share-across-computers" class="md-nav__link">
+    Step 2: Map a network drive to share across computers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-configure-the-ct-ramp-and-jppf-services" class="md-nav__link">
+    Step 3: Configure the CT-RAMP and JPPF Services
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-configure-runmodelbat-and-ctrampenvbat" class="md-nav__link">
+    Step 4: Configure RunModel.bat and CTRampEnv.bat
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-execution" class="md-nav__link">
+    Model Execution
+  </a>
+  
+    <nav class="md-nav" aria-label="Model Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-set-globally-available-environmental-variables" class="md-nav__link">
+    Step 1: Set globally-available environmental variables
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-set-relevant-paths-to-access-software" class="md-nav__link">
+    Step 2: Set relevant paths to access software
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-create-and-populate-a-working-directory-of-input-files" class="md-nav__link">
+    Step 3: Create and populate a working directory of input files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-pre-process-steps" class="md-nav__link">
+    Step 4: Pre-process steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-build-walk-bicycle-and-nearby-automobile-level-of-service-matrices" class="md-nav__link">
+    Step 5:  Build walk, bicycle, and nearby automobile level-of-service matrices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-build-air-passenger-demand-matrices" class="md-nav__link">
+    Step 6: Build air passenger demand matrices
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-build-highway-and-transit-skims" class="md-nav__link">
+    Step 7: Build highway and transit skims
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-execute-the-ct-ramp-models" class="md-nav__link">
+    Step 8:  Execute the CT-RAMP models
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-9-execute-the-internalexternal-and-commercial-vehicle-models" class="md-nav__link">
+    Step 9:  Execute the internal/external and commercial vehicle models
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-10-network-assignment" class="md-nav__link">
+    Step 10: Network Assignment
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-11-clean-up" class="md-nav__link">
+    Step 11: Clean up
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-12-visualizer" class="md-nav__link">
+    Step 12: visualizer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ct-ramp-properties-file" class="md-nav__link">
+    CT-RAMP Properties File
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/BayAreaMetro/travel-model-two/edit/master/docs/guide.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="user-guide">User Guide</h1>
+<p><em>Work in Progress</em></p>
+<p><em>Model Version TM2.1 - transit-ccr</em></p>
+<h2 id="computing-environment">Computing Environment</h2>
+<p>The hardware and software MTC uses to execute Travel Model Two are described on this page. To date, MTC has not experimented enough with the model to define the minimum or ideal hardware configuration. As such, the description here is for a hardware set up that is sufficient -- not optimal. It is important to note that both the software and model structure are highly configurable and flexible; depending on the analysis needs, the required computing power could vary dramatically.</p>
+<h3 id="hardware">Hardware</h3>
+<p>MTC uses four identical servers with the following characteristics:</p>
+<ul>
+<li>Operating system: Microsoft Windows Server 2007 with Service Pack 2, 64-bit edition;</li>
+<li>Processors: Two Intel Xeon X5570 @ 2.93 GHz (i.e., two quad-core processors with hyper-threading capability);</li>
+<li>Memory (RAM): 96.0 GB</li>
+</ul>
+<p>As discussed in the <a href="#system-design">System Design</a> section, these four computers can act in different roles, each requiring different amounts of memory and computing power. The four computers are named as follows: <code>mainmodel</code>, <code>satmodel</code> (for satellite), <code>satmodel2</code>, and <code>satmodel3</code>. As discussed in the <a href="#system-design">System Design</a> section, the <code>mainmodel</code> computer plays a specialized role in the system design; the satellite machines each play identical and completely interchangeable roles.</p>
+<h3 id="software">Software</h3>
+<p>The following software are required to execute the MTC travel model.</p>
+<h4 id="citilabs-cube-voyager">Citilabs Cube Voyager</h4>
+<p>The travel model currently uses version 6.4.2 of <a href="http://www.citilabs.com/">Citilabs Cube</a> software. The Cube software is used to manage network, skim highways, and perform highway assignments.</p>
+<h4 id="citilabs-cube-voyager-64bit-matrix-io-dll">Citilabs Cube Voyager 64bit Matrix I/O DLL</h4>
+<p>The CT-RAMP software, as discussed below, needs to access data stored in a format dictated by Cube. This is accomplished through a 64-bit DLL library specifically for matrix I/O,which must be accessible through the <code>PATH</code> environment variable.  To install the DLL:</p>
+<ul>
+<li>Run <code>VoyagerFileAPIInstaller.msi</code>, which is included in the <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/runtime"><code>CTRAMP\runtime</code></a> folder</li>
+<li>Ensure <code>VoyagerFileAccess.dll</code> is in the <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/runtime"><code>CTRAMP\runtime</code></a> folder</li>
+<li>Ensure the Microsoft Visual C++ 2012 redistributable is installed on the matrix server machine.  Make sure to get version “110” DLLs (<code>MSVCR110.dll</code> and <code>MSVCP110.dll</code>).  These files can be obtained from the <a href="http://www.microsoft.com/en-us/default.aspx">Microsoft</a>. Download and install <code>vcredist_x64.exe</code>.</li>
+</ul>
+<h4 id="citilabs-cube-cluster">Citilabs Cube Cluster</h4>
+<p>The <a href="http://citilabs.com/software/products/cube/cube-cluster">Cube Cluster software</a> allows Cube scripts to be multi-threaded. In the current approach, the travel model uses 64 computing nodes across four machines. The Cube scripts can be manipulated to use any number of computing nodes across any number of machines, provided each machine has, at a minimum, a Cube Voyager node license (for the time being, MTC has found 64 nodes on a single machine to be the most effective approach -- in terms of reliability and run time). Cube Cluster is not strictly necessary, as the Cube scripts can be modified to use only a single computing node. Such an approach would dramatically increase run times.</p>
+<h4 id="emme">EMME</h4>
+<p>The travel model currently uses version 4.4.5.1 of <a href="https://www.inrosoftware.com/en/products/emme/">EMME</a> software. EMME software converts the CUBE network to use it for transit skimming and assignment, while incorporating transit capacity constraints.</p>
+<h4 id="java-and-ct-ramp">Java and CT-RAMP</h4>
+<p>MTC's travel model operates on the open-source Coordinated Travel - Regional Activity-based Modeling Platform (or CT-RAMP) developed by <a href="pbworld.com">Parsons Brinckerhoff</a>. The software is written in the <a href="http://java.com/en">Java</a> programming language.  CT-RAMP requires the 64-bit Java Development Kit version 1.8 or later to be installed on each computer running the CT-RAMP software. The Java Development Kit includes the Java Runtime Environment. The 64-bit version of the software allows CT-RAMP to take advantage of larger memory addresses. The details of setting up and configuring the software are presented in the <a href="#setup-and-configuration">Setup and Configuration section</a> of this guide.</p>
+<h4 id="python">Python</h4>
+<p>Certain network processing programs are written in <a href="https://www.python.org/">Python</a>. Python must be installed on the computer executing the Cube and EMME scripts -- <code>mainmodel</code> in MTC's configuration. The following table contains the list of python packages that are required by MTC's travel model.</p>
+<p>You should also list the python packages required and the environments required</p>
+<table>
+<thead>
+<tr>
+<th><strong>Library</strong></th>
+<th><strong>Version</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>argon2-cffi</td>
+<td>20.1.0</td>
+</tr>
+<tr>
+<td>async_generator</td>
+<td>1.1</td>
+</tr>
+<tr>
+<td>attrs</td>
+<td>20.2.0</td>
+</tr>
+<tr>
+<td>backcall</td>
+<td>0.2.0</td>
+</tr>
+<tr>
+<td>backports</td>
+<td>1</td>
+</tr>
+<tr>
+<td>backports.functools_lru_cache</td>
+<td>1.6.1</td>
+</tr>
+<tr>
+<td>blas</td>
+<td>1</td>
+</tr>
+<tr>
+<td>bleach</td>
+<td>3.2.1</td>
+</tr>
+<tr>
+<td>brotlipy</td>
+<td>0.7.0</td>
+</tr>
+<tr>
+<td>bzip2</td>
+<td>1.0.8</td>
+</tr>
+<tr>
+<td>ca-certificates</td>
+<td>2022.2.1</td>
+</tr>
+<tr>
+<td>certifi</td>
+<td>2021.10.8</td>
+</tr>
+<tr>
+<td>cffi</td>
+<td>1.14.3</td>
+</tr>
+<tr>
+<td>cfitsio</td>
+<td>3.47</td>
+</tr>
+<tr>
+<td>chardet</td>
+<td>3.0.4</td>
+</tr>
+<tr>
+<td>click</td>
+<td>7.1.2</td>
+</tr>
+<tr>
+<td>click-plugins</td>
+<td>1.1.1</td>
+</tr>
+<tr>
+<td>cligj</td>
+<td>0.5.0</td>
+</tr>
+<tr>
+<td>colorama</td>
+<td>0.4.4</td>
+</tr>
+<tr>
+<td>cryptography</td>
+<td>3.1.1</td>
+</tr>
+<tr>
+<td>curl</td>
+<td>7.67.0</td>
+</tr>
+<tr>
+<td>cycler</td>
+<td>0.10.0</td>
+</tr>
+<tr>
+<td>dbfpy3</td>
+<td>4.1.5</td>
+</tr>
+<tr>
+<td>decorator</td>
+<td>4.4.2</td>
+</tr>
+<tr>
+<td>defusedxml</td>
+<td>0.6.0</td>
+</tr>
+<tr>
+<td>entrypoints</td>
+<td>0.3</td>
+</tr>
+<tr>
+<td>et_xmlfile</td>
+<td>1.0.1</td>
+</tr>
+<tr>
+<td>expat</td>
+<td>2.2.10</td>
+</tr>
+<tr>
+<td>fiona</td>
+<td>1.8.13.post1</td>
+</tr>
+<tr>
+<td>freetype</td>
+<td>2.10.4</td>
+</tr>
+<tr>
+<td>freexl</td>
+<td>1.0.5</td>
+</tr>
+<tr>
+<td>gdal</td>
+<td>3.0.2</td>
+</tr>
+<tr>
+<td>geopandas</td>
+<td>0.8.1</td>
+</tr>
+<tr>
+<td>geos</td>
+<td>3.8.0</td>
+</tr>
+<tr>
+<td>geotiff</td>
+<td>1.5.1</td>
+</tr>
+<tr>
+<td>hdf4</td>
+<td>4.2.13</td>
+</tr>
+<tr>
+<td>hdf5</td>
+<td>1.10.4</td>
+</tr>
+<tr>
+<td>icc_rt</td>
+<td>2019.0.0</td>
+</tr>
+<tr>
+<td>icu</td>
+<td>58.2</td>
+</tr>
+<tr>
+<td>idna</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td>importlib-metadata</td>
+<td>2.0.0</td>
+</tr>
+<tr>
+<td>importlib_metadata</td>
+<td>2.0.0</td>
+</tr>
+<tr>
+<td>intel-openmp</td>
+<td>2020.2</td>
+</tr>
+<tr>
+<td>ipykernel</td>
+<td>5.3.4</td>
+</tr>
+<tr>
+<td>ipython</td>
+<td>7.18.1</td>
+</tr>
+<tr>
+<td>ipython_genutils</td>
+<td>0.2.0</td>
+</tr>
+<tr>
+<td>jdcal</td>
+<td>1.4.1</td>
+</tr>
+<tr>
+<td>jedi</td>
+<td>0.17.2</td>
+</tr>
+<tr>
+<td>jinja2</td>
+<td>2.11.2</td>
+</tr>
+<tr>
+<td>jpeg</td>
+<td>9b</td>
+</tr>
+<tr>
+<td>json5</td>
+<td>0.9.5</td>
+</tr>
+<tr>
+<td>jsonschema</td>
+<td>3.2.0</td>
+</tr>
+<tr>
+<td>jupyter_client</td>
+<td>6.1.7</td>
+</tr>
+<tr>
+<td>jupyter_core</td>
+<td>4.6.3</td>
+</tr>
+<tr>
+<td>jupyterlab</td>
+<td>2.2.9</td>
+</tr>
+<tr>
+<td>jupyterlab_pygments</td>
+<td>0.1.2</td>
+</tr>
+<tr>
+<td>jupyterlab_server</td>
+<td>1.2.0</td>
+</tr>
+<tr>
+<td>kealib</td>
+<td>1.4.7</td>
+</tr>
+<tr>
+<td>kiwisolver</td>
+<td>1.2.0</td>
+</tr>
+<tr>
+<td>krb5</td>
+<td>1.16.4</td>
+</tr>
+<tr>
+<td>libboost</td>
+<td>1.67.0</td>
+</tr>
+<tr>
+<td>libcurl</td>
+<td>7.67.0</td>
+</tr>
+<tr>
+<td>libgdal</td>
+<td>3.0.2</td>
+</tr>
+<tr>
+<td>libiconv</td>
+<td>1.15</td>
+</tr>
+<tr>
+<td>libkml</td>
+<td>1.3.0</td>
+</tr>
+<tr>
+<td>libnetcdf</td>
+<td>4.6.1</td>
+</tr>
+<tr>
+<td>libpng</td>
+<td>1.6.37</td>
+</tr>
+<tr>
+<td>libpq</td>
+<td>11.2</td>
+</tr>
+<tr>
+<td>libsodium</td>
+<td>1.0.18</td>
+</tr>
+<tr>
+<td>libspatialindex</td>
+<td>1.9.3</td>
+</tr>
+<tr>
+<td>libspatialite</td>
+<td>4.3.0a</td>
+</tr>
+<tr>
+<td>libssh2</td>
+<td>1.9.0</td>
+</tr>
+<tr>
+<td>libtiff</td>
+<td>4.1.0</td>
+</tr>
+<tr>
+<td>libxml2</td>
+<td>2.9.10</td>
+</tr>
+<tr>
+<td>lz4-c</td>
+<td>1.8.1.2</td>
+</tr>
+<tr>
+<td>m2w64-expat</td>
+<td>2.1.1</td>
+</tr>
+<tr>
+<td>m2w64-gcc-libgfortran</td>
+<td>5.3.0</td>
+</tr>
+<tr>
+<td>m2w64-gcc-libs</td>
+<td>5.3.0</td>
+</tr>
+<tr>
+<td>m2w64-gcc-libs-core</td>
+<td>5.3.0</td>
+</tr>
+<tr>
+<td>m2w64-gettext</td>
+<td>0.19.7</td>
+</tr>
+<tr>
+<td>m2w64-gmp</td>
+<td>6.1.0</td>
+</tr>
+<tr>
+<td>m2w64-libiconv</td>
+<td>1.14</td>
+</tr>
+<tr>
+<td>m2w64-libwinpthread-git</td>
+<td>5.0.0.4634.697f757</td>
+</tr>
+<tr>
+<td>m2w64-xz</td>
+<td>5.2.2</td>
+</tr>
+<tr>
+<td>markupsafe</td>
+<td>1.1.1</td>
+</tr>
+<tr>
+<td>matplotlib</td>
+<td>3.3.2</td>
+</tr>
+<tr>
+<td>matplotlib-base</td>
+<td>3.3.2</td>
+</tr>
+<tr>
+<td>mistune</td>
+<td>0.8.4</td>
+</tr>
+<tr>
+<td>mkl</td>
+<td>2020.2</td>
+</tr>
+<tr>
+<td>mkl-service</td>
+<td>2.3.0</td>
+</tr>
+<tr>
+<td>mkl_fft</td>
+<td>1.2.0</td>
+</tr>
+<tr>
+<td>mkl_random</td>
+<td>1.1.1</td>
+</tr>
+<tr>
+<td>msys2-conda-epoch</td>
+<td>20160418</td>
+</tr>
+<tr>
+<td>munch</td>
+<td>2.5.0</td>
+</tr>
+<tr>
+<td>nbclient</td>
+<td>0.5.1</td>
+</tr>
+<tr>
+<td>nbconvert</td>
+<td>6.0.7</td>
+</tr>
+<tr>
+<td>nbformat</td>
+<td>5.0.8</td>
+</tr>
+<tr>
+<td>nest-asyncio</td>
+<td>1.4.1</td>
+</tr>
+<tr>
+<td>notebook</td>
+<td>6.1.4</td>
+</tr>
+<tr>
+<td>numpy</td>
+<td>1.19.1</td>
+</tr>
+<tr>
+<td>numpy-base</td>
+<td>1.19.1</td>
+</tr>
+<tr>
+<td>olefile</td>
+<td>0.46</td>
+</tr>
+<tr>
+<td>openjpeg</td>
+<td>2.3.0</td>
+</tr>
+<tr>
+<td>openpyxl</td>
+<td>3.0.7</td>
+</tr>
+<tr>
+<td>openssl</td>
+<td>1.1.1m</td>
+</tr>
+<tr>
+<td>packaging</td>
+<td>20.4</td>
+</tr>
+<tr>
+<td>pandas</td>
+<td>1.1.3</td>
+</tr>
+<tr>
+<td>pandoc</td>
+<td>2.11.0.2</td>
+</tr>
+<tr>
+<td>pandocfilters</td>
+<td>1.4.2</td>
+</tr>
+<tr>
+<td>parso</td>
+<td>0.7.1</td>
+</tr>
+<tr>
+<td>pcre</td>
+<td>8.44</td>
+</tr>
+<tr>
+<td>pickleshare</td>
+<td>0.7.5</td>
+</tr>
+<tr>
+<td>pillow</td>
+<td>8.0.0</td>
+</tr>
+<tr>
+<td>pip</td>
+<td>20.2.3</td>
+</tr>
+<tr>
+<td>postgresql</td>
+<td>11.2</td>
+</tr>
+<tr>
+<td>proj</td>
+<td>6.2.1</td>
+</tr>
+<tr>
+<td>prometheus_client</td>
+<td>0.8.0</td>
+</tr>
+<tr>
+<td>prompt-toolkit</td>
+<td>3.0.8</td>
+</tr>
+<tr>
+<td>pycparser</td>
+<td>2.2</td>
+</tr>
+<tr>
+<td>pygments</td>
+<td>2.7.1</td>
+</tr>
+<tr>
+<td>pyopenssl</td>
+<td>19.1.0</td>
+</tr>
+<tr>
+<td>pyparsing</td>
+<td>2.4.7</td>
+</tr>
+<tr>
+<td>pyproj</td>
+<td>2.6.1.post1</td>
+</tr>
+<tr>
+<td>pyqt</td>
+<td>5.9.2</td>
+</tr>
+<tr>
+<td>pyrsistent</td>
+<td>0.17.3</td>
+</tr>
+<tr>
+<td>pysocks</td>
+<td>1.7.1</td>
+</tr>
+<tr>
+<td>python</td>
+<td>3.8.5</td>
+</tr>
+<tr>
+<td>python-dateutil</td>
+<td>2.8.1</td>
+</tr>
+<tr>
+<td>python_abi</td>
+<td>3.8</td>
+</tr>
+<tr>
+<td>pytz</td>
+<td>2020.1</td>
+</tr>
+<tr>
+<td>pywin32</td>
+<td>228</td>
+</tr>
+<tr>
+<td>pywinpty</td>
+<td>0.5.7</td>
+</tr>
+<tr>
+<td>pyzmq</td>
+<td>19.0.2</td>
+</tr>
+<tr>
+<td>qt</td>
+<td>5.9.7</td>
+</tr>
+<tr>
+<td>requests</td>
+<td>2.24.0</td>
+</tr>
+<tr>
+<td>rtree</td>
+<td>0.9.4</td>
+</tr>
+<tr>
+<td>scipy</td>
+<td>1.5.2</td>
+</tr>
+<tr>
+<td>seaborn</td>
+<td>0.11.2</td>
+</tr>
+<tr>
+<td>send2trash</td>
+<td>1.5.0</td>
+</tr>
+<tr>
+<td>setuptools</td>
+<td>50.3.0</td>
+</tr>
+<tr>
+<td>shapely</td>
+<td>1.7.1</td>
+</tr>
+<tr>
+<td>sip</td>
+<td>4.19.13</td>
+</tr>
+<tr>
+<td>six</td>
+<td>1.15.0</td>
+</tr>
+<tr>
+<td>sqlite</td>
+<td>3.33.0</td>
+</tr>
+<tr>
+<td>tbb</td>
+<td>2018.0.5</td>
+</tr>
+<tr>
+<td>terminado</td>
+<td>0.9.1</td>
+</tr>
+<tr>
+<td>testpath</td>
+<td>0.4.4</td>
+</tr>
+<tr>
+<td>tiledb</td>
+<td>1.6.3</td>
+</tr>
+<tr>
+<td>tk</td>
+<td>8.6.10</td>
+</tr>
+<tr>
+<td>tornado</td>
+<td>6.0.4</td>
+</tr>
+<tr>
+<td>traitlets</td>
+<td>5.0.5</td>
+</tr>
+<tr>
+<td>urllib3</td>
+<td>1.25.11</td>
+</tr>
+<tr>
+<td>vc</td>
+<td>14.1</td>
+</tr>
+<tr>
+<td>vs2015_runtime</td>
+<td>14.16.27012</td>
+</tr>
+<tr>
+<td>wcwidth</td>
+<td>0.2.5</td>
+</tr>
+<tr>
+<td>webencodings</td>
+<td>0.5.1</td>
+</tr>
+<tr>
+<td>wheel</td>
+<td>0.35.1</td>
+</tr>
+<tr>
+<td>win_inet_pton</td>
+<td>1.1.0</td>
+</tr>
+<tr>
+<td>wincertstore</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>winpty</td>
+<td>0.4.3</td>
+</tr>
+<tr>
+<td>xerces-c</td>
+<td>3.2.3</td>
+</tr>
+<tr>
+<td>xlrd</td>
+<td>2.0.1</td>
+</tr>
+<tr>
+<td>xz</td>
+<td>5.2.5</td>
+</tr>
+<tr>
+<td>zeromq</td>
+<td>4.3.2</td>
+</tr>
+<tr>
+<td>zipp</td>
+<td>3.3.1</td>
+</tr>
+<tr>
+<td>zlib</td>
+<td>1.2.11</td>
+</tr>
+<tr>
+<td>zstd</td>
+<td>1.3.7</td>
+</tr>
+</tbody>
+</table>
+<h4 id="python-rtree-library">Python Rtree library</h4>
+<p>The open source <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#rtree">Python <code>rtree</code> library</a> is required for a script that dynamically codes link area type based on land use data.  The <code>rtree</code> library provides an efficient spatial index for looking up all spatial units within a buffered distance from each spatial unit. To install, open a dos prompt, navigate to the directory and type: pip install Rtree-0.8.2-cp27-cp27m-win_amd64.whl</p>
+<h4 id="microsoft-excel">Microsoft Excel</h4>
+<p>The CT-RAMP software allows discrete choice models to be specified via so-called <a href="http://analytics.mtc.ca.gov/foswiki/Main/UtilityExpressionCalculator">Utility Expression Calculators</a>. These files are Excel-based.</p>
+<h4 id="remote-execution-and-stop-utilities">Remote Execution and Stop Utilities</h4>
+<p>The Microsoft <a href="http://technet.microsoft.com/en-us/sysinternals/bb896683.aspx"><code>PsKill</code></a> and <a href="http://technet.microsoft.com/en-us/sysinternals/bb897553.aspx"><code>PsExec</code></a> programs are used to remotely kill programs and execute programs.</p>
+<h2 id="system-design">System Design</h2>
+<p>Here, we describe the manner in which the software is configured to take advantage of the available hardware (see the <a href="#computing-environment">Computing Environment</a> section for details on the hardware and software used in the travel model; see the <a href="#setup-and-configuration">Setup and Configuration</a> section for details on setting up and configuring the MTC to run on a given set of hardware).</p>
+<h3 id="distributed-computing">Distributed Computing</h3>
+<p>The MTC travel model uses two types of distributed applications. The first is facilitated by the Cube Cluster software and allows the skim building and assignment steps to utilize multiple threads. The second is faciltated by the CT-RAMP software, which allows the choice models to be distributed across multiple threads and multiple computers. A brief overview of both of these applications is provided below.</p>
+<h4 id="cube-cluster">Cube Cluster</h4>
+<p>Citilabs Cube scripts facilitate two types of distribution, both of which are highly configurable through the Cube scripting language and the Cube Cluster thread management system; the two distinct types of multi-threading are as follows:</p>
+<ul>
+<li>Intra-step threading: The <code>DistributeINTRAStep</code> keyword allows calculations that are performed across a matrix of data to be performed in blocks -- specifically rows of data -- across multiple threads. MTC uses intra-step threading in highway assignment, allowing shortest paths to be constructed for more than one origin at a time. Complex matrix calculations can also benefit from intra-step threading.</li>
+<li>Multi-step threading: The <code>DistributeMULTIStep</code> keyword allows blocks of code to be distributed across multiple threads. For example, if the same calculations are being performed for five different time periods, the same block of code (with variables) can be distributed across computers for parallel processing. This type of Cube multi-threading is a bit less flexible than the intra-step threading as it requires threads to be identified <em>a priori</em> (e.g., thread one will do the calculations for time period A), where the intra-step threading can be given a list of available processes and use what is available. MTC uses multi-step threading for highway skimming, transit skimming, highway assignment, the conversion of trip lists to trip matrices, highway assignment, and transit assignment.</li>
+</ul>
+<p>As noted in the <a href="#computing-environment">Computing Environment</a> section, the MTC travel model specifies the Cube scripts to take advantage of 64 threads. A knowledgeable user can easily adjust the necessary scripts to take advantage of more or fewer processors.</p>
+<h4 id="ct-ramp">CT-RAMP</h4>
+<p>The CT-RAMP software allows for the choice models to be distributed across threads and machines. The MTC application currently uses four machines, but the CT-RAMP software can be configured fairly easy to utilize fewer or more machines. CT-RAMP uses the <a href="http://www.jppf.org/">Java Parallel Processing Framework</a>, or JPPF, to manage the distribution of tasks. JPPF is an open-source Java package. The JPPF framework consists of three main parts as follows:</p>
+<ol>
+<li>a driver, also referred to as the JPPF server;</li>
+<li>one or more nodes, typically one node is established on each machine; and,</li>
+<li>a client, the CT-RAMP software in this case.</li>
+</ol>
+<p>As noted on the <a href="#computing-environment">Computing Environment</a> section, MTC uses four computers with the names <code>mainmodel</code>, <code>satmodel</code>, <code>satmodel2</code>, and <code>satmodel3</code>. The JPPF driver process is executed on <code>mainmodel</code> and acts like a traffic cop by acquiring tasks from the client and distributing those tasks to the node processes. When the node processes complete tasks, the results are returned back to the client via the JPPF driver. Three nodes are used in the MTC application, one each on <code>satmodel</code>, <code>satmodel2</code>, and <code>satmodel3</code> (each node runs 12 processes). These three nodes are created prior to executing a model run. After being created, each node listens for tasks from the JPPF driver.</p>
+<p>Node processes receive tasks, perform those tasks, and return the results. Nodes are configured to communicate with the driver process when they are started. MTC configures the nodes to use 90 GB of memory and 12 threads (see the <a href="#setup-and-configuration">Setup and Configuration</a> section for details on where these parameters are specified). The JPPF driver attempts to balance computational loads across available nodes. The driver also retrieves class files, i.e. sets of Java code, from the client application and passes those to the nodes as needed.</p>
+<p>The CT-RAMP software, which serves as the client, is responsible for creating task objects that can be run in parallel and submitting those to the driver. Because the MTC travel model simulates households, the CT-RAMP software creates packets of <code>N</code> (a user-configurable quantity, e.g. 500) households and sends those packets to the nodes for processing. As the nodes complete tasks and return them to the driver, the driver gives the nodes new tasks, attempting to keep each node uniformly busy.</p>
+<h5 id="household-manager-and-matrix-manager">Household Manager and Matrix Manager</h5>
+<p>Before executing a model run, the travel model requires a <code>Household Manager</code> and a <code>Matrix Manager</code> be created. In the MTC application, both the Managers reside on the <code>satmodel</code> computer during execution. The Household Manager is tasked with managing the simulated households, as well as each simulated person in each simulated household. The <code>Household Manager</code> provides the JPPF nodes with information regarding the households for which the JPPF nodes are applying choice models and stores the resulting information computed by the JPPF nodes. To help keep run time down, the synthetic population is read from disk and stored in memory at the beginning of the application and then continuously updated as choice models are completed and iterations are performed. When the last iteration is complete, the necessary information is written to disk.</p>
+<p>The <code>Matrix Manager</code> is tasked with managing all of the skim matrices used by the choice models. When a skim is needed, a request is made to the Matrix Manager, which then reads the required skim from disk and stores it in memory. Once in memory, each matrix is available to any other JPPF node process that may need it.</p>
+<p>Both the <code>Household Manager</code> and <code>Matrix Manager</code> have substantial memory footprints, currently 35GB and 44GB respectively.</p>
+<h5 id="taz-maz-and-tap-data-manager">TAZ, MAZ, and TAP Data Manager</h5>
+<p>The main CT-RAMP model process includes the following internal data management interfaces for managing zone-type data:</p>
+<ul>
+<li>TAZ data manager,</li>
+<li>MAZ data manager, and</li>
+<li>TAP data manager.  </li>
+</ul>
+<p>These data managers provide TAZ, MAZ, and TAP level data to the various sub-models.  The TAZ data manager provides TAZ attribute data.  The MAZ data manager provides MAZ attribute data, as well as MAZ to MAZ impedances.  The TAP data manager provides TAP attribute data, as well as MAZ to TAP impedances.  These data managers are copied to JPPF nodes during execution, which increases the memory required by JPPF nodes.</p>
+<h2 id="setup-and-configuration">Setup and Configuration</h2>
+<p>This section provides details on setting up the travel model to run on a cluster of computers, including descriptions of the necessary configuration files.</p>
+<h3 id="step-1-create-the-required-folder-structure">Step 1: Create the required folder structure</h3>
+<p>The MTC travel model folder structure is shown below. Typically the parent directory will be named for the scenario to be run (e.g. '2010_base'). The parent directory contains two subfolders <code>ctramp</code> and <code>input</code>, and one MS-DOS batch file, <code>RunModel.bat</code>. This folder can be placed in any directory on a computer designated as the main controller of the program flow. On MTC's set up, these files are placed on the <code>mainmodel</code> computer (see <a href="#system-design">System Design</a> section for more details).</p>
+<ul>
+<li>\Scenario_Folder<ul>
+<li>\ct-ramp</li>
+<li>\input</li>
+<li>RunModel.bat</li>
+</ul>
+</li>
+</ul>
+<p>The <code>CTRAMP</code> directory contains all of the model configuration files, Java instructions, Cube, EMME, EMME and Python scripts required to run the travel model, organized in the following three folders:</p>
+<ul>
+<li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/model">model</a> -- contains all of the <a href="http://analytics.mtc.ca.gov/foswiki/Main/UtilityExpressionCalculator">Utility Expression Calculators</a> files that specify the choice models; [CHECK_DAVID: should the links be for master branch or transit-ccr?]</li>
+<li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/runtime">runtime</a> -- contains all of the Java configuration and <code>JAR</code> (executable) files, as well as the files necessary for Java to communicate with Cube; [CHECK_DAVID: should the links be for master branch or transit-ccr?]</li>
+<li><a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/tree/master/model-files/scripts">scripts</a> -- contains all of the Cube, EMME, and Python scripts along with associated helper files. [CHECK_DAVID: should the links be for master branch or transit-ccr?]</li>
+</ul>
+<p>The <code>INPUT</code> directory contains all of the input files (see the <a href="#input-files">Input Files</a> section) required to run a specific scenario. All the input files are available on <a href="https://mtcdrive.box.com/s/7fpzlg3vmtk5x65r7lp4q3k5kvp1v3p4">Box</a>. MTC will deliver the model with a set of scenario-specific set of inputs. When configuring the model on a new computing system, one should make sure that the results from an established scenario can be recreated before developing and analyzing a new scenario. The <code>INPUT</code> directory contains the following folders:</p>
+<ul>
+<li><code>hwy</code> -- contains the input master network with all zone centroids as well (TAZ, MAZ, and TAP) (see the <a href="#networks">Networks</a> section);</li>
+<li><code>trn</code> -- contains all of the input transit network files (see the <a href="#networks">Networks</a> section);</li>
+<li><code>landuse</code> -- contains the MAZ and TAZ level socio-economic input land use files;</li>
+<li><code>nonres</code> -- contains the fixed, year-specific internal/external trip tables, the fixed, year-specific air passenger trip tables, and files used to support the commercial vehicle model;</li>
+<li><code>popsyn</code> -- contains the synthetic population files;</li>
+<li><code>visualizer</code> -- contains the survey data and other helper files needed for the visualizer;</li>
+</ul>
+<p>The <code>RunModel.bat</code> script contains a list of MS-DOS instructions that control model flow.</p>
+<h3 id="step-2-map-a-network-drive-to-share-across-computers">Step 2: Map a network drive to share across computers</h3>
+<p>As noted in the previous section, the MTC model files can be placed within any directory. After establishing this location, the user must map a network drive to a shared folder to allow other computers access. On MTC's machine, the directory <code>E:\MainModelShare</code> is first mapped to the letter drive <code>M:\</code> and this directory is then shared across on the network (<code>M:\ = \\MainModel\MainModelShare\</code>).</p>
+<p>Satellite computers should also map the letter drive <code>M:\</code> to this network location.</p>
+<p>Please note that the model components running on the main machine should use the local version of the directory (i.e. <code>M:\Projects\</code>) rather than the network version (i.e. <code>\\MainModel\MainModelShare\Projects\</code>).</p>
+<p>MTC has created scenarios for 2000, 2005, 2010 and 2015. The model is calibrated and validated to 2010 observed data.</p>
+<h3 id="step-3-configure-the-ct-ramp-and-jppf-services">Step 3: Configure the CT-RAMP and JPPF Services</h3>
+<p>Much of the configuration of the CT-RAMP software is done automatically by the <code>RunModel.bat</code> batch file.  However, prior to executing a model run, the files controlling the CT-RAMP and JPPF services may need to be configured. Please see the <a href="#system-design">System Design</a> section for a broad overview of these services. When executing the travel model, the following start-up scripts need to be run separately on each computer. Each script specifies the tasks assigned to each computer and need not be configured exactly as described on the <a href="#system-design">System Design</a> section (we describe MTC's setup; numerous other configurations are possible). In the MTC setup, the following commands are executed:</p>
+<ol>
+<li><code>runDriver.cmd</code> starts the JPPF Driver required for distributed model running;</li>
+<li><code>runHhMgr.cmd</code> starts the household manager on <code>satmodel1</code>;</li>
+<li><code>runMtxMgr.cmd</code> starts the matrix manager on <code>satmodel1</code>;</li>
+<li><code>runNode{X}.cmd</code> starts up JPPF worker nodes on the remaining node {X} machine(s);</li>
+</ol>
+<p>The <code>.cmd</code> files are MS-DOS batch scripts and can be edited in a text editor, such as Notepad.</p>
+<p>Each program requires an explicit amount of memory to be allocated to it.  The amount of memory allocated to each program is identified by the <code>-Xmx</code> parameter (<code>XXXm</code> allocates XXX megabytes; <code>Xg</code> allocates X gigabytes.  This may need to be adjusted depending on the model and hardware configurations.  An example is as follows:</p>
+<pre><code class="language-dosbatch">.. %JAVA_PATH%\bin\java -server -Xmx35000m ...
+</code></pre>
+<p>Most of the JPPF-related configuration parameters have been optimized for the MTC travel model application and, as such, need not be modified. There are, however, a handful of parameters described in the table below that may need to be modified to meet the specifications of the computing environment upon which the model is being executed. Each of the files listed below can be found in the <code>CTRAMP\runtime\config\</code> directory.</p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>File Name</strong></th>
+<th><strong>File Function</strong></th>
+<th><strong>Statement</strong></th>
+<th><strong>Purpose</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>jppf-clientDistributed.properties</code></td>
+<td>JPPF Client Driver Control file</td>
+<td><code>driver1.jppf.server.host = 192.168.1.200</code></td>
+<td>IP address of the main computer (<code>mainmodel</code> at MTC)</td>
+</tr>
+<tr>
+<td align="left"><code>jppf-clientLocal.properties</code></td>
+<td>JPPF Client Local Control file</td>
+<td><code>jppf.local.execution.threads = 22</code></td>
+<td>Number of threads to use for running the model on one machine for testing (mainly for debugging)</td>
+</tr>
+<tr>
+<td align="left"><code>jppf-driver.properties</code></td>
+<td>JPPF Driver Control file</td>
+<td><code>jppf.server.host = 192.168.1.200</code></td>
+<td>IP address of the main computer (<code>mainmodel</code> at MTC)</td>
+</tr>
+<tr>
+<td align="left"><code>jppf-node{x}.properties</code></td>
+<td>Remote JPPF Node Control file</td>
+<td><code>jppf.server.host = 192.168.1.200</code></td>
+<td>IP address of the main computer (<code>mainmodel</code> at MTC)</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td></td>
+<td><code>processing.threads = 12</code></td>
+<td>Number of computing cores on node {X}</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td></td>
+<td><code>other.jvm.options = -Xms48000m -Xmx48000m -Dnode.name=node0</code></td>
+<td>Maximum amount of memory, in MB, to allocate to node {X} and node name for logging</td>
+</tr>
+</tbody>
+</table>
+<p>A file that needs to be edited prior to executing a model run is the <code>mtctm2.properties</code> file located in <code>CTRAMP\runtime\</code>. This file serves as the general control module for the entire CT-RAMP application. At this stage, the following variables need to be modified for the software to execute the model properly.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Statement</strong></th>
+<th><strong>Purpose</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RunModel.MatrixServerAddress = 192.168.1.200</code></td>
+<td>The IP address of the machine upon which the Matrix Manager is being executed (<code>satmodel1</code> at MTC)</td>
+</tr>
+<tr>
+<td><code>RunModel.HouseholdServerAddress = 192.168.1.200</code></td>
+<td>The IP address of the machine upon which the Household Manager is being executed (<code>satmodel1</code> at MTC)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-4-configure-runmodelbat-and-ctrampenvbat">Step 4: Configure <code>RunModel.bat</code> and <code>CTRampEnv.bat</code></h3>
+<p>The file <code>RunModel.bat</code> MS-DOS batch file that executes the model stream needs to be consistent with the network and if a specialized model run is being executed, the model flow logic and/or sample rates may need to be adjusted. The following statements may need to be configured within this file:</p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>Statement</strong></th>
+<th><strong>Purpose</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>set SAMPLERATE_ITERATION{iteration}=0.2</code></td>
+<td>Set choice model household sample rate by iteration</td>
+</tr>
+<tr>
+<td align="left">model run</td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>set MODEL_YEAR=2015</code></td>
+<td>Set model year</td>
+</tr>
+<tr>
+<td align="left"><code>set BASE_SCRIPTS=CTRAMP\scripts</code></td>
+<td>Set scripts folder</td>
+</tr>
+<tr>
+<td align="left"><code>set /A MAX_ITERATION=3</code></td>
+<td>Set the model feedback iterations</td>
+</tr>
+<tr>
+<td align="left"><code>set /A MAX_INNER_ITERATION=2</code></td>
+<td>Set the inner transit capacity restraint iterations</td>
+</tr>
+</tbody>
+</table>
+<p>The file <code>CTRampEnv.bat</code> MS-DOS batch file points to locations of executables and contains some additional information on machine configuration. The following statements may need to be configured within this file:</p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>Statement</strong></th>
+<th><strong>Purpose</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>set JAVA_PATH=C:\Program Files\Java\jre1.8.0_301</code></td>
+<td>Specify the 64-bit Java path; version 1.8.0+</td>
+</tr>
+<tr>
+<td align="left"><code>set TPP_PATH=C:\Progam Files\Citilabs\CubeVoyager</code></td>
+<td>Specify the Cube Voyager path</td>
+</tr>
+<tr>
+<td align="left"><code>set CUBE_PATH=C:\Progam Files (x86)\Citilabs\Cube</code></td>
+<td>Specify the Cube path</td>
+</tr>
+<tr>
+<td align="left"><code>set PYTHON_PATH=D:\Anaconda2</code></td>
+<td>Specify the Python path</td>
+</tr>
+<tr>
+<td align="left"><code>set RUNTIME=CTRAMP\runtime</code></td>
+<td>Specify the location of the CT-RAMP software (relative to the project directory)</td>
+</tr>
+<tr>
+<td align="left"><code>set JAVA_32_PORT=1190</code></td>
+<td>Specify the port for Java 32 bit matrix reader\writer (not currently used)</td>
+</tr>
+<tr>
+<td align="left"><code>set MATRIX_MANAGER_PORT=1191</code></td>
+<td>Specify the port for the matrix manager</td>
+</tr>
+<tr>
+<td align="left"><code>set HH_MANAGER_PORT=1129</code></td>
+<td>Specify the port for the household manager</td>
+</tr>
+<tr>
+<td align="left"><code>SET MAIN=WRJMDLPPW08</code></td>
+<td>Set machine name mainmodel</td>
+</tr>
+<tr>
+<td align="left"><code>SET MTC0{1,2,3}=WRJMDLPPW08</code></td>
+<td>Set machine names for satmodels</td>
+</tr>
+<tr>
+<td align="left"><code>set HHMGR_IP=172.24.0.100</code></td>
+<td>Specify IP address of household manager</td>
+</tr>
+<tr>
+<td align="left"><code>set MATRIX_SERVER=\\%MTC02%</code></td>
+<td>Machine running matrix data manager</td>
+</tr>
+<tr>
+<td align="left"><code>set MATRIX_SERVER_BASE_DIR=%MATRIX_SERVER%\e$\projects\clients\MTC\%SCEN%</code></td>
+<td>Machine running matrix data manager base directory</td>
+</tr>
+<tr>
+<td align="left"><code>set MATRIX_SERVER_ABSOLUTE_BASE_DIR=e:\projects\clients\MTC\%SCEN%</code></td>
+<td>Machine running matrix data manager absolute directory</td>
+</tr>
+<tr>
+<td align="left"><code>set MATRIX_SERVER_JAVA_PATH=C:\Program Files\Java\jre1.8.0_261</code></td>
+<td>Machine running matrix data manager Java install</td>
+</tr>
+<tr>
+<td align="left"><code>set HH_SERVER=\\%MTC02%</code></td>
+<td>Machine running household data manager</td>
+</tr>
+<tr>
+<td align="left"><code>set HH_SERVER_BASE_DIR=%HH_SERVER%\e$\projects\clients\MTC\%SCEN%</code></td>
+<td>Machine running household data manager base directory</td>
+</tr>
+<tr>
+<td align="left"><code>set HH_SERVER_ABSOLUTE_BASE_DIR=e:\projects\clients\MTC\%SCEN%</code></td>
+<td>Machine running household data manager absolute directory</td>
+</tr>
+<tr>
+<td align="left"><code>set HH_SERVER_JAVA_PATH=C:\Program Files\Java\jre1.8.0_261</code></td>
+<td>Machine running household data manager Java install</td>
+</tr>
+<tr>
+<td align="left"><code>set USERNAME=</code></td>
+<td>Username for remote access using psexec</td>
+</tr>
+<tr>
+<td align="left"><code>set PASSWORD=</code></td>
+<td>Password for remote access using psexec</td>
+</tr>
+</tbody>
+</table>
+<p>Now that the model is configured, the user can run the model, as described in the <a href="#model-execution">Model Execution</a> section.</p>
+<h2 id="model-execution">Model Execution</h2>
+<p>This page describes how <code>RunModel.bat</code> executes the travel model. For:</p>
+<ul>
+<li>a description of the underlying computing environment, see <a href="#computing-environment">Computing Environment</a>;</li>
+<li>a general description of the underlying system design, see <a href="#system-design">System Design</a>;</li>
+<li>a description of the configuration files that may need to be modified before executing the model, see <a href="#setup-and-configuration">Setup and Configuration</a>.</li>
+</ul>
+<h3 id="step-1-set-globally-available-environmental-variables">Step 1: Set globally-available environmental variables</h3>
+<p>See  <a href="#setup-and-configuration">Setup and Configuration</a> for complete details.</p>
+<h3 id="step-2-set-relevant-paths-to-access-software">Step 2: Set relevant paths to access software</h3>
+<p>See  <a href="#setup-and-configuration">Setup and Configuration</a> for complete details.</p>
+<h3 id="step-3-create-and-populate-a-working-directory-of-input-files">Step 3: Create and populate a working directory of input files</h3>
+<p>A working directory is created and populated with the input files, leaving the input files untouched in the process.  This step also creates the necessary directory structure for the household and matrix data servers on the remote machine and copies over needed files.</p>
+<pre><code class="language-dosbatch">mkdir hwy
+mkdir trn
+mkdir skims
+mkdir landuse
+mkdir popsyn
+mkdir nonres
+mkdir main
+mkdir logs
+mkdir database
+mkdir ctramp_output
+
+:: Stamp the feedback report with the date and time of the model start
+echo STARTED MODEL RUN  %DATE% %TIME% &gt;&gt; logs\feedback.rpt
+
+:: Move the input files, which are not accessed by the model, to the working directories
+copy INPUT\hwy\                 hwy\       /Y
+copy INPUT\trn\                 trn\       /Y
+copy INPUT\landuse\             landuse\   /Y
+copy INPUT\popsyn\              popsyn\    /Y
+copy INPUT\nonres\              nonres\    /Y
+copy INPUT\warmstart\main\      main\      /Y
+copy INPUT\warmstart\nonres\    nonres\    /Y
+</code></pre>
+<p>After the directories are created, copies are made to the remote machines for access by the household and matrix servers.</p>
+<pre><code class="language-dosbatch">SET HH_DEPENDENCIES=(hwy popsyn landuse skims trn CTRAMP logs)
+IF NOT EXIST &quot;%HH_SERVER_BASE_DIR%&quot; MKDIR &quot;%HH_SERVER_BASE_DIR%&quot;
+FOR %%A IN %HH_DEPENDENCIES% DO (
+  IF NOT EXIST &quot;%HH_SERVER_BASE_DIR%\%%A&quot; MKDIR &quot;%HH_SERVER_BASE_DIR%\%%A&quot;
+)
+ROBOCOPY CTRAMP %HH_SERVER_BASE_DIR%\CTRAMP *.* /E /NDL /NFL
+
+:: Create necessary directory structure for matrix data server
+SET MATRIX_DEPENDENCIES=(skims CTRAMP logs ctramp_output)
+IF NOT EXIST &quot;%MATRIX_SERVER_BASE_DIR%&quot; MKDIR &quot;%MATRIX_SERVER_BASE_DIR%&quot;
+FOR %%A IN %MATRIX_DEPENDENCIES% DO (
+    IF NOT EXIST &quot;%MATRIX_SERVER_BASE_DIR%\%%A&quot; MKDIR &quot;%MATRIX_SERVER_BASE_DIR%\%%A&quot;
+)
+ROBOCOPY CTRAMP &quot;%MATRIX_SERVER_BASE_DIR%\CTRAMP&quot; *.* /E /NDL /NFL
+</code></pre>
+<h3 id="step-4-pre-process-steps">Step 4: Pre-process steps</h3>
+<p>Several steps are needed to prepare the inputs for use in the model.  The following Cube scripts are executed to perform the following:</p>
+<ul>
+<li><code>preprocess_input_net.job</code> -- preprocessing input network to add a Feet field for distance and fix space issue in CNTYPE field</li>
+<li><code>writeZoneSystems.job</code> -- write a batch file with number of tazs, taps, and mazs</li>
+<li><code>zone_seq_net_builder.job</code> -- build an internal numbering scheme for the network nodes to play nice with Cube</li>
+<li><code>zone_seq_disseminator.py</code> -- creates all necessary input files based on updated sequential zone numbering</li>
+<li><code>renumber.py</code> -- renumber the TAZs and MAZs in the households data file</li>
+<li><code>maz_densities.job</code> -- writes out the intersection and MAZ XYs</li>
+<li><code>createMazDensityFile.py</code> -- calculates density fields and append those to MAZ file</li>
+<li><code>CreateNonMotorizedNetwork.job</code> -- convert the roadway network into bike and ped networks</li>
+<li><code>tap_to_taz_for_parking.job</code> -- builds a shortest path tree from taps to tazs based on walk distance</li>
+<li><code>tap_data_builder.py</code> -- this script builds the tap csv data file which maps all TAPs to the closest TAZ for that TAP</li>
+<li><code>SetTolls.job</code> -- set network prices (i.e., bridge tolls, express lane tolls) in the roadway network</li>
+<li><code>SetHovXferPenalties.job</code> -- add a penalty of X seconds for dummy links connecting HOV/express lanes and general purpose lanes</li>
+<li><code>SetCapClass.job</code> -- compute area type and populate the <code>CAPCLASS</code> network variable</li>
+<li><code>setInterchangeDistance.job</code> -- preprocess freeway link distances to nearest major interchange</li>
+<li><code>CreateFiveHighwayNetworks.job</code> -- create time-of-day-specific roadway networks</li>
+<li><code>BuildTazNetworks.job</code> -- create TAZ-scale networks for TAZ-scale roadway assignment</li>
+</ul>
+<h3 id="step-5-build-walk-bicycle-and-nearby-automobile-level-of-service-matrices">Step 5:  Build walk, bicycle, and nearby automobile level-of-service matrices</h3>
+<p>Two scripts create the level-of-service information for the non-motorized modes and nearby automobile skims (for which, as a simplification, congestion is constant).  The following Cube scripts do the job:</p>
+<ul>
+<li><code>NonMotorizedSkims.job</code> -- skim the walk and bicycle networks</li>
+<li><code>MazMazSkims.job</code> -- builds short-distance MAZ-to-MAZ automobile skims</li>
+</ul>
+<h3 id="step-6-build-air-passenger-demand-matrices">Step 6: Build air passenger demand matrices</h3>
+<p>The <code>BuildAirPax.job</code> Cube script creates the air passenger demand estimates.  Air passenger demand is assumed to be independent of roadway level-of-service and, as such, can be computed a single time.</p>
+<h3 id="step-7-build-highway-and-transit-skims">Step 7: Build highway and transit skims</h3>
+<p>The following steps create the highway and transit level-of-service matrices:</p>
+<ul>
+<li><code>HwySkims.job</code> -- build the roadway skims</li>
+<li><code>BuildTransitNetworks.job</code> -- build the transit networks using the congested roadway times</li>
+<li><code>TransitSkimsPrep.job</code> -- build the transit skims for five time periods</li>
+<li><code>cube_to_emme_network_conversion.py</code> -- read in a Cube network shapefile and output EMME transaction files to load the network and attributes into EMME for first model iteration</li>
+<li><code>create_emme_network.py</code> -- creates an EMME project folder, database, and a scenario for each time period for first model iteration</li>
+<li><code>skim_transit_network.py</code> -- performs transit skimming and assignment for TM2</li>
+<li>Set the sampling rate based on <code>SAMPLERATE_ITERATION&lt;iteration&gt;</code> global variable</li>
+<li>Copy the skims and related files to the remote household and matrix data manager machines</li>
+</ul>
+<h3 id="step-8-execute-the-ct-ramp-models">Step 8:  Execute the CT-RAMP models</h3>
+<p>The core passenger travel demand models are executed via the CT-RAMP Java code via the following steps:</p>
+<ul>
+<li>Remote household and matrix servers are started using <code>psexec</code></li>
+<li>JPPF driver, as needed, is started via <code>CTRAMP/runtime/runDriver.cmd</code></li>
+<li>JPPF worker nodes, as specified, are started via <code>CTRAMP\runtime\runNode0.cmd</code></li>
+<li>CT-RAMP models are executed via <code>CTRAMP/runMTCTM2ABM.cmd</code></li>
+<li>Stops remote servers using <code>pskill</code></li>
+<li>Copies output matrices from the matrix manager machine back to the main machine</li>
+<li><code>merge_auto_matrices.s</code> --  merge non-transit trip matrices from the CTRAMP model outputs</li>
+</ul>
+<h3 id="step-9-execute-the-internalexternal-and-commercial-vehicle-models">Step 9:  Execute the internal/external and commercial vehicle models</h3>
+<p>These ancillary demand models are executed via a series of Cube scripts as follows:</p>
+<ul>
+<li><code>IxForecasts.job</code> -- create the internal/external demand matrices forecast</li>
+<li><code>IxTimeOfDay.job</code> -- apply diurnal factors to the daily fixed internal/external demand matrices</li>
+<li><code>IxTollChoice.job</code> -- apply a toll choice model for express lanes to the internal/external demand</li>
+<li><code>TruckTripGeneration.job</code> -- apply the commercial vehicle generation models</li>
+<li><code>TruckTripDistribution.job</code> -- apply the commercial vehicle distribution models</li>
+<li><code>TruckTimeOfDay.job</code> -- apply the commercial vehicle diurnal factors</li>
+<li><code>TruckTollChoice.job</code> -- apply a toll choice model for express lanes with eligible commercial demand</li>
+</ul>
+<h3 id="step-10-network-assignment">Step 10: Network Assignment</h3>
+<p>Demand is located on mode-specific paths through the networks in the assignment step via the following steps:</p>
+<ul>
+<li><code>build_and_assign_maz_to_maz_auto.job</code> -- nearby automobile demand assigned to best path on MAZ-scale network</li>
+<li><code>HwyAssign.job</code> -- using nearby demand as background demand, demand assigned to TAZ-scale network</li>
+<li><code>AverageNetworkVolumes.job</code> -- method of successive averages (MSA) applied across overall model iterations</li>
+<li><code>CalculateAverageSpeed.job</code> -- using the averaged volumes, compute speeds</li>
+<li><code>MergeNetworks.job</code> -- merge time-of-day-specific networks into a single network</li>
+<li><code>IF</code> additional <code>ITERATION</code>s are needed, run <code>HwySkims.job</code></li>
+<li><code>BuildTransitNetworks.job</code> -- creates the transit network used for skimming/assignment</li>
+<li><code>TransitSkimsPrep.job</code> -- compute transit skims for five time periods</li>
+<li><code>cube_to_emme_network_conversion.py</code> -- updates the transaction files and attributes in EMME for second model iteration</li>
+<li><code>create_emme_network.py</code> -- updates the congested link times in EMME for second model iteration</li>
+<li><code>IF INNER_ITERATION == 1</code>, <code>skim_transit_network_py2.py</code> script resimulates the congested transit assignment for all time periods</li>
+<li><code>IF INNER_ITERATION &gt; 1</code>, <code>skim_transit_network_py2.py</code> script resimulates the congested transit assignment only for AM and PM periods</li>
+<li>Start remote matrix server using <code>psexec</code></li>
+<li>Recalculate transit best path via running <code>CTRAMP\runtime\runTransitPathRecalculator.cmd</code></li>
+</ul>
+<h3 id="step-11-clean-up">Step 11: Clean up</h3>
+<p>The next step of the model run moves all the TP+ printouts to the <code>/logs</code> folder and deletes all the temporary TP+ printouts and cluster files.</p>
+<h3 id="step-12-visualizer">Step 12: visualizer</h3>
+<p>The final step of the model run creates an html visualizer that helps comparing CHTS survey data to current run model outputs. The visualizer is created via <code>CTRAMP\scripts\visualizer\generateDashboard.bat</code></p>
+<h2 id="ct-ramp-properties-file">CT-RAMP Properties File</h2>
+<p>The CT-RAMP software is controlled by a standard Java <a href="https://github.com/MetropolitanTransportationCommission/travel-model-two/blob/master/model-files/runtime/mtctm2.properties">properties file</a>.  The <em>forthcoming</em> {table, link} below identifies, describes, and provides on example of, each of the variables CT-RAMP expects to be in the properties file.  After the initial configuration, only a handful of these properties willl be modified in a typical application of the travel model.  The primary use for many of the variables is to facilitate model calibration and/or debugging.  Comments in the properties file preceeded with a pound (#) are ignored.</p>
+<table>
+    <tr>
+        <th>Purpose</th>
+        <th>Expected Data Type</th>
+        <th>Example Value</th>
+        <th>Purpose</th>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="cluster_properties"><b>Cluster Properties</b><br><i>Modify when changing cluster configuration or moving to new cluster</i> (properties for java processes) </a></td>
+    </tr>
+    <tr>
+        <td>RunModel.MatrixServerAddress</td>
+        <td>String</td>
+        <td>10.0.1.46</td>
+        <td>Matrix server address</td>
+    </tr>
+    <tr>
+        <td>RunModel.MatrixServerPort</td>
+        <td>Integer</td>
+        <td>1191</td>
+        <td>Matrix server port number</td>
+    </tr>
+    <tr>
+        <td>RunModel.HouseholdServerAddress</td>
+        <td>String</td>
+        <td>10.0.1.46</td>
+        <td>Household server address</td>
+    </tr>
+    <tr>
+        <td>RunModel.HouseholdServerPort</td>
+        <td>Integer</td>
+        <td>1129</td>
+        <td>Household server port number</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="logging_properties"><b>Logging and Debugging Properties</b><br><i>Use for tracing households or agents through simulation</i></b></a></td>
+    </tr>
+    <tr>
+        <td>Trace</td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to trace zones</td>
+    </tr>
+    <tr>
+        <td>Trace.otaz </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Specify which origin taz to trace</td>
+    </tr>
+    <tr>
+        <td>Trace.dtaz </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Specify which destination taz to trace</td>
+    </tr>
+    <tr>
+        <td>Seek </td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>True or False whether to seek households</td>
+    </tr>
+    <tr>
+        <td>Process.Debug.HHs.Only </td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>True of False whether to debug households</td>
+    </tr>
+    <tr>
+        <td>Debug.Trace.HouseholdIdList </td>
+        <td>Integer</td>
+        <td>13748</td>
+        <td>Specify which Household ID to trace</td>
+    </tr>
+    <tr>
+        <td>TourModeChoice.Save.UtilsAndProbs </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>Save tour mode choice utilities and probabilities for debugging</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="path_properties"><b>Path Properties</b><br><i>Modify as needed when copy release to a local run folder</i></b></a></td>
+    </tr>
+    <tr>
+        <td>Project.Directory</td>
+        <td>String</td>
+        <td>%project.folder%/</td>
+        <td>Project.Directory</td>
+    </tr>
+    <tr>
+        <td>generic.path </td>
+        <td>String</td>
+        <td>%project.folder%/INPUT/</td>
+        <td>Inputs folder</td>
+    </tr>
+    <tr>
+        <td>scenario.path </td>
+        <td>String</td>
+        <td>%project.folder%/</td>
+        <td>Scenario folder</td>
+    </tr>
+    <tr>
+        <td>skims.path </td>
+        <td>String</td>
+        <td>%project.folder%/skims/</td>
+        <td>Outputs folder</td>
+    </tr>
+    <tr>
+        <td>uec.path </td>
+        <td>String</td>
+        <td>%project.folder%/CTRAMP/model/</td>
+        <td>UEC folder</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="scenario_properties"><b>Scenario Properties</b><br><i>Modify when running new scenario, if necessary</i></a></td>
+    </tr>
+    <tr>
+        <td>mgra.socec.file </td>
+        <td>String</td>
+        <td>/landuse/maz_data_withDensity.csv</td>
+        <td>Location of mgra land use file</td>
+    </tr>
+    <tr>
+        <td>network.node.seq.mapping.file </td>
+        <td>String</td>
+        <td>/hwy/mtc_final_network_zone_seq.csv</td>
+        <td>Location of mapping between Nodes, MAZs, TAZs and TAPs</td>
+    </tr>
+    <tr>
+        <td>aoc.fuel </td>
+        <td>Float</td>
+        <td>10.99</td>
+        <td>Auto operating costs: Fuel cost</td>
+    </tr>
+    <tr>
+        <td>aoc.maintenance </td>
+        <td>Float</td>
+        <td>6.24</td>
+        <td>Auto operating costs: Maintenance cost</td>
+    </tr>
+    <tr>
+        <td>HouseholdManager.MinValueOfTime </td>
+        <td>Float</td>
+        <td>1.0</td>
+        <td>Household Value of Time Distribution: Minimum</td>
+    </tr>
+    <tr>
+        <td>HouseholdManager.MaxValueOfTime </td>
+        <td>Float</td>
+        <td>50.0</td>
+        <td>Household Value of Time Distribution: Maximum</td>
+    </tr>
+    <tr>
+        <td>HouseholdManager.MeanValueOfTime.Values </td>
+        <td>String</td>
+        <td>6.01, 8.81, 10.44, 12.86</td>
+        <td>Household Value of Time Distribution: Mean values for income groups</td>
+    </tr>
+    <tr>
+        <td>HouseholdManager.MeanValueOfTime.Income.Limits </td>
+        <td>String</td>
+        <td>30000, 60000, 100000</td>
+        <td>Household Value of Time Distribution: Income Limits</td>
+    </tr>
+    <tr>
+        <td>HouseholdManager.Mean.ValueOfTime.Multiplier.Mu </td>
+        <td>Float</td>
+        <td>0.684</td>
+        <td>Household Value of Time Distribution: Mean Multiplier</td>
+    </tr>
+    <tr>
+        <td>HouseholdManager.ValueOfTime.Lognormal.Sigma </td>
+        <td>Float</td>
+        <td>0.87</td>
+        <td>Household Value of Time Distribution: Lognormal Sigma</td>
+    </tr>
+    <tr>
+        <td>HouseholdManager.HH.ValueOfTime.Multiplier.Under18 </td>
+        <td>Float</td>
+        <td>0.66667</td>
+        <td>Household Value of Time Distribution: Under 18 multiplier</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="av_mobility"><b>AV Mobility Scenario Parameters</b></a></td>
+    </tr>
+    <tr>
+        <td>Mobility.AV.Share </td>
+        <td>Float</td>
+        <td>0.0</td>
+        <td>Specifies the share of vehicles assumed to be AVs in the vehicle fleet</td>
+    </tr>
+    <tr>
+        <td>Mobility.AV.ProbabilityBoost.AutosLTDrivers </td>
+        <td>Float</td>
+        <td>1.2</td>
+        <td>The increased probability for using AVs for tours by LT drivers.</td>
+    </tr>
+    <tr>
+        <td>Mobility.AV.ProbabilityBoost.AutosGEDrivers </td>
+        <td>Float</td>
+        <td>1.1</td>
+        <td>The increased probability for using AVs for tours by GE drivers.</td>
+    </tr>
+    <tr>
+        <td>Mobility.AV.IVTFactor </td>
+        <td>Float</td>
+        <td>0.5</td>
+        <td>The auto in-vehicle time factor to apply to AVs</td>
+    </tr>
+    <tr>
+        <td>Mobility.AV.ParkingCostFactor </td>
+        <td>Float</td>
+        <td>0.0</td>
+        <td>The auto parking cost factor to apply to AVs</td>
+    </tr>
+    <tr>
+        <td>Mobility.AV.CostPerMileFactor </td>
+        <td>Float</td>
+        <td>0.5</td>
+        <td>Cost to travel per mile to apply to AVs</td>
+    </tr>
+    <tr>
+        <td>Mobility.AV.TerminalTimeFactor </td>
+        <td>Float</td>
+        <td>0.0</td>
+        <td>Terminal Time Factor to apply to AVs</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="taxi_tnc_cost"><b>Taxi and TNC Cost and Wait Time Parameters</b></a></td>
+    </tr>
+    <tr>
+        <td>taxi.basefare </td>
+        <td>Float</td>
+        <td>2.2</td>
+        <td>Basefare for taxi</td>
+    </tr>
+    <tr>
+        <td>taxi.costPerMile </td>
+        <td>Float</td>
+        <td>2.3</td>
+        <td>Cost per mile for taxi</td>
+    </tr>
+    <tr>
+        <td>taxi.costPerMinute </td>
+        <td>Float</td>
+        <td>0.1</td>
+        <td>Cost per minute for taxi</td>
+    </tr>
+    <tr>
+        <td>TNC.basefare </td>
+        <td>Float</td>
+        <td>2.2</td>
+        <td>Basefare for TNC</td>
+    </tr>
+    <tr>
+        <td>TNC.costPerMile </td>
+        <td>Float</td>
+        <td>1.33</td>
+        <td>cost per mile  for TNC</td>
+    </tr>
+    <tr>
+        <td>TNC.costPerMinute </td>
+        <td>Float</td>
+        <td>0.24</td>
+        <td>Cost per minute for TNC</td>
+    </tr>
+    <tr>
+        <td>TNC.costMinimum </td>
+        <td>Float</td>
+        <td>7.2</td>
+        <td>Minimum cost to ride using TNC</td>
+    </tr>
+    <tr>
+        <td>TNC.waitTime.mean </td>
+        <td>String</td>
+        <td>10.3, 8.5,  8.4, 6.3, 4.7</td>
+        <td>Mean for TNC wait time distribution</td>
+    </tr>
+    <tr>
+        <td>TNC.waitTime.sd </td>
+        <td>String</td>
+        <td>2.1, 2.1,  2.1, 2.1, 2.1</td>
+        <td>Standard deviation for TNC wait time distribution</td>
+    </tr>
+    <tr>
+        <td>Taxi.waitTime.mean </td>
+        <td>String</td>
+        <td>26.5, 17.3,13.3, 9.5, 5.5</td>
+        <td>Mean for taxi wait time distribution</td>
+    </tr>
+    <tr>
+        <td>Taxi.waitTime.sd </td>
+        <td>String</td>
+        <td>3.2,  3.2, 3.2, 3.2, 3.2</td>
+        <td>Standard deviation for taxi wait time distribution</td>
+    </tr>
+    <tr>
+        <td>WaitTimeDistribution.EndPopEmpPerSqMi </td>
+        <td>String</td>
+        <td>500,2000,5000,15000,9999999999</td>
+        <td>Population employment per square mile for wait time distribution</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="transit_assignment_parameters"><b>Transit Assignment Parameters</b><br><i>Toggle and controls for managing Cube PT transit crowding assignments</i></a></td>
+    </tr>
+    <tr>
+        <td>transit.crowding </td>
+        <td>Boolean</td>
+        <td>True</td>
+        <td>Master toggle to enable adjustlink and adjustwait.</td>
+    </tr>
+    <tr>
+        <td>transit.crowding.adjustlink </td>
+        <td>Boolean</td>
+        <td>False</td>
+        <td>Toggle to enable link travel-time adjustment based on crowding</td>
+    </tr>
+    <tr>
+        <td>transit.crowding.adjustwait </td>
+        <td>Boolean</td>
+        <td>False</td>
+        <td>Toggle to enable wait adjusted travel times and bump boardings from crowding</td>
+    </tr>
+    <tr>
+        <td>transit.crowding.advance_support </td>
+        <td>Boolean</td>
+        <td>False</td>
+        <td>Toggle if Cube version is > 6.4.4 and supports advanced convergence and dampening factors (df)</td>
+    </tr>
+    <tr>
+        <td>transit.crowding.convergence </td>
+        <td>Float</td>
+        <td>0.01</td>
+        <td>Cube PT crowding RMSE congervence criteria</td>
+    </tr>
+    <tr>
+        <td>transit.crowding.linkdf </td>
+        <td>Float</td>
+        <td>0.4</td>
+        <td>Cube PT link dampening factor</td>
+    </tr>
+    <tr>
+        <td>transit.crowding.voldf </td>
+        <td>Float</td>
+        <td>0.4</td>
+        <td>Cube PT volume dampening factor</td>
+    </tr>
+    <tr>
+        <td>transit.crowding.waitdf </td>
+        <td>Float</td>
+        <td>0.4</td>
+        <td>Cube PT wait dampening factor</td>
+    </tr>
+    <tr>
+        <td>transit.crowding.iterations </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Number of iterations for transit crowding assignments</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="parking_restraint_parameters"><b>Parking Capacity Restraint Parameters</b><br><i>For managing CT-RAMP parking capacity restraint algorithm</i></a></td>
+    </tr>
+    <tr>
+        <td>ParkingCapacityRestraint.spacesForMissingLots </td>
+        <td>Integer</td>
+        <td>20</td>
+        <td>The number of spaces to use for any TAP not listed in the station attribute file (local stops, missing express bus stops, etc.)</td>
+    </tr>
+    <tr>
+        <td>ParkingCapacityRestraint.minutesPerSimulationPeriod </td>
+        <td>Integer</td>
+        <td>15</td>
+        <td>The size of the simulation period used for capacity calculations in the parking capacity restraint model. The smaller the simulation period, the more iterations may be required to constrain to total available parking</td>
+    </tr>
+    <tr>
+        <td>ParkingCapacityRestraint.maxIterations </td>
+        <td>Integer</td>
+        <td>10</td>
+        <td>Maximum number of times to iterate between parking constraint and re-running CT-RAMP for households with PNR tours arriving at full lots</td>
+    </tr>
+    <tr>
+        <td>ParkingCapacityRestraint.lumpinessFactor </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>The factor used to scale the inverse of sample rate to calculate a buffer for parking capacity (buffer = 1.0f/sampleRate * lumpiness_factor)</td>
+    </tr>
+    <tr>
+        <td>ParkingCapacityRestraint.parkAndHideFactor </td>
+        <td>Float</td>
+        <td>1.15</td>
+        <td>A factor on parking capacity to account for cars that "hide" and walk to station from non-designated parking</td>
+    </tr>
+    <tr>
+        <td>ParkingCapacityRestraint.occupancyFactor </td>
+        <td>Float</td>
+        <td>1.05</td>
+        <td>The average number of transit riders who drive together in the same car and park, to convert person trips to vehicles</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="avg_veh_occupancy_3_plus"><b>Average vehicle occupancy for 3 plus by purpose</b><br><i>Used for generating trip tables for assignment</i></a></td>
+    </tr>
+    <tr>
+        <td>occ3plus.purpose.Work </td>
+        <td>Float</td>
+        <td>3.33</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>occ3plus.purpose.University </td>
+        <td>Float</td>
+        <td>3.33</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>occ3plus.purpose.School </td>
+        <td>Float</td>
+        <td>3.33</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>occ3plus.purpose.Escort </td>
+        <td>Float</td>
+        <td>3.33</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>occ3plus.purpose.Shop </td>
+        <td>Float</td>
+        <td>3.33</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>occ3plus.purpose.Maintenance </td>
+        <td>Float</td>
+        <td>3.33</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>occ3plus.purpose.EatingOut </td>
+        <td>Float</td>
+        <td>3.33</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>occ3plus.purpose.Visiting </td>
+        <td>Float</td>
+        <td>3.33</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>occ3plus.purpose.Discretionary </td>
+        <td>Float</td>
+        <td>3.33</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>occ3plus.purpose.WorkBased </td>
+        <td>Float</td>
+        <td>3.33</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="core_model"><b>Core Model Run Properties</b><br><i>Control Steps Run in Core Model</i></a></td>
+    </tr>
+    <tr>
+        <td>Model.Random.Seed </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Starting value for model random seed number (added to household IDs to create unique random number for each household)</td>
+    </tr>
+    <tr>
+        <td>acc.read.input.file</td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>Set to true if read the accessibilities from an input file instead of calculating them prior to running CTRAMP</td>
+    </tr>
+    <tr>
+        <td>uwsl.ShadowPricing.Work.MaximumIterations </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>maximum number of iterations for work shadow price</td>
+    </tr>
+    <tr>
+        <td>uwsl.ShadowPricing.School.MaximumIterations </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>maximum number of iterations for school shadow price</td>
+    </tr>
+    <tr>
+        <td>uwsl.ShadowPricing.OutputFile </td>
+        <td>String</td>
+        <td>/ctramp_output/ShadowPricingOutput.csv</td>
+        <td>output file name and location for shadow price</td>
+    </tr>
+    <tr>
+        <td>uwsl.run.workLocChoice </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component</td>
+    </tr>
+    <tr>
+        <td>uwsl.run.schoolLocChoice </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component</td>
+    </tr>
+    <tr>
+        <td>uwsl.write.results </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True of False whether to write out usual work and school location results</td>
+    </tr>
+    <tr>
+        <td>uwsl.use.new.soa </td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>true or false whether to use new soa for the work/school DC model</td>
+    </tr>
+    <tr>
+        <td>nmdc.use.new.soa </td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>true or false whether to use new soa for the non-mandatory DC models</td>
+    </tr>
+    <tr>
+        <td>slc.use.new.soa </td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>true or false whether to use new soa for the stop location choice models</td>
+    </tr>
+    <tr>
+        <td>distributed.task.packet.size </td>
+        <td>Integer</td>
+        <td>500</td>
+        <td>Distributed task packet size</td>
+    </tr>
+    <tr>
+        <td>RunModel.PreAutoOwnership </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.UsualWorkAndSchoolLocationChoice </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.AutoOwnership </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.TransponderChoice </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component</td>
+    </tr>
+    <tr>
+        <td>RunModel.FreeParking </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component</td>
+    </tr>
+    <tr>
+        <td>RunModel.CoordinatedDailyActivityPattern </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component</td>
+    </tr>
+    <tr>
+        <td>RunModel.IndividualMandatoryTourFrequency </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component</td>
+    </tr>
+    <tr>
+        <td>RunModel.MandatoryTourModeChoice </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component</td>
+    </tr>
+    <tr>
+        <td>RunModel.MandatoryTourDepartureTimeAndDuration </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component</td>
+    </tr>
+    <tr>
+        <td>RunModel.JointTourFrequency </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.JointTourLocationChoice </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.JointTourDepartureTimeAndDuration </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.JointTourModeChoice </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.IndividualNonMandatoryTourFrequency </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.IndividualNonMandatoryTourLocationChoice </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.IndividualNonMandatoryTourDepartureTimeAndDuration </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.IndividualNonMandatoryTourModeChoice </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.AtWorkSubTourFrequency </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.AtWorkSubTourLocationChoice </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.AtWorkSubTourDepartureTimeAndDuration </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.AtWorkSubTourModeChoice</td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.StopFrequency</td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td>RunModel.StopLocation</td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to run this model component </td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="input_properties"><b>Input Properties</b></a></td>
+    </tr>
+    <tr>
+        <td>PopulationSynthesizer.InputToCTRAMP.HouseholdFile </td>
+        <td>String</td>
+        <td>popsyn/households.csv</td>
+        <td>Location of popsyn households.csv file</td>
+    </tr>
+    <tr>
+        <td>PopulationSynthesizer.InputToCTRAMP.PersonFile </td>
+        <td>String</td>
+        <td>popsyn/persons.csv</td>
+        <td>Location of popsyn persons.csv file</td>
+    </tr>
+    <tr>
+        <td>maz.tap.tapLines</td>
+        <td>String</td>
+        <td>trn/tapLines.csv</td>
+        <td>Location of tap lines file</td>
+    </tr>
+    <tr>
+        <td>maz.tap. </td>
+        <td>String</td>
+        <td>skims/ped_distance_maz_tap.txt</td>
+        <td>Location of MAZ to TAP pedestrian distances file</td>
+    </tr>
+    <tr>
+        <td>maz.maz.distance.file </td>
+        <td>String</td>
+        <td>skims/ped_distance_maz_maz.txt</td>
+        <td>Location of MAZ to MAZ pedestrian distances file</td>
+    </tr>
+    <tr>
+        <td>maz.maz.bike.distance.file </td>
+        <td>String</td>
+        <td>skims/bike_distance_maz_maz.txt</td>
+        <td>Location of MAZ to MAZ bike distances file</td>
+    </tr>
+    <tr>
+        <td>maz.tap.trimTapSet</td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>True or False whether to trim tap set or not</td>
+    </tr>
+    <tr>
+        <td>maz.tap.maxWalkTapDistInMiles </td>
+        <td>Integer</td>
+        <td>1.2</td>
+        <td>Maximum walk distance allowed between any MAZ and TAP</td>
+    </tr>
+    <tr>
+        <td>transit.fareDiscount.file</td>
+        <td>String</td>
+        <td>trn/transitFareDiscounts.csv</td>
+        <td>Location of transit fare discounts file</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="output_properties"><b>Output Properties</b></a></td>
+    </tr>
+    <tr>
+        <td>Results.WriteDataToFiles</td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>Write data to files</td>
+    </tr>
+    <tr>
+        <td>Results.HouseholdDataFile </td>
+        <td>String</td>
+        <td>/ctramp_output/householdData.csv</td>
+        <td>Output name of household data file</td>
+    </tr>
+    <tr>
+        <td>Results.PersonDataFile </td>
+        <td>String</td>
+        <td>/ctramp_output/personData.csv</td>
+        <td>Output name of person data file</td>
+    </tr>
+    <tr>
+        <td>Results.IndivTourDataFile </td>
+        <td>String</td>
+        <td>/ctramp_output/indivTourData.csv</td>
+        <td>Output name of individual tour data file</td>
+    </tr>
+    <tr>
+        <td>Results.JointTourDataFile </td>
+        <td>String</td>
+        <td>/ctramp_output/jointTourData.csv</td>
+        <td>Output name of joint tour data file</td>
+    </tr>
+    <tr>
+        <td>Results.IndivTripDataFile </td>
+        <td>String</td>
+        <td>/ctramp_output/indivTripData.csv</td>
+        <td>Output name of individual trip data file</td>
+    </tr>
+    <tr>
+        <td>Results.JointTripDataFile </td>
+        <td>String</td>
+        <td>/ctramp_output/jointTripData.csv</td>
+        <td>Output name of joint trip data file</td>
+    </tr>
+    <tr>
+        <td>Results.WriteDataToDatabase </td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>Write data to a database</td>
+    </tr>
+    <tr>
+        <td>Results.HouseholdTable </td>
+        <td>String</td>
+        <td>household_data</td>
+        <td>Output name of household data file in database</td>
+    </tr>
+    <tr>
+        <td>Results.PersonTable </td>
+        <td>String</td>
+        <td>person_data</td>
+        <td>Output name of person data file in database</td>
+    </tr>
+    <tr>
+        <td>Results.IndivTourTable </td>
+        <td>String</td>
+        <td>indiv_tour_data</td>
+        <td>Output name of individual tour data file in database</td>
+    </tr>
+    <tr>
+        <td>Results.JointTourTable </td>
+        <td>String</td>
+        <td>joint_tour_data</td>
+        <td>Output name of joint tour data file in database</td>
+    </tr>
+    <tr>
+        <td>Results.IndivTripTable </td>
+        <td>String</td>
+        <td>indiv_trip_data</td>
+        <td>Output name of individual trip data file in database</td>
+    </tr>
+    <tr>
+        <td>Results.JointTripTable </td>
+        <td>String</td>
+        <td>joint_trip_data</td>
+        <td>Output name of joint trip data file in database</td>
+    </tr>
+    <tr>
+        <td>Results.CBDFile </td>
+        <td>String</td>
+        <td>/ctramp_output/cbdParking.csv</td>
+        <td>Output name of CBD by MGRA Vehicle Trip file</td>
+    </tr>
+    <tr>
+        <td>Results.PNRFile </td>
+        <td>String</td>
+        <td>/ctramp_output/pnrParking.csv</td>
+        <td>Output name of PNR by TAP Vehicle Trip file</td>
+    </tr>
+    <tr>
+        <td>Results.AutoTripMatrix </td>
+        <td>String</td>
+        <td>/ctramp_output/auto</td>
+        <td>Output name of auto trip matrix</td>
+    </tr>
+    <tr>
+        <td>Results.TranTripMatrix </td>
+        <td>String</td>
+        <td>/ctramp_output/transit</td>
+        <td>Output name of transit trip matrix</td>
+    </tr>
+    <tr>
+        <td>Results.NMotTripMatrix </td>
+        <td>String</td>
+        <td>/ctramp_output/nonmotor</td>
+        <td>Output name of non-motorized trip matrix</td>
+    </tr>
+    <tr>
+        <td>Results.OthrTripMatrix </td>
+        <td>String</td>
+        <td>/ctramp_output/other</td>
+        <td>Output name of other modes trip matrix</td>
+    </tr>
+    <tr>
+        <td>Results.AutoAVTripMatrix  </td>
+        <td>String</td>
+        <td>/ctramp_output/autoAV</td>
+        <td>Output name of AV modes trip matrix</td>
+    </tr>
+    <tr>
+        <td>Results.MatrixType </td>
+        <td>String</td>
+        <td>OMX</td>
+        <td>Matrix type for trip tables</td>
+    </tr>
+    <tr>
+        <td>Results.MAZAutoTripMatrix.IntrazonalOnly </td>
+        <td>Boolean</td>
+        <td>False</td>
+        <td>If True, then intrazonal trips get put into one of the three County Sets based on the origin MAZ county code. If False, then both intrazonal trips and trips whose distance is less than TripMaxDistance get put into one of the CountySets based on the origin MAZ county code</td>
+    </tr>
+    <tr>
+        <td>Results.AutoOwnership</td>
+        <td>String</td>
+        <td>/ctramp_output/aoResults.csv</td>
+        <td>Auto ownership output file name and location</td>
+    </tr>
+    <tr>
+        <td>read.pre.ao.results</td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>Read in the old pre-auto ownership results file</td>
+    </tr>
+    <tr>
+        <td>read.pre.ao.filename</td>
+        <td>String</td>
+        <td>/ctramp_output/aoResults_pre.csv</td>
+        <td>Pre auto ownership output file name and location</td>
+    </tr>
+    <tr>
+        <td>Results.UsualWorkAndSchoolLocationChoice</td>
+        <td>String</td>
+        <td>/ctramp_output/wsLocResults.csv</td>
+        <td>Usual work and school location output file name and location</td>
+    </tr>
+    <tr>
+        <td>read.uwsl.results</td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>Read in the old uwsl results</td>
+    </tr>
+    <tr>
+        <td>read.uwsl.filename</td>
+        <td>String</td>
+        <td>/ctramp_output/wsLocResults_1.csv</td>
+        <td>Old uwsl result file name and location to read in</td>
+    </tr>
+    <tr>
+        <td>workSchoolSegments.definitions </td>
+        <td>String</td>
+        <td>/ctramp_output/workSchoolSegments.definitions</td>
+        <td>Correspondence table for work location segment indices and work location segment names</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="core_model_uec"><b>Core Model UECs</b></a></td>
+    </tr>
+    <tr>
+        <td>acc.jppf </td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>Accessibilities to be assigned to a JPPF node</td>
+    </tr>
+    <tr>
+        <td>acc.without.jppf.numThreads </td>
+        <td>Integer</td>
+        <td>30</td>
+        <td>Number of threads for accessibilities without JPPF</td>
+    </tr>
+    <tr>
+        <td>acc.destination.sampleRate </td>
+        <td>Float</td>
+        <td>0.05</td>
+        <td>Sample rate for accessibilities</td>
+    </tr>
+    <tr>
+        <td>acc.uec.file </td>
+        <td>String</td>
+        <td>%project.folder%/uec/Accessibilities.xls</td>
+        <td>Accessibilities.xls location</td>
+    </tr>
+    <tr>
+        <td>acc.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Accessibilities data page</td>
+    </tr>
+    <tr>
+        <td>acc.sov.offpeak.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Accessibilities SOV offpeak</td>
+    </tr>
+    <tr>
+        <td>acc.sov.peak.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>Accessibilities SOV peak</td>
+    </tr>
+    <tr>
+        <td>acc.hov.offpeak.page </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Accessibilities HOV offpeak</td>
+    </tr>
+    <tr>
+        <td>acc.hov.peak.page </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>Accessibilities HOV peak</td>
+    </tr>
+    <tr>
+        <td>acc.nonmotorized.page </td>
+        <td>Integer</td>
+        <td>5</td>
+        <td>Accessibilities non-motorized</td>
+    </tr>
+    <tr>
+        <td>acc.constants.page </td>
+        <td>Integer</td>
+        <td>6</td>
+        <td>Accessibilities constants</td>
+    </tr>
+    <tr>
+        <td>acc.sizeTerm.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Accessibilities size terms</td>
+    </tr>
+    <tr>
+        <td>acc.schoolSizeTerm.page </td>
+        <td>Integer</td>
+        <td>8</td>
+        <td>Accessibilities school size terms</td>
+    </tr>
+    <tr>
+        <td>acc.workerSizeTerm.page </td>
+        <td>Integer</td>
+        <td>9</td>
+        <td>Accessibilities worker size terms</td>
+    </tr>
+    <tr>
+        <td>acc.dcUtility.uec.file </td>
+        <td>String</td>
+        <td>%project.folder%/CTRAMP/model/Accessibilities_DC.xls</td>
+        <td>Accessibilities_DC.xls location</td>
+    </tr>
+    <tr>
+        <td>acc.dcUtility.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>DC Accessibilities data page</td>
+    </tr>
+    <tr>
+        <td>acc.dcUtility.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>DC Accessibilities utility page</td>
+    </tr>
+    <tr>
+        <td>acc.output.file </td>
+        <td>String</td>
+        <td>/ctramp_output/accessibilities.csv</td>
+        <td>accessibilities.csv location</td>
+    </tr>
+    <tr>
+        <td>accessibility.alts.file </td>
+        <td>String</td>
+        <td>Acc_alts.csv</td>
+        <td>Accessibilities alternatives</td>
+    </tr>
+    <tr>
+        <td>acc.mandatory.uec.file </td>
+        <td>String</td>
+        <td>%project.folder%/CTRAMP/model/MandatoryAccess.xls</td>
+        <td>MandatoryAccess.xls location</td>
+    </tr>
+    <tr>
+        <td>acc.mandatory.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Mandatory Access data page</td>
+    </tr>
+    <tr>
+        <td>acc.mandatory.auto.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Mandatory Access auto page</td>
+    </tr>
+    <tr>
+        <td>acc.mandatory.autoLogsum.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>Mandatory Access autoLogsum page</td>
+    </tr>
+    <tr>
+        <td>acc.mandatory.bestWalkTransit.page </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Mandatory Access best Walk Transit page</td>
+    </tr>
+    <tr>
+        <td>acc.mandatory.bestDriveTransit.page </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>Mandatory Access best Drive Transit page</td>
+    </tr>
+    <tr>
+        <td>acc.mandatory.transitLogsum.page </td>
+        <td>Integer</td>
+        <td>5</td>
+        <td>Mandatory Access transit logsum page</td>
+    </tr>
+    <tr>
+        <td>ao.uec.file </td>
+        <td>String</td>
+        <td>AutoOwnership.xls</td>
+        <td>File name of auto ownership UEC</td>
+    </tr>
+    <tr>
+        <td>ao.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Auto ownership UEC data page</td>
+    </tr>
+    <tr>
+        <td>ao.model.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Auto ownership UEC utility page</td>
+    </tr>
+    <tr>
+        <td>tt.uec.file </td>
+        <td>String</td>
+        <td>TransitSubsidyAndPass.xls</td>
+        <td>File name of transit subsidy UEC</td>
+    </tr>
+    <tr>
+        <td>tt.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Transit Subsidy UEC data page</td>
+    </tr>
+    <tr>
+        <td>tt.subsidyModel.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Transit subsidy model page</td>
+    </tr>
+    <tr>
+        <td>tt.passModel.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>Transit pass model page</td>
+    </tr>
+    <tr>
+        <td>tt.autoGenTime.page </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Transit auto time page</td>
+    </tr>
+    <tr>
+        <td>tt.subsidyPercent.file </td>
+        <td>String</td>
+        <td>transitSubsidyDistribution.csv</td>
+        <td>File name of transit subsidy distribution</td>
+    </tr>
+    <tr>
+        <td>tt.naics.20 </td>
+        <td>String</td>
+        <td>constr,util,natres</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>tt.naics.30 </td>
+        <td>String</td>
+        <td>man_bio,man_lgt,man_hvy,man_tech</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>tt.naics.40 </td>
+        <td>String</td>
+        <td>logis,ret_loc,ret_reg,transp</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>tt.naics.50 </td>
+        <td>String</td>
+        <td>info,lease,prof,fire,serv_bus</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>tt.naics.70 </td>
+        <td>String</td>
+        <td>art_rec,eat,hotel</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>tt.naics.80 </td>
+        <td>String</td>
+        <td>serv_pers</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>tt.naics.90 </td>
+        <td>String</td>
+        <td>gov</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>uwsl.dc.uec.file </td>
+        <td>String</td>
+        <td>TourDestinationChoice.xls</td>
+        <td>File Name of Tour Destination Choice UEC</td>
+    </tr>
+    <tr>
+        <td>uwsl.dc2.uec.file </td>
+        <td>String</td>
+        <td>TourDestinationChoice2.xls</td>
+        <td>File Name of Tour Destination Choice 2 UEC</td>
+    </tr>
+    <tr>
+        <td>uwsl.soa.uec.file </td>
+        <td>String</td>
+        <td>DestinationChoiceAlternativeSample.xls</td>
+        <td>File Name of Destination Choice Alternative Sample UEC</td>
+    </tr>
+    <tr>
+        <td>uwsl.soa.alts.file </td>
+        <td>String</td>
+        <td>DestinationChoiceAlternatives.csv</td>
+        <td>File name of the alternatives (MGRAs) available to the destination choice models (part of the model design; this should not be changed)</td>
+    </tr>
+    <tr>
+        <td>uwsl.work.soa.SampleSize </td>
+        <td>Integer</td>
+        <td>30</td>
+        <td>Sample size of Work Destination Choice</td>
+    </tr>
+    <tr>
+        <td>uwsl.school.soa.SampleSize </td>
+        <td>Integer</td>
+        <td>30</td>
+        <td>Sample size of School Destination Choice</td>
+    </tr>
+    <tr>
+        <td>work.soa.uec.file </td>
+        <td>String</td>
+        <td>TourDcSoaDistance.xls</td>
+        <td>File Name of Tour Distance DC SOA UEC for Work Purpose includes TAZ Size in the expressions</td>
+    </tr>
+    <tr>
+        <td>work.soa.uec.data </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Work Tour Distance SOA UEC data page</td>
+    </tr>
+    <tr>
+        <td>work.soa.uec.model </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Work Tour Distance SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>univ.soa.uec.file </td>
+        <td>String</td>
+        <td>TourDcSoaDistanceNoSchoolSize.xls</td>
+        <td>File Name of Tour Distance DC SOA UEC for School Purpose; school purposes do not include TAZ Size in the expressions so that the utilities can be stored as exponentiated distance utility matrices for university and then multiplied by the university segment size terms</td>
+    </tr>
+    <tr>
+        <td>univ.soa.uec.data </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>University Tour Distance SOA UEC data page</td>
+    </tr>
+    <tr>
+        <td>univ.soa.uec.model </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>University Tour Distance SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>hs.soa.uec.file </td>
+        <td>String</td>
+        <td>TourDcSoaDistanceNoSchoolSize.xls</td>
+        <td>File Name of Tour Distance DC SOA UEC for School Purpose; school purposes do not include TAZ Size in the expressions so that the utilities can be stored as exponentiated distance utility matrices for high school and then multiplied by the high school segment size terms</td>
+    </tr>
+    <tr>
+        <td>hs.soa.uec.data </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>High School Tour Distance SOA UEC data page</td>
+    </tr>
+    <tr>
+        <td>hs.soa.uec.model </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>High School Tour Distance SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>gs.soa.uec.file </td>
+        <td>String</td>
+        <td>TourDcSoaDistanceNoSchoolSize.xls</td>
+        <td>File Name of Tour Distance DC SOA UEC for School Purpose; school purposes do not include TAZ Size in the expressions so that the utilities can be stored as exponentiated distance utility matrices for grade school and then multiplied by the grade school segment size terms</td>
+    </tr>
+    <tr>
+        <td>gs.soa.uec.data </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Grade School Tour Distance SOA UEC data page</td>
+    </tr>
+    <tr>
+        <td>gs.soa.uec.model </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Grade School Tour Distance SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>ps.soa.uec.file </td>
+        <td>String</td>
+        <td>TourDcSoaDistanceNoSchoolSize.xls</td>
+        <td>File Name of Tour Distance DC SOA UEC for School Purpose; school purposes do not include TAZ Size in the expressions so that the utilities can be stored as exponentiated distance utility matrices for preschool and then multiplied by the preschool segment size terms</td>
+    </tr>
+    <tr>
+        <td>ps.soa.uec.data </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Preschool Tour Distance SOA UEC data page</td>
+    </tr>
+    <tr>
+        <td>ps.soa.uec.model </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>Preschool Tour Distance SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>tc.choice.avgtts.file </td>
+        <td>String</td>
+        <td>/../input/ABMTEMP/ctramp/tc_avgtt.csv</td>
+        <td>File name of average travel times for transponder ownership</td>
+    </tr>
+    <tr>
+        <td>tc.uec.file </td>
+        <td>String</td>
+        <td>TransponderOwnership.xls</td>
+        <td>File name of transponder ownership UEC</td>
+    </tr>
+    <tr>
+        <td>tc.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Transponder ownership UEC data page</td>
+    </tr>
+    <tr>
+        <td>tc.model.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Transponder ownership UEC utility page</td>
+    </tr>
+    <tr>
+        <td>fp.uec.file </td>
+        <td>String</td>
+        <td>ParkingProvision.xls</td>
+        <td>File name of parking provision UEC</td>
+    </tr>
+    <tr>
+        <td>fp.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Parking Provision UEC data page</td>
+    </tr>
+    <tr>
+        <td>fp.model.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Parking Provision UEC utility page</td>
+    </tr>
+    <tr>
+        <td>cdap.uec.file </td>
+        <td>String</td>
+        <td>CoordinatedDailyActivityPattern.xls</td>
+        <td>File name of CDAP UEC</td>
+    </tr>
+    <tr>
+        <td>cdap.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>CDAP UEC data page</td>
+    </tr>
+    <tr>
+        <td>cdap.one.person.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>CDAP UEC utility for one person page</td>
+    </tr>
+    <tr>
+        <td>cdap.two.person.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>CDAP UEC utility for 2 persons page</td>
+    </tr>
+    <tr>
+        <td>cdap.three.person.page </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>CDAP UEC utility for 3 persons page</td>
+    </tr>
+    <tr>
+        <td>cdap.all.person.page </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>CDAP UEC utility for All member interation page</td>
+    </tr>
+    <tr>
+        <td>cdap.joint.page </td>
+        <td>Integer</td>
+        <td>5</td>
+        <td>CDAP UEC utility for joint tours page</td>
+    </tr>
+    <tr>
+        <td>imtf.uec.file </td>
+        <td>String</td>
+        <td>MandatoryTourFrequency.xls</td>
+        <td>File name of Mandatory tour frequency UEC</td>
+    </tr>
+    <tr>
+        <td>imtf.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Mandatory tour frequency UEC data page</td>
+    </tr>
+    <tr>
+        <td>imtf.model.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>mandatory tour frequency UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nonSchool.soa.uec.file </td>
+        <td>String</td>
+        <td>TourDcSoaDistance.xls</td>
+        <td>File Name of Tour Distance DC SOA UEC for Non Work/School Purposes includes TAZ Size in the expressions</td>
+    </tr>
+    <tr>
+        <td>escort.soa.uec.data </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Escort Tour Distance SOA UEC data page</td>
+    </tr>
+    <tr>
+        <td>escort.soa.uec.model </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>Escort Tour Distance SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>other.nonman.soa.uec.data </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Other Non-mandatory Tour Distance SOA UEC data page</td>
+    </tr>
+    <tr>
+        <td>other.nonman.soa.uec.model </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Other Non-mandatory Tour Distance SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>atwork.soa.uec.data </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>At-Work Sub-Tour Distance SOA UEC data page</td>
+    </tr>
+    <tr>
+        <td>atwork.soa.uec.model </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>At-Work Sub-Tour Distance SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>soa.taz.dist.alts.file </td>
+        <td>String</td>
+        <td>SoaTazDistAlternatives.csv</td>
+        <td>File name of Sample of Alternatives of TAZs</td>
+    </tr>
+    <tr>
+        <td>nmdc.dist.alts.file </td>
+        <td>String</td>
+        <td>NonMandatoryTlcAlternatives.csv</td>
+        <td>File name of non-mandatory tour alternatives</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.alts.file </td>
+        <td>String</td>
+        <td>DestinationChoiceAlternatives.csv</td>
+        <td>File name of the alternatives (MGRAs) available to the destination choice models (part of the model design; this should not be changed)</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.SampleSize </td>
+        <td>Integer</td>
+        <td>30</td>
+        <td>Sample size of non-mandatory Destination choice</td>
+    </tr>
+    <tr>
+        <td>nmdc.uec.file2 </td>
+        <td>String</td>
+        <td>TourDestinationChoice2.xls</td>
+        <td>File Name of Tour Destination Choice 2 UEC</td>
+    </tr>
+    <tr>
+        <td>nmdc.uec.file </td>
+        <td>String</td>
+        <td>TourDestinationChoice.xls</td>
+        <td>File Name of Tour Destination Choice UEC</td>
+    </tr>
+    <tr>
+        <td>nmdc.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Non-mandatory Tour DC UEC data page</td>
+    </tr>
+    <tr>
+        <td>nmdc.escort.model.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Escort Tour Destination Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.shop.model.page </td>
+        <td>Integer</td>
+        <td>8</td>
+        <td>Shop Tour Destination Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.maint.model.page </td>
+        <td>Integer</td>
+        <td>9</td>
+        <td>Maintenance Tour Destination Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.eat.model.page </td>
+        <td>Integer</td>
+        <td>10</td>
+        <td>Eating Out Tour Destination Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.visit.model.page </td>
+        <td>Integer</td>
+        <td>11</td>
+        <td>Visiting Tour Destination Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.discr.model.page </td>
+        <td>Integer</td>
+        <td>12</td>
+        <td>Discretionary Tour Destination Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.atwork.model.page </td>
+        <td>Integer</td>
+        <td>13</td>
+        <td>At-Work Sub-Tour Destination Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.uec.file </td>
+        <td>String</td>
+        <td>DestinationChoiceAlternativeSample.xls</td>
+        <td>File Name of Destination Choice Alternative Sample UEC</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Non-mandatory TOUR SOA UEC data page</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.escort.model.page </td>
+        <td>Integer</td>
+        <td>6</td>
+        <td>Escort TOUR SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.shop.model.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Shop TOUR SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.maint.model.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Maintenance TOUR SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.eat.model.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Eating Out TOUR SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.visit.model.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Visiting TOUR SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.discr.model.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Discretionary TOUR SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>nmdc.soa.atwork.model.page </td>
+        <td>Integer</td>
+        <td>8</td>
+        <td>At-Work Sub-Tour SOA UEC utility page</td>
+    </tr>
+    <tr>
+        <td>tourModeChoice.uec.file </td>
+        <td>String</td>
+        <td>TourModeChoice.xls</td>
+        <td>File name of Tour Mode choice UEC</td>
+    </tr>
+    <tr>
+        <td>tourModeChoice.maint.model.page </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>Maintenance Tour Mode Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>tourModeChoice.discr.model.page </td>
+        <td>Integer</td>
+        <td>5</td>
+        <td>Discretionary Tour Mode Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>tourModeChoice.atwork.model.page </td>
+        <td>Integer</td>
+        <td>6</td>
+        <td>At-Work Sub-Tour Mode Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.uec.file </td>
+        <td>String</td>
+        <td>TourDepartureAndDuration.xls</td>
+        <td>File name of Tour TOD Choice UEC</td>
+    </tr>
+    <tr>
+        <td>departTime.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Tour TOD Choice UEC data page</td>
+    </tr>
+    <tr>
+        <td>departTime.work.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Work Tour TOD Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.univ.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>University Tour TOD Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.school.page </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>School Tour TOD Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.escort.page </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>Escort Tour TOD Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.shop.page </td>
+        <td>Integer</td>
+        <td>5</td>
+        <td>Shop Tour TOD Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.maint.page </td>
+        <td>Integer</td>
+        <td>6</td>
+        <td>Maintenance Tour TOD Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.eat.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Eating Out Tour TOD Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.visit.page </td>
+        <td>Integer</td>
+        <td>8</td>
+        <td>Visiting Tour TOD Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.discr.page </td>
+        <td>Integer</td>
+        <td>9</td>
+        <td>Discretionary Tour TOD Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.atwork.page </td>
+        <td>Integer</td>
+        <td>10</td>
+        <td>At-Work Sub-Tour TOD Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>departTime.alts.file </td>
+        <td>String</td>
+        <td>DepartureTimeAndDurationAlternatives.csv</td>
+        <td>File name of Departure time and duration alternatives</td>
+    </tr>
+    <tr>
+        <td>jtfcp.uec.file </td>
+        <td>String</td>
+        <td>JointTourFrequency.xls</td>
+        <td>File name of Joint Tour Frequency UEC</td>
+    </tr>
+    <tr>
+        <td>jtfcp.alternatives.file </td>
+        <td>String</td>
+        <td>JointAlternatives.csv</td>
+        <td>File name of joint tour alternatives by purpose and party composition combinations</td>
+    </tr>
+    <tr>
+        <td>jtfcp.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Joint Tour Frequency UEC data page</td>
+    </tr>
+    <tr>
+        <td>jtfcp.freq.comp.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Joint Tour Frequency UEC utility composition page</td>
+    </tr>
+    <tr>
+        <td>jtfcp.participate.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>Joint Tour Frequency UEC utility participation page</td>
+    </tr>
+    <tr>
+        <td>inmtf.uec.file </td>
+        <td>String</td>
+        <td>NonMandatoryIndividualTourFrequency.xls</td>
+        <td>File name of Individual non-mandatory tour frequency UEC</td>
+    </tr>
+    <tr>
+        <td>inmtf.FrequencyExtension.ProbabilityFile </td>
+        <td>String</td>
+        <td>IndividualNonMandatoryTourFrequencyExtensionProbabilities_p1.csv</td>
+        <td>File name of Individual non-mandatory tour frequency extension probabilities</td>
+    </tr>
+    <tr>
+        <td>IndividualNonMandatoryTourFrequency.AlternativesList.InputFile </td>
+        <td>String</td>
+        <td>IndividualNonMandatoryTourFrequencyAlternatives.csv</td>
+        <td>File name of individual non-mandatory tour frequency alternatives (combinations)</td>
+    </tr>
+    <tr>
+        <td>inmtf.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Individual Non-mandatory tour frequency UEC data page</td>
+    </tr>
+    <tr>
+        <td>inmtf.perstype1.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Individual Non-mandatory tour frequency UEC utility for Full time workers page</td>
+    </tr>
+    <tr>
+        <td>inmtf.perstype2.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>Individual Non-mandatory tour frequency UEC utility for Part time workers page</td>
+    </tr>
+    <tr>
+        <td>inmtf.perstype3.page </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Individual Non-mandatory tour frequency UEC utility for University students page</td>
+    </tr>
+    <tr>
+        <td>inmtf.perstype4.page </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>Individual Non-mandatory tour frequency UEC utility for Non-workers page</td>
+    </tr>
+    <tr>
+        <td>inmtf.perstype5.page </td>
+        <td>Integer</td>
+        <td>5</td>
+        <td>Individual Non-mandatory tour frequency UEC utility for Retirees page</td>
+    </tr>
+    <tr>
+        <td>inmtf.perstype6.page </td>
+        <td>Integer</td>
+        <td>6</td>
+        <td>Individual Non-mandatory tour frequency UEC utility for Driving students page</td>
+    </tr>
+    <tr>
+        <td>inmtf.perstype7.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Individual Non-mandatory tour frequency UEC utility for Pre-driving students page</td>
+    </tr>
+    <tr>
+        <td>inmtf.perstype8.page </td>
+        <td>Integer</td>
+        <td>8</td>
+        <td>Individual Non-mandatory tour frequency UEC utility for Preschool students page</td>
+    </tr>
+    <tr>
+        <td>awtf.uec.file </td>
+        <td></td>
+        <td>AtWorkSubtourFrequency.xls</td>
+        <td>File name of at-work sub-tour frequency UEC</td>
+    </tr>
+    <tr>
+        <td>awtf.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>At-Work Sub-Tour Frequency UEC Data page</td>
+    </tr>
+    <tr>
+        <td>awtf.model.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>At-Work Sub-Tour Frequency UEC Utility page</td>
+    </tr>
+    <tr>
+        <td>stf.uec.file </td>
+        <td>String</td>
+        <td>StopFrequency.xls</td>
+        <td>File name of Stop Frequency UEC</td>
+    </tr>
+    <tr>
+        <td>stf.purposeLookup.proportions </td>
+        <td>String</td>
+        <td>StopPurposeLookupProportions.csv</td>
+        <td>File name of Stop Purpose Lookup proportions</td>
+    </tr>
+    <tr>
+        <td>stf.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Stop Frequency UEC data page</td>
+    </tr>
+    <tr>
+        <td>stf.work.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Stop Frequency for Work Tour UEC utility page</td>
+    </tr>
+    <tr>
+        <td>stf.univ.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>Stop Frequency for University Tour UEC utility page</td>
+    </tr>
+    <tr>
+        <td>stf.school.page </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Stop Frequency for School Tour UEC utility page</td>
+    </tr>
+    <tr>
+        <td>stf.escort.page </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>Stop Frequency for Escort Tour UEC utility page</td>
+    </tr>
+    <tr>
+        <td>stf.shop.page </td>
+        <td>Integer</td>
+        <td>5</td>
+        <td>Stop Frequency for Shop Tour UEC utility page</td>
+    </tr>
+    <tr>
+        <td>stf.maint.page </td>
+        <td>Integer</td>
+        <td>6</td>
+        <td>Stop Frequency for Maintenance Tour UEC utility page</td>
+    </tr>
+    <tr>
+        <td>stf.eat.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Stop Frequency for Eating Out Tour UEC utility page</td>
+    </tr>
+    <tr>
+        <td>stf.visit.page </td>
+        <td>Integer</td>
+        <td>8</td>
+        <td>Stop Frequency for Visiting Tour UEC utility page</td>
+    </tr>
+    <tr>
+        <td>stf.discr.page </td>
+        <td>Integer</td>
+        <td>9</td>
+        <td>Stop Frequency for Discretionary Tour UEC utility page</td>
+    </tr>
+    <tr>
+        <td>stf.subtour.page </td>
+        <td>Integer</td>
+        <td>10</td>
+        <td>Stop Frequency for At-Work Sub-Tour UEC utility page</td>
+    </tr>
+    <tr>
+        <td>slc.uec.file </td>
+        <td>String</td>
+        <td>StopLocationChoice.xls</td>
+        <td>File Name of Stop Location Choice UEC</td>
+    </tr>
+    <tr>
+        <td>slc.uec.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Stop Location Choice UEC data page</td>
+    </tr>
+    <tr>
+        <td>slc.mandatory.uec.model.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Stop Location Choice for Mandatory Tours UEC utility page</td>
+    </tr>
+    <tr>
+        <td>slc.maintenance.uec.model.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>Stop Location Choice for Maintenance Tours UEC utility page</td>
+    </tr>
+    <tr>
+        <td>slc.discretionary.uec.model.page </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Stop Location Choice for Discretionary Tours UEC utility page</td>
+    </tr>
+    <tr>
+        <td>slc.alts.file </td>
+        <td>String</td>
+        <td>SlcAlternatives.csv</td>
+        <td>File name of stop location choice alternatives</td>
+    </tr>
+    <tr>
+        <td>slc.soa.uec.file </td>
+        <td>String</td>
+        <td>SlcSoaSize.xls</td>
+        <td>File name of SOA UEC to the stop location choice </td>
+    </tr>
+    <tr>
+        <td>slc.soa.alts.file </td>
+        <td>String</td>
+        <td>DestinationChoiceAlternatives.csv</td>
+        <td>File name of the alternatives (MGRAs) available to the destination choice models (part of the model design; this should not be changed)</td>
+    </tr>
+    <tr>
+        <td>auto.slc.soa.distance.uec.file </td>
+        <td>String</td>
+        <td>SlcSoaDistanceUtility.xls</td>
+        <td>File name of Stop Location Sample of Alternatives Choice UEC for tour modes other than walk or bike - for transit, availability of stop for transit is set in java code</td>
+    </tr>
+    <tr>
+        <td>auto.slc.soa.distance.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Stop Location SOA Choice UEC data page</td>
+    </tr>
+    <tr>
+        <td>auto.slc.soa.distance.model.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Stop Location SOA Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>slc.soa.size.uec.file </td>
+        <td>String</td>
+        <td>SlcSoaSize.xls</td>
+        <td>File Name of Stop Location Choice Size Terms UEC</td>
+    </tr>
+    <tr>
+        <td>slc.soa.size.uec.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Stop Location Choice Size terms UEC data page</td>
+    </tr>
+    <tr>
+        <td>slc.soa.size.uec.model.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Stop Location Choice Size terms UEC utility page</td>
+    </tr>
+    <tr>
+        <td>stop.depart.arrive.proportions </td>
+        <td>String</td>
+        <td>StopDepartArriveProportions.csv</td>
+        <td>File name of Stop Location Time of Day proportions</td>
+    </tr>
+    <tr>
+        <td>tripModeChoice.uec.file </td>
+        <td>String</td>
+        <td>TripModeChoice.xls</td>
+        <td>File name of Trip mode choice UEC</td>
+    </tr>
+    <tr>
+        <td>plc.uec.file </td>
+        <td>String</td>
+        <td>ParkLocationChoice.xls</td>
+        <td>File name of Parking Location Choice UEC</td>
+    </tr>
+    <tr>
+        <td>plc.uec.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Parking Location Choice UEC data page</td>
+    </tr>
+    <tr>
+        <td>plc.uec.model.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Parking Location Choice UEC utility page</td>
+    </tr>
+    <tr>
+        <td>plc.alts.corresp.file </td>
+        <td>String</td>
+        <td>ParkLocationAlts.csv</td>
+        <td>File name of parking location alternatives (MGRAs)</td>
+    </tr>
+    <tr>
+        <td>plc.alts.file </td>
+        <td>String</td>
+        <td>ParkLocationSampleAlts.csv</td>
+        <td>File name of parking location sample of alternatives</td>
+    </tr>
+    <tr>
+        <td>mgra.avg.cost.output.file </td>
+        <td>String</td>
+        <td>/ctramp_output/mgraParkingCost.csv</td>
+        <td>File name of average parking costs by MGRA</td>
+    </tr>
+    <tr>
+        <td>mgra.avg.cost.trace.zone </td>
+        <td>Integer</td>
+        <td>2141</td>
+        <td>Zone ID where parking cost to be traced</td>
+    </tr>
+    <tr>
+        <td>mgra.max.parking.distance </td>
+        <td>Float</td>
+        <td>0.75</td>
+        <td>Maximum parking distance</td>
+    </tr>
+    <tr>
+        <td>mgra.avg.cost.dist.coeff.work </td>
+        <td>Float</td>
+        <td>-8.6</td>
+        <td>Parking location model coefficient for walking distance to destination for Work purpose</td>
+    </tr>
+    <tr>
+        <td>mgra.avg.cost.dist.coeff.other </td>
+        <td>Float</td>
+        <td>-4.9</td>
+        <td>Parking location model coefficient for walking distance to destination for other purposes</td>
+    </tr>
+    <tr>
+        <td>park.cost.reimb.mean </td>
+        <td>Float</td>
+        <td>-0.05</td>
+        <td>Parking location model mean parking cost reimbursement</td>
+    </tr>
+    <tr>
+        <td>park.cost.reimb.std.dev </td>
+        <td>Float</td>
+        <td>0.54</td>
+        <td>Parking location model standard deviation for parking cost reimbursement</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.uec.file </td>
+        <td>String</td>
+        <td>BestTransitPathUtility.xls</td>
+        <td>File name of best transit path UEC</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Best Transit Path UEC data page</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.tapToTap.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Best Transit Path UEC for TAP to TAP utility page</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.walkAccess.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>Best Transit Path UEC for walk access utility page</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.driveAccess.page</td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Best Transit Path UEC for drive access utility page</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.walkEgress.page</td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>Best Transit Path UEC for walk egress utility page</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.driveEgress.page</td>
+        <td>Integer</td>
+        <td>5</td>
+        <td>Best Transit Path UEC for drive egress utility page</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.driveAccDisutility.page </td>
+        <td>Integer</td>
+        <td>6</td>
+        <td>Best Transit Path UEC for drive access disutility page</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.driveEgrDisutility.page </td>
+        <td>Integer</td>
+        <td>7</td>
+        <td>Best Transit Path UEC for drive egress disutility page</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.skim.sets</td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Number of skim sets in best transit path </td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.alts </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>Number of alternatives in best transit path</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.maxPathsPerSkimSetForLogsum</td>
+        <td>String</td>
+        <td>1, 1, 1</td>
+        <td>Maximum number of paths per skims set to use for logsum (by iteration?)</td>
+    </tr>
+    <tr>
+        <td>utility.bestTransitPath.nesting.coeff</td>
+        <td>Float</td>
+        <td>0.24</td>
+        <td>Nesting coefficient</td>
+    </tr>
+    <tr>
+        <td>ResimulateTransitPath.uec.file </td>
+        <td>String</td>
+        <td>BestTransitPathUtility.xls</td>
+        <td>File name of transit capacity restraint resimulation</td>
+    </tr>
+    <tr>
+        <td>ResimulateTransitPath.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Transit capacity restraint data page</td>
+    </tr>
+    <tr>
+        <td>ResimulateTransitPath.identifyTripToResimulate.page </td>
+        <td>Integer</td>
+        <td>8</td>
+        <td>Transit capacity restraint utility page</td>
+    </tr>
+    <tr>
+        <td>ResimulateTransitPath.results.IndivTripDataFile </td>
+        <td>String</td>
+        <td>/ctramp_output/indivTripDataResim.csv</td>
+        <td>File name of resimulated individual trips data</td>
+    </tr>
+    <tr>
+        <td>ResimulateTransitPath.results.JointTripDataFile </td>
+        <td>String</td>
+        <td>/ctramp_output/jointTripDataResim.csv</td>
+        <td>File name of resimulated joint trips data</td>
+    </tr>
+    <tr>
+        <td>skims.auto.uec.file </td>
+        <td>String</td>
+        <td>AutoSkims.xls</td>
+        <td>File name of Auto Skims UEC</td>
+    </tr>
+    <tr>
+        <td>skims.auto.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Auto Skims data page</td>
+    </tr>
+    <tr>
+        <td>skims.auto.ea.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Auto skims Early AM utility page</td>
+    </tr>
+    <tr>
+        <td>skims.auto.am.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>Auto skims AM utility page</td>
+    </tr>
+    <tr>
+        <td>skims.auto.md.page </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>Auto skims MD utility page</td>
+    </tr>
+    <tr>
+        <td>skims.auto.pm.page </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>Auto skims PM utility page</td>
+    </tr>
+    <tr>
+        <td>skims.auto.ev.page </td>
+        <td>Integer</td>
+        <td>5</td>
+        <td>Auto skims Evening utility page</td>
+    </tr>
+    <tr>
+        <td>taz.distance.uec.file </td>
+        <td>String</td>
+        <td>tazDistance.xls</td>
+        <td>File name of TAZ Distance UEC</td>
+    </tr>
+    <tr>
+        <td>taz.distance.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>TAZ Distance UEC data page</td>
+    </tr>
+    <tr>
+        <td>taz.od.distance.ea.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>TAZ Distance UEC Early AM utility page</td>
+    </tr>
+    <tr>
+        <td>taz.od.distance.am.page </td>
+        <td>Integer</td>
+        <td>2</td>
+        <td>TAZ Distance UEC AM utility page</td>
+    </tr>
+    <tr>
+        <td>taz.od.distance.md.page </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td>TAZ Distance UEC MD utility page</td>
+    </tr>
+    <tr>
+        <td>taz.od.distance.pm.page </td>
+        <td>Integer</td>
+        <td>4</td>
+        <td>TAZ Distance UEC PM utility page</td>
+    </tr>
+    <tr>
+        <td>taz.od.distance.ev.page </td>
+        <td>Integer</td>
+        <td>5</td>
+        <td>TAZ Distance UEC Evening utility page</td>
+    </tr>
+    <tr>
+        <td>skim.walk.transit.walk.uec.file </td>
+        <td>String</td>
+        <td>WalkTransitWalkSkims.xls</td>
+        <td>File name of Walk Transit Walk Skims UEC</td>
+    </tr>
+    <tr>
+        <td>skim.walk.transit.walk.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Walk Transit Walk Skims UEC data page</td>
+    </tr>
+    <tr>
+        <td>skim.walk.transit.walk.skim.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Walk Transit Walk Skims UEC skim page</td>
+    </tr>
+    <tr>
+        <td>skim.walk.transit.walk.sets </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>skim.walk.transit.walk.skims </td>
+        <td>Integer</td>
+        <td>12</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>skim.walk.transit.drive.uec.file </td>
+        <td>String</td>
+        <td>WalkTransitDriveSkims.xls</td>
+        <td>File name of Walk Transit Drive Skims UEC</td>
+    </tr>
+    <tr>
+        <td>skim.walk.transit.drive.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Walk Transit Drive Skims UEC data page</td>
+    </tr>
+    <tr>
+        <td>skim.walk.transit.drive.skim.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Walk Transit Drive Skims UEC skim page</td>
+    </tr>
+    <tr>
+        <td>skim.walk.transit.drive.sets </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>skim.walk.transit.drive.skims </td>
+        <td>Integer</td>
+        <td>12</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>skim.drive.transit.walk.uec.file </td>
+        <td>String</td>
+        <td>DriveTransitWalkSkims.xls</td>
+        <td>File name of Drive Transit Walk Skims UEC</td>
+    </tr>
+    <tr>
+        <td>skim.drive.transit.walk.data.page </td>
+        <td>Integer</td>
+        <td>0</td>
+        <td>Drive Transit Walk Skims UEC data page</td>
+    </tr>
+    <tr>
+        <td>skim.drive.transit.walk.skim.page </td>
+        <td>Integer</td>
+        <td>1</td>
+        <td>Drive Transit Walk Skims UEC skim page</td>
+    </tr>
+    <tr>
+        <td>skim.drive.transit.walk.sets </td>
+        <td>Integer</td>
+        <td>3</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>skim.drive.transit.walk.skims </td>
+        <td>Integer</td>
+        <td>12</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="transit_path_data"><b>Best Transit Path Data Files</b></a></td>
+    </tr>
+    <tr>
+        <td>tap.data.file </td>
+        <td>String</td>
+        <td>hwy/tap_data.csv</td>
+        <td>Location of the file having information about parking lot capacity for TAPS</td>
+    </tr>
+    <tr>
+        <td>tap.data.tap.column </td>
+        <td>String</td>
+        <td>tap</td>
+        <td>Column name for TAP IDs</td>
+    </tr>
+    <tr>
+        <td>tap.data.taz.column </td>
+        <td>String</td>
+        <td>taz</td>
+        <td>Column name TAZ IDs</td>
+    </tr>
+    <tr>
+        <td>tap.data.lotid.column </td>
+        <td>String</td>
+        <td>lotid</td>
+        <td>Column name for parking lot IDs</td>
+    </tr>
+    <tr>
+        <td>tap.data.capacity.column </td>
+        <td>String</td>
+        <td>capacity</td>
+        <td>Column name for parking lot capacity</td>
+    </tr>
+    <tr>
+        <td>tap.station.attribute.file </td>
+        <td>String</td>
+        <td>trn/emme_network_transaction_files_AM/station_attributes/station_tap_attributes.csv</td>
+        <td>Location of station attribute data</td>
+    </tr>
+    <tr>
+        <td>tap.pnr.default.share </td>
+        <td>Integer</td>
+        <td>0.5</td>
+        <td>PNR share value</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.file </td>
+        <td>String</td>
+        <td>/skims/drive_maz_taz_tap.csv</td>
+        <td>Location of file having cost information related drive access between TAZ-TAP pairs</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.ftaz.column </td>
+        <td>String</td>
+        <td>FTAZ</td>
+        <td>Column containing start TAZ</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.mode.column </td>
+        <td>String</td>
+        <td>MODE</td>
+        <td>Column containing mode</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.period.column </td>
+        <td>String</td>
+        <td>PERIOD</td>
+        <td>Column containing time periods</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.ttap.column </td>
+        <td>String</td>
+        <td>TTAP</td>
+        <td>Column containing transit TAPs</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.tmaz.column </td>
+        <td>String</td>
+        <td>TMAZ</td>
+        <td>Column containing transit MAZs</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.ttaz.column </td>
+        <td>String</td>
+        <td>TTAZ</td>
+        <td>Column containing transit TAZs</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.dtime.column </td>
+        <td>String</td>
+        <td>DTIME</td>
+        <td>Column containing drive times</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.ddist.column </td>
+        <td>String</td>
+        <td>DDIST</td>
+        <td>Column containing drive distances</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.dtoll.column </td>
+        <td>String</td>
+        <td>DTOLL</td>
+        <td>Column containing drive tolls</td>
+    </tr>
+    <tr>
+        <td>taz.tap.access.wdist.column </td>
+        <td>String</td>
+        <td>WDIST</td>
+        <td>Column containing walk distances</td>
+    </tr>
+    <tr>
+        <td colspan="4"><a id="misc"><b>Miscellaneous: Place Holders for Future Enhancements</b></a></td>
+    </tr>
+    <tr>
+        <td>taz.data.file </td>
+        <td>String</td>
+        <td>/landuse/taz_data.csv</td>
+        <td>location of TAZ landuse file</td>
+    </tr>
+    <tr>
+        <td>taz.data.taz.column </td>
+        <td>String</td>
+        <td>TAZ</td>
+        <td>Column containing TAZ IDs</td>
+    </tr>
+    <tr>
+        <td>taz.data.avgttd.column </td>
+        <td>String</td>
+        <td>AVGTTS</td>
+        <td>Column containing </td>
+    </tr>
+    <tr>
+        <td>taz.data.dist.column </td>
+        <td>String</td>
+        <td>DIST</td>
+        <td>Column containing distances</td>
+    </tr>
+    <tr>
+        <td>taz.data.pctdetour.column </td>
+        <td>String</td>
+        <td>PCTDETOUR</td>
+        <td>Column containing </td>
+    </tr>
+    <tr>
+        <td>taz.data.terminal.column </td>
+        <td>String</td>
+        <td>TERMINALTIME</td>
+        <td>Column containing terminal times</td>
+    </tr>
+</table>
+
+
+
+
+              
+            </article>
+            
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Travel Model Two" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Travel Model Two
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../input/" class="md-footer__link md-footer__link--next" aria-label="Next: Input" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Input
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "content.code.annotate", "content.tabs.link", "navigation.indexes"], "search": "../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.9c69f0bc.min.js"></script>
+      
+    
+  </body>
+</html>
