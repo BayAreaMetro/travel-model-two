@@ -80,6 +80,8 @@ public final class MgraDataManager
     private static final String MGRA_DISTANCE_COEFF_OTHER = "mgra.avg.cost.dist.coeff.other";
     private static final String LOG_MGRA_PARKCOST = "mgra.avg.cost.trace.zone";
     public static final String PROPERTIES_MAX_WALK_DIST = "mgra.max.parking.distance";
+    public static final String MGRA_STOPS_WALK_ACCESS_TIME_FILE = "mgra.stops.walk.access.time.file";
+    public static final String MGRA_STOPS_WALK_EGRESS_TIME_FILE = "mgra.stops.walk.egress.time.file";
 
     public static final int PARK_AREA_ONE = 1;
     private static final String MGRA_PARKAREA_FIELD   = "parkarea";
@@ -119,6 +121,10 @@ public final class MgraDataManager
 
     private HashMap<Integer, Integer>[] oMgraBikeDistance;
     private HashMap<Integer, Integer>[] dMgraBikeDistance;
+    
+    // An array of Hashmaps dimensioned by origin mgra, time period, with time in minutes
+    private HashMap<Integer, Integer>[] mgraToStopsWalkAccessTime;
+    private HashMap<Integer, Integer>[] mgraFromStopsWalkEgressTime;
 
     // An array dimensioned to maxMgra of ragged arrays of lists of TAPs accessible by driving
     private Set<Integer>[]              driveAccessibleTaps;
@@ -187,6 +193,8 @@ public final class MgraDataManager
         
         readMazMazWalkDistance(rbMap);
         readMazMazBikeDistance(rbMap);
+        readMgraToStopsWalkAccessTime(rbMap);
+        readMgraFromStopsWalkEgressime(rbMap);
 
         // pre-process the list of TAPS reachable by drive access for each MGRA 
         mapDriveAccessTapsToMgras( TazDataManager.getInstance(rbMap) );
@@ -1499,6 +1507,64 @@ public final class MgraDataManager
     public HashMap<Integer, double[]> getNaicsProbabilitiesByMAZ() {
 		return naicsProbabilitiesByMAZ;
 	}
+    
+    /**
+     * This method is for reading input mgra to stop average walk access/egress time from csv
+     * the walk time should be based on mgra and time period
+     * @param mgraStopsWalkTimeFile
+     * @param mgraStopsWalkTime
+     */
+    private void readMgraStopsTime(File mgraStopsWalkTimeFile, HashMap[] mgraStopsWalkTime){
+    	try (BufferedReader reader = new BufferedReader(new FileReader(mgraStopsWalkTimeFile))) {
+        	String line;
+        	
+        	while ((line = reader.readLine()) != null) {
+				line = line.trim();
+				if (line.length() == 0)
+					continue;
+				String[] data = line.split(",");
+				int mgra = Integer.parseInt(data[0]);
+        		int timePeriod = Integer.parseInt(data[1]);
+        		int time = new Double(data[3]).intValue();
+        		
+        		mgraStopsWalkTime[mgra].put(timePeriod,time);
+        	}
+    	} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+    }
+    
+    public void readMgraToStopsWalkAccessTime(HashMap<String, String> rbMap) {
+    	File mgraToStopsWalkAccessTimeFile = Paths.get(Util.getStringValueFromPropertyMap(rbMap, "scenario.path"),
+                Util.getStringValueFromPropertyMap(rbMap, MGRA_STOPS_WALK_ACCESS_TIME_FILE)).toFile();
+    	mgraToStopsWalkAccessTime = new HashMap[maxMgra + 1];
+    	readMgraStopsTime(mgraToStopsWalkAccessTimeFile,mgraToStopsWalkAccessTime);
+    }
+    
+    public void readMgraFromStopsWalkEgressime(HashMap<String, String> rbMap) {
+    	File mgraToStopsWalkAccessTimeFile = Paths.get(Util.getStringValueFromPropertyMap(rbMap, "scenario.path"),
+                Util.getStringValueFromPropertyMap(rbMap, MGRA_STOPS_WALK_EGRESS_TIME_FILE)).toFile();
+    	mgraFromStopsWalkEgressTime = new HashMap[maxMgra + 1];
+    	readMgraStopsTime(mgraToStopsWalkAccessTimeFile,mgraFromStopsWalkEgressTime);
+    }
+    
+    public double getPMgraToStopsWalkTime(int mgra, int timePeriod) {
+    	if (mgraToStopsWalkAccessTime[mgra] == null) 
+    		return 0;
+    	else if (mgraToStopsWalkAccessTime[mgra].containsKey(timePeriod))
+    		return mgraToStopsWalkAccessTime[mgra].get(timePeriod);
+    	else
+    		return 0;
+    }
+    
+    public double getAMgraFromStopsWalkTime(int mgra, int timePeriod) {
+    	if (mgraFromStopsWalkEgressTime[mgra] == null) 
+    		return 0;
+    	else if (mgraFromStopsWalkEgressTime[mgra].containsKey(timePeriod))
+    		return mgraFromStopsWalkEgressTime[mgra].get(timePeriod);
+    	else
+    		return 0;
+    }
 
 
 }
