@@ -10,7 +10,6 @@ import com.pb.mtctm2.abm.application.SandagModelStructure;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
 import com.pb.mtctm2.abm.ctramp.ModelStructure;
-import com.pb.mtctm2.abm.ctramp.TapDataManager;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.Modes;
 import com.pb.mtctm2.abm.ctramp.TazDataManager;
@@ -116,7 +115,6 @@ public class SkimBuilder {
     public static final int TRANSIT_SET_MAIN_MODE_INDEX = 12;
     public static final int TRANSIT_SET_XFERS_INDEX = 13;
 
-    private final TapDataManager tapManager;
     private final TazDataManager tazManager;
     private final MgraDataManager mgraManager;
     private final AutoTazSkimsCalculator tazDistanceCalculator;
@@ -139,7 +137,6 @@ public class SkimBuilder {
     	
     	HashMap<String,String> rbMap = new HashMap<String,String>((Map<String,String>) (Map) properties);
 
-        tapManager = TapDataManager.getInstance(rbMap);
         tazManager = TazDataManager.getInstance(rbMap);
         mgraManager = MgraDataManager.getInstance(rbMap);
         tazDistanceCalculator = new AutoTazSkimsCalculator(rbMap);
@@ -216,10 +213,10 @@ public class SkimBuilder {
         return (tripTimePeriod-1)*30 + 270; //starts at 4:30 and goes half hour intervals after that
     }
 
-    public TripAttributes getTripAttributes(int origin, int destination, int tripModeIndex, int boardTap, int alightTap, int tripTimePeriod, boolean inbound, int set) {
+    public TripAttributes getTripAttributes(int origin, int destination, int tripModeIndex, int tripTimePeriod, boolean inbound) {
         int tod = getTod(tripTimePeriod);
         TripModeChoice tripMode = modeChoiceLookup[tripModeIndex < 0 ? 0 : tripModeIndex];
-        TripAttributes attributes = getTripAttributes(tripMode,origin,destination,boardTap,alightTap,tod,inbound,set);
+        TripAttributes attributes = getTripAttributes(tripMode,origin,destination,tod,inbound);
         attributes.setTripStartTime(getStartTime(tripTimePeriod));
         int oTaz = -1;
         int dTaz = -1;
@@ -234,7 +231,7 @@ public class SkimBuilder {
         return new TripAttributes(-1,-1,-1,-1,-1);
     }
 
-    private TripAttributes getTripAttributes(TripModeChoice modeChoice, int origin, int destination, int boardTap, int alightTap, int tod, boolean inbound, int set) {
+    private TripAttributes getTripAttributes(TripModeChoice modeChoice, int origin, int destination, int tod, boolean inbound) {
         int timeIndex = -1;
         int distIndex = -1;
         int tollIndex = -1;
@@ -343,88 +340,19 @@ public class SkimBuilder {
                 int destTaz = mgraManager.getTaz(destination);
                 if (isDrive) { 
                     if (!inbound) { //outbound: drive to transit stop at origin, then transit to destination
-                        boardAccessTime = tazManager.getTimeToTapFromTaz(originTaz,boardTap,( modeChoice==TripModeChoice.PNR_SET ? Modes.AccessMode.PARK_N_RIDE : Modes.AccessMode.KISS_N_RIDE));
-                        alightAccessTime = mgraManager.getWalkTimeFromMgraToTap(destination,alightTap);
+                        alightAccessTime = mgraManager.getAMgraFromStopsWalkTime(destination,tod);
                         
-                        if (boardAccessTime ==-1) {
-                            logger.info("Error: TAP not accessible from origin TAZ by "+ (modeChoice==TripModeChoice.PNR_SET ? "PNR" : "KNR" )+" access");
-                            logger.info("mc: " + modeChoice);
-                            logger.info("origin MAZ: " + origin);
-                            logger.info("origin TAZ" + originTaz);
-                            logger.info("dest MAZ: " + destination);
-                            logger.info("board tap: " + boardTap);
-                            logger.info("alight tap: " + alightTap);
-                            logger.info("tod: " + tod);
-                            logger.info("inbound: " + inbound);
-                            logger.info("set: " + set);
-                        } 
-                        
-                        if (alightAccessTime == -1){
-                            logger.info("Error: TAP not accessible from destination MAZ by walk access");
-                            logger.info("mc: " + modeChoice);
-                            logger.info("origin MAZ: " + origin);
-                            logger.info("origin TAZ" + originTaz);
-                            logger.info("dest MAZ: " + destination);
-                            logger.info("board tap: " + boardTap);
-                            logger.info("alight tap: " + alightTap);
-                            logger.info("tod: " + tod);
-                            logger.info("inbound: " + inbound);
-                            logger.info("set: " + set);
-                       	
-                        }
-                        skims = dtw.getDriveTransitWalkSkims(set,boardAccessTime,alightAccessTime,boardTap,alightTap,tod,false);
+                        skims = dtw.getDriveTransitWalkSkims(alightAccessTime,originTaz,destTaz,tod,false);
                     } else { //inbound: transit from origin to destination, then drive
-                        boardAccessTime = mgraManager.getWalkTimeFromMgraToTap(origin,boardTap);
-                        alightAccessTime = tazManager.getTimeToTapFromTaz(destTaz,alightTap,( modeChoice==TripModeChoice.PNR_SET ? Modes.AccessMode.PARK_N_RIDE : Modes.AccessMode.KISS_N_RIDE));
+                        boardAccessTime = mgraManager.getPMgraToStopsWalkTime(origin,tod);
                         
-                        if (boardAccessTime ==-1) {
-                            logger.info("Error: TAP not accessible from origin MAZ by walk access");
-                            logger.info("mc: " + modeChoice);
-                            logger.info("origin MAZ: " + origin);
-                            logger.info("origin TAZ" + originTaz);
-                            logger.info("dest MAZ: " + destination);
-                            logger.info("board tap: " + boardTap);
-                            logger.info("alight tap: " + alightTap);
-                            logger.info("tod: " + tod);
-                            logger.info("inbound: " + inbound);
-                            logger.info("set: " + set);
-                        } 
-                        
-                        if (alightAccessTime == -1){
-                            logger.info("Error: TAP not accessible from destination TAZ by "+ (modeChoice==TripModeChoice.PNR_SET ? "PNR" : "KNR" )+" access");
-                            logger.info("mc: " + modeChoice);
-                            logger.info("origin MAZ: " + origin);
-                            logger.info("origin TAZ" + originTaz);
-                            logger.info("dest MAZ: " + destination);
-                            logger.info("board tap: " + boardTap);
-                            logger.info("alight tap: " + alightTap);
-                            logger.info("tod: " + tod);
-                            logger.info("inbound: " + inbound);
-                            logger.info("set: " + set);
-                       	
-                        }
-                   skims = wtd.getWalkTransitDriveSkims(set,boardAccessTime,alightAccessTime,boardTap,alightTap,tod,false);
+                        skims = wtd.getWalkTransitDriveSkims(boardAccessTime,originTaz,destTaz,tod,false);
                     }
                 } else {
-                    int bt = mgraManager.getTapPosition(origin,boardTap);
-                    int at = mgraManager.getTapPosition(destination,alightTap);
-                    if (bt < 0 || at < 0) {
-                        logger.info("bad tap position: " + bt + "  " + at);
-                        logger.info("mc: " + modeChoice);
-                        logger.info("origin: " + origin);
-                        logger.info("dest: " + destination);
-                        logger.info("board tap: " + boardTap);
-                        logger.info("alight tap: " + alightTap);
-                        logger.info("tod: " + tod);
-                        logger.info("inbound: " + inbound);
-                        logger.info("set: " + set);
-                        logger.info("board tap position: " + bt);
-                        logger.info("alight tap position: " + at);
-                    } else {
-                        boardAccessTime = mgraManager.getMgraToTapWalkTime(origin,bt);
-                        alightAccessTime = mgraManager.getMgraToTapWalkTime(destination,at);
-                    }
-                    skims = wtw.getWalkTransitWalkSkims(set,boardAccessTime,alightAccessTime,boardTap,alightTap,tod,false);
+                    boardAccessTime = mgraManager.getPMgraToStopsWalkTime(origin,tod);
+                    alightAccessTime = mgraManager.getAMgraFromStopsWalkTime(destination,tod);
+                    
+                    skims = wtw.getWalkTransitWalkSkims(boardAccessTime,alightAccessTime,originTaz,destTaz,tod,false);
                 }
 
                 double time = 0.0;

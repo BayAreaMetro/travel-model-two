@@ -11,23 +11,23 @@ public class StoredUtilityData
     public static final float		 default_utility = -999;
 
     // these arrays are shared by multiple BestTransitPathCalculator objects in a distributed computing environment
-    private float[][] storedWalkAccessUtils;	// dim#1: MGRA id, dim#2: TAP id
-    private float[][] storedDriveAccessUtils; // dim#1: TAZ id, dim#2: TAP id
-    private float[][] storedWalkEgressUtils; 	// dim#1: TAP id, dim#2: MGRA id
-    private float[][] storedDriveEgressUtils; // dim#1: TAP id, dim#2: TAZ id
+    private float[][] storedWalkAccessUtils;	// dim#1: MGRA id, dim#2: TAZ id
+    private float[][] storedDriveAccessUtils; // dim#1: TAZ id, dim#2: TAZ id
+    private float[][] storedWalkEgressUtils; 	// dim#1: TAZ id, dim#2: MGRA id
+    private float[][] storedDriveEgressUtils; // dim#1: TAZ id, dim#2: TAZ id
     
-    // {0:WTW, 1:WTD, 2:DTW} -> TOD period number -> pTAP*100000+aTAP -> utility
-    private HashMap<Integer,HashMap<Integer,ConcurrentHashMap<Long,float[]>>> storedDepartPeriodTapTapUtils;
+    // {0:WTW, 1:WTD, 2:DTW} -> TOD period number -> pTAZ*100000+aTAZ -> utility
+    private HashMap<Integer,HashMap<Integer,ConcurrentHashMap<Long,float[]>>> storedDepartPeriodTazTazUtils;
        
     
     private StoredUtilityData(){
     }
     
-    public static synchronized StoredUtilityData getInstance( int maxMgra, int maxTap, int maxTaz, int[] accEgrSegments, int[] periods)
+    public static synchronized StoredUtilityData getInstance( int maxMgra, int maxTaz, int[] accEgrSegments, int[] periods)
     {
         if (objInstance == null) {
             objInstance = new StoredUtilityData();
-            objInstance.setupStoredDataArrays( maxMgra, maxTap, maxTaz, accEgrSegments, periods);
+            objInstance.setupStoredDataArrays( maxMgra, maxTaz, accEgrSegments, periods);
             return objInstance;
         }
         else {
@@ -35,32 +35,32 @@ public class StoredUtilityData
         }
     }    
     
-    private void setupStoredDataArrays( int maxMgra, int maxTap, int maxTaz, int[] accEgrSegments, int[] periods){        
+    private void setupStoredDataArrays( int maxMgra, int maxTaz, int[] accEgrSegments, int[] periods){        
     	// dimension the arrays
-    	storedWalkAccessUtils = new float[maxMgra + 1][maxTap + 1];
-        storedDriveAccessUtils = new float[maxTaz + 1][maxTap + 1];
-        storedWalkEgressUtils = new float[maxTap + 1][maxMgra + 1];
-        storedDriveEgressUtils = new float[maxTap + 1][maxTaz + 1];
+    	storedWalkAccessUtils = new float[maxMgra + 1][maxTaz + 1];
+        storedDriveAccessUtils = new float[maxTaz + 1][maxTaz + 1];
+        storedWalkEgressUtils = new float[maxTaz + 1][maxMgra + 1];
+        storedDriveEgressUtils = new float[maxTaz + 1][maxTaz + 1];
         // assign default values to array elements
         for (int i=0; i<=maxMgra; i++)
-        	for (int j=0; j<=maxTap; j++) {
+        	for (int j=0; j<=maxTaz; j++) {
         		storedWalkAccessUtils[i][j] = default_utility;
         		storedWalkEgressUtils[j][i] = default_utility;
         	}
         // assign default values to array elements
         for (int i=0; i<=maxTaz; i++)
-        	for (int j=0; j<=maxTap; j++) {
+        	for (int j=0; j<=maxTaz; j++) {
         		storedDriveAccessUtils[i][j] = default_utility;
         		storedDriveEgressUtils[j][i] = default_utility;
         	}
         
         //put into concurrent hashmap
-        storedDepartPeriodTapTapUtils = new HashMap<Integer,HashMap<Integer,ConcurrentHashMap<Long,float[]>>>();
+        storedDepartPeriodTazTazUtils = new HashMap<Integer,HashMap<Integer,ConcurrentHashMap<Long,float[]>>>();
         for(int i=0; i<accEgrSegments.length; i++) {
-        	storedDepartPeriodTapTapUtils.put(accEgrSegments[i], new HashMap<Integer,ConcurrentHashMap<Long,float[]>>());
+        	storedDepartPeriodTazTazUtils.put(accEgrSegments[i], new HashMap<Integer,ConcurrentHashMap<Long,float[]>>());
         	for(int j=0; j<periods.length; j++) {
-        		HashMap<Integer,ConcurrentHashMap<Long,float[]>> hm = storedDepartPeriodTapTapUtils.get(accEgrSegments[i]);
-        		hm.put(periods[j], new ConcurrentHashMap<Long,float[]>()); //key method paTapKey below
+        		HashMap<Integer,ConcurrentHashMap<Long,float[]>> hm = storedDepartPeriodTazTazUtils.get(accEgrSegments[i]);
+        		hm.put(periods[j], new ConcurrentHashMap<Long,float[]>()); //key method paTazKey below
         	}
     	}        
     }
@@ -81,12 +81,12 @@ public class StoredUtilityData
         return storedDriveEgressUtils;
     }
     
-    public HashMap<Integer,HashMap<Integer,ConcurrentHashMap<Long,float[]>>> getStoredDepartPeriodTapTapUtils() {
-        return storedDepartPeriodTapTapUtils;
+    public HashMap<Integer,HashMap<Integer,ConcurrentHashMap<Long,float[]>>> getStoredDepartPeriodTazTazUtils() {
+        return storedDepartPeriodTazTazUtils;
     }
     
     //create p to a hash key - up to 99,999 
-    public long paTapKey(int p, int a) {
+    public long paTazKey(int p, int a) {
     	return(p * 100000 + a);
     }
     

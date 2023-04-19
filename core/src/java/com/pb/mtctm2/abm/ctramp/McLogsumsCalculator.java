@@ -50,17 +50,6 @@ public class McLogsumsCalculator implements Serializable
     private double[]                           lsWgtAvgCostH;
     private int[]                              parkingArea;
     
-    private double[][]                            bestWtwTapPairsOut;
-    private double[][]                            bestWtwTapPairsIn;
-    private double[][]                            bestWtdTapPairsOut;
-    private double[][]                            bestWtdTapPairsIn;
-    private double[][]                            bestDtwTapPairsOut;
-    private double[][]                            bestDtwTapPairsIn;
-           
-    private double[][]                            bestWtwTripTapPairs;
-    private double[][]                            bestWtdTripTapPairs;
-    private double[][]                            bestDtwTripTapPairs;
-        
     private AutoAndNonMotorizedSkimsCalculator anm;
 
     private int                                setTourMcLogsumDmuAttributesTotalTime = 0;
@@ -288,52 +277,6 @@ public class McLogsumsCalculator implements Serializable
     public double[] getStoredSegmentCumulativeProbabilities() {
         return tripModeChoiceSegmentStoredProbabilities;
     }
-
-    public double[][] getBestWtwTapsOut()
-    {
-        return bestWtwTapPairsOut;
-    }
-    
-    public double[][] getBestWtwTapsIn()
-    {
-        return bestWtwTapPairsIn;
-    }
-    
-    public double[][] getBestWtdTapsOut()
-    {
-        return bestWtdTapPairsOut;
-    }
-    
-    public double[][] getBestWtdTapsIn()
-    {
-        return bestWtdTapPairsIn;
-    }
-    
-    public double[][] getBestDtwTapsOut()
-    {
-        return bestDtwTapPairsOut;
-    }
-    
-    public double[][] getBestDtwTapsIn()
-    {
-        return bestDtwTapPairsIn;
-    }
-    
-    public double[][] getBestWtwTripTaps()
-    {
-        return bestWtwTripTapPairs;
-    }
-    
-    public double[][] getBestDtwTripTaps()
-    {
-        return bestDtwTripTapPairs;
-    }
-    
-    public double[][] getBestWtdTripTaps()
-    {
-        return bestWtdTripTapPairs;
-    }
-
     
     private void setNmTourMcDmuAttributes( TourModeChoiceDMU mcDmuObject, int origMgra, int destMgra, int departPeriod, int arrivePeriod, boolean loggingEnabled )
     {
@@ -372,29 +315,24 @@ public class McLogsumsCalculator implements Serializable
         int pTaz = mgraManager.getTaz(origMgra);
         int aTaz = mgraManager.getTaz(destMgra);
         float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
-        bestWtwTapPairsOut = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
-        
-        if (bestWtwTapPairsOut[0] == null) {
-        	mcDmuObject.setTransitLogSum( WTW, false, bestPathUEC.NA );
-        } else {
-        	// calculate logsum
         	
-        	//set person specific variables and re-calculate best tap pair utilities
-        	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
-        	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	walkDmu.setFareSubsidy(mcDmuObject.getFareSubsidy());
-        	
-        	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
-        	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
+    	//set person specific variables
+    	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
+    	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
+    	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
+    	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
+    	walkDmu.setFareSubsidy(mcDmuObject.getFareSubsidy());
+    	
+    	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
+    	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
+    	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
+    	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
 
-        	bestWtwTapPairsOut = bestPathUEC.calcPersonSpecificUtilities(bestWtwTapPairsOut, walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
-        	double logsumOut = bestPathUEC.calcTripLogSum(bestWtwTapPairsOut, loggingEnabled, autoSkimLogger);
-        	mcDmuObject.setTransitLogSum( WTW, false, logsumOut);
-        }
+    	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
+    	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
+    	double logsumOut = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
+    	
+    	mcDmuObject.setTransitLogSum( WTW, false, logsumOut);
         
         //setup best path dmu variables
     	walkDmu =  new TransitWalkAccessDMU();
@@ -403,28 +341,24 @@ public class McLogsumsCalculator implements Serializable
         
         // walk access, walk egress transit, inbound
         int skimPeriodIndexIn = ModelStructure.getSkimPeriodIndex(arrivePeriod);
-        bestWtwTapPairsIn = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTW, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
-
-        if (bestWtwTapPairsIn[0] == null) {
-        	mcDmuObject.setTransitLogSum( WTW, true, bestPathUEC.NA );
-        } else {
-        	// calculate logsum
         	
-        	//set person specific variables and re-calculate best tap pair utilities
-        	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
-        	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	
-        	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
-        	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	
-        	bestWtwTapPairsIn = bestPathUEC.calcPersonSpecificUtilities(bestWtwTapPairsIn, walkDmu, driveDmu, WTW, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
-        	double logsumIn = bestPathUEC.calcTripLogSum(bestWtwTapPairsIn, loggingEnabled, autoSkimLogger);             
-        	mcDmuObject.setTransitLogSum( WTW, true, logsumIn);
-        }
+    	//set person specific variables
+    	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
+    	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
+    	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
+    	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
+    	
+    	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
+    	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
+    	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
+    	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
+    	
+    	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
+    	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
+    	double logsumIn = bestPathUEC.calcPersonSpecificUtilities(aTaz, pTaz, walkDmu, driveDmu, WTW, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
+    	           
+    	mcDmuObject.setTransitLogSum( WTW, true, logsumIn);
+        
     }
 
     private void setWtdTourMcDmuAttributes( TourModeChoiceDMU mcDmuObject, int origMgra, int destMgra, int departPeriod, int arrivePeriod, boolean loggingEnabled )
@@ -437,32 +371,6 @@ public class McLogsumsCalculator implements Serializable
     	
     	// logsum for WTD outbound is never used -> set to NA
     	mcDmuObject.setTransitLogSum( WTD, false, bestPathUEC.NA );
-    	/* TODO: - remove this section of code after successful testing 
-    	// walk access, drive egress transit, outbound
-        int skimPeriodIndexOut = ModelStructure.getSkimPeriodIndex(departPeriod);
-        bestWtdTapPairsOut = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTD, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger);
-        
-        if (bestWtdTapPairsOut[0] == null) {
-        	mcDmuObject.setTransitLogSum( WTD, false, bestPathUEC.NA );
-        } else {
-        	// calculate logsum
-        	
-        	//set person specific variables and re-calculate best tap pair utilities
-        	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
-        	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	
-        	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
-        	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	
-        	bestWtdTapPairsOut = bestPathUEC.calcPersonSpecificUtilities(bestWtdTapPairsOut, walkDmu, driveDmu, WTD, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger);
-        	double logsumOut = bestPathUEC.calcTripLogSum(bestWtdTapPairsOut, loggingEnabled, autoSkimLogger);
-        	mcDmuObject.setTransitLogSum( WTD, false, logsumOut);
-        }
-        */
     	
         //setup best path dmu variables
     	walkDmu =  new TransitWalkAccessDMU();
@@ -474,29 +382,25 @@ public class McLogsumsCalculator implements Serializable
         int pTaz = mgraManager.getTaz(origMgra);
         int aTaz = mgraManager.getTaz(destMgra);
         float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
-
-        bestWtdTapPairsIn = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTD, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
-        if (bestWtdTapPairsIn[0] == null) {
-        	mcDmuObject.setTransitLogSum( WTD, true, bestPathUEC.NA );
-        } else {
-        	// calculate logsum
         	
-        	//set person specific variables and re-calculate best tap pair utilities
-        	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
-        	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	walkDmu.setFareSubsidy(mcDmuObject.getFareSubsidy());
-        	
-        	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
-        	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	
-        	bestWtdTapPairsIn = bestPathUEC.calcPersonSpecificUtilities(bestWtdTapPairsIn, walkDmu, driveDmu, WTD, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
-        	double logsumIn = bestPathUEC.calcTripLogSum(bestWtdTapPairsIn, loggingEnabled, autoSkimLogger);
-        	mcDmuObject.setTransitLogSum( WTD, true, logsumIn);
-        }
+    	//set person specific variables
+    	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
+    	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
+    	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
+    	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
+    	walkDmu.setFareSubsidy(mcDmuObject.getFareSubsidy());
+    	
+    	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
+    	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
+    	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
+    	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
+    	
+    	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
+    	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
+    	double logsumIn = bestPathUEC.calcPersonSpecificUtilities(aTaz, pTaz, walkDmu, driveDmu, WTD, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
+    	
+    	mcDmuObject.setTransitLogSum( WTD, true, logsumIn);
+    	
     }
 
     private void setDtwTourMcDmuAttributes( TourModeChoiceDMU mcDmuObject, int origMgra, int destMgra, int departPeriod, int arrivePeriod, boolean loggingEnabled )
@@ -511,63 +415,28 @@ public class McLogsumsCalculator implements Serializable
         int pTaz = mgraManager.getTaz(origMgra);
         int aTaz = mgraManager.getTaz(destMgra);
         float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
-        
-        bestDtwTapPairsOut = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
-        if (bestDtwTapPairsOut[0] == null) {
-        	mcDmuObject.setTransitLogSum( DTW, false, bestPathUEC.NA );
-        } else {
-        	// calculate logsum
         	
-        	//set person specific variables and re-calculate best tap pair utilities
-        	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
-        	walkDmu.setValueOfTime((float) mcDmuObject.getValueOfTime());
-        	walkDmu.setFareSubsidy(mcDmuObject.getFareSubsidy());
-        	
-          	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-            driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
-        	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	
-        	bestDtwTapPairsOut = bestPathUEC.calcPersonSpecificUtilities(bestDtwTapPairsOut, walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
-        	double logsumOut = bestPathUEC.calcTripLogSum(bestDtwTapPairsOut, loggingEnabled, autoSkimLogger);
-        	mcDmuObject.setTransitLogSum( DTW, false, logsumOut);
-        }
+    	//set person specific variables
+    	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
+    	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
+    	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
+    	walkDmu.setValueOfTime((float) mcDmuObject.getValueOfTime());
+    	walkDmu.setFareSubsidy(mcDmuObject.getFareSubsidy());
+    	
+      	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
+        driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
+    	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
+    	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
+    	
+    	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
+    	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
+    	double logsumOut = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
+    	
+    	mcDmuObject.setTransitLogSum( DTW, false, logsumOut);
         
     	// logsum for DTW inbound is never used -> set to NA
     	mcDmuObject.setTransitLogSum( DTW, true, bestPathUEC.NA );
         
-    	/* TODO: remove this section of code after successful testing 
-        //setup best path dmu variables
-    	walkDmu =  new TransitWalkAccessDMU();
-    	driveDmu  = new TransitDriveAccessDMU();
-    	
-        // drive access, walk egress transit, inbound
-        int skimPeriodIndexIn = ModelStructure.getSkimPeriodIndex(arrivePeriod);
-        bestDtwTapPairsIn = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, DTW, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger);
-
-        if (bestDtwTapPairsIn[0] == null) {
-        	mcDmuObject.setTransitLogSum( DTW, true, bestPathUEC.NA );
-        } else {
-        	// calculate logsum
-        	
-        	//set person specific variables and re-calculate best tap pair utilities
-        	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	walkDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	walkDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : mcDmuObject.getPersonType());
-        	walkDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	
-        	driveDmu.setApplicationType(bestPathUEC.APP_TYPE_TOURMC);
-        	driveDmu.setTourCategoryIsJoint(mcDmuObject.getTourCategoryJoint());
-        	driveDmu.setPersonType(mcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : mcDmuObject.getPersonType());
-        	driveDmu.setValueOfTime((float)mcDmuObject.getValueOfTime());
-        	
-        	bestDtwTapPairsIn = bestPathUEC.calcPersonSpecificUtilities(bestDtwTapPairsIn, walkDmu, driveDmu, DTW, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger);
-        	double logsumIn = bestPathUEC.calcTripLogSum(bestDtwTapPairsIn, loggingEnabled, autoSkimLogger);
-        	mcDmuObject.setTransitLogSum( DTW, true, logsumIn);
-        }
-        */
     }
 
     private void setNmTripMcDmuAttributes( TripModeChoiceDMU tripMcDmuObject, int origMgra, int destMgra, int departPeriod, boolean loggingEnabled )
@@ -590,59 +459,6 @@ public class McLogsumsCalculator implements Serializable
         
     }
     
-    public void setWtwTripMcDmuAttributesForBestTapPairs( TripModeChoiceDMU tripMcDmuObject, int origMgra, int destMgra, int departPeriod, double[][] bestTapPairs, boolean loggingEnabled)
-    {
-
-        if (bestTapPairs == null) {
-        	tripMcDmuObject.setTransitLogSum( WTW, bestPathUEC.NA );
-            bestWtwTripTapPairs = bestTapPairs;
-            return;
-        }
-
-        // calculate logsum
-        int skimPeriodIndex = ModelStructure.getSkimPeriodIndex(departPeriod);
-        double logsum = bestPathUEC.calcTripLogSum(bestTapPairs, loggingEnabled, autoSkimLogger);
-        tripMcDmuObject.setTransitLogSum( WTW, logsum);
-        bestWtwTripTapPairs = bestTapPairs;
-        
-    }
-    
-    public void setDtwTripMcDmuAttributesForBestTapPairs( TripModeChoiceDMU tripMcDmuObject, int origMgra, int destMgra, int departPeriod, double[][] bestTapPairs, boolean loggingEnabled )
-    {
-
-        if (bestTapPairs == null) {
-        	tripMcDmuObject.setTransitLogSum( DTW, bestPathUEC.NA );
-            bestDtwTripTapPairs = bestTapPairs;
-            return;
-        }
-                
-        // calculate logsum
-        int skimPeriodIndex = ModelStructure.getSkimPeriodIndex(departPeriod);
-        double logsum = bestPathUEC.calcTripLogSum(bestTapPairs, loggingEnabled, autoSkimLogger);
-        if(loggingEnabled)
-        	autoSkimLogger.info("Setting DTW logsum in trip MC DMU object to "+logsum);
-        tripMcDmuObject.setTransitLogSum( DTW, logsum);
-        bestDtwTripTapPairs = bestTapPairs;
-        
-    }
-    
-    public void setWtdTripMcDmuAttributesForBestTapPairs( TripModeChoiceDMU tripMcDmuObject, int origMgra, int destMgra, int departPeriod, double[][] bestTapPairs, boolean loggingEnabled )
-    {
-
-        if (bestTapPairs == null) {
-        	tripMcDmuObject.setTransitLogSum( WTD, bestPathUEC.NA );
-            bestWtdTripTapPairs = bestTapPairs;
-            return;
-        }
-        
-        // calculate logsum
-        int skimPeriodIndex = ModelStructure.getSkimPeriodIndex(departPeriod);
-        double logsum = bestPathUEC.calcTripLogSum(bestTapPairs, loggingEnabled, autoSkimLogger);
-        tripMcDmuObject.setTransitLogSum( WTD, logsum);
-        bestWtdTripTapPairs = bestTapPairs;
-        
-    }
-    
     public void setWtwTripMcDmuAttributes( TripModeChoiceDMU tripMcDmuObject, int origMgra, int destMgra, int departPeriod, boolean loggingEnabled )
     {
     	//setup best path dmu variables
@@ -656,10 +472,7 @@ public class McLogsumsCalculator implements Serializable
         int aTaz = mgraManager.getTaz(destMgra);
         float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
         
-        // store best tap pairs for walk-transit-walk
-        bestWtwTripTapPairs = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance );
-
-        //set person specific variables and re-calculate best tap pair utilities
+        //set person specific variables
     	walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TRIPMC);
     	walkDmu.setTourCategoryIsJoint(tripMcDmuObject.getTourCategoryJoint());
     	walkDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : tripMcDmuObject.getPersonType());
@@ -671,9 +484,10 @@ public class McLogsumsCalculator implements Serializable
     	driveDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : tripMcDmuObject.getPersonType());
     	driveDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
     	
-        // calculate logsum
-    	bestWtwTripTapPairs = bestPathUEC.calcPersonSpecificUtilities(bestWtwTripTapPairs, walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
-        double logsum = bestPathUEC.calcTripLogSum(bestWtwTripTapPairs, loggingEnabled, autoSkimLogger);
+    	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
+    	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
+    	double logsum = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, WTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
+        
         tripMcDmuObject.setTransitLogSum( WTW, logsum);
         
     }
@@ -691,10 +505,6 @@ public class McLogsumsCalculator implements Serializable
         int aTaz = mgraManager.getTaz(destMgra);
         float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
         
-        // store best tap pairs using outbound direction array
-        bestWtdTripTapPairs = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, WTD, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
-        
-        //set person specific variables and re-calculate best tap pair utilities
         walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TRIPMC);
     	walkDmu.setTourCategoryIsJoint(tripMcDmuObject.getTourCategoryJoint());
     	walkDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : tripMcDmuObject.getPersonType());
@@ -706,9 +516,10 @@ public class McLogsumsCalculator implements Serializable
     	driveDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : tripMcDmuObject.getPersonType());
     	driveDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
     	
-        // calculate logsum
-    	bestWtdTripTapPairs = bestPathUEC.calcPersonSpecificUtilities(bestWtdTripTapPairs, walkDmu, driveDmu, WTD, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
-        double logsum = bestPathUEC.calcTripLogSum(bestWtdTripTapPairs, loggingEnabled, autoSkimLogger);
+    	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
+    	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
+    	double logsum = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, WTD, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
+        
         tripMcDmuObject.setTransitLogSum( WTD, logsum);
         
     }
@@ -726,10 +537,7 @@ public class McLogsumsCalculator implements Serializable
         int aTaz = mgraManager.getTaz(destMgra);
         float odDistance = (float) anm.getTazDistanceFromTaz(pTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[aTaz];
         
-        // store best tap pairs using outbound direction array
-        bestDtwTripTapPairs = bestPathUEC.getBestTapPairs(walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
-       
-        //set person specific variables and re-calculate best tap pair utilities
+        //set person specific variables
         walkDmu.setApplicationType(bestPathUEC.APP_TYPE_TRIPMC);
     	walkDmu.setTourCategoryIsJoint(tripMcDmuObject.getTourCategoryJoint());
     	walkDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? walkDmu.personType : tripMcDmuObject.getPersonType());
@@ -741,16 +549,12 @@ public class McLogsumsCalculator implements Serializable
     	driveDmu.setPersonType(tripMcDmuObject.getTourCategoryJoint()==1 ? driveDmu.personType : tripMcDmuObject.getPersonType());
     	driveDmu.setValueOfTime((float)tripMcDmuObject.getValueOfTime());
     	
-        // calculate logsum
-    	bestDtwTripTapPairs = bestPathUEC.calcPersonSpecificUtilities(bestDtwTripTapPairs, walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
-        double logsum = bestPathUEC.calcTripLogSum(bestDtwTripTapPairs, loggingEnabled, autoSkimLogger);
+    	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
+    	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
+    	double logsum = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
+        
         tripMcDmuObject.setTransitLogSum( DTW, logsum);
         
-    }
-    
-    //select best transit path from N-path for trip
-    public int chooseTripPath(float rnum, double[][] bestTapPairs, boolean myTrace, Logger myLogger) {
-    	return bestPathUEC.chooseTripPath(rnum, bestTapPairs, myTrace, myLogger);
     }
     
 }

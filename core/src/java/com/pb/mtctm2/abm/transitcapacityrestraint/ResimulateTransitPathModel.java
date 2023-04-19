@@ -36,7 +36,7 @@ import com.pb.mtctm2.abm.ctramp.TazDataManager;
 import com.pb.mtctm2.abm.ctramp.TransitDriveAccessDMU;
 import com.pb.mtctm2.abm.ctramp.TransitWalkAccessDMU;
 import com.pb.mtctm2.abm.ctramp.Util;
-import com.pb.mtctm2.abm.survey.OutputTapPairs;
+//import com.pb.mtctm2.abm.survey.OutputTapPairs;
 
 /**
  * This class chooses a new transit path for transit trips whose chosen TAP pair
@@ -246,7 +246,6 @@ public class ResimulateTransitPathModel{
 			TransitWalkAccessDMU walkDmu =  new TransitWalkAccessDMU();
 	    	walkDmu.setTransitFareDiscounts(bestPathCalculator.getTransitFareDiscounts());
 	    	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
-	    	double[][] bestTaps = null;
 
 			long hhid = trip.getHhid();
 			int originMaz = trip.getOriginMaz();
@@ -273,7 +272,7 @@ public class ResimulateTransitPathModel{
 			
 			float odDistance  = (float) tazDistanceCalculator.getTazToTazDistance(ModelStructure.AM_SKIM_PERIOD_INDEX, originTaz, destinationTaz);
 		
-
+			/*
 			if(modelStructure.getTripModeIsWalkTransit(mode))
 				bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.WTW, originMaz, destinationMaz, todPeriod, debug, logger, odDistance);
 			else
@@ -291,7 +290,7 @@ public class ResimulateTransitPathModel{
 				int stop = trip.getStopid();
 				logger.error("Transit trip with no transit path. HHID: "+hh_id+" PERID "+per_num+" TOUR "+tour+" INBOUND "+inbound+" STOP "+stop);
 				continue;
-			}
+			}*/
 	        //set person specific variables and re-calculate best tap pair utilities
 	    	walkDmu.setApplicationType(bestPathCalculator.APP_TYPE_TRIPMC);
 	    	walkDmu.setTourCategoryIsJoint(joint);
@@ -303,7 +302,7 @@ public class ResimulateTransitPathModel{
 	    	driveDmu.setTourCategoryIsJoint(joint);
 	     	driveDmu.setPersonType(joint==1 ? driveDmu.getPersonType() : personType);
 	     	driveDmu.setValueOfTime(valueOfTime);
-			
+			/*
 	     	//recalculate utilities for best walk and drive paths for person attributes
 			if(modelStructure.getTripModeIsWalkTransit(mode))
 				bestTaps = bestPathCalculator.calcPersonSpecificUtilities(bestTaps, walkDmu, driveDmu, bestPathCalculator.WTW, originMaz, destinationMaz, todPeriod, debug, logger, odDistance);
@@ -339,7 +338,7 @@ public class ResimulateTransitPathModel{
 			trip.setBoardingTap(boardTap);
 			trip.setAlightingTap(alightTap);
 			trip.setSet(set);
-			
+			*/
 			//write results
 			if(trip.getJoint()==0)
 				writeTrip(trip,resimulatedTrip,outputIndivTripWriter);
@@ -421,9 +420,7 @@ public class ResimulateTransitPathModel{
         	float depTime = simulateExactTime(depPeriod);
         	float sRate = inputTripTableData.getValueAt(row,"sampleRate");
           	int mode = (int) inputTripTableData.getValueAt(row,"trip_mode");
-            int avAvailable = (int) inputTripTableData.getValueAt(row,"avAvailable");  	
-        	int boardingTap = (int) inputTripTableData.getValueAt(row,"trip_board_tap");  
-        	int alightingTap = (int) inputTripTableData.getValueAt(row,"trip_alight_tap");  
+            int avAvailable = (int) inputTripTableData.getValueAt(row,"avAvailable");
         	String tour_purpose	= inputTripTableData.getStringValueAt(row, "tour_purpose");
         	String orig_purpose	= inputTripTableData.getStringValueAt(row, "orig_purpose");
         	String dest_purpose = inputTripTableData.getStringValueAt(row, "dest_purpose");
@@ -439,7 +436,7 @@ public class ResimulateTransitPathModel{
         	float rnum = inputTripTableData.getValueAt(row, "tranpath_rnum");
         	
             if(modelStructure.getTripModeIsTransit(mode)){
-        		Trip trip = new Trip(hhid,personId,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,boardingTap,alightingTap,set,rnum);
+        		Trip trip = new Trip(hhid,personId,personNumber,tourid,stopid,inbound,(jointTripData?1:0),oMaz,dMaz,depPeriod,depTime,sRate,mode,rnum);
         		trip.setAvAvailable(avAvailable);
         		trip.setTourPurpose(tour_purpose);
         		trip.setOriginPurpose(orig_purpose);
@@ -525,14 +522,11 @@ public class ResimulateTransitPathModel{
 
 			resimulateDMU.setOriginMaz(trip.getOriginMaz());
 			resimulateDMU.setDestinationMaz(trip.getDestinationMaz());
-			resimulateDMU.setBoardingTap(trip.getBoardingTap());
-			resimulateDMU.setAlightingTap(trip.getAlightingTap());
-			resimulateDMU.setSet(trip.getSet());
 			resimulateDMU.setTOD(todPeriod);
 		        
 			// set up the index and dmu objects
-		    index.setOriginZone(trip.getBoardingTap());
-		    index.setDestZone(trip.getAlightingTap());
+		    index.setOriginZone(mgraManager.getTaz(trip.getOriginMaz()));
+		    index.setDestZone(mgraManager.getTaz(trip.getDestinationMaz()));
 		       
 		    // solve
 		    float util = (float)identifyTripToResimulateUEC.solve(index, resimulateDMU, null)[0];  
@@ -609,7 +603,7 @@ public class ResimulateTransitPathModel{
 			
 	        String headerString = new String(
 			"hh_id,person_id,person_num,tour_id,stop_id,inbound,tour_purpose,orig_purpose,dest_purpose,orig_mgra,dest_mgra,trip_dist,"+
-	        "parking_mgra,stop_period,trip_mode,trip_board_tap,trip_alight_tap,tour_mode,set,sampleRate,avAvailable,resimulatedTrip");
+	        "parking_mgra,stop_period,trip_mode,tour_mode,sampleRate,avAvailable,resimulatedTrip");
 
 	        printWriter.println(headerString);
 	        printWriter.flush();
@@ -625,7 +619,7 @@ public class ResimulateTransitPathModel{
 			
 	        String headerString = new String(
 			"hh_id,tour_id,stop_id,inbound,tour_purpose,orig_purpose,dest_purpose,orig_mgra,dest_mgra,trip_dist,parking_mgra,stop_period,"
-			+"trip_mode,num_participants,trip_board_tap,trip_alight_tap,tour_mode,set,sampleRate,avAvailable,resimulatedTrip");
+			+"trip_mode,num_participants,tour_mode,sampleRate,avAvailable,resimulatedTrip");
 
 	        printWriter.println(headerString);
 	        printWriter.flush();
@@ -664,10 +658,7 @@ public class ResimulateTransitPathModel{
 			}
 			
 			outputRecord = outputRecord + new String(
-					trip.getBoardingTap() + ","
-					+ trip.getAlightingTap() + ","
-					+ trip.getTourMode() + ","
-					+ trip.getSet() + ","
+					trip.getTourMode() + ","
 					+ trip.getSampleRate() + ","
 					+ trip.getAvAvailable() + ","
 					+ (resimulated ? 1: 0)

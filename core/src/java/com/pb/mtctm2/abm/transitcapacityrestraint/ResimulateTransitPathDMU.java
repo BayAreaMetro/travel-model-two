@@ -23,9 +23,9 @@ public class ResimulateTransitPathDMU
     int                                 personType = 1;     //defaults to full-time worker
     private int originMaz;
     private int destinationMaz;
-    private int boardingTap;
-    private int alightingTap;
-    private int set;
+    //private int boardingTap;
+    //private int alightingTap;
+    //private int set;
     private int tod;
     float								fareSubsidy = 0f;
     protected float[][] transitFareDiscounts;
@@ -43,9 +43,9 @@ public class ResimulateTransitPathDMU
 
         methodIndexMap.put("getOriginMaz", 0);
         methodIndexMap.put("getDestinationMaz", 1);
-        methodIndexMap.put("getBoardingTap", 2);
-        methodIndexMap.put("getAlightingTap", 3);
-        methodIndexMap.put("getSet", 4);
+        //methodIndexMap.put("getBoardingTap", 2);
+        //methodIndexMap.put("getAlightingTap", 3);
+        //methodIndexMap.put("getSet", 4);
         methodIndexMap.put("getTOD", 5);
         methodIndexMap.put("getApplicationType", 6);
         methodIndexMap.put("getPersonType", 8);
@@ -70,12 +70,12 @@ public class ResimulateTransitPathDMU
                 return getOriginMaz();
             case 1:
                 return getDestinationMaz();
-            case 2:
-                return getBoardingTap();
-            case 3:
-                return getAlightingTap();
-            case 4:
-                return getSet();
+            //case 2:
+            //    return getBoardingTap();
+            //case 3:
+            //    return getAlightingTap();
+            //case 4:
+            //    return getSet();
             case 5:
                 return getTOD();
             case 6:
@@ -146,7 +146,7 @@ public class ResimulateTransitPathDMU
 	public void setDestinationMaz(int destinationMaz) {
 		this.destinationMaz = destinationMaz;
 	}
-
+	/*
 	public int getBoardingTap() {
 		return boardingTap;
 	}
@@ -170,7 +170,7 @@ public class ResimulateTransitPathDMU
 	public void setSet(int set) {
 		this.set = set;
 	}
-
+	*/
 	public int getTOD() {
 		return tod;
 	}

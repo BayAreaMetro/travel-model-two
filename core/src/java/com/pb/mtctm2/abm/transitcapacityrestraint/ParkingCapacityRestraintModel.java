@@ -33,7 +33,7 @@ import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.ModelStructure;
 import com.pb.mtctm2.abm.ctramp.Person;
 import com.pb.mtctm2.abm.ctramp.Stop;
-import com.pb.mtctm2.abm.ctramp.TapDataManager;
+//import com.pb.mtctm2.abm.ctramp.TapDataManager;
 import com.pb.mtctm2.abm.ctramp.TazDataManager;
 import com.pb.mtctm2.abm.ctramp.Tour;
 import com.pb.mtctm2.abm.ctramp.Util;
@@ -47,7 +47,7 @@ public class ParkingCapacityRestraintModel {
 	protected int iteration;
 	protected MgraDataManager mgraManager;
 	protected TazDataManager tazManager;
-	protected TapDataManager tapManager;
+	//protected TapDataManager tapManager;
 	protected static final String ModelSeedProperty = "Model.Random.Seed";
     private transient ModelStructure          modelStructure;
 	protected int numberOfTimeBins;
@@ -172,7 +172,7 @@ public class ParkingCapacityRestraintModel {
 
  		modelStructure = new SandagModelStructure();
 		
-		tapManager = TapDataManager.getInstance(propertyMap);
+		//tapManager = TapDataManager.getInstance(propertyMap);
 		mgraManager = MgraDataManager.getInstance(propertyMap);
 		tazManager = TazDataManager.getInstance(propertyMap);
 		
@@ -264,7 +264,7 @@ public class ParkingCapacityRestraintModel {
 		
 		logger.info("Buffer for over-capacity calculation: "+buffer);
 		
-		
+		/*
 		logger.info("LOT    CAPACITY    CAP+BUFFER    ARRIVALS   OVER?");
 		//iterate through lots
 		Set<Integer> taps = constrainedPNRLotMap.keySet();
@@ -280,7 +280,7 @@ public class ParkingCapacityRestraintModel {
 				return false;
 			
 		}
-	
+		*/
 		
 		return true;
 		
@@ -506,8 +506,8 @@ public class ParkingCapacityRestraintModel {
 		unconstrainedPNRLotMap = new HashMap<Integer, float[]>();
 		
 		//to hold arrivals over time
-		unconstrainedArrivalsToTAP = new float[tapManager.getMaxTap()+1];
-	
+		//unconstrainedArrivalsToTAP = new float[tapManager.getMaxTap()+1];
+		/*
 		for(Stop thisStop : unconstrainedPNRTrips) {
 			
 			float departTime = thisStop.getMinute();
@@ -552,7 +552,7 @@ public class ParkingCapacityRestraintModel {
 				
 			}
 		}
-		
+		*/
 	}
 	
 	/**
@@ -583,7 +583,7 @@ public class ParkingCapacityRestraintModel {
 		//remove the taps that have reached capacity from the tap data manager
 		logger.info("Removing drive access to the following TAPs");
 		for(Integer tap : tapsToRemove) {
-			tapManager.setDriveAccessAllowed(tap, false);
+			//tapManager.setDriveAccessAllowed(tap, false);
 			logger.info("TAP "+tap);
 		}
 		
@@ -662,7 +662,7 @@ public class ParkingCapacityRestraintModel {
 		
 		constrainedPNRLotMap = new HashMap<Integer, float[]>();
 		
-		constrainedArrivalsToTAP = new float[tapManager.getMaxTap()+1];
+		//constrainedArrivalsToTAP = new float[tapManager.getMaxTap()+1];
 
 		
         try{
@@ -746,7 +746,7 @@ public class ParkingCapacityRestraintModel {
 	 * @param thisTour
 	 */
 	private void calculateConstrainedArrivals(Tour thisTour) {
-		
+		/*
 		totalConstrainedPNRTours += (1.0/sampleRate);
 		
 		
@@ -781,7 +781,7 @@ public class ParkingCapacityRestraintModel {
 				}
 			}
 		}
-		
+		*/
 	}
 	
 
@@ -809,7 +809,7 @@ public class ParkingCapacityRestraintModel {
         }
         pnrWriter.println(header);
         pnrWriter.flush();
-        
+        /*
         Set<Integer> tapSet = PNRLotMap.keySet();
         for(Integer tap:tapSet) {
         	float totalSpaces = tapManager.getTotalSpaces(tap) * parkAndHideFactor * occupancyFactor;
@@ -822,7 +822,7 @@ public class ParkingCapacityRestraintModel {
         	pnrWriter.println(printString);
             pnrWriter.flush();
         }
-
+		*/
         pnrWriter.close();
 	}
 				

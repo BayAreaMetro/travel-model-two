@@ -408,13 +408,6 @@ public class HouseholdDataWriter
         data.add("num_ob_stops");
         data.add("num_ib_stops");
         
-        data.add("out_btap");
-        data.add("out_atap");
-        data.add("in_btap");
-        data.add("in_atap");
-        
-        data.add("out_set");
-        data.add("in_set");
         data.add("sampleRate");
         data.add("avAvailable");
         data.add("dcLogsum");
@@ -462,14 +455,6 @@ public class HouseholdDataWriter
         data.add("num_ob_stops");
         data.add("num_ib_stops");
         
-        data.add("out_btap");
-        data.add("out_atap");
-        data.add("in_btap");
-        data.add("in_atap");
-
-        data.add("out_set");
-        data.add("in_set");
-
         data.add("sampleRate");
         data.add("avAvailable");
         data.add("dcLogsum");
@@ -519,13 +504,6 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
-        
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
@@ -571,13 +549,6 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
-        
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
@@ -625,28 +596,6 @@ public class HouseholdDataWriter
         data.add(string(t.getSubtourFreqChoice()));
         data.add(string(t.getNumOutboundStops() == 0 ? 0 : t.getNumOutboundStops() - 1));
         data.add(string(t.getNumInboundStops() == 0 ? 0 : t.getNumInboundStops() - 1));
-
-        //get tour taps
-        double[] outTaps = new double[4];
-        double[] inTaps = new double[4];
-        for (int i = 0; i < outTaps.length; i++) {
-        	outTaps[i] = setNA;
-        	inTaps[i]  = setNA;
-        }
-        
-        if ( modelStructure.getTourModeIsWalkTransit(t.getTourModeChoice())) {
-            outTaps = t.getBestWtwTapPairsOut()[(int)t.getChoosenTransitPathOut()];
-            inTaps = t.getBestWtwTapPairsIn()[(int)t.getChoosenTransitPathIn()];
-        } else if ( modelStructure.getTourModeIsDriveTransit(t.getTourModeChoice())) {
-        	outTaps = t.getBestDtwTapPairsOut()[(int)t.getChoosenTransitPathOut()];
-        	inTaps = t.getBestWtdTapPairsIn()[(int)t.getChoosenTransitPathIn()];
-        }
-        data.add(string(outTaps[0]));
-        data.add(string(outTaps[1]));
-        data.add(string(inTaps[0]));
-        data.add(string(inTaps[1]));
-        data.add(string(outTaps[2]));
-        data.add(string(inTaps[2]));
         
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
@@ -702,28 +651,6 @@ public class HouseholdDataWriter
         data.add(string(calculateTimesForAllMgras(t.getTourOrigMgra(), t.getTourDestMgra())));
         data.add(string(t.getNumOutboundStops() == 0 ? 0 : t.getNumOutboundStops() - 1));
         data.add(string(t.getNumInboundStops() == 0 ? 0 : t.getNumInboundStops() - 1));
-
-        //get tour taps
-        double[] outTaps = new double[4];
-        double[] inTaps = new double[4];
-        for (int i = 0; i < outTaps.length; i++) {
-        	outTaps[i] = setNA;
-        	inTaps[i]  = setNA;
-        }
-        
-        if ( modelStructure.getTourModeIsWalkTransit(t.getTourModeChoice())) {
-            outTaps = t.getBestWtwTapPairsOut()[(int)t.getChoosenTransitPathOut()];
-            inTaps = t.getBestWtwTapPairsIn()[(int)t.getChoosenTransitPathIn()];
-        } else if ( modelStructure.getTourModeIsDriveTransit(t.getTourModeChoice())) {
-        	outTaps = t.getBestDtwTapPairsOut()[(int)t.getChoosenTransitPathOut()];
-        	inTaps = t.getBestWtdTapPairsIn()[(int)t.getChoosenTransitPathIn()];
-        }
-        data.add(string(outTaps[0]));
-        data.add(string(outTaps[1]));
-        data.add(string(inTaps[0]));
-        data.add(string(inTaps[1]));
-        data.add(string(outTaps[2]));
-        data.add(string(inTaps[2]));
         
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
@@ -855,11 +782,8 @@ public class HouseholdDataWriter
         data.add("parking_mgra");
         data.add("stop_period");
         data.add("trip_mode");
-        data.add("trip_board_tap");
-        data.add("trip_alight_tap");
         data.add("tour_mode");
         
-        data.add("set");
         data.add("tranpath_rnum");
         data.add("sampleRate");
         data.add("avAvailable");
@@ -883,11 +807,8 @@ public class HouseholdDataWriter
         data.add("stop_period");
         data.add("trip_mode");
         data.add("num_participants");
-        data.add("trip_board_tap");
-        data.add("trip_alight_tap");
         data.add("tour_mode");
         
-        data.add("set");
         data.add("tranpath_rnum");
         
         data.add("sampleRate");
@@ -914,9 +835,6 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.INTEGER);
@@ -936,9 +854,6 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
-        data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
@@ -1029,18 +944,10 @@ public class HouseholdDataWriter
         data.add(string(s.getPark()));
         data.add(string(s.getStopPeriod()));
         data.add(string(s.getMode()));
-        data.add(string(s.getBoardTap()));
-        data.add(string(s.getAlightTap()));
         data.add(string(t.getTourModeChoice()));
         
-        int set = setNA;
         float rnum = rnumNA;
         
-        if(modelStructure.getTripModeIsTransit(s.getMode())) {
-        	set = s.getSet();
-        	rnum = s.getRandomNumberForTapChoice();
-        }
-        data.add(string(set));
         data.add(String.format("%.5f", rnum));
         float sampleRate = s.getSampleRate();
         data.add(string(sampleRate));
@@ -1134,18 +1041,10 @@ public class HouseholdDataWriter
         }
 
         data.add(string(participants.length));
-        data.add(string(s.getBoardTap()));
-        data.add(string(s.getAlightTap()));
         data.add(string(t.getTourModeChoice()));
 
-        int set = setNA;
         float rnum = rnumNA;
         
-        if(modelStructure.getTripModeIsTransit(s.getMode())) {
-        	rnum = s.getRandomNumberForTapChoice();
-        	set = s.getSet();
-        }
-        data.add(string(set));
         data.add(String.format("%.5f", rnum));
         float sampleRate = s.getSampleRate();
         data.add(string(sampleRate));
@@ -1199,12 +1098,8 @@ public class HouseholdDataWriter
         data.add(string(inbound ? t.getTourArrivePeriod() : t.getTourDepartPeriod()));
         data.add(string(t.getTourModeChoice()));
         
-        data.add(string(0));							// board tap
-        data.add(string(0));							// alight tap
-        
         data.add(string(t.getTourModeChoice()));
        
-        data.add(string(0));							// set
         data.add(String.format("%.5f",0f));             //random 
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));
@@ -1273,12 +1168,8 @@ public class HouseholdDataWriter
 
         data.add(string(participants.length));
         
-        data.add(string(0));							// board tap
-        data.add(string(0));							// alight tap
-        
         data.add(string(t.getTourModeChoice()));
        
-        data.add(string(0));							// set
         data.add(String.format("%.5f",0f));             //random 
         float sampleRate = t.getSampleRate();
         data.add(string(sampleRate));

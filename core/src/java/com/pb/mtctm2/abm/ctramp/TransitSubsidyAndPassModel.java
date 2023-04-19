@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+
 import com.pb.common.calculator.VariableTable;
 import com.pb.common.datafile.OLD_CSVFileReader;
 import com.pb.common.datafile.TableDataSet;
@@ -48,6 +49,10 @@ public class TransitSubsidyAndPassModel
     private double[]                           lsWgtAvgCostH;
     private double[]                           subsidyDistribution;
     private double[]                           subsidyPercent;
+    
+    public static final int                   WTW = 0;
+    public static final int                   WTD = 1;
+    public static final int                   DTW = 2;
     
     
     
@@ -439,8 +444,7 @@ public class TransitSubsidyAndPassModel
     
     public double[] getBestPeakWalkTransitSkims(int originMaz, int destinationMaz, boolean debug) {
     	
-    	double[][] bestTaps = null;
-		double[] skims = null;
+    	double[] skims = null;
 		double boardAccessTime;
 		double alightAccessTime;
 				
@@ -452,19 +456,14 @@ public class TransitSubsidyAndPassModel
 		
 		float odDistance  = (float) dist[destinationTaz];
 		
-		bestTaps = bestPathCalculator.getBestTapPairs(walkDmu, driveDmu, bestPathCalculator.WTW, originMaz, destinationMaz, period, debug, logger, odDistance);
-		double[] bestUtilities = bestPathCalculator.getBestUtilities();
+		double transitUtility = bestPathCalculator.calcPersonSpecificUtilities(originTaz, destinationTaz, walkDmu, driveDmu, WTW, originMaz, destinationMaz, period, debug, logger, odDistance);
 			
-		if(bestUtilities[0]<-500)
+		if(transitUtility <-500)
 			return skims;
-
-    	int boardTap = (int) bestTaps[0][0];
-       	int alightTap = (int) bestTaps[0][1];
-       	int set = (int) bestTaps[0][2];
-
-        boardAccessTime = mgraManager.getWalkTimeFromMgraToTap(originMaz,boardTap);
-    	alightAccessTime = mgraManager.getWalkTimeFromMgraToTap(destinationMaz,alightTap);
-	    skims = wtw.getWalkTransitWalkSkims(set, boardAccessTime, alightAccessTime, boardTap, alightTap, period, debug); 
+		
+        boardAccessTime = mgraManager.getPMgraToStopsWalkTime(originMaz,period);
+    	alightAccessTime = mgraManager.getAMgraFromStopsWalkTime(destinationMaz,period);
+	    skims = wtw.getWalkTransitWalkSkims(boardAccessTime, alightAccessTime, originTaz, destinationTaz, period, debug); 
 
 	    return skims;
     }

@@ -357,35 +357,6 @@ public class TourModeChoiceModel
         if (mcModel[modelIndex].getAvailabilityCount() > 0) {
             
             chosen = mcModel[modelIndex].getChoiceResult(rn);
-        
-            // best tap pairs were determined and saved in mcDmuObject while setting dmu skim attributes
-            // if chosen mode is a transit mode, save these tap pairs in the tour object; if not transit tour attributes remain null.
-            if ( modelStructure.getTourModeIsTransit( chosen ) ) {
-                tour.setBestWtwTapPairsOut( logsumHelper.getBestWtwTapsOut() );
-                tour.setBestWtwTapPairsIn( logsumHelper.getBestWtwTapsIn() );
-                tour.setBestWtdTapPairsOut( logsumHelper.getBestWtdTapsOut() );
-                tour.setBestWtdTapPairsIn( logsumHelper.getBestWtdTapsIn() );
-                tour.setBestDtwTapPairsOut( logsumHelper.getBestDtwTapsOut() );
-                tour.setBestDtwTapPairsIn( logsumHelper.getBestDtwTapsIn() );
-                
-                float rnumOut = (float)hhRandom.nextDouble();
-                float rnumIn = (float)hhRandom.nextDouble();
-                tour.setRandomNumberForTapChoiceOut(rnumOut);
-                tour.setRandomNumberForTapChoiceIn(rnumIn);
-                
-                if(modelStructure.getTourModeIsWalkTransit(chosen)) {
-                	tour.setChoosenTransitPathOut(logsumHelper.chooseTripPath((float)rnumOut, 
-                			tour.getBestWtwTapPairsOut(), household.getDebugChoiceModels(), modelLogger));
-                	tour.setChoosenTransitPathIn(logsumHelper.chooseTripPath((float)rnumIn, 
-                			tour.getBestWtwTapPairsIn(), household.getDebugChoiceModels(), modelLogger));
-                } else {
-                	tour.setChoosenTransitPathOut(logsumHelper.chooseTripPath((float)rnumOut, 
-                			tour.getBestDtwTapPairsOut(), household.getDebugChoiceModels(), modelLogger));
-                	tour.setChoosenTransitPathIn(logsumHelper.chooseTripPath((float)rnumIn, 
-                			tour.getBestWtdTapPairsIn(), household.getDebugChoiceModels(), modelLogger));
-                	
-                }
-            }
             
         }
         else

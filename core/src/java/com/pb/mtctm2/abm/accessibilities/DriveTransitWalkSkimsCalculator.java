@@ -9,6 +9,7 @@ import com.pb.mtctm2.abm.ctramp.MatrixDataServer;
 import com.pb.mtctm2.abm.ctramp.MatrixDataServerRmi;
 import com.pb.mtctm2.abm.ctramp.McLogsumsCalculator;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
+import com.pb.mtctm2.abm.ctramp.TazDataManager;
 import com.pb.mtctm2.abm.ctramp.ModelStructure;
 import com.pb.mtctm2.abm.ctramp.TransitDriveAccessDMU;
 import com.pb.mtctm2.abm.ctramp.Util;
@@ -50,7 +51,6 @@ public class DriveTransitWalkSkimsCalculator
     private static final int              EGRESS_TIME_INDEX             = 1;
     private static final int              NA                            = -999;
 
-    private int 						  maxDTWSkimSets                = 5;
     private int[]                         NUM_SKIMS;
     private double[]                      defaultSkims;
     
@@ -65,12 +65,13 @@ public class DriveTransitWalkSkimsCalculator
     // UEC
 
     private MgraDataManager               mgraManager;
-    private int                           maxTap;
+    private TazDataManager                tazManager;
+    private int                           maxTaz;
 
-    // skim values array for transit service type(local, premium),
+    // skim values array for
     // depart skim period(am, pm, op),
-    // and Tap-Tap pair.
-    private double[][][][][] storedDepartPeriodTapTapSkims;
+    // and Taz-Taz pair.
+    private double[][][][] storedDepartPeriodTazTazSkims;
 
     private BestTransitPathCalculator     bestPathUEC;
 
@@ -79,7 +80,7 @@ public class DriveTransitWalkSkimsCalculator
     public DriveTransitWalkSkimsCalculator(HashMap<String, String> rbMap)
     {
     	mgraManager = MgraDataManager.getInstance();
-        maxTap = mgraManager.getMaxTap();
+        maxTaz = tazManager.getMaxTaz();
     }
 
     public void setup(HashMap<String, String> rbMap, Logger logger,
@@ -109,69 +110,59 @@ public class DriveTransitWalkSkimsCalculator
           defaultSkims[j] = NA;
         }
         
-        // point the stored Array of skims: by Prem or Local, DepartPeriod, O tap, D tap, skim values[] to a shared data store
-        StoredTransitSkimData storedDataObject = StoredTransitSkimData.getInstance( maxDTWSkimSets, NUM_PERIODS, maxTap );
-        storedDepartPeriodTapTapSkims = storedDataObject.getStoredDtwDepartPeriodTapTapSkims();
+        // point the stored Array of skims: by Prem or Local, DepartPeriod, O taz, D taz, skim values[] to a shared data store
+        StoredTransitSkimData storedDataObject = StoredTransitSkimData.getInstance(NUM_PERIODS, maxTaz );
+        storedDepartPeriodTazTazSkims = storedDataObject.getStoredDtwDepartPeriodTazTazSkims();
         
     }
 
  
 
     /**
-     * Return the array of drive-transit-walk skims for the ride mode, origin TAP,
-     * destination TAP, and departure time period.
+     * Return the array of drive-transit-walk skims for the ride mode, origin TAz,
+     * destination TAZ, and departure time period.
      * 
      * @param set for set source skims
-     * @param origTap best Origin TAP for the MGRA pair
-     * @param workTap best Destination TAP for the MGRA pair
+     * @param origTaz Origin TAZ for the MGRA pair
+     * @param workTaz Destination TAZ for the MGRA pair
      * @param departPeriod Departure time period - 1 = AM period, 2 = PM period, 3 =
      *            OffPeak period
      * @return Array of 55 skim values for the MGRA pair and departure period
      */
-    public double[] getDriveTransitWalkSkims(int set, double pDriveTime, double aWalkTime, int origTap, int destTap,
+    public double[] getDriveTransitWalkSkims(double aWalkTime, int origTaz, int destTaz,
             int departPeriod, boolean debug)
     {
 
-        dmu.setDriveTimeToTap(pDriveTime);
-        dmu.setMgraTapWalkTime(aWalkTime);
+        dmu.setMgraStopsWalkTime(aWalkTime);
 
-        iv.setOriginZone(origTap);
-        iv.setDestZone(destTap);
+        iv.setOriginZone(origTaz);
+        iv.setDestZone(destTaz);
 
         // allocate space for the origin tap if it hasn't been allocated already
-        if (storedDepartPeriodTapTapSkims[set][departPeriod][origTap] == null)
+        if (storedDepartPeriodTazTazSkims[departPeriod][origTaz] == null)
         {
-            storedDepartPeriodTapTapSkims[set][departPeriod][origTap] = new double[maxTap + 1][];
+            storedDepartPeriodTazTazSkims[departPeriod][origTaz] = new double[maxTaz + 1][];
         }
 
-        // if the destTap skims are not already stored, calculate them and store
+        // if the destTaz skims are not already stored, calculate them and store
         // them
-        if (storedDepartPeriodTapTapSkims[set][departPeriod][origTap][destTap] == null)
+        if (storedDepartPeriodTazTazSkims[departPeriod][origTaz][destTaz] == null)
         {
         	dmu.setTOD(departPeriod);
-        	dmu.setSet(set);
             double[] results = driveWalkSkimUEC.solve(iv, dmu, null);
             if (debug)
             	driveWalkSkimUEC.logAnswersArray(primaryLogger, "Drive-Walk Skims");
-            storedDepartPeriodTapTapSkims[set][departPeriod][origTap][destTap] = results;
+            storedDepartPeriodTazTazSkims[departPeriod][origTaz][destTaz] = results;
         }
 
         try {
-            storedDepartPeriodTapTapSkims[set][departPeriod][origTap][destTap][ACCESS_TIME_INDEX] = pDriveTime;
+            storedDepartPeriodTazTazSkims[departPeriod][origTaz][destTaz][EGRESS_TIME_INDEX] = aWalkTime;
         }
         catch ( Exception e ) {
-            primaryLogger.error ("departPeriod=" + departPeriod + ", origTap=" + origTap + ", destTap=" + destTap + ", pDriveTime=" + pDriveTime);
-            primaryLogger.error ("exception setting drive-transit-walk drive access time in stored array.", e);
-        }
-
-        try {
-            storedDepartPeriodTapTapSkims[set][departPeriod][origTap][destTap][EGRESS_TIME_INDEX] = aWalkTime;
-        }
-        catch ( Exception e ) {
-            primaryLogger.error ("departPeriod=" + departPeriod + ", origTap=" + origTap + ", destTap=" + destTap + ", aWalkTime=" + aWalkTime);
+            primaryLogger.error ("departPeriod=" + departPeriod + ", origTaz=" + origTaz + ", destTaz=" + destTaz + ", aWalkTime=" + aWalkTime);
             primaryLogger.error ("exception setting drive-transit-walk walk egress time in stored array.", e);
         }
-        return storedDepartPeriodTapTapSkims[set][departPeriod][origTap][destTap];
+        return storedDepartPeriodTazTazSkims[departPeriod][origTaz][destTaz];
         
 
     }

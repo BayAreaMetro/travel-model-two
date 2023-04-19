@@ -47,17 +47,6 @@ public class Tour
     private Stop[]    outboundStops;
     private Stop[]    inboundStops;
     
-    //Dimension N-path by 3 - 0=btap, 1=atap, 2=skim set , 3=utility
-    private double[][]   bestWtwTapPairsOut;
-    private double[][]   bestWtwTapPairsIn;
-    private double[][]   bestWtdTapPairsOut;
-    private double[][]   bestWtdTapPairsIn;
-    private double[][]   bestDtwTapPairsOut;
-    private double[][]   bestDtwTapPairsIn;
-    
-    private float randomNumberForTapChoiceOut;
-    private float randomNumberForTapChoiceIn;
-    
     private int       choosenTransitPathIn;
     private int       choosenTransitPathOut;
     
@@ -444,115 +433,6 @@ public class Tour
         tempString = String.format("inboundStops[%s]:", inboundStops == null ? "" : String.valueOf(inboundStops.length));
         logger.info(tempString);
         
-        
-        if ( bestWtwTapPairsOut == null ) {
-            tempString = "bestWtwTapPairsOut: no tap pairs saved";
-        }
-        else {
-            if ( bestWtwTapPairsOut[0] == null )
-                tempString = "bestWtwTapPairsOut: " + 0 + "[" + "none" + "," + "none" + "," + "none" + "]";
-            else
-                tempString = "bestWtwTapPairsOut: " + 0 + "[" + bestWtwTapPairsOut[0][0] + "," + bestWtwTapPairsOut[0][1] + "," + bestWtwTapPairsOut[0][2] + "]";
-            for (int i=1; i < bestWtwTapPairsOut.length; i++)
-                if ( bestWtwTapPairsOut[i] == null )
-                    tempString += ", " + i + "[" + "none" + "," + "none" + "," + "none" + "]";
-                else
-                    tempString += ", " + i + "[" + bestWtwTapPairsOut[i][0] + "," + bestWtwTapPairsOut[i][1] + "," + bestWtwTapPairsOut[0][2] + "]";
-                        
-            tempString += ", choosenTransitPathOut: " + choosenTransitPathOut;
-        }
-        logger.info(tempString);
-
-        if ( bestWtwTapPairsIn == null ) {
-            tempString = "bestWtwTapPairsIn: no tap pairs saved";
-        }
-        else {
-            if ( bestWtwTapPairsIn[0] == null )
-                tempString = "bestWtwTapPairsIn: " + 0 + "[" + "none" + "," + "none" + "," + "none" + "]";
-            else
-                tempString = "bestWtwTapPairsIn: " + 0 + "[" + bestWtwTapPairsIn[0][0] + "," + bestWtwTapPairsIn[0][1] + "," + bestWtwTapPairsIn[0][2] + "]";
-            for (int i=1; i < bestWtwTapPairsIn.length; i++)
-                if ( bestWtwTapPairsIn[i] == null )
-                    tempString += ", " + 0 + "[" + "none" + "," + "none" + "," + "none" + "]";
-                else
-                    tempString += ", " + i + "[" + bestWtwTapPairsIn[i][0] + "," + bestWtwTapPairsIn[i][1] + "," + bestWtwTapPairsIn[0][2] + "]";
-            
-            tempString += ", choosenTransitPathIn: " + choosenTransitPathIn;
-        }
-        logger.info(tempString);
-
-        if ( bestWtdTapPairsOut == null ) {
-            tempString = "bestWtdTapPairsOut: no tap pairs saved";
-        }
-        else {
-            if ( bestWtdTapPairsOut[0] == null )
-                tempString = "bestWtdTapPairsOut: " + 0 + "[" + "none" + "," + "none" + "," + "none" + "]";
-            else
-                tempString = "bestWtdTapPairsOut: " + 0 + "[" + bestWtdTapPairsOut[0][0] + "," + bestWtdTapPairsOut[0][1] + "," + bestWtdTapPairsOut[0][2] + "]";
-            for (int i=1; i < bestWtdTapPairsOut.length; i++)
-                if ( bestWtdTapPairsOut[i] == null )
-                    tempString += ", " + i + "[" + "none" + "," + "none" + "," + "none" + "]";
-                else
-                    tempString += ", " + i + "[" + bestWtdTapPairsOut[i][0] + "," + bestWtdTapPairsOut[i][1] + "," + bestWtdTapPairsOut[0][2] + "]";
-            
-            tempString += ", choosenTransitPathOut: " + choosenTransitPathOut;
-        }
-        logger.info(tempString);
-
-        if ( bestWtdTapPairsIn == null ) {
-            tempString = "bestWtdTapPairsIn: no tap pairs saved";
-        }
-        else {
-            if ( bestWtdTapPairsIn[0] == null )
-                tempString = "bestWtdTapPairsIn: " + 0 + "[" + "none" + "," + "none" + "," + "none" + "]";
-            else
-                tempString = "bestWtdTapPairsIn: " + 0 + "[" + bestWtdTapPairsIn[0][0] + "," + bestWtdTapPairsIn[0][1] + "," + bestWtdTapPairsIn[0][2] + "]";
-            for (int i=1; i < bestWtdTapPairsIn.length; i++)
-                if ( bestWtdTapPairsIn[i] == null )
-                    tempString += ", " + 0 + "[" + "none" + "," + "none" + "," + "none" + "]";
-                else
-                    tempString += ", " + i + "[" + bestWtdTapPairsIn[i][0] + "," + bestWtdTapPairsIn[i][1] + "," + bestWtdTapPairsIn[0][2] + "]";
-            
-            tempString += ", choosenTransitPathIn: " + choosenTransitPathIn;
-        }
-        logger.info(tempString);
-
-        if ( bestDtwTapPairsOut == null ) {
-            tempString = "bestDtwTapPairsOut: no tap pairs saved";
-        }
-        else {
-            if ( bestDtwTapPairsOut[0] == null )
-                tempString = "bestDtwTapPairsOut: " + 0 + "[" + "none" + "," + "none" + "," + "none" + "]";
-            else
-                tempString = "bestDtwTapPairsOut: " + 0 + "[" + bestDtwTapPairsOut[0][0] + "," + bestDtwTapPairsOut[0][1] + "," + bestDtwTapPairsOut[0][2] + "]";
-            for (int i=1; i < bestDtwTapPairsOut.length; i++)
-                if ( bestDtwTapPairsOut[i] == null )
-                    tempString += ", " + i + "[" + "none" + "," + "none" + "," + "none" + "]";
-                else
-                    tempString += ", " + i + "[" + bestDtwTapPairsOut[i][0] + "," + bestDtwTapPairsOut[i][1] + "," + bestDtwTapPairsOut[0][2] + "]";
-            
-            tempString += ", choosenTransitPathOut: " + choosenTransitPathOut;
-        }
-        logger.info(tempString);
-
-        if ( bestDtwTapPairsIn == null ) {
-            tempString = "bestDtwTapPairsIn: no tap pairs saved";
-        }
-        else {
-            if ( bestDtwTapPairsIn[0] == null )
-                tempString = "bestDtwTapPairsIn: " + 0 + "[" + "none" + "," + "none" + "," + "none" + "]";
-            else
-                tempString = "bestDtwTapPairsIn: " + 0 + "[" + bestDtwTapPairsIn[0][0] + "," + bestDtwTapPairsIn[0][1] + "," + bestDtwTapPairsIn[0][2] + "]";
-            for (int i=1; i < bestDtwTapPairsIn.length; i++)
-                if ( bestDtwTapPairsIn[i] == null )
-                    tempString += ", " + 0 + "[" + "none" + "," + "none" + "," + "none" + "]";
-                else
-                    tempString += ", " + i + "[" + bestDtwTapPairsIn[i][0] + "," + bestDtwTapPairsIn[i][1] + "," + bestDtwTapPairsIn[0][2] + "]";
-            
-            tempString += ", choosenTransitPathIn: " + choosenTransitPathIn;
-        }
-        logger.info(tempString);
-
     }
 
     public void logEntireTourObject(Logger logger)
@@ -646,38 +526,6 @@ public class Tour
         return tourModalProbabilities;
     }
 
-    
-    
-    public void setBestWtwTapPairsOut( double[][] tapPairArray )
-    {
-        bestWtwTapPairsOut = tapPairArray;
-    }
-
-    public void setBestWtwTapPairsIn( double[][] tapPairArray )
-    {
-        bestWtwTapPairsIn = tapPairArray;
-    }
-
-    public void setBestWtdTapPairsOut( double[][] tapPairArray )
-    {
-        bestWtdTapPairsOut = tapPairArray;
-    }
-
-    public void setBestWtdTapPairsIn( double[][] tapPairArray )
-    {
-        bestWtdTapPairsIn = tapPairArray;
-    }
-
-    public void setBestDtwTapPairsOut( double[][] tapPairArray )
-    {
-        bestDtwTapPairsOut = tapPairArray;
-    }
-
-    public void setBestDtwTapPairsIn( double[][] tapPairArray )
-    {
-        bestDtwTapPairsIn = tapPairArray;
-    }
-    
     public void setChoosenTransitPathIn( int path )
     {
     	choosenTransitPathIn = path;
@@ -686,36 +534,6 @@ public class Tour
     public void setChoosenTransitPathOut( int path )
     {
     	choosenTransitPathOut = path;
-    }
-    
-    public double[][] getBestWtwTapPairsOut()
-    {
-        return bestWtwTapPairsOut;
-    }
-    
-    public double[][] getBestWtwTapPairsIn()
-    {
-        return bestWtwTapPairsIn;
-    }
-    
-    public double[][] getBestWtdTapPairsOut()
-    {
-        return bestWtdTapPairsOut;
-    }
-    
-    public double[][] getBestWtdTapPairsIn()
-    {
-        return bestWtdTapPairsIn;
-    }
-    
-    public double[][] getBestDtwTapPairsOut()
-    {
-        return bestDtwTapPairsOut;
-    }
-    
-    public double[][] getBestDtwTapPairsIn()
-    {
-        return bestDtwTapPairsIn;
     }
     
     public double getChoosenTransitPathIn()
@@ -750,21 +568,4 @@ public class Tour
 	public void setDestinationChoiceLogsum(float destinationChoiceLogsum) {
 		this.destinationChoiceLogsum = destinationChoiceLogsum;
 	}
-
-	public float getRandomNumberForTapChoiceOut() {
-		return randomNumberForTapChoiceOut;
-	}
-
-	public void setRandomNumberForTapChoiceOut(float randomNumberForTapChoiceOut) {
-		this.randomNumberForTapChoiceOut = randomNumberForTapChoiceOut;
-	}
-
-	public float getRandomNumberForTapChoiceIn() {
-		return randomNumberForTapChoiceIn;
-	}
-
-	public void setRandomNumberForTapChoiceIn(float randomNumberForTapChoiceIn) {
-		this.randomNumberForTapChoiceIn = randomNumberForTapChoiceIn;
-	}
-
 }

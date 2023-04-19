@@ -21,19 +21,15 @@ public class NodeZoneMapping {
 	
 	private final Map<Integer,Integer> originalToSequenceTaz;
 	private final Map<Integer,Integer> originalToSequenceMaz;
-	private final Map<Integer,Integer> originalToSequenceTap;
 	private final Map<Integer,Integer> sequenceToOriginalTaz;
 	private final Map<Integer,Integer> sequenceToOriginalMaz;
-	private final Map<Integer,Integer> sequenceToOriginalTap;
 	
 	public NodeZoneMapping(Map<String,String> properties) {
 		originalToSequenceTaz = new TreeMap<>();
 		originalToSequenceMaz = new TreeMap<>();
-		originalToSequenceTap = new TreeMap<>();
 		loadNodeSequenceData(Paths.get(properties.get(CtrampApplication.PROPERTIES_PROJECT_DIRECTORY) + properties.get(NETWORK_NODE_SEQUENCE_FILE_PROPERTY)));
 		sequenceToOriginalTaz = reverseMap(originalToSequenceTaz);
 		sequenceToOriginalMaz = reverseMap(originalToSequenceMaz);
-		sequenceToOriginalTap = reverseMap(originalToSequenceTap);
 	}
 	
 	private void loadNodeSequenceData(Path sequenceFile) {
@@ -44,17 +40,14 @@ public class NodeZoneMapping {
 			int[] nodeIds = nodeSeqTable.getColumnAsInt("N");
 			int[] tazs    = nodeSeqTable.getColumnAsInt("TAZSEQ");
 			int[] mazs    = nodeSeqTable.getColumnAsInt("MAZSEQ");
-			int[] taps    = nodeSeqTable.getColumnAsInt("TAPSEQ");
 
 			System.out.println("tazs length= " + tazs.length);
 			for(int i=0; i<nodeIds.length; i++) {
 				if (tazs[i] > 0) { originalToSequenceTaz.put(nodeIds[i], tazs[i]); }
 				if (mazs[i] > 0) { originalToSequenceMaz.put(nodeIds[i], mazs[i]); }
-				if (taps[i] > 0) { originalToSequenceTap.put(nodeIds[i], taps[i]); }
 			}
 			System.out.println("tazs size= " + originalToSequenceTaz.size());
 			System.out.println("mazs size= " + originalToSequenceMaz.size());
-			System.out.println("taps size= " + originalToSequenceTap.size());
 			System.out.println("taz for node 200700: " + originalToSequenceTaz.get(200700));
 
         } catch (IOException e) {
@@ -77,20 +70,12 @@ public class NodeZoneMapping {
 		return originalToSequenceMaz.get(originalMaz);
 	}
 	
-	public int getSequenceTap(int originalTap) {
-		return originalToSequenceTap.get(originalTap);
-	}
-	
 	public int getOriginalTaz(int sequenceTaz) {
 		return sequenceToOriginalTaz.get(sequenceTaz);
 	}
 	
 	public int getOriginalMaz(int sequenceMaz) {
 		return sequenceToOriginalMaz.get(sequenceMaz);
-	}
-	
-	public int getOriginalTap(int sequenceTap) {
-		return sequenceToOriginalTap.get(sequenceTap);
 	}
 
 	public Set<Integer> getOriginalTazs() {
@@ -101,20 +86,12 @@ public class NodeZoneMapping {
 		return originalToSequenceMaz.keySet();
 	}
 
-	public Set<Integer> getOriginalTaps() {
-		return originalToSequenceTap.keySet();
-	}
-
 	public Set<Integer> getSequenceTazs() {
 		return sequenceToOriginalTaz.keySet();
 	}
 
 	public Set<Integer> getSequenceMazs() {
 		return sequenceToOriginalMaz.keySet();
-	}
-
-	public Set<Integer> getSequenceTaps() {
-		return sequenceToOriginalTap.keySet();
 	}
 
 }

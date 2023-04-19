@@ -110,10 +110,7 @@ public class AutoUEC
         // log DMU values
         if (trace)
         {
-            TapDataManager tapManager = TapDataManager.getInstance();
-            if (Arrays.binarySearch(tapManager.getTaps(), pTaz) > 0
-                    && Arrays.binarySearch(tapManager.getTaps(), aTaz) > 0)
-                uec.logDataValues(logger, pTaz, aTaz, aTaz);
+            uec.logDataValues(logger, pTaz, aTaz, aTaz);
             dmu.logValues(logger);
         }
 
