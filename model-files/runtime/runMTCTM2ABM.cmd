@@ -38,14 +38,14 @@ rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -
 rem java -agentlib:jdwp=transport=dt_socket,address=1045,server=y,suspend=y -server Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
 
 rem ## backup CT-RAMP outputs since they will be over-written by PNR model
-mkdir ctramp_output\unconstrained
-copy ctramp_output\indivTourData_%iteration%.csv ctramp_output\unconstrained /Y
-copy ctramp_output\jointTourData_%iteration%.csv ctramp_output\unconstrained /Y
-copy ctramp_output\indivTripData_%iteration%.csv ctramp_output\unconstrained /Y
-copy ctramp_output\jointTripData_%iteration%.csv ctramp_output\unconstrained /Y
+rem mkdir ctramp_output\unconstrained
+rem copy ctramp_output\indivTourData_%iteration%.csv ctramp_output\unconstrained /Y
+rem copy ctramp_output\jointTourData_%iteration%.csv ctramp_output\unconstrained /Y
+rem copy ctramp_output\indivTripData_%iteration%.csv ctramp_output\unconstrained /Y
+rem copy ctramp_output\jointTripData_%iteration%.csv ctramp_output\unconstrained /Y
 
 rem ### Run PNR model
-java -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.transitcapacityrestraint.ParkingCapacityRestraintModel mtcpcrm -iteration %iteration% -sampleRate %sampleRate% -sampleSeed 0
+rem java -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.transitcapacityrestraint.ParkingCapacityRestraintModel mtcpcrm -iteration %iteration% -sampleRate %sampleRate% -sampleSeed 0
 
 rem ### Run ABM DISTRIBUTED
 rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientDistributed.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
