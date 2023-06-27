@@ -176,7 +176,7 @@ public final class MgraDataManager
        
         setupNaicsArrays();
        
-        printMgraStats();
+        //printMgraStats();
     }
 
     /**
@@ -1150,6 +1150,8 @@ public final class MgraDataManager
         		int timePeriod = Integer.parseInt(data[1]);
         		int time = new Double(data[3]).intValue();
         		
+        		if (mgraStopsWalkTime[mgra] == null)
+        		    mgraStopsWalkTime[mgra] = new HashMap();
         		mgraStopsWalkTime[mgra].put(timePeriod,time);
         	}
     	} catch (IOException e) {
