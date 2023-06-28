@@ -80,7 +80,7 @@ public class WalkTransitWalkSkimsCalculator
 
     public WalkTransitWalkSkimsCalculator(HashMap<String, String> rbMap)
     {
-        mgraManager = MgraDataManager.getInstance();
+        tazManager = TazDataManager.getInstance();
         maxTaz = tazManager.getMaxTaz();
     }
 
