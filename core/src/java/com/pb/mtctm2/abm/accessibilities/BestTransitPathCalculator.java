@@ -229,6 +229,7 @@ public class BestTransitPathCalculator implements Serializable
     }
     
     public float calcDriveAccessRatioDisutility(TransitDriveAccessDMU driveDmu, int pMgra, int pTaz, float origDestDistance, AccessMode accMode, boolean myTrace, Logger myLogger){
+    	driveDmu.setOrigDestDistance(origDestDistance);
     	float util = (float)driveAccDisutilityUEC.solve(index, driveDmu, null)[0];
         // logging
         if (myTrace) {
@@ -280,6 +281,7 @@ public class BestTransitPathCalculator implements Serializable
      */
     public float calcDriveEgressRatioDisutility(TransitDriveAccessDMU driveDmu, int aMgra, int aTaz, float origDestDistance, AccessMode accMode, boolean myTrace, Logger myLogger)
     {
+    	driveDmu.setOrigDestDistance(origDestDistance);
     	float util = (float)driveEgrDisutilityUEC.solve(index, driveDmu, null)[0];
         // logging
         if (myTrace) {

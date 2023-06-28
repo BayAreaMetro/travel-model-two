@@ -69,6 +69,7 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
     public static final int                   DTW = 2;
     
     private AutoAndNonMotorizedSkimsCalculator anm;
+    private AutoTazSkimsCalculator tazDistanceCalculator;
    
     /**
      * Call threaded but not with JPPF
@@ -171,6 +172,7 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
             DataProvider dataProvider = getDataProvider();
 
             mgraManager = (MgraDataManager) dataProvider.getValue("mgraManager");
+            tazDistanceCalculator = (AutoTazSkimsCalculator) dataProvider.getValue("tazDistanceCalculator");
             sovExpUtilities = (double[][][]) dataProvider.getValue("sovExpUtilities");
             hovExpUtilities = (double[][][]) dataProvider.getValue("hovExpUtilities");
             nMotorExpUtilities = (double[][][]) dataProvider.getValue("nMotorExpUtilities");
@@ -189,8 +191,6 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
             dcUtilityPage = (int) dataProvider.getValue("dcUtilityPage");
 
             rbMap = (HashMap<String, String>) dataProvider.getValue("rbMap");
-            
-
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -238,7 +238,10 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
 //        ntUtilities.setNonMotorUtilsMap(ntUtilitiesMap);
 
         McLogsumsCalculator logsumHelper = new McLogsumsCalculator();
-        logsumHelper.setupSkimCalculators(rbMap);
+        logsumHelper.setupSkimCalculators(rbMap);               
+        logsumHelper.setTazDistanceSkimArrays( tazDistanceCalculator.getStoredFromTazToAllTazsDistanceSkims(), tazDistanceCalculator.getStoredToTazFromAllTazsDistanceSkims() );
+        anm = logsumHelper.getAnmSkimCalculator();
+        
         bestPathCalculator = logsumHelper.getBestTransitPathCalculator();
 
         // set up the tracer object
@@ -324,7 +327,7 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
             	if (!sample[jMgra]) continue;
             	
             	//log zone pair processed
-                //logger.info("...Origin MGRA "+ iMgra + "...Destination MGRA "+ jMgra);
+            	//logger.info("...Origin MGRA "+ iMgra + "...Destination MGRA "+ jMgra);
             	
                 if (!hasSizeTerm[jMgra]) continue;
 
