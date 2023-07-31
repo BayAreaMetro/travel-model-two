@@ -65,8 +65,6 @@ public class WalkTransitDriveSkimsCalculator
     // UEC
 
     private BestTransitPathCalculator     bestPathUEC;
-
-    private MgraDataManager               mgraManager;
     private TazDataManager                tazManager;
     private int                           maxTaz;
 
@@ -78,7 +76,7 @@ public class WalkTransitDriveSkimsCalculator
 
     public WalkTransitDriveSkimsCalculator(HashMap<String, String> rbMap)
     {
-        mgraManager = MgraDataManager.getInstance();
+    	tazManager = TazDataManager.getInstance();
         maxTaz = tazManager.getMaxTaz();
     }
 
