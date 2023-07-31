@@ -185,9 +185,9 @@ public class IntermediateStopChoiceModels implements Serializable {
     private int[] finalSample;
     private double[] sampleCorrectionFactors; 
     private double[] tripModeChoiceLogsums;
-    private boolean[] sampleMgraInBoardingStopsShed;
-    private boolean[] sampleMgraInAlightingStopsShed;
-    private boolean earlierTripWasLocatedInAlightingStopsShed; 
+    private boolean[] sampleMgraInBoardingTazShed;
+    private boolean[] sampleMgraInAlightingTazShed;
+    private boolean earlierTripWasLocatedInAlightingTazShed; 
 
     private double[] tourOrigToAllMgraDistances;
     private double[] tourDestToAllMgraDistances;
@@ -448,8 +448,8 @@ public class IntermediateStopChoiceModels implements Serializable {
         soaSampleBackup = new int[numSlcSoaAlternatives+1];
         soaAvailabilityBackup = new boolean[numSlcSoaAlternatives+1];
 
-        sampleMgraInBoardingStopsShed = new boolean[mgraManager.getMaxMgra()+1];
-        sampleMgraInAlightingStopsShed = new boolean[mgraManager.getMaxMgra()+1];
+        sampleMgraInBoardingTazShed = new boolean[mgraManager.getMaxMgra()+1];
+        sampleMgraInAlightingTazShed = new boolean[mgraManager.getMaxMgra()+1];
         
         distanceFromStopOrigToAllMgras  = new double[mgraManager.getMaxMgra()+1];
         distanceToFinalDestFromAllMgras = new double[mgraManager.getMaxMgra()+1];
@@ -1186,7 +1186,7 @@ public class IntermediateStopChoiceModels implements Serializable {
         if (stops != null) {
 
         	int oldSelectedIndex = -1;
-            earlierTripWasLocatedInAlightingStopsShed = false;
+            earlierTripWasLocatedInAlightingTazShed = false;
             for ( int i=0; i < stops.length; i++ ) {
                 
                 Stop stop = stops[i];
@@ -1222,13 +1222,13 @@ public class IntermediateStopChoiceModels implements Serializable {
                         check = System.nanoTime();
                         
                         
-                       selectedIndex = selectDestinationWithTiming(stop,departPeriodToStop,departPeriodFromStop);
-                       choice = finalSample[selectedIndex];
-                        
+                        selectedIndex = selectDestinationWithTiming(stop,departPeriodToStop,departPeriodFromStop);
+                        choice = finalSample[selectedIndex];
+                            
                         stop.setDest(choice);
                         
-                        if ( sampleMgraInAlightingStopsShed[choice] )
-                            earlierTripWasLocatedInAlightingStopsShed = true;
+                        if ( sampleMgraInAlightingTazShed[choice] )
+                            earlierTripWasLocatedInAlightingTazShed = true;
                         lastDest = choice;
                         slcTime += ( System.nanoTime() - check );
                         
@@ -1479,8 +1479,8 @@ public class IntermediateStopChoiceModels implements Serializable {
         // if tour mode is transit, set availablity of location alternatives based on transit accessibility relative to best transit TAP pair for tour
         if ( modelStructure.getTourModeIsTransit( tour.getTourModeChoice() ) ) {            
             
-        	Arrays.fill( sampleMgraInBoardingStopsShed, false );
-            Arrays.fill( sampleMgraInAlightingStopsShed, false );
+        	Arrays.fill( sampleMgraInBoardingTazShed, false );
+            Arrays.fill( sampleMgraInAlightingTazShed, false );
         	
         	int numAvailableAlternatives = setSoaAvailabilityForTransitTour(s, tour, household.getDebugChoiceModels());
             if ( numAvailableAlternatives == 0 ) {
@@ -1736,14 +1736,13 @@ public class IntermediateStopChoiceModels implements Serializable {
         // if tour mode is transit, set availablity of location alternatives based on transit accessibility relative to best transit TAP pair for tour
         if ( modelStructure.getTourModeIsTransit( tour.getTourModeChoice() ) ) {            
             
-        	Arrays.fill( sampleMgraInBoardingStopsShed, false );
-            Arrays.fill( sampleMgraInAlightingStopsShed, false );
+        	Arrays.fill( sampleMgraInBoardingTazShed, false );
+            Arrays.fill( sampleMgraInAlightingTazShed, false );
         	
         	int numAvailableAlternatives = setSoaAvailabilityForTransitTour(s, tour, household.getDebugChoiceModels());
             if ( numAvailableAlternatives == 0 ) {
                 logger.error( "No available stop locations in sample for household "+household.getHhId()+" personNum "+person.getPersonNum()+
                 		" transit tour "+tour.getTourId()+" stop "+s.getStopId()+" - empty sample." );
-                //logger.error("Best tap pair which is empty: " +  Arrays.deepToString(s.isInboundStop() ? tour.getBestWtwTapPairsIn() : tour.getBestWtwTapPairsOut()));
                 throw new RuntimeException();
             }
         }
@@ -1844,6 +1843,10 @@ public class IntermediateStopChoiceModels implements Serializable {
             selectedIndex = slcModelArray[slcModelIndex].getChoiceResult( rn );
             chosen= finalSample[selectedIndex];
             
+        }
+        
+        if (selectedIndex == -1) {
+        	modelLogger.error( "ERROR selecting stop location choice due to no alternatives available." );
         }
 
         
@@ -2032,20 +2035,20 @@ public class IntermediateStopChoiceModels implements Serializable {
             	if ( ! s.isInboundStop() ) {
 
             		// if the sampled mgra is in the outbound half-tour boarding tap shed (near tour origin)
-            		if ( sampleMgraInBoardingStopsShed[altMgra] ) {
+            		if ( sampleMgraInBoardingTazShed[altMgra] ) {
             			logsumHelper.setWalkTransitLogSumUnavailable( mcDmuObject );
             			logsumHelper.setDriveTransitLogSumUnavailable( mcDmuObject, s.isInboundStop() );
             		}
 
             		// if the sampled mgra is in the outbound half-tour alighting tap shed (near tour primary destination)
-            		if ( sampleMgraInAlightingStopsShed[altMgra] ) {
+            		if ( sampleMgraInAlightingTazShed[altMgra] ) {
             			logsumHelper.setWalkTransitLogSumUnavailable( mcDmuObject );
             			logsumHelper.setDtwTripMcDmuAttributes(mcDmuObject,s.getOrig(),altMgra,departPeriodToStop,s.getTour().getPersonObject().getHouseholdObject().getDebugChoiceModels());
             		}
 
             
             		// if the trip origin and sampled mgra are in the outbound half-tour alighting tap shed (near tour origin)
-            		if ( sampleMgraInAlightingStopsShed[s.getOrig()] && sampleMgraInAlightingStopsShed[altMgra] ) {
+            		if ( sampleMgraInAlightingTazShed[s.getOrig()] && sampleMgraInAlightingTazShed[altMgra] ) {
             			logsumHelper.setWtwTripMcDmuAttributes(mcDmuObject, s.getOrig(), altMgra, departPeriodToStop,s.getTour().getPersonObject().getHouseholdObject().getDebugChoiceModels());
             			logsumHelper.setDriveTransitLogSumUnavailable( mcDmuObject, s.isInboundStop() );
             		}
@@ -2054,19 +2057,19 @@ public class IntermediateStopChoiceModels implements Serializable {
             	else {
             		
             		// if the sampled mgra is in the inbound half-tour boarding tap shed (near tour primary destination)
-            		if ( sampleMgraInBoardingStopsShed[altMgra] ) {
+            		if ( sampleMgraInBoardingTazShed[altMgra] ) {
             			logsumHelper.setWtwTripMcDmuAttributes( mcDmuObject, s.getOrig(), altMgra, departPeriodToStop, s.getTour().getPersonObject().getHouseholdObject().getDebugChoiceModels() );
             			logsumHelper.setDriveTransitLogSumUnavailable( mcDmuObject, s.isInboundStop() );
             		}
 
             		// if the sampled mgra is in the inbound half-tour alighting tap shed (near tour origin)
-            		if ( sampleMgraInAlightingStopsShed[altMgra] ) {
+            		if ( sampleMgraInAlightingTazShed[altMgra] ) {
             			logsumHelper.setWalkTransitLogSumUnavailable( mcDmuObject );
             			logsumHelper.setWtdTripMcDmuAttributes(mcDmuObject,s.getOrig(),altMgra,departPeriodToStop,s.getTour().getPersonObject().getHouseholdObject().getDebugChoiceModels());
             		}
 
             		// if the trip origin and sampled mgra are in the inbound half-tour alighting tap shed (near tour origin)
-            		if ( sampleMgraInAlightingStopsShed[s.getOrig()] && sampleMgraInAlightingStopsShed[altMgra] ) {
+            		if ( sampleMgraInAlightingTazShed[s.getOrig()] && sampleMgraInAlightingTazShed[altMgra] ) {
             			logsumHelper.setWalkTransitLogSumUnavailable( mcDmuObject );
             			logsumHelper.setDriveTransitLogSumUnavailable( mcDmuObject, s.isInboundStop() );
             		}
@@ -2140,13 +2143,13 @@ public class IntermediateStopChoiceModels implements Serializable {
             	// if the direction is outbound
             	if ( ! s.isInboundStop() ) {
             		
-            		if ( sampleMgraInBoardingStopsShed[altMgra] ) {
+            		if ( sampleMgraInBoardingTazShed[altMgra] ) {
             			logsumHelper.setWalkTransitLogSumUnavailable( mcDmuObject );
             			logsumHelper.setDtwTripMcDmuAttributes(mcDmuObject,altMgra,halfTourFinalDest,departPeriodFromStop,s.getTour().getPersonObject().getHouseholdObject().getDebugChoiceModels());
             		}
 
             		// if the trip origin is in the outbound half-tour alighting tap shed (close to tour primary destination)
-            		if ( sampleMgraInAlightingStopsShed[altMgra] ) {
+            		if ( sampleMgraInAlightingTazShed[altMgra] ) {
             			logsumHelper.setWtwTripMcDmuAttributes( mcDmuObject, altMgra, halfTourFinalDest, departPeriodFromStop, s.getTour().getPersonObject().getHouseholdObject().getDebugChoiceModels() );
             			logsumHelper.setDriveTransitLogSumUnavailable( mcDmuObject, s.isInboundStop() );
             		}
@@ -2154,13 +2157,13 @@ public class IntermediateStopChoiceModels implements Serializable {
             	}
             	else {
             		
-            		if ( sampleMgraInBoardingStopsShed[altMgra] ) {
+            		if ( sampleMgraInBoardingTazShed[altMgra] ) {
             			logsumHelper.setWalkTransitLogSumUnavailable( mcDmuObject );
             			logsumHelper.setWtdTripMcDmuAttributes(mcDmuObject,altMgra,halfTourFinalDest,departPeriodFromStop,s.getTour().getPersonObject().getHouseholdObject().getDebugChoiceModels());
             		}
             		
             		// if the trip origin is in the inbound half-tour alighting tap shed (close to tour origin)
-            		if ( sampleMgraInAlightingStopsShed[altMgra] ) {
+            		if ( sampleMgraInAlightingTazShed[altMgra] ) {
             			logsumHelper.setWtwTripMcDmuAttributes( mcDmuObject, altMgra, halfTourFinalDest, departPeriodFromStop, s.getTour().getPersonObject().getHouseholdObject().getDebugChoiceModels() );
             			logsumHelper.setDriveTransitLogSumUnavailable( mcDmuObject, s.isInboundStop() );
             		}
@@ -2688,97 +2691,61 @@ public class IntermediateStopChoiceModels implements Serializable {
         
     }
 
-
     /**
-     * determine if each indexed mgra has transit access to the best tap pairs for the tour
-     * create an array with 1 if the mgra indexed has at least one TAP within walk egress distance of the mgra
-     * or zero if no walk TAPS exist for the mgra. 
+     * Determine MGRAs are potential stop locations for a Transit Tour
      */
     private int setSoaAvailabilityForTransitTour( Stop s, Tour t, boolean debug ) {
 
-        
         int availableCount = 0;
-        double[][] bestTaps = null;
-        
+       
         if(debug){
         	slcSoaLogger.info("Logging stop sampling for transit tour");
         	t.logEntireTourObject(slcSoaLogger);
         	s.logStopObject(slcSoaLogger,1000);
         }
         
+        // loop through MGRAs and determine if they are available as a stop location
+    	// Alternative MGRA is available as a potential stop if it is in the same TAZ as origin MGRA or the destination MGRA. 
+    	        
         if ( s.isInboundStop() ) {
-            
-            // loop through mgras and determine if they are available as a stop location
+   	
             ArrayList<Integer> mgras = mgraManager.getMgras();
-            for (int alt : mgras)
-            {
-                // if alternative mgra is unavailable because it has no size, no need to check its accessibility
-                //if ( ! soaAvailability[alt] )
-                //    continue;                    
-
-                boolean accessible = false;
-                int i=-1;
-                    
-                boolean altIsInWalkDistanceOfOrigin = mgraManager.getMgrasAreWithinWalkDistance(s.getOrig(), alt);
-                boolean altIsWalkAccessibleFromBoardingStops = mgraManager.getStopsAreWalkAccessibleFromMgra(alt, s.getStopPeriod());
-                    
-                    if ( modelStructure.getTourModeIsWalkTransit(t.getTourModeChoice() ) ) {
-                        // if alternative location mgra is accessible by walk to the inbound boarding stop, AND it's accessible by walk to the stop origin, it's available.                    
-                        if ( altIsWalkAccessibleFromBoardingStops
-                                && altIsInWalkDistanceOfOrigin
-                                && earlierTripWasLocatedInAlightingStopsShed == false ) {
-                            accessible = true;
-                            sampleMgraInBoardingStopsShed[alt] = true;
-                        }
-                        // if alternative location mgra is accessible by walk to the inbound alighting stop, AND it's accessible by walk to the tour origin, it's available.                    
-                        else if ( mgraManager.getStopsAreWalkAccessibleFromMgra(alt, s.getStopPeriod()) 
-                        		&& mgraManager.getMgrasAreWithinWalkDistance(alt, t.getTourOrigMgra()) ) {
-                            accessible = true;
-                            sampleMgraInAlightingStopsShed[alt] = true;
-                        }
-                    }
-                    else {
-                        // if alternative location mgra is accessible by walk to the best origin taps, AND it's accessible by walk to the stop origin, it's available.                    
-                        if (  altIsWalkAccessibleFromBoardingStops
-                                && altIsInWalkDistanceOfOrigin
-                                && earlierTripWasLocatedInAlightingStopsShed == false ) {
-                            accessible = true;
-                            sampleMgraInBoardingStopsShed[alt] = true;
-                        }
-                        // if alternative location mgra is accessible by drive to any of the best destination taps it's available.     
-                        // in non-tap version, move this avail rule in UEC, using drive access skims
-                        //else if (  mgraManager.getStopsAreDriveAccessibleFromMgra(alt, s.getStopPeriod()) ) {
-                        //    accessible = true;
-                        //    sampleMgraInAlightingStopsShed[alt] = true;
-                        //}
-                    }
-                    //if alternative is tour destination mgra it is accessible to boarding (inbound)
-                    if(alt==t.getTourDestMgra()){
-                    	accessible = true;
-                    	sampleMgraInBoardingStopsShed[alt] = true;
-                    }
-                    //if alternative is tour origin mgra it is accessible to alighting (inbound)
-                    if(alt==t.getTourOrigMgra()){
-                    	accessible = true;
-                    	sampleMgraInAlightingStopsShed[alt] = true;
-                    }
-
-                    if ( accessible ){
-                        if(debug){
-                        	slcSoaLogger.info("");
-                        	if(sampleMgraInBoardingStopsShed[alt]==true){
-                        		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for stops");
-                        	}else if(sampleMgraInAlightingStopsShed[alt]==true){
-                           		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for stops");
-                        	}
-                        	if((sampleMgraInBoardingStopsShed[alt]==true) && (sampleMgraInAlightingStopsShed[alt]==true)) //should not happen
-                           		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for stops");
-                        }
-                        
-                        break;
-                    }
+            for (int alt : mgras) {
+            	boolean available = false;
+            	
+            	int altTaz = mgraManager.getTaz(alt);
+                int origTaz = mgraManager.getTaz(s.getOrig());
+                int destTaz = mgraManager.getTaz(t.getTourOrigMgra());
                 
-                if ( accessible ) {
+                boolean altIsInSameTazAsOrig = altTaz == origTaz;
+                boolean altIsInSameTazAsDest = altTaz == destTaz;
+                		
+        		// Walk to Transit Tour
+            	if ( modelStructure.getTourModeIsWalkTransit(t.getTourModeChoice() ) ) {
+
+            		// Alternative is available if
+            		// Alt is in the same TAZ as Origin
+            		if ( altIsInSameTazAsOrig && earlierTripWasLocatedInAlightingTazShed == false) {
+            			available = true;
+            			sampleMgraInBoardingTazShed[alt] = true;
+            		}
+            		
+            		// or Alt is in the same TAZ as Destination
+            		if ( altIsInSameTazAsDest ) {
+            			available = true;
+            			sampleMgraInAlightingTazShed[alt] = true;
+            		}
+            	}
+            	// Drive to Transit Tour
+            	else {
+            		// Stop is only allowed on walk leg of the drive to transit tour
+            		if ( altIsInSameTazAsOrig ) {
+            			available = true;
+            			sampleMgraInAlightingTazShed[alt] = true;
+            		}
+            	}
+
+                if ( available ) {
                     availableCount++;
                 }
                 else {
@@ -2787,87 +2754,48 @@ public class IntermediateStopChoiceModels implements Serializable {
                     
                     if(debug)
                     	slcSoaLogger.info("Stop alternative "+alt+" is not available");
-                }
-
+                }	
             }
-                
         }
-        else
-        {
-            
-            // loop through mgras and determine if they have walk egress
+        else {
+        	
             ArrayList<Integer> mgras = mgraManager.getMgras();
-            for (int alt : mgras)
-            {
-            	// if alternative mgra is unavailable because it has no size, no need to check its accessibility
-                //if ( ! soaAvailability[alt] )
-                //    continue;                    
-
-                // check whether any of the outbound dtw boarding taps or best wtw alighting taps are in the set of walk accessible TAPs for the alternative mgra.
-                // if not, the alternative is not available.
-                boolean accessible = false;
-                int i=-1;
-                    
-                boolean altIsInWalkDistanceOfOrigin = mgraManager.getMgrasAreWithinWalkDistance(s.getOrig(), alt);
-                boolean altIsWalkAccessibleFromBoardingStops = mgraManager.getStopsAreWalkAccessibleFromMgra(alt, s.getStopPeriod());
-
-                if ( modelStructure.getTourModeIsWalkTransit(t.getTourModeChoice() ) ) {
-                    // if alternative location mgra is accessible by walk to any of the best origin taps, AND it's accessible by walk to the stop origin, it's available.                    
-                    if ( altIsWalkAccessibleFromBoardingStops
-                            && altIsInWalkDistanceOfOrigin
-                            && earlierTripWasLocatedInAlightingStopsShed == false ) {
-                        accessible = true;
-                        sampleMgraInBoardingStopsShed[alt] = true;
-                    }
-                    // if alternative location mgra is accessible by walk to any of the best destination taps, AND it's accessible by walk to the tour primary destination, it's available.                    
-                    else if ( mgraManager.getStopsAreWalkAccessibleFromMgra(alt, s.getStopPeriod()) 
-                    		&& mgraManager.getMgrasAreWithinWalkDistance(alt, t.getTourDestMgra()) ) {
-                        accessible = true;
-                        sampleMgraInAlightingStopsShed[alt] = true;
-                    }
-                }
-                else {
-                    // if alternative location mgra is accessible by drive to any of the best origin taps, it's available.
-                	// in non-tap version, move this avail rule in UEC, using drive access skims
-                    //if ( mgraManager.getStopsAreaDriveAccessibleFromMgra(alt, s.getStopPeriod())
-                    //        && earlierTripWasLocatedInAlightingStopsShed == false ) {
-                    //    accessible = true;
-                    //    sampleMgraInBoardingStopsShed[alt] = true;
-                    //}
-                    // if alternative location mgra is accessible by walk to any of the best destination taps, AND it's accessible by walk to the tour primary destination, it's available.                    
-                    if ( mgraManager.getStopsAreWalkAccessibleFromMgra(alt, s.getStopPeriod()) 
-                    		&& mgraManager.getMgrasAreWithinWalkDistance(alt, t.getTourDestMgra()) ) {
-                        accessible = true;
-                        sampleMgraInAlightingStopsShed[alt] = true;
-                    }
-                }
-                //if alternative is tour origin mgra it is accessible to boarding (outbound)
-                if(alt==t.getTourOrigMgra()){
-                	accessible = true;
-                	sampleMgraInBoardingStopsShed[alt] = true;
-                }
-                //if alternative is tour destination mgra it is accessible to alighting (outbound)
-                if(alt==t.getTourDestMgra()){
-                	accessible = true;
-                	sampleMgraInAlightingStopsShed[alt] = true;
-                }
-
-                if ( accessible ){
-                    if(debug){
-                    	slcSoaLogger.info("");
-                    	if(sampleMgraInBoardingStopsShed[alt]==true)
-                    		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for stops");
-                    	else if(sampleMgraInAlightingStopsShed[alt]==true)
-                       		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for stop");
-                   
-                    	if((sampleMgraInBoardingStopsShed[alt]==true) && (sampleMgraInAlightingStopsShed[alt]==true)) //should not happen
-                       		slcSoaLogger.info("Stop alternative MGRA "+alt+" is accessible for stop");
-                    }
-
-                    break;
-                }
+            for (int alt : mgras) {
+            	boolean available = false;
+            	
+            	int altTaz = mgraManager.getTaz(alt);
+                int origTaz = mgraManager.getTaz(s.getOrig());
+                int destTaz = mgraManager.getTaz(t.getTourDestMgra());
                 
-                if ( accessible ) {
+                boolean altIsInSameTazAsOrig = altTaz == origTaz;
+                boolean altIsInSameTazAsDest = altTaz == destTaz;
+                		
+        		// Walk to Transit Tour
+            	if ( modelStructure.getTourModeIsWalkTransit(t.getTourModeChoice() ) ) {
+
+            		// Alternative is available if
+            		// Alt is in the same TAZ as Origin
+            		if ( altIsInSameTazAsOrig && earlierTripWasLocatedInAlightingTazShed == false) {
+            			available = true;
+            			sampleMgraInBoardingTazShed[alt] = true;
+            		}
+            		
+            		// or Alt is in the same TAZ as Destination
+            		if ( altIsInSameTazAsDest ) {
+            			available = true;
+            			sampleMgraInAlightingTazShed[alt] = true;
+            		}
+            	}
+            	// Drive to Transit Tour
+            	else {
+            		// Stop is only allowed on walk leg of the drive to transit tour
+            		if ( altIsInSameTazAsDest ) {
+            			available = true;
+            			sampleMgraInAlightingTazShed[alt] = true;
+            		}
+            	}
+
+                if ( available ) {
                     availableCount++;
                 }
                 else {
@@ -2875,16 +2803,13 @@ public class IntermediateStopChoiceModels implements Serializable {
                     soaAvailability[alt] = false;
                     
                     if(debug)
-                    	slcSoaLogger.info ("Stop alternative "+alt+" is not available");
-                }
-
+                    	slcSoaLogger.info("Stop alternative "+alt+" is not available");
+                }	
             }
-        
         }
         
         return availableCount;
-    }
-    
+    }  
     
     /**
      * create an array with 1 if the mgra indexed has at least one TAP within walk egress distance of the mgra
