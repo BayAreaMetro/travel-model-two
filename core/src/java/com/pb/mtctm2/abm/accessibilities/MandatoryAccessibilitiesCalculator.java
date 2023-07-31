@@ -345,9 +345,7 @@ public class MandatoryAccessibilitiesCalculator
 
             int oTaz = mgraManager.getTaz(oMgra);
             int dTaz = mgraManager.getTaz(dMgra);
-           
-            float odDistance = (float) anm.getTazDistanceFromTaz(oTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[dTaz];
-
+                     
             iv.setOriginZone(oTaz);
             iv.setDestZone(dTaz);
 
@@ -361,6 +359,8 @@ public class MandatoryAccessibilitiesCalculator
             accessibilities[0] = autoResults[PEAK_NONTOLL_SOV_TIME_INDEX];
             accessibilities[1] = autoResults[PEAK_NONTOLL_SOV_DIST_INDEX];
 
+            float odDistance = (float) autoResults[PEAK_NONTOLL_SOV_DIST_INDEX];
+            		
             // pre-calculate the hov, sov, and non-motorized exponentiated utilities for the origin MGRA.
             // the method called returns cached values if they were already calculated.
             ntUtilities.buildUtilitiesForOrigMgraAndPeriod( oMgra, NonTransitUtilities.PEAK_PERIOD_INDEX );
