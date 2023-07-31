@@ -201,7 +201,7 @@ public class BestTransitPathCalculator implements Serializable
     	double pWalkTime = mgraManager.getPMgraToStopsWalkTime(pMgra, timePeriod);
     	
     	if(pWalkTime==0){
-    		myLogger.info("Walk time from mgra "+pMgra+" to stops is 0; setting walk access utility to "+NA);
+    		//myLogger.info("Walk time from mgra "+pMgra+" to stops is 0; setting walk access utility to "+NA);
     		return NA;
     	}
     	
@@ -243,7 +243,7 @@ public class BestTransitPathCalculator implements Serializable
     	double aWalkTime = mgraManager.getAMgraFromStopsWalkTime(aMgra, timePeriod);        
  
     	if(aWalkTime==0){
-    		myLogger.info("Walk time from stops to mgra "+aMgra+" is 0; setting walk egress utility to "+NA);
+    		//myLogger.info("Walk time from stops to mgra "+aMgra+" is 0; setting walk egress utility to "+NA);
     		return NA;
     	}
 

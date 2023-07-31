@@ -287,7 +287,7 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
             int iMgra = mgraManager.getMgras().get(i);
   
             //log zone processed
-            logger.info("...Origin MGRA "+ iMgra);
+            //logger.info("...Origin MGRA "+ iMgra);
         	
             ++originMgras;
             mgraNumbers[iMgra] = iMgra;

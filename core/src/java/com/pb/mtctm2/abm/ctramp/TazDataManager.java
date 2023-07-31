@@ -100,7 +100,7 @@ public class TazDataManager
         setTazMgraCorrespondence();
         readTazData(rbMap);
 
-        printTazStats();
+        //printTazStats();
     }
     
     private void readTazData(HashMap<String,String> rbMap) {

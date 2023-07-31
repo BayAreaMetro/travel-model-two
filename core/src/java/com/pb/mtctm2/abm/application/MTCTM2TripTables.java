@@ -10,7 +10,6 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
-import com.pb.mtctm2.abm.ctramp.TapDataManager;
 import com.pb.mtctm2.abm.ctramp.TazDataManager;
 import com.pb.common.calculator.MatrixDataManager;
 import com.pb.common.calculator.MatrixDataServerIf;
