@@ -27,6 +27,7 @@ public class TransitDriveAccessDMU
     double                              mgraToStopsWalkTime;
     int                                 accessMode;
     int 								period;
+    int                                 accessEgress;
     
     //default values for generic application
     int                                 applicationType = 0;
@@ -200,7 +201,7 @@ public class TransitDriveAccessDMU
         methodIndexMap.put("getPersonType", 14);
         methodIndexMap.put("getValueOfTime", 15);
         methodIndexMap.put("getOrigDestDistance",17);
-        
+        methodIndexMap.put("getAccessEgress",18);
         
         methodIndexMap.put("getParkingCost", 20);
 
@@ -230,6 +231,8 @@ public class TransitDriveAccessDMU
                 return getValueOfTime();
             case 17:
             	return getOrigDestDistance();
+            case 18:
+            	return getAccessEgress();
 
             case 20:
             	return getParkingCost();
@@ -242,7 +245,27 @@ public class TransitDriveAccessDMU
         }
     }
 
-    public int getIndexValue(String variableName)
+    /**
+     * Get the combinatorial access egress mode for this DMU.
+     * 
+     * @return The access mode.
+     */
+    public int getAccessEgress()
+    {
+        return accessEgress;
+    }
+
+    /**
+     * Set the combinatorial access egress mode for this DMU.
+     * 
+     * @param accessMode The access mode.
+     */
+    public void setAccessEgress(int accessEgress)
+    {
+        this.accessEgress = accessEgress;
+    }
+
+	public int getIndexValue(String variableName)
     {
         return methodIndexMap.get(variableName);
     }

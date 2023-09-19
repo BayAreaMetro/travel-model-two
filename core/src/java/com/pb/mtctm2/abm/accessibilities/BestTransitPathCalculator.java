@@ -66,9 +66,11 @@ public class BestTransitPathCalculator implements Serializable
 
     public static final float               NA            = -999;
     public static final int               WTW           = 0;
-    public static final int               WTD           = 1;
-    public static final int               DTW           = 2;
-    public static final int[]             ACC_EGR       = {WTW,WTD,DTW};
+    public static final int               PTW           = 1;
+    public static final int               WTP           = 2;
+    public static final int               KTW           = 3;
+    public static final int               WTK           = 4;
+    public static final int[]             ACC_EGR       = {WTW,PTW,WTP,KTW,WTK};
     public static final int               NUM_ACC_EGR   = ACC_EGR.length;
 
     // seek and trace
@@ -217,7 +219,7 @@ public class BestTransitPathCalculator implements Serializable
         
     }
     
-    public float calcDriveAccessUtility(TransitDriveAccessDMU driveDmu, int pMgra, int pTaz, AccessMode accMode, boolean myTrace, Logger myLogger)
+    public float calcDriveAccessUtility(TransitDriveAccessDMU driveDmu, int pMgra, int pTaz, boolean myTrace, Logger myLogger)
     {
     	float util = (float)driveAccessUEC.solve(index, driveDmu, null)[0];
 
@@ -228,7 +230,7 @@ public class BestTransitPathCalculator implements Serializable
         return(util);
     }
     
-    public float calcDriveAccessRatioDisutility(TransitDriveAccessDMU driveDmu, int pMgra, int pTaz, float origDestDistance, AccessMode accMode, boolean myTrace, Logger myLogger){
+    public float calcDriveAccessRatioDisutility(TransitDriveAccessDMU driveDmu, int pMgra, int pTaz, float origDestDistance, boolean myTrace, Logger myLogger){
     	driveDmu.setOrigDestDistance(origDestDistance);
     	float util = (float)driveAccDisutilityUEC.solve(index, driveDmu, null)[0];
         // logging
@@ -257,7 +259,7 @@ public class BestTransitPathCalculator implements Serializable
         return(util);
     }
     
-    public float calcDriveEgressUtility(TransitDriveAccessDMU driveDmu, int aTaz, int aMgra, AccessMode accMode, boolean myTrace, Logger myLogger)
+    public float calcDriveEgressUtility(TransitDriveAccessDMU driveDmu, int aTaz, int aMgra, boolean myTrace, Logger myLogger)
     {
     	float util = (float)driveEgressUEC.solve(index, driveDmu, null)[0];
 
@@ -279,7 +281,7 @@ public class BestTransitPathCalculator implements Serializable
      * @param myLogger
      * @return
      */
-    public float calcDriveEgressRatioDisutility(TransitDriveAccessDMU driveDmu, int aMgra, int aTaz, float origDestDistance, AccessMode accMode, boolean myTrace, Logger myLogger)
+    public float calcDriveEgressRatioDisutility(TransitDriveAccessDMU driveDmu, int aMgra, int aTaz, float origDestDistance, boolean myTrace, Logger myLogger)
     {
     	driveDmu.setOrigDestDistance(origDestDistance);
     	float util = (float)driveEgrDisutilityUEC.solve(index, driveDmu, null)[0];
@@ -322,18 +324,18 @@ public class BestTransitPathCalculator implements Serializable
     		accUtil = calcWalkAccessUtility(walkDmu, origMgra, period, myTrace, myLogger);
             egrUtil = calcWalkEgressUtility(walkDmu, destMgra, period, myTrace, myLogger);
             tazTazUtil = calcUtilitiesForTazPair(walkDmu, period, WTW, pTaz, aTaz, origMgra, destMgra, myTrace, myLogger);
-    	} else if(accEgr==WTD) {
-    		AccessMode accMode = AccessMode.PARK_N_RIDE;
+    	} else if(accEgr==WTP || accEgr==WTK) {
+    		driveDmu.setAccessEgress(accEgr);
     		accUtil = calcWalkAccessUtility(walkDmu, origMgra, pTaz, myTrace, myLogger);
-    		egrUtil = calcDriveEgressUtility(driveDmu, aTaz, destMgra, accMode, myTrace, myLogger);
-    		egrDisutil = calcDriveEgressRatioDisutility(driveDmu, destMgra,aTaz, odDistance, accMode, myTrace, myLogger);
-    		tazTazUtil = calcUtilitiesForTazPair(walkDmu, period, WTD, pTaz, aTaz, origMgra, destMgra, myTrace, myLogger);
-    	} else if(accEgr==DTW) {
-    		AccessMode accMode = AccessMode.PARK_N_RIDE;
-    		accUtil = calcDriveAccessUtility(driveDmu, origMgra, pTaz, accMode, myTrace, myLogger);
-       		accDisutil = calcDriveAccessRatioDisutility(driveDmu, origMgra, pTaz, odDistance, accMode, myTrace, myLogger);
+    		egrUtil = calcDriveEgressUtility(driveDmu, aTaz, destMgra, myTrace, myLogger);
+    		egrDisutil = calcDriveEgressRatioDisutility(driveDmu, destMgra,aTaz, odDistance, myTrace, myLogger);
+    		tazTazUtil = calcUtilitiesForTazPair(walkDmu, period, accEgr, pTaz, aTaz, origMgra, destMgra, myTrace, myLogger);
+    	} else if(accEgr==PTW || accEgr==KTW) {
+    		driveDmu.setAccessEgress(accEgr);
+    		accUtil = calcDriveAccessUtility(driveDmu, origMgra, pTaz, myTrace, myLogger);
+       		accDisutil = calcDriveAccessRatioDisutility(driveDmu, origMgra, pTaz, odDistance, myTrace, myLogger);
     		egrUtil = calcWalkEgressUtility(walkDmu, aTaz, destMgra, myTrace, myLogger);
-    		tazTazUtil = calcUtilitiesForTazPair(walkDmu, period, DTW, pTaz, aTaz, origMgra, destMgra, myTrace, myLogger);
+    		tazTazUtil = calcUtilitiesForTazPair(walkDmu, period, accEgr, pTaz, aTaz, origMgra, destMgra, myTrace, myLogger);
     	}
         return(accUtil + tazTazUtil + egrUtil + accDisutil + egrDisutil);
     }

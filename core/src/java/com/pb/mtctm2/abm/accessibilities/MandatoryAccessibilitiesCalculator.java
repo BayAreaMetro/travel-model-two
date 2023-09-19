@@ -41,8 +41,10 @@ public class MandatoryAccessibilitiesCalculator
     private static final int OFFPEAK_NONTOLL_SOV_DIST_INDEX = 3;
     
     public static final int                   WTW = 0;
-    public static final int                   WTD = 1;
-    public static final int                   DTW = 2;
+    public static final int                   PTW = 1;
+    public static final int                   WTP = 2;
+    public static final int                   KTW = 3;
+    public static final int                   WTK = 4;
     
     private UtilityExpressionCalculator autoSkimUEC;
     private UtilityExpressionCalculator bestWalkTransitUEC;
@@ -436,7 +438,8 @@ public class MandatoryAccessibilitiesCalculator
             //////////////////////////////////////////////////////////////////////////
             
             // get the drive transit walk utility
-            double driveTransitWalkUtility = bestPathCalculator.calcPersonSpecificUtilities(oTaz, dTaz, walkDmu, driveDmu, DTW, oMgra, dMgra, ModelStructure.AM_SKIM_PERIOD_INDEX, debug, logger, odDistance);
+            // because we are now separating PNR and KNR, this should really be the logsum of the two, but for simplification, we will just use PNR here
+            double driveTransitWalkUtility = bestPathCalculator.calcPersonSpecificUtilities(oTaz, dTaz, walkDmu, driveDmu, PTW, oMgra, dMgra, ModelStructure.AM_SKIM_PERIOD_INDEX, debug, logger, odDistance);
             
             // 11 used to be the logsum of N best transit paths
             // now it is just the transit utility between the mgra pair

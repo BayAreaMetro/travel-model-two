@@ -13,8 +13,10 @@ public class TourModeChoiceDMU
     protected transient Logger             logger = Logger.getLogger(TourModeChoiceDMU.class);
 
     public static final int                WTW = McLogsumsCalculator.WTW;
-    public static final int                WTD = McLogsumsCalculator.WTD;
-    public static final int                DTW = McLogsumsCalculator.DTW;
+    public static final int                WTP = McLogsumsCalculator.WTP;
+    public static final int                PTW = McLogsumsCalculator.PTW;
+    public static final int                WTK = McLogsumsCalculator.WTK;
+    public static final int                KTW = McLogsumsCalculator.KTW;
     protected static final int             NUM_ACC_EGR = McLogsumsCalculator.NUM_ACC_EGR;
         
     protected static final int             OUT = McLogsumsCalculator.OUT;

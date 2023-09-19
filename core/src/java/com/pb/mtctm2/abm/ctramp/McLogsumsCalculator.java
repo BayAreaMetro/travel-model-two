@@ -30,9 +30,11 @@ public class McLogsumsCalculator implements Serializable
 
 
     public static final int                   WTW = 0;
-    public static final int                   WTD = 1;
-    public static final int                   DTW = 2;
-    public static final int                   NUM_ACC_EGR = 3;
+    public static final int                   PTW = 1;
+    public static final int                   WTP = 2;
+    public static final int                   KTW = 3;
+    public static final int                   WTK = 4;
+    public static final int                   NUM_ACC_EGR = 5;
     
     public static final int                   OUT = 0;
     public static final int                   IN = 1;
@@ -200,10 +202,12 @@ public class McLogsumsCalculator implements Serializable
     	
     	// set drive transit skim attributes to unavailable
         if ( ! isInbound ) {
-        	tripMcDmuObject.setTransitLogSum( DTW, bestPathUEC.NA);
+        	tripMcDmuObject.setTransitLogSum( PTW, bestPathUEC.NA);
+        	tripMcDmuObject.setTransitLogSum( KTW, bestPathUEC.NA);
         }
         else {
-        	tripMcDmuObject.setTransitLogSum( WTD, bestPathUEC.NA);
+        	tripMcDmuObject.setTransitLogSum( WTP, bestPathUEC.NA);
+        	tripMcDmuObject.setTransitLogSum( WTK, bestPathUEC.NA);
         }
 
     }
@@ -370,7 +374,8 @@ public class McLogsumsCalculator implements Serializable
     	TransitDriveAccessDMU driveDmu  = new TransitDriveAccessDMU();
     	
     	// logsum for WTD outbound is never used -> set to NA
-    	mcDmuObject.setTransitLogSum( WTD, false, bestPathUEC.NA );
+    	mcDmuObject.setTransitLogSum( WTP, false, bestPathUEC.NA );
+    	mcDmuObject.setTransitLogSum( WTK, false, bestPathUEC.NA );
     	
         //setup best path dmu variables
     	walkDmu =  new TransitWalkAccessDMU();
@@ -397,9 +402,14 @@ public class McLogsumsCalculator implements Serializable
     	
     	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
     	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
-    	double logsumIn = bestPathUEC.calcPersonSpecificUtilities(aTaz, pTaz, walkDmu, driveDmu, WTD, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
+    	// because we are now separating PNR and KNR, this should calculate for two
+    	double logsumIn_p = bestPathUEC.calcPersonSpecificUtilities(aTaz, pTaz, walkDmu, driveDmu, WTP, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
     	
-    	mcDmuObject.setTransitLogSum( WTD, true, logsumIn);
+    	mcDmuObject.setTransitLogSum( WTP, true, logsumIn_p);
+    	
+    	double logsumIn_k = bestPathUEC.calcPersonSpecificUtilities(aTaz, pTaz, walkDmu, driveDmu, WTK, destMgra, origMgra, skimPeriodIndexIn, loggingEnabled, autoSkimLogger, odDistance);
+    	
+    	mcDmuObject.setTransitLogSum( WTK, true, logsumIn_k);
     	
     }
 
@@ -430,12 +440,20 @@ public class McLogsumsCalculator implements Serializable
     	
     	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
     	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
-    	double logsumOut = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
+    	// because we are now separating PNR and KNR, this should calculate for two
+    	double logsumOut_p = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, PTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
     	
-    	mcDmuObject.setTransitLogSum( DTW, false, logsumOut);
+    	mcDmuObject.setTransitLogSum( PTW, false, logsumOut_p);
         
     	// logsum for DTW inbound is never used -> set to NA
-    	mcDmuObject.setTransitLogSum( DTW, true, bestPathUEC.NA );
+    	mcDmuObject.setTransitLogSum( PTW, true, bestPathUEC.NA );
+    	
+    	double logsumOut_k = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, KTW, origMgra, destMgra, skimPeriodIndexOut, loggingEnabled, autoSkimLogger, odDistance);
+    	
+    	mcDmuObject.setTransitLogSum( KTW, false, logsumOut_k);
+        
+    	// logsum for DTW inbound is never used -> set to NA
+    	mcDmuObject.setTransitLogSum( KTW, true, bestPathUEC.NA );
         
     }
 
@@ -518,9 +536,14 @@ public class McLogsumsCalculator implements Serializable
     	
     	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
     	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
-    	double logsum = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, WTD, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
+    	// because we are now separating PNR and KNR, this should calculate for two
+    	double logsum_p = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, WTP, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
         
-        tripMcDmuObject.setTransitLogSum( WTD, logsum);
+        tripMcDmuObject.setTransitLogSum( WTP, logsum_p);
+        
+        double logsum_k = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, WTK, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
+        
+        tripMcDmuObject.setTransitLogSum( WTK, logsum_k);
         
     }
     
@@ -551,9 +574,14 @@ public class McLogsumsCalculator implements Serializable
     	
     	// In the Tap version, logsumXX is the logsum of N best transit paths (N Tap pairs)
     	// In the non-Tap version, we keep the logsumXX name unchanged even though it is really just the transit utility between one TAZ pair
-    	double logsum = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, DTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
+    	// because we are now separating PNR and KNR, this should calculate for two
+    	double logsum_p = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, PTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
         
-        tripMcDmuObject.setTransitLogSum( DTW, logsum);
+        tripMcDmuObject.setTransitLogSum( PTW, logsum_p);
+        
+        double logsum_k = bestPathUEC.calcPersonSpecificUtilities(pTaz, aTaz, walkDmu, driveDmu, KTW, origMgra, destMgra, skimPeriodIndex, loggingEnabled, autoSkimLogger, odDistance);
+        
+        tripMcDmuObject.setTransitLogSum( KTW, logsum_k);
         
     }
     
