@@ -298,7 +298,7 @@ public class BestTransitPathCalculator implements Serializable
         index.setOriginZone(pTaz);
         index.setDestZone(aTaz);
         walkDmu.setTOD(period);
-        walkDmu.setAccessEgressMode(accessEgressMode);
+        walkDmu.setAccessEgress(accessEgressMode);
 
         // solve
         float util = (float)tazToTazUEC.solve(index, walkDmu, null)[0];  

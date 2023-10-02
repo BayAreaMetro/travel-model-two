@@ -42,7 +42,7 @@ public class TransitWalkAccessDMU
     int                                 personType = 1;     //defaults to full-time worker
     float                               ivtCoeff;
     float                               costCoeff;
-    int									accessEgressMode=0; //this is called a walk-access DMU but it is used in the TAP-to-TAP UEC, so it is
+    int									accessEgressMode=0; //this is called a walk-access DMU but it is used in the TAZ-to-TAZ UEC, so it is
                                                             //possible that it is being called for a drive-access path!
     int                                 tourCategoryIsJoint = 0;
     float                               valueOfTime = (float) 10.0;
@@ -60,7 +60,7 @@ public class TransitWalkAccessDMU
      * 
      * @param accessEgressMode
      */
-    public void setAccessEgressMode(int accessEgressMode){
+    public void setAccessEgress(int accessEgressMode){
     	this.accessEgressMode = accessEgressMode;
     }
     
@@ -74,7 +74,7 @@ public class TransitWalkAccessDMU
      * 
      * @return accessEgressMode
      */
-    public int getAccessEgressMode(){
+    public int getAccessEgress(){
     	return accessEgressMode;
     }
     
@@ -305,7 +305,7 @@ public class TransitWalkAccessDMU
         methodIndexMap.put("getPersonType", 8);
         methodIndexMap.put("getIvtCoeff", 9);
         methodIndexMap.put("getCostCoeff", 10);
-        methodIndexMap.put("getAccessEgressMode", 11);
+        methodIndexMap.put("getAccessEgress", 11);
         methodIndexMap.put("getTourCategoryIsJoint", 12);
         methodIndexMap.put("getValueOfTime", 13);
         
@@ -347,7 +347,7 @@ public class TransitWalkAccessDMU
             case 10:
             	return getCostCoeff();
             case 11:
-            	return getAccessEgressMode();
+            	return getAccessEgress();
             case 12:
             	return getTourCategoryIsJoint();
             case 13:
