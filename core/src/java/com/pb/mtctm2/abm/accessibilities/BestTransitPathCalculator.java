@@ -326,7 +326,7 @@ public class BestTransitPathCalculator implements Serializable
             tazTazUtil = calcUtilitiesForTazPair(walkDmu, period, WTW, pTaz, aTaz, origMgra, destMgra, myTrace, myLogger);
     	} else if(accEgr==WTP || accEgr==WTK) {
     		driveDmu.setAccessEgress(accEgr);
-    		accUtil = calcWalkAccessUtility(walkDmu, origMgra, pTaz, myTrace, myLogger);
+    		accUtil = calcWalkAccessUtility(walkDmu, origMgra, period, myTrace, myLogger);
     		egrUtil = calcDriveEgressUtility(driveDmu, aTaz, destMgra, myTrace, myLogger);
     		egrDisutil = calcDriveEgressRatioDisutility(driveDmu, destMgra,aTaz, odDistance, myTrace, myLogger);
     		tazTazUtil = calcUtilitiesForTazPair(walkDmu, period, accEgr, pTaz, aTaz, origMgra, destMgra, myTrace, myLogger);
@@ -334,7 +334,7 @@ public class BestTransitPathCalculator implements Serializable
     		driveDmu.setAccessEgress(accEgr);
     		accUtil = calcDriveAccessUtility(driveDmu, origMgra, pTaz, myTrace, myLogger);
        		accDisutil = calcDriveAccessRatioDisutility(driveDmu, origMgra, pTaz, odDistance, myTrace, myLogger);
-    		egrUtil = calcWalkEgressUtility(walkDmu, aTaz, destMgra, myTrace, myLogger);
+    		egrUtil = calcWalkEgressUtility(walkDmu, destMgra, period, myTrace, myLogger);
     		tazTazUtil = calcUtilitiesForTazPair(walkDmu, period, accEgr, pTaz, aTaz, origMgra, destMgra, myTrace, myLogger);
     	}
         return(accUtil + tazTazUtil + egrUtil + accDisutil + egrDisutil);
