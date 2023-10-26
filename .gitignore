@@ -8,3 +8,9 @@ core/release/
 model-files/runtime/config/pskill.exe
 utilities/vta_expresslane_feed_saver/vta_expresslanes_2018*
 site/
+.DS_Store
+model-files/model/TripModeChoice.xls
+utilities/sandag-activitysim/configs/*
+utilities/sandag-activitysim/output/*
+utilities/sandag-activitysim/scripts/.Rproj.user/*
+utilities/sandag-activitysim/scripts/.Rhistory
