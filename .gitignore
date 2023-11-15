@@ -8,3 +8,7 @@ core/release/
 model-files/runtime/config/pskill.exe
 utilities/vta_expresslane_feed_saver/vta_expresslanes_2018*
 site/
+.DS_Store
+utilities/sandag-activitysim/*
+utilities/compare-transit-skims/TM2.2.0/*
+utilities/compare-transit-skims/TM2.2.1.1/*
