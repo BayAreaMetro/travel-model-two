@@ -13,3 +13,4 @@ utilities/sandag-activitysim/configs/*
 utilities/sandag-activitysim/output/*
 utilities/sandag-activitysim/scripts/.Rproj.user/*
 utilities/sandag-activitysim/scripts/.Rhistory
+.Rproj.user
