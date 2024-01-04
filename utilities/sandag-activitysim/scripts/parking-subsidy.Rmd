@@ -1,6 +1,8 @@
 ---
 title: "Parking Subsidy"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Overhead
@@ -44,7 +46,121 @@ ptype_dict <- tibble(ptype = seq(1,8),
 
 
 # Data Reads
-```{r read}
+Minor note: the ActivitySim outputs get bloated with temporary variables that are poorly documented. Using a data model to clean-up and document the output is low-hanging fruit. 
+```{r read-persons}
+person_df <- read_csv(person_filename, col_types = cols(
+  person_id = col_double(),
+  household_id = col_double(),
+  age = col_double(),
+  PNUM = col_double(),
+  sex = col_double(),
+  pemploy = col_double(),
+  pstudent = col_double(),
+  ptype = col_double(),
+  educ = col_double(),
+  naics2_original_code = col_character(),
+  soc2 = col_double(),
+  age_16_to_19 = col_logical(),
+  age_16_p = col_logical(),
+  adult = col_logical(),
+  male = col_logical(),
+  female = col_logical(),
+  has_non_worker = col_logical(),
+  has_retiree = col_logical(),
+  has_preschool_kid = col_logical(),
+  has_driving_kid = col_logical(),
+  has_school_kid = col_logical(),
+  has_full_time = col_logical(),
+  has_part_time = col_logical(),
+  has_university = col_logical(),
+  student_is_employed = col_logical(),
+  nonstudent_to_school = col_logical(),
+  is_student = col_logical(),
+  is_preschool = col_logical(),
+  is_gradeschool = col_logical(),
+  is_highschool = col_logical(),
+  is_university = col_logical(),
+  school_segment = col_double(),
+  is_worker = col_logical(),
+  is_fulltime_worker = col_logical(),
+  is_parttime_worker = col_logical(),
+  is_internal_worker = col_logical(),
+  is_external_worker = col_logical(),
+  home_zone_id = col_double(),
+  time_factor_work = col_double(),
+  time_factor_nonwork = col_double(),
+  naics_code = col_double(),
+  occupation = col_character(),
+  is_income_less25K = col_logical(),
+  is_income_25K_to_60K = col_logical(),
+  is_income_60K_to_120K = col_logical(),
+  is_income_greater60K = col_logical(),
+  is_income_greater120K = col_logical(),
+  is_non_worker_in_HH = col_logical(),
+  is_all_adults_full_time_workers = col_logical(),
+  is_pre_drive_child_in_HH = col_logical(),
+  work_from_home = col_logical(),
+  is_out_of_home_worker = col_logical(),
+  external_workplace_zone_id = col_double(),
+  external_workplace_location_logsum = col_double(),
+  external_workplace_modechoice_logsum = col_double(),
+  school_zone_id = col_double(),
+  school_location_logsum = col_double(),
+  school_modechoice_logsum = col_double(),
+  distance_to_school = col_double(),
+  roundtrip_auto_time_to_school = col_double(),
+  workplace_zone_id = col_double(),
+  workplace_location_logsum = col_double(),
+  workplace_modechoice_logsum = col_double(),
+  distance_to_work = col_double(),
+  workplace_in_cbd = col_logical(),
+  work_zone_area_type = col_double(),
+  auto_time_home_to_work = col_double(),
+  roundtrip_auto_time_to_work = col_double(),
+  work_auto_savings = col_double(),
+  exp_daily_work = col_double(),
+  non_toll_time_work = col_double(),
+  toll_time_work = col_double(),
+  toll_dist_work = col_double(),
+  toll_cost_work = col_double(),
+  toll_travel_time_savings_work = col_double(),
+  transit_pass_subsidy = col_double(),
+  transit_pass_ownership = col_double(),
+  free_parking_at_work = col_logical(),
+  telecommute_frequency = col_character(),
+  cdap_activity = col_character(),
+  travel_active = col_logical(),
+  under16_not_at_school = col_logical(),
+  has_preschool_kid_at_home = col_logical(),
+  has_school_kid_at_home = col_logical(),
+  mandatory_tour_frequency = col_character(),
+  work_and_school_and_worker = col_logical(),
+  work_and_school_and_student = col_logical(),
+  num_mand = col_double(),
+  num_work_tours = col_double(),
+  has_pre_school_child_with_mandatory = col_logical(),
+  has_driving_age_child_with_mandatory = col_logical(),
+  num_joint_tours = col_double(),
+  non_mandatory_tour_frequency = col_double(),
+  num_non_mand = col_double(),
+  num_escort_tours = col_double(),
+  num_eatout_tours = col_double(),
+  num_shop_tours = col_double(),
+  num_maint_tours = col_double(),
+  num_discr_tours = col_double(),
+  num_social_tours = col_double(),
+  num_non_escort_tours = col_double(),
+  num_shop_maint_tours = col_double(),
+  num_shop_maint_escort_tours = col_double(),
+  num_add_shop_maint_tours = col_double(),
+  num_soc_discr_tours = col_double(),
+  num_add_soc_discr_tours = col_double(),
+  model = col_character()
+))
+
+```
+
+```{r read-trips, eval=FALSE}
 trips_df <- read_csv(trips_filename, col_types = cols(
   trip_id = col_double(),
   person_id = col_double(),
@@ -306,121 +422,12 @@ trips_df <- read_csv(trips_filename, col_types = cols(
   model = col_character()
 ))
 
-person_df <- read_csv(person_filename, col_types = cols(
-  person_id = col_double(),
-  household_id = col_double(),
-  age = col_double(),
-  PNUM = col_double(),
-  sex = col_double(),
-  pemploy = col_double(),
-  pstudent = col_double(),
-  ptype = col_double(),
-  educ = col_double(),
-  naics2_original_code = col_character(),
-  soc2 = col_double(),
-  age_16_to_19 = col_logical(),
-  age_16_p = col_logical(),
-  adult = col_logical(),
-  male = col_logical(),
-  female = col_logical(),
-  has_non_worker = col_logical(),
-  has_retiree = col_logical(),
-  has_preschool_kid = col_logical(),
-  has_driving_kid = col_logical(),
-  has_school_kid = col_logical(),
-  has_full_time = col_logical(),
-  has_part_time = col_logical(),
-  has_university = col_logical(),
-  student_is_employed = col_logical(),
-  nonstudent_to_school = col_logical(),
-  is_student = col_logical(),
-  is_preschool = col_logical(),
-  is_gradeschool = col_logical(),
-  is_highschool = col_logical(),
-  is_university = col_logical(),
-  school_segment = col_double(),
-  is_worker = col_logical(),
-  is_fulltime_worker = col_logical(),
-  is_parttime_worker = col_logical(),
-  is_internal_worker = col_logical(),
-  is_external_worker = col_logical(),
-  home_zone_id = col_double(),
-  time_factor_work = col_double(),
-  time_factor_nonwork = col_double(),
-  naics_code = col_double(),
-  occupation = col_character(),
-  is_income_less25K = col_logical(),
-  is_income_25K_to_60K = col_logical(),
-  is_income_60K_to_120K = col_logical(),
-  is_income_greater60K = col_logical(),
-  is_income_greater120K = col_logical(),
-  is_non_worker_in_HH = col_logical(),
-  is_all_adults_full_time_workers = col_logical(),
-  is_pre_drive_child_in_HH = col_logical(),
-  work_from_home = col_logical(),
-  is_out_of_home_worker = col_logical(),
-  external_workplace_zone_id = col_double(),
-  external_workplace_location_logsum = col_double(),
-  external_workplace_modechoice_logsum = col_double(),
-  school_zone_id = col_double(),
-  school_location_logsum = col_double(),
-  school_modechoice_logsum = col_double(),
-  distance_to_school = col_double(),
-  roundtrip_auto_time_to_school = col_double(),
-  workplace_zone_id = col_double(),
-  workplace_location_logsum = col_double(),
-  workplace_modechoice_logsum = col_double(),
-  distance_to_work = col_double(),
-  workplace_in_cbd = col_logical(),
-  work_zone_area_type = col_double(),
-  auto_time_home_to_work = col_double(),
-  roundtrip_auto_time_to_work = col_double(),
-  work_auto_savings = col_double(),
-  exp_daily_work = col_double(),
-  non_toll_time_work = col_double(),
-  toll_time_work = col_double(),
-  toll_dist_work = col_double(),
-  toll_cost_work = col_double(),
-  toll_travel_time_savings_work = col_double(),
-  transit_pass_subsidy = col_double(),
-  transit_pass_ownership = col_double(),
-  free_parking_at_work = col_logical(),
-  telecommute_frequency = col_character(),
-  cdap_activity = col_character(),
-  travel_active = col_logical(),
-  under16_not_at_school = col_logical(),
-  has_preschool_kid_at_home = col_logical(),
-  has_school_kid_at_home = col_logical(),
-  mandatory_tour_frequency = col_character(),
-  work_and_school_and_worker = col_logical(),
-  work_and_school_and_student = col_logical(),
-  num_mand = col_double(),
-  num_work_tours = col_double(),
-  has_pre_school_child_with_mandatory = col_logical(),
-  has_driving_age_child_with_mandatory = col_logical(),
-  num_joint_tours = col_double(),
-  non_mandatory_tour_frequency = col_double(),
-  num_non_mand = col_double(),
-  num_escort_tours = col_double(),
-  num_eatout_tours = col_double(),
-  num_shop_tours = col_double(),
-  num_maint_tours = col_double(),
-  num_discr_tours = col_double(),
-  num_social_tours = col_double(),
-  num_non_escort_tours = col_double(),
-  num_shop_maint_tours = col_double(),
-  num_shop_maint_escort_tours = col_double(),
-  num_add_shop_maint_tours = col_double(),
-  num_soc_discr_tours = col_double(),
-  num_add_soc_discr_tours = col_double(),
-  model = col_character()
-))
-
 ```
+
 
 # Temp I/O
 ```{r temp-io}
-saveRDS(trips_df, temp_trips_filename)
+# saveRDS(trips_df, temp_trips_filename)
 trips_df <- readRDS(temp_trips_filename)
 ```
 
@@ -431,7 +438,9 @@ summary_df <- person_df %>%
   select(person_id, ptype, free_parking_at_work) %>%
   left_join(., ptype_dict, by = c("ptype")) %>%
   rename(person_type = label) %>%
-  mutate(free_parking_at_work = if_else(free_parking_at_work, "Free Parking at Work", "Not Free Parking at Work")) %>%
+  mutate(free_parking_at_work = if_else(free_parking_at_work, 
+                                        "Free Parking at Work", 
+                                        "Not Free Parking at Work")) %>%
   group_by(ptype, person_type, free_parking_at_work) %>%
   summarise(count = n(), .groups = "drop") %>%
   group_by(ptype, person_type) %>%
@@ -439,7 +448,10 @@ summary_df <- person_df %>%
   ungroup() %>%
   arrange(ptype) %>%
   select(person_type, free_parking_at_work, share) %>%
-  pivot_wider(names_from = free_parking_at_work, values_from = share, values_fill = 0.0)
+  pivot_wider(
+    names_from = free_parking_at_work, 
+    values_from = share, 
+    values_fill = 0.0)
   
 
 summary_df %>%
@@ -453,35 +465,53 @@ The model does show the right types of categories for each of the person types. 
 - `free_parking_coefficients.csv`
 -- For SANDAG: still has coefficients specific to SF Bay Area
 - `free_parking.csv`: not much intelligence in the spec
-- `free_parking.yaml`: appears
+- `free_parking.yaml`: appears as expected
+- `tour_mode_choice_annotate_preprocessor.csv`: removes the parking cost for those with free parking
+- `trip_mode_choice_annotate_trips_preprocessor.csv`: same as tour 
 
 ```{r Reductions part 2}
 # need to check what choices those with free parking make in regards to parking locations
 summary_df <- trips_df %>%
   select(trip_id, person_id, purpose, parking_zone, destination) %>%
   filter(purpose == "work") %>% 
-  left_join(., select(person_df, person_id, free_parking_at_work), by = c("person_id")) %>%
+  left_join(
+    ., 
+    select(person_df, person_id, free_parking_at_work), 
+    by = c("person_id")) %>%
   mutate(parking_choice_made = (parking_zone > 0)) %>%
-  mutate(parking_zone_is_destination = if_else(parking_zone == destination, "Parked at Destination", "Parked and Walked to Destination")) %>%
-  mutate(parking_zone_is_destination = if_else(parking_choice_made, parking_zone_is_destination, "No Parking Choice Made")) %>%
-  mutate(free_parking_at_work = if_else(free_parking_at_work, "Free Parking at Work", "Not Free Parking at Work")) %>%
+  mutate(parking_zone_is_destination = if_else(
+    parking_zone == destination, 
+    "Parked at Destination", 
+    "Parked and Walked to Destination")) %>%
+  mutate(parking_zone_is_destination = if_else(
+    parking_choice_made, 
+    parking_zone_is_destination, 
+    "No Parking Choice Made")) %>%
+  mutate(free_parking_at_work = if_else(
+    free_parking_at_work, 
+    "Free Parking at Work", 
+    "Not Free Parking at Work")) %>%
   group_by(free_parking_at_work, parking_zone_is_destination) %>%
   summarise(count = n(), .groups = "drop") %>%
   group_by(free_parking_at_work) %>%
   mutate(share = count/sum(count)) %>%
   ungroup() %>%
   select(-count) %>%
-  pivot_wider(names_from = parking_zone_is_destination, values_from = share, values_fill = 0.0)
+  pivot_wider(
+    names_from = parking_zone_is_destination, 
+    values_from = share, 
+    values_fill = 0.0)
 
 summary_df %>%
   kbl() %>%
   kable_styling()
   
 
-
-
 ```
 
-The parking location choice model does not appeared to be applied correctly. Emailed Joe F. follow-up question on 10/26. 
+The parking location choice model does not appeared to be applied correctly. I cannot find records of those with a parking zone that differs from the destination. 
 
+
+
+###
 

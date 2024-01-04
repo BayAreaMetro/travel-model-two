@@ -1,6 +1,8 @@
 ---
 title: "Mandatory Tour Frequency"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Overhead
@@ -42,6 +44,7 @@ ptype_dict <- tibble(ptype = seq(1,8),
 
 
 # Data Reads
+Minor note: bloated output -- see `parking-subsidy.Rmd` note. 
 ```{r read}
 person_df <- read_csv(person_filename, col_types = cols(
   person_id = col_double(),
@@ -238,4 +241,8 @@ The model does show the right types of categories for each of the person types. 
 - `mandatory_tour_frequency.csv`
 - `mandatory_tour_frequency.yaml`
 - `annotate_persons_mtf.csv`
+
+
+
+###
 

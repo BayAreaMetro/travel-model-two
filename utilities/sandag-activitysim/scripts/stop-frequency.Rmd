@@ -1,6 +1,8 @@
 ---
 title: "Stop Frequency"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Overhead
@@ -86,7 +88,7 @@ working_df <- tour_df %>%
 
 Examine four selected purposes to see if examples are logical. 
 
-1. Work tours
+## 1. Work tours
 ```{r}
 summary_df <- working_df %>%
   filter(tour_category == "mandatory" & tour_type == "work") %>%
@@ -97,9 +99,9 @@ summary_df %>%
   kable_styling()
 ```
 
-This makes sense. The dominate outcome is 0 out, 0 in, followed by 0 out, 1 in. It is somewhat illogical that 0 out 3 in is more likely than 0 out, 2 in. Check the UEC for this. 
+This makes sense. The dominate outcome is 0 out, 0 in, followed by 0 out, 1 in. It is somewhat illogical that 0 out 3 in is more likely than 0 out, 2 in. The calibration *appears* to have modestly overfit this model to the observed data. 
 
-1. At-work eating tours
+## 2. At-work eating tours
 ```{r}
 summary_df <- working_df %>%
   filter(tour_category == "atwork" & tour_type == "eat") %>%
@@ -112,7 +114,7 @@ summary_df %>%
 
 A dominate share of 0 out, 0 in, as expected.
 
-3. Shopping tours
+## 3. Shopping tours
 ```{r}
 summary_df <- working_df %>%
   filter(tour_category == "non_mandatory" & tour_type == "shopping") %>%
@@ -123,9 +125,9 @@ summary_df %>%
   kable_styling()
 ```
 
-0 out, 0 in is a bit higher than expected, but the in/out pairs (1 out, 0 in and 0 out, 1 in) are roughly balanced, as expected. 
+The 0 out, 0 in alternative is a bit higher than expected, but the in/out pairs (1 out, 0 in and 0 out, 1 in) are roughly balanced, as expected. 
 
-4. Joint social
+## 4. Joint social
 ```{r}
 summary_df <- working_df %>%
   filter(tour_category == "joint" & tour_type == "social") %>%
@@ -147,8 +149,10 @@ ActivitySim files reviewed include:
 - `stop_frequency_alternatives.csv`
 - `stop_frequency_annotate_tours_preprocessor.csv`
 - `stop_frequency_[purpose].csv`, where purpose is `at_work`, `eatout`, `escort`, `othdiscr`, `othmaint`, `school`, `shopping`, `social`, `univ`, and `work`
-
 - `stop_frequency_coefficients_[purpose]`, where purpose is the same as above.
 - `stop_frequency.yaml`
+
+
+###
 
 
