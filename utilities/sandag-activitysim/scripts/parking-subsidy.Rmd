@@ -509,7 +509,7 @@ summary_df %>%
 
 ```
 
-The parking location choice model does not appeared to be applied correctly. I cannot find records of those with a parking zone that differs from the destination. 
+There is a known problem with ActivitySim in which the `destination` column is overwritten with the parking location. See this [pull request](https://github.com/SANDAG/activitysim/pull/64) for additional information. 
 
 
 

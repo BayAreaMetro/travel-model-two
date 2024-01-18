@@ -465,7 +465,7 @@ zero_shop_ret_df <- shop_df %>%
 # Findings
 The sampling *appears* to be implemented correctly. The correlation between work trip ends and total employment is `r cor(work_df$emp_total, work_df$work_trips)` at the MGRA level. The number of MGRAs with zero total employment and non-zero work trips is `r nrow(zero_emp_work_df)` (out of `r nrow(maz_df)`). The number of MGRAs with total employment of at least 20 and zero work trips is `r nrow(zero_work_emp_df)`. 
 
-For shopping trips, the correlation between shopping trip ends and retail employment is `r cor(shop_df$emp_ret, shop_df$shop_trips)` at the MGRA level. The number of MGRAs with zero retail employment and non-zero shopping trips is `r nrow(zero_ret_shop_df)` (out of `r nrow(maz_df)`), presumably because other size terms impact shopping trips? Note to SANDAG to check the size terms for shopping trips. The number of MGRAs with retail employment of at least 20 and zero work trips is `r nrow(zero_shop_ret_df)`.  
+For shopping trips, the correlation between shopping trip ends and retail employment is `r cor(shop_df$emp_ret, shop_df$shop_trips)` at the MGRA level. The number of MGRAs with zero retail employment and non-zero shopping trips is `r nrow(zero_ret_shop_df)` (out of `r nrow(maz_df)`), presumably because other size terms impact shopping trips? Note to SANDAG to check the size terms for shopping trips (why would it be something other than retail?). The number of MGRAs with retail employment of at least 20 and zero shopping trips is `r nrow(zero_shop_ret_df)`.  
 
 This evidence suggests the sampling is done correctly. 
 

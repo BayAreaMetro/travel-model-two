@@ -2217,7 +2217,7 @@ work
 <p>This makes sense. The dominate outcome is 0 out, 0 in, followed by 0
 out, 1 in. It is somewhat illogical that 0 out 3 in is more likely than
 0 out, 2 in. The calibration <em>appears</em> to have modestly overfit
-this model to the observed data.</p>
+this model to the observed data, but this is a very minor issue.</p>
 </div>
 <div id="at-work-eating-tours" class="section level2">
 <h2>2. At-work eating tours</h2>
@@ -2727,8 +2727,8 @@ shopping
 </tr>
 </tbody>
 </table>
-<p>The 0 out, 0 in alternative is a bit higher than expected, but the
-in/out pairs (1 out, 0 in and 0 out, 1 in) are roughly balanced, as
+<p>The 0 out, 0 in alternative is highest, as expected, and the in/out
+pairs (1 out, 0 in and 0 out, 1 in) are roughly balanced, as
 expected.</p>
 </div>
 <div id="joint-social" class="section level2">
@@ -2986,23 +2986,23 @@ social
 </table>
 <p>These outcomes appear to be a bit overfit to the data, with 3 out, 0
 in being the most likely. Perhaps this is being addressed in the
-on-going calibration effort.</p>
+on-going calibration effort? But this is a very minor issue.</p>
 </div>
 </div>
 <div id="findings" class="section level1">
 <h1>Findings</h1>
 <p>The models appear to be implemented correctly. Though a minor issue,
-the models could benefit from more thoughtful calibration, though the
-impact would be relatively minor. For example, the base coefficients for
-stops on social tours on the outbound trip is <code>1.323</code> – it
-does not vary across the alternatives. During calibration of SANDAG’s
-ABM2, it appears a constant of <code>3.226</code> was applied to the
+the models could benefit from calibration refinement (though the impact
+would be negligible). For example, the base coefficients for stops on
+social tours on the outbound trip is <code>1.323</code> – it does not
+vary across the alternatives. During calibration of SANDAG’s ABM2, it
+appears a constant of <code>3.226</code> was applied to the
 <code>3 out, 0 in</code> alternative, but a smaller constant of
 <code>1.75</code> to the <code>2 out, 0 in</code> alternative. The
 current calibration adjusts both of these constants down, but not enough
 to account for the gap. It’s unlikely that tours with 3 outbound stops
-are actually more likely than those with 2. MTC should consider cleaning
-up the calibration.</p>
+are actually more likely than those with 2. MTC may benefit from
+cleaning up the UECs prior to calibration.</p>
 <p>ActivitySim files reviewed include:</p>
 <ul>
 <li><code>stop_frequency_alternatives.csv</code></li>

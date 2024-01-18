@@ -2041,7 +2041,7 @@ working_df &lt;- temp_df %&gt;%
 out_df &lt;- left_join(temp_df, working_df, by = c(&quot;person_id&quot;)) %&gt;%
   mutate(choice = if_else(is.na(choice_update), choice, choice_update)) %&gt;%
   distinct(person_id, choice) %&gt;%
-  left_join(select(person_df, person_id, ptype), ., by = c(&quot;person_id&quot;)) %&gt;%
+  left_join(select(person_df, person_id, ptype, cdap_activity), ., by = c(&quot;person_id&quot;)) %&gt;%
   mutate(choice = if_else(is.na(choice), &quot;none&quot;, choice)) %&gt;%
   left_join(., ptype_dict, by = c(&quot;ptype&quot;)) %&gt;%
   rename(person_type = label)
@@ -2272,11 +2272,284 @@ Preschool Student
 </tr>
 </tbody>
 </table>
+<pre class="r"><code>summary_cdap_df &lt;- person_df %&gt;%
+  left_join(., ptype_dict, by = c(&quot;ptype&quot;)) %&gt;%
+  rename(person_type = label) %&gt;%
+  group_by(ptype, person_type, cdap_activity) %&gt;%
+  summarise(count = n(), .groups = &quot;drop&quot;) %&gt;%
+  group_by(ptype, person_type) %&gt;%
+  mutate(share = count/sum(count)) %&gt;%
+  ungroup() %&gt;%
+  arrange(ptype) %&gt;%
+  select(person_type, cdap_activity, share)
+
+summary_cdap_df %&gt;%
+  kbl() %&gt;%
+  kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+person_type
+</th>
+<th style="text-align:left;">
+cdap_activity
+</th>
+<th style="text-align:right;">
+share
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Full-time Worker
+</td>
+<td style="text-align:left;">
+H
+</td>
+<td style="text-align:right;">
+0.2092996
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Full-time Worker
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+0.2206785
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Full-time Worker
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+0.5700219
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Part-time Worker
+</td>
+<td style="text-align:left;">
+H
+</td>
+<td style="text-align:right;">
+0.1597797
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Part-time Worker
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+0.2625417
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Part-time Worker
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+0.5776786
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+University Student
+</td>
+<td style="text-align:left;">
+H
+</td>
+<td style="text-align:right;">
+0.3217423
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+University Student
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+0.2126560
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+University Student
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+0.4656017
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Unemployed
+</td>
+<td style="text-align:left;">
+H
+</td>
+<td style="text-align:right;">
+0.2633182
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Unemployed
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+0.7366818
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Retired
+</td>
+<td style="text-align:left;">
+H
+</td>
+<td style="text-align:right;">
+0.2957514
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Retired
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+0.7042486
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Driving age Student
+</td>
+<td style="text-align:left;">
+H
+</td>
+<td style="text-align:right;">
+0.3623851
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Driving age Student
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+0.1671267
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Driving age Student
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+0.4704881
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Non-driving age Student
+</td>
+<td style="text-align:left;">
+H
+</td>
+<td style="text-align:right;">
+0.2079634
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Non-driving age Student
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+0.1845142
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Non-driving age Student
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+0.6075224
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Preschool Student
+</td>
+<td style="text-align:left;">
+H
+</td>
+<td style="text-align:right;">
+0.2905486
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Preschool Student
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+0.0966921
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Preschool Student
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+0.6127593
+</td>
+</tr>
+</tbody>
+</table>
 <p>The model does show the right types of categories for each of the
 person types. It seems to have a much higher than expected share of
-non-mandatory and home activity patterns for workers and students, so
-the model does not appear to be well calibrated. But the implementation
-appears correct. ActivitySim files reviewed include:</p>
+non-mandatory and home activity patterns for workers and students, which
+suggests we have a version prior to additional calibration? But the
+implementation appears correct. ActivitySim files reviewed include:</p>
 <ul>
 <li><code>mandatory_tour_frequency_alternatives.csv</code></li>
 <li><code>mandatory_tour_frequency_coeffs.csv</code></li>

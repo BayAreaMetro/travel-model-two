@@ -214,7 +214,7 @@ working_df <- temp_df %>%
 out_df <- left_join(temp_df, working_df, by = c("person_id")) %>%
   mutate(choice = if_else(is.na(choice_update), choice, choice_update)) %>%
   distinct(person_id, choice) %>%
-  left_join(select(person_df, person_id, ptype), ., by = c("person_id")) %>%
+  left_join(select(person_df, person_id, ptype, cdap_activity), ., by = c("person_id")) %>%
   mutate(choice = if_else(is.na(choice), "none", choice)) %>%
   left_join(., ptype_dict, by = c("ptype")) %>%
   rename(person_type = label)
@@ -233,8 +233,24 @@ summary_df %>%
   kbl() %>%
   kable_styling()
 
+summary_cdap_df <- person_df %>%
+  left_join(., ptype_dict, by = c("ptype")) %>%
+  rename(person_type = label) %>%
+  group_by(ptype, person_type, cdap_activity) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(ptype, person_type) %>%
+  mutate(share = count/sum(count)) %>%
+  ungroup() %>%
+  arrange(ptype) %>%
+  select(person_type, cdap_activity, share)
+
+summary_cdap_df %>%
+  kbl() %>%
+  kable_styling()
+
+
 ```
-The model does show the right types of categories for each of the person types. It seems to have a much higher than expected share of non-mandatory and home activity patterns for workers and students, so the model does not appear to be well calibrated. But the implementation appears correct. ActivitySim files reviewed include:
+The model does show the right types of categories for each of the person types. It seems to have a much higher than expected share of non-mandatory and home activity patterns for workers and students, which suggests we have a version prior to additional calibration? But the implementation appears correct. ActivitySim files reviewed include:
 
 - `mandatory_tour_frequency_alternatives.csv`
 - `mandatory_tour_frequency_coeffs.csv`
