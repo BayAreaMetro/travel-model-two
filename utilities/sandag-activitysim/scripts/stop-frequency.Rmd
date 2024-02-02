@@ -1,0 +1,158 @@
+---
+title: "Stop Frequency"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Overhead
+```{r overhead, include = FALSE}
+packages_vector <- c("tidyverse",
+                     "kableExtra")
+
+need_to_install <- packages_vector[!(packages_vector %in% installed.packages()[,"Package"])]
+
+if (length(need_to_install)) install.packages(need_to_install)
+
+for (package in packages_vector) {
+  library(package, character.only = TRUE)
+}
+
+```
+
+# Remote I/O
+```{r remote-io}
+interim_dir <- "../output/"
+
+tour_filename <- paste0(interim_dir, "final_tours.csv")
+
+```
+
+# Parameters
+```{r parameters}
+
+```
+
+
+# Data Reads
+```{r read}
+tour_df <- read_csv(tour_filename, col_types = cols(
+  tour_id = col_double(),
+  person_id = col_double(),
+  tour_type = col_character(),
+  tour_type_count = col_double(),
+  tour_type_num = col_double(),
+  tour_num = col_double(),
+  tour_count = col_double(),
+  tour_category = col_character(),
+  number_of_participants = col_double(),
+  destination = col_double(),
+  origin = col_double(),
+  household_id = col_double(),
+  start = col_double(),
+  end = col_double(),
+  duration = col_double(),
+  school_esc_outbound = col_character(),
+  school_esc_inbound = col_character(),
+  num_escortees = col_double(),
+  tdd = col_double(),
+  tour_id_temp = col_double(),
+  composition = col_character(),
+  is_external_tour = col_logical(),
+  is_internal_tour = col_logical(),
+  destination_logsum = col_double(),
+  vehicle_occup_1 = col_character(),
+  vehicle_occup_2 = col_character(),
+  vehicle_occup_3.5 = col_character(),
+  tour_mode = col_character(),
+  mode_choice_logsum = col_double(),
+  selected_vehicle = col_character(),
+  atwork_subtour_frequency = col_character(),
+  parent_tour_id = col_double(),
+  stop_frequency = col_character(),
+  primary_purpose = col_character(),
+  model = col_character()
+))
+```
+
+# Reductions 
+```{r reductions}
+working_df <- tour_df %>%
+  select(tour_id, person_id, tour_category, tour_type, stop_frequency) %>%
+  group_by(tour_category, tour_type, stop_frequency) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(tour_category, tour_type) %>%
+  mutate(share = count/sum(count)) %>%
+  ungroup()
+```
+
+Examine four selected purposes to see if examples are logical. 
+
+## 1. Work tours
+```{r}
+summary_df <- working_df %>%
+  filter(tour_category == "mandatory" & tour_type == "work") %>%
+  arrange(-share)
+
+summary_df %>%
+  kbl() %>%
+  kable_styling()
+```
+
+This makes sense. The dominate outcome is 0 out, 0 in, followed by 0 out, 1 in. It is somewhat illogical that 0 out 3 in is more likely than 0 out, 2 in. The calibration *appears* to have modestly overfit this model to the observed data, but this is a very minor issue. 
+
+## 2. At-work eating tours
+```{r}
+summary_df <- working_df %>%
+  filter(tour_category == "atwork" & tour_type == "eat") %>%
+  arrange(-share)
+
+summary_df %>%
+  kbl() %>%
+  kable_styling()
+```
+
+A dominate share of 0 out, 0 in, as expected.
+
+## 3. Shopping tours
+```{r}
+summary_df <- working_df %>%
+  filter(tour_category == "non_mandatory" & tour_type == "shopping") %>%
+  arrange(-share)
+
+summary_df %>%
+  kbl() %>%
+  kable_styling()
+```
+
+The 0 out, 0 in alternative is highest, as expected, and the in/out pairs (1 out, 0 in and 0 out, 1 in) are roughly balanced, as expected. 
+
+## 4. Joint social
+```{r}
+summary_df <- working_df %>%
+  filter(tour_category == "joint" & tour_type == "social") %>%
+  arrange(-share)
+
+summary_df %>%
+  kbl() %>%
+  kable_styling()
+```
+
+These outcomes appear to be a bit overfit to the data, with 3 out, 0 in being the most likely. Perhaps this is being addressed in the on-going calibration effort? But this is a very minor issue.
+
+
+# Findings
+The models appear to be implemented correctly. Though a minor issue, the models could benefit from calibration refinement (though the impact would be negligible). For example, the base coefficients for stops on social tours on the outbound trip is `1.323` -- it does not vary across the alternatives. During calibration of SANDAG's ABM2, it appears a constant of `3.226` was applied to the `3 out, 0 in` alternative, but a smaller constant of `1.75` to the `2 out, 0 in` alternative. The current calibration adjusts both of these constants down, but not enough to account for the gap. It's unlikely that tours with 3 outbound stops are actually more likely than those with 2. MTC may benefit from cleaning up the UECs prior to calibration. 
+
+ActivitySim files reviewed include:
+
+- `stop_frequency_alternatives.csv`
+- `stop_frequency_annotate_tours_preprocessor.csv`
+- `stop_frequency_[purpose].csv`, where purpose is `at_work`, `eatout`, `escort`, `othdiscr`, `othmaint`, `school`, `shopping`, `social`, `univ`, and `work`
+- `stop_frequency_coefficients_[purpose]`, where purpose is the same as above.
+- `stop_frequency.yaml`
+
+
+###
+
+

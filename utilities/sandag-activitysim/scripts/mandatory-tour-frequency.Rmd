@@ -1,0 +1,264 @@
+---
+title: "Mandatory Tour Frequency"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Overhead
+```{r overhead, include = FALSE}
+packages_vector <- c("tidyverse",
+                     "kableExtra")
+
+need_to_install <- packages_vector[!(packages_vector %in% installed.packages()[,"Package"])]
+
+if (length(need_to_install)) install.packages(need_to_install)
+
+for (package in packages_vector) {
+  library(package, character.only = TRUE)
+}
+
+```
+
+# Remote I/O
+```{r remote-io}
+interim_dir <- "../output/"
+
+person_filename <- paste0(interim_dir, "final_persons.csv")
+tour_filename <- paste0(interim_dir, "final_tours.csv")
+
+```
+
+# Parameters
+```{r parameters}
+ptype_dict <- tibble(ptype = seq(1,8),
+                     label = c("Full-time Worker",
+                               "Part-time Worker",
+                               "University Student",
+                               "Unemployed",
+                               "Retired",
+                               "Driving age Student",
+                               "Non-driving age Student",
+                               "Preschool Student"))
+```
+
+
+# Data Reads
+Minor note: bloated output -- see `parking-subsidy.Rmd` note. 
+```{r read}
+person_df <- read_csv(person_filename, col_types = cols(
+  person_id = col_double(),
+  household_id = col_double(),
+  age = col_double(),
+  PNUM = col_double(),
+  sex = col_double(),
+  pemploy = col_double(),
+  pstudent = col_double(),
+  ptype = col_double(),
+  educ = col_double(),
+  naics2_original_code = col_character(),
+  soc2 = col_double(),
+  age_16_to_19 = col_logical(),
+  age_16_p = col_logical(),
+  adult = col_logical(),
+  male = col_logical(),
+  female = col_logical(),
+  has_non_worker = col_logical(),
+  has_retiree = col_logical(),
+  has_preschool_kid = col_logical(),
+  has_driving_kid = col_logical(),
+  has_school_kid = col_logical(),
+  has_full_time = col_logical(),
+  has_part_time = col_logical(),
+  has_university = col_logical(),
+  student_is_employed = col_logical(),
+  nonstudent_to_school = col_logical(),
+  is_student = col_logical(),
+  is_preschool = col_logical(),
+  is_gradeschool = col_logical(),
+  is_highschool = col_logical(),
+  is_university = col_logical(),
+  school_segment = col_double(),
+  is_worker = col_logical(),
+  is_fulltime_worker = col_logical(),
+  is_parttime_worker = col_logical(),
+  is_internal_worker = col_logical(),
+  is_external_worker = col_logical(),
+  home_zone_id = col_double(),
+  time_factor_work = col_double(),
+  time_factor_nonwork = col_double(),
+  naics_code = col_double(),
+  occupation = col_character(),
+  is_income_less25K = col_logical(),
+  is_income_25K_to_60K = col_logical(),
+  is_income_60K_to_120K = col_logical(),
+  is_income_greater60K = col_logical(),
+  is_income_greater120K = col_logical(),
+  is_non_worker_in_HH = col_logical(),
+  is_all_adults_full_time_workers = col_logical(),
+  is_pre_drive_child_in_HH = col_logical(),
+  work_from_home = col_logical(),
+  is_out_of_home_worker = col_logical(),
+  external_workplace_zone_id = col_double(),
+  external_workplace_location_logsum = col_double(),
+  external_workplace_modechoice_logsum = col_double(),
+  school_zone_id = col_double(),
+  school_location_logsum = col_double(),
+  school_modechoice_logsum = col_double(),
+  distance_to_school = col_double(),
+  roundtrip_auto_time_to_school = col_double(),
+  workplace_zone_id = col_double(),
+  workplace_location_logsum = col_double(),
+  workplace_modechoice_logsum = col_double(),
+  distance_to_work = col_double(),
+  workplace_in_cbd = col_logical(),
+  work_zone_area_type = col_double(),
+  auto_time_home_to_work = col_double(),
+  roundtrip_auto_time_to_work = col_double(),
+  work_auto_savings = col_double(),
+  exp_daily_work = col_double(),
+  non_toll_time_work = col_double(),
+  toll_time_work = col_double(),
+  toll_dist_work = col_double(),
+  toll_cost_work = col_double(),
+  toll_travel_time_savings_work = col_double(),
+  transit_pass_subsidy = col_double(),
+  transit_pass_ownership = col_double(),
+  free_parking_at_work = col_logical(),
+  telecommute_frequency = col_character(),
+  cdap_activity = col_character(),
+  travel_active = col_logical(),
+  under16_not_at_school = col_logical(),
+  has_preschool_kid_at_home = col_logical(),
+  has_school_kid_at_home = col_logical(),
+  mandatory_tour_frequency = col_character(),
+  work_and_school_and_worker = col_logical(),
+  work_and_school_and_student = col_logical(),
+  num_mand = col_double(),
+  num_work_tours = col_double(),
+  has_pre_school_child_with_mandatory = col_logical(),
+  has_driving_age_child_with_mandatory = col_logical(),
+  num_joint_tours = col_double(),
+  non_mandatory_tour_frequency = col_double(),
+  num_non_mand = col_double(),
+  num_escort_tours = col_double(),
+  num_eatout_tours = col_double(),
+  num_shop_tours = col_double(),
+  num_maint_tours = col_double(),
+  num_discr_tours = col_double(),
+  num_social_tours = col_double(),
+  num_non_escort_tours = col_double(),
+  num_shop_maint_tours = col_double(),
+  num_shop_maint_escort_tours = col_double(),
+  num_add_shop_maint_tours = col_double(),
+  num_soc_discr_tours = col_double(),
+  num_add_soc_discr_tours = col_double(),
+  model = col_character()
+))
+
+tour_df <- read_csv(tour_filename, col_types = cols(
+  tour_id = col_double(),
+  person_id = col_double(),
+  tour_type = col_character(),
+  tour_type_count = col_double(),
+  tour_type_num = col_double(),
+  tour_num = col_double(),
+  tour_count = col_double(),
+  tour_category = col_character(),
+  number_of_participants = col_double(),
+  destination = col_double(),
+  origin = col_double(),
+  household_id = col_double(),
+  start = col_double(),
+  end = col_double(),
+  duration = col_double(),
+  school_esc_outbound = col_character(),
+  school_esc_inbound = col_character(),
+  num_escortees = col_double(),
+  tdd = col_double(),
+  tour_id_temp = col_double(),
+  composition = col_character(),
+  is_external_tour = col_logical(),
+  is_internal_tour = col_logical(),
+  destination_logsum = col_double(),
+  vehicle_occup_1 = col_character(),
+  vehicle_occup_2 = col_character(),
+  vehicle_occup_3.5 = col_character(),
+  tour_mode = col_character(),
+  mode_choice_logsum = col_double(),
+  selected_vehicle = col_character(),
+  atwork_subtour_frequency = col_character(),
+  parent_tour_id = col_double(),
+  stop_frequency = col_character(),
+  primary_purpose = col_character(),
+  model = col_character()
+))
+```
+
+# Reductions 
+```{r reductions}
+temp_df <- tour_df %>%
+  select(tour_id, person_id, tour_category, tour_type) %>%
+  filter(tour_category == "mandatory") %>%
+  group_by(person_id, tour_type) %>%
+  summarise(mandatory_tours = n(), .groups = "drop") %>%
+  mutate(choice = paste0(tour_type, "_", mandatory_tours))
+
+working_df <- temp_df %>%
+  group_by(person_id) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  filter(count > 1) %>%
+  mutate(choice_update = "work_and_school") %>%
+  select(person_id, choice_update)
+
+out_df <- left_join(temp_df, working_df, by = c("person_id")) %>%
+  mutate(choice = if_else(is.na(choice_update), choice, choice_update)) %>%
+  distinct(person_id, choice) %>%
+  left_join(select(person_df, person_id, ptype, cdap_activity), ., by = c("person_id")) %>%
+  mutate(choice = if_else(is.na(choice), "none", choice)) %>%
+  left_join(., ptype_dict, by = c("ptype")) %>%
+  rename(person_type = label)
+
+summary_df <- out_df %>%
+  group_by(ptype, person_type, choice) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(ptype, person_type) %>%
+  mutate(share = count/sum(count)) %>%
+  ungroup() %>%
+  arrange(ptype) %>%
+  select(person_type, choice, share) %>%
+  pivot_wider(names_from = choice, values_from = share, values_fill = 0.0)
+
+summary_df %>%
+  kbl() %>%
+  kable_styling()
+
+summary_cdap_df <- person_df %>%
+  left_join(., ptype_dict, by = c("ptype")) %>%
+  rename(person_type = label) %>%
+  group_by(ptype, person_type, cdap_activity) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(ptype, person_type) %>%
+  mutate(share = count/sum(count)) %>%
+  ungroup() %>%
+  arrange(ptype) %>%
+  select(person_type, cdap_activity, share)
+
+summary_cdap_df %>%
+  kbl() %>%
+  kable_styling()
+
+
+```
+The model does show the right types of categories for each of the person types. It seems to have a much higher than expected share of non-mandatory and home activity patterns for workers and students, which suggests we have a version prior to additional calibration? But the implementation appears correct. ActivitySim files reviewed include:
+
+- `mandatory_tour_frequency_alternatives.csv`
+- `mandatory_tour_frequency_coeffs.csv`
+- `mandatory_tour_frequency.csv`
+- `mandatory_tour_frequency.yaml`
+- `annotate_persons_mtf.csv`
+
+
+
+###
+

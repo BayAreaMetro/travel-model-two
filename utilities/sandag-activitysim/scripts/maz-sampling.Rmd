@@ -1,0 +1,474 @@
+---
+title: "MAZ Sampling"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Overhead
+```{r overhead, include = FALSE}
+packages_vector <- c("tidyverse",
+                     "kableExtra",
+                     "ggplot2")
+
+need_to_install <- packages_vector[!(packages_vector %in% installed.packages()[,"Package"])]
+
+if (length(need_to_install)) install.packages(need_to_install)
+
+for (package in packages_vector) {
+  library(package, character.only = TRUE)
+}
+
+```
+
+# Remote I/O
+```{r remote-io}
+interim_dir <- "../"
+
+trips_filename <- paste0(interim_dir, "output/final_trips.csv")
+maz_filename <- paste0(interim_dir, "inputs/mgra15_based_input2022.csv")
+
+temp_trips_filename <- paste0(interim_dir, "output/final_trips.RDS")
+
+```
+
+# Parameters
+```{r parameters}
+
+```
+
+
+# Data Reads
+Minor note: the index column is confusing and should probably be removed. ActivitySim output is bloated. 
+```{r read}
+maz_df <- read_csv(maz_filename, col_types = cols(
+  ...1 = col_double(),
+  taz = col_double(),
+  luz_id = col_double(),
+  pop = col_double(),
+  hhp = col_double(),
+  hs = col_double(),
+  hs_sf = col_double(),
+  hs_mf = col_double(),
+  hs_mh = col_double(),
+  hh = col_double(),
+  hh_sf = col_double(),
+  hh_mf = col_double(),
+  hh_mh = col_double(),
+  hhs = col_double(),
+  gq_civ = col_double(),
+  gq_mil = col_double(),
+  i1 = col_double(),
+  i2 = col_double(),
+  i3 = col_double(),
+  i4 = col_double(),
+  i5 = col_double(),
+  i6 = col_double(),
+  i7 = col_double(),
+  i8 = col_double(),
+  i9 = col_double(),
+  i10 = col_double(),
+  pseudomsa = col_double(),
+  zip09 = col_double(),
+  enrollgradekto8 = col_double(),
+  enrollgrade9to12 = col_double(),
+  collegeenroll = col_double(),
+  majorcollege_pt_Undergrad = col_double(),
+  majorcollege_ft_Undergrad = col_double(),
+  majorcollege_All_Undergrad = col_double(),
+  major_All_Graduate = col_double(),
+  othercollegeenroll = col_double(),
+  othercollege_pt_Undergrad = col_double(),
+  othercollege_ft_Undergrad = col_double(),
+  othercollege_All_Undergrad = col_double(),
+  othercollege_All_Graduate = col_double(),
+  hotelroomtotal = col_double(),
+  parkactive = col_double(),
+  openspaceparkpreserve = col_double(),
+  beachactive = col_double(),
+  district27 = col_double(),
+  milestocoast = col_double(),
+  acres = col_double(),
+  land_acres = col_double(),
+  effective_acres = col_double(),
+  truckregiontype = col_double(),
+  emp_gov = col_double(),
+  emp_mil = col_double(),
+  emp_ag_min = col_double(),
+  emp_bus_svcs = col_double(),
+  emp_fin_res_mgm = col_double(),
+  emp_educ = col_double(),
+  emp_hlth = col_double(),
+  emp_ret = col_double(),
+  emp_trn_wrh = col_double(),
+  emp_con = col_double(),
+  emp_utl = col_double(),
+  emp_mnf = col_double(),
+  emp_whl = col_double(),
+  emp_ent = col_double(),
+  emp_accm = col_double(),
+  emp_food = col_double(),
+  emp_oth = col_double(),
+  emp_non_ws_wfh = col_double(),
+  emp_non_ws_oth = col_double(),
+  emp_total = col_double(),
+  totint = col_double(),
+  duden = col_double(),
+  empden = col_double(),
+  popden = col_double(),
+  retempden = col_double(),
+  totintbin = col_double(),
+  empdenbin = col_double(),
+  dudenbin = col_double(),
+  PopEmpDenPerMi = col_double(),
+  ech_dist = col_double(),
+  hch_dist = col_double(),
+  adultschenrl = col_double(),
+  hstallsoth = col_double(),
+  hstallssam = col_double(),
+  numfreehrs = col_double(),
+  dstallsoth = col_double(),
+  dstallssam = col_double(),
+  mstallsoth = col_double(),
+  mstallssam = col_double(),
+  budgetroom = col_double(),
+  economyroom = col_double(),
+  luxuryroom = col_double(),
+  midpriceroom = col_double(),
+  upscaleroom = col_double(),
+  MicroAccessTime = col_double(),
+  remoteAVParking = col_double(),
+  refueling_stations = col_double(),
+  mgra = col_double(),
+  exp_hourly = col_double(),
+  exp_daily = col_double(),
+  exp_monthly = col_double(),
+  parking_type = col_double(),
+  parking_spaces = col_double()
+))
+
+```
+
+```{r read-two, eval=FALSE}
+trips_df <- read_csv(trips_filename, col_types = cols(
+  trip_id = col_double(),
+  person_id = col_double(),
+  household_id = col_double(),
+  primary_purpose = col_character(),
+  trip_num = col_double(),
+  outbound = col_logical(),
+  trip_count = col_double(),
+  destination = col_double(),
+  origin = col_double(),
+  tour_id = col_double(),
+  escort_participants = col_character(),
+  school_escort_direction = col_character(),
+  purpose = col_character(),
+  destination_logsum = col_double(),
+  depart = col_double(),
+  trip_mode = col_character(),
+  mode_choice_logsum = col_double(),
+  vot_da = col_double(),
+  vot_s2 = col_double(),
+  vot_s3 = col_double(),
+  ownsTransponder = col_logical(),
+  parking_zone = col_double(),
+  trip_period = col_character(),
+  tour_participants = col_double(),
+  distance = col_double(),
+  is_ea = col_logical(),
+  is_am = col_logical(),
+  is_md = col_logical(),
+  is_pm = col_logical(),
+  is_ev = col_logical(),
+  ownTrp = col_logical(),
+  vot1 = col_double(),
+  vot2 = col_double(),
+  vot3 = col_double(),
+  inbound = col_logical(),
+  DRIVEALONE_NOTR_EA_LOW = col_double(),
+  SHARED2_NOTR_EA_LOW = col_double(),
+  SHARED3_NOTR_EA_LOW = col_double(),
+  DRIVEALONE_TR_EA_LOW = col_double(),
+  SHARED2_TR_EA_LOW = col_double(),
+  SHARED3_TR_EA_LOW = col_double(),
+  DRIVEALONE_NOTR_EA_MED = col_double(),
+  SHARED2_NOTR_EA_MED = col_double(),
+  SHARED3_NOTR_EA_MED = col_double(),
+  DRIVEALONE_TR_EA_MED = col_double(),
+  SHARED2_TR_EA_MED = col_double(),
+  SHARED3_TR_EA_MED = col_double(),
+  DRIVEALONE_NOTR_EA_HIGH = col_double(),
+  SHARED2_NOTR_EA_HIGH = col_double(),
+  SHARED3_NOTR_EA_HIGH = col_double(),
+  DRIVEALONE_TR_EA_HIGH = col_double(),
+  SHARED2_TR_EA_HIGH = col_double(),
+  SHARED3_TR_EA_HIGH = col_double(),
+  WALK_LOC_EA = col_double(),
+  WALK_PRM_EA = col_double(),
+  WALK_MIX_EA = col_double(),
+  PNR_LOCOUT_EA = col_double(),
+  PNR_PRMOUT_EA = col_double(),
+  PNR_MIXOUT_EA = col_double(),
+  KNR_LOCOUT_EA = col_double(),
+  KNR_PRMOUT_EA = col_double(),
+  KNR_MIXOUT_EA = col_double(),
+  TNC_LOCOUT_EA = col_double(),
+  TNC_PRMOUT_EA = col_double(),
+  TNC_MIXOUT_EA = col_double(),
+  PNR_LOCIN_EA = col_double(),
+  PNR_PRMIN_EA = col_double(),
+  PNR_MIXIN_EA = col_double(),
+  KNR_LOCIN_EA = col_double(),
+  KNR_PRMIN_EA = col_double(),
+  KNR_MIXIN_EA = col_double(),
+  TNC_LOCIN_EA = col_double(),
+  TNC_PRMIN_EA = col_double(),
+  TNC_MIXIN_EA = col_double(),
+  BIKE_EA = col_double(),
+  WALK_EA = col_double(),
+  DRIVEALONE_NOTR_AM_LOW = col_double(),
+  SHARED2_NOTR_AM_LOW = col_double(),
+  SHARED3_NOTR_AM_LOW = col_double(),
+  DRIVEALONE_TR_AM_LOW = col_double(),
+  SHARED2_TR_AM_LOW = col_double(),
+  SHARED3_TR_AM_LOW = col_double(),
+  DRIVEALONE_NOTR_AM_MED = col_double(),
+  SHARED2_NOTR_AM_MED = col_double(),
+  SHARED3_NOTR_AM_MED = col_double(),
+  DRIVEALONE_TR_AM_MED = col_double(),
+  SHARED2_TR_AM_MED = col_double(),
+  SHARED3_TR_AM_MED = col_double(),
+  DRIVEALONE_NOTR_AM_HIGH = col_double(),
+  SHARED2_NOTR_AM_HIGH = col_double(),
+  SHARED3_NOTR_AM_HIGH = col_double(),
+  DRIVEALONE_TR_AM_HIGH = col_double(),
+  SHARED2_TR_AM_HIGH = col_double(),
+  SHARED3_TR_AM_HIGH = col_double(),
+  WALK_LOC_AM = col_double(),
+  WALK_PRM_AM = col_double(),
+  WALK_MIX_AM = col_double(),
+  PNR_LOCOUT_AM = col_double(),
+  PNR_PRMOUT_AM = col_double(),
+  PNR_MIXOUT_AM = col_double(),
+  KNR_LOCOUT_AM = col_double(),
+  KNR_PRMOUT_AM = col_double(),
+  KNR_MIXOUT_AM = col_double(),
+  TNC_LOCOUT_AM = col_double(),
+  TNC_PRMOUT_AM = col_double(),
+  TNC_MIXOUT_AM = col_double(),
+  PNR_LOCIN_AM = col_double(),
+  PNR_PRMIN_AM = col_double(),
+  PNR_MIXIN_AM = col_double(),
+  KNR_LOCIN_AM = col_double(),
+  KNR_PRMIN_AM = col_double(),
+  KNR_MIXIN_AM = col_double(),
+  TNC_LOCIN_AM = col_double(),
+  TNC_PRMIN_AM = col_double(),
+  TNC_MIXIN_AM = col_double(),
+  BIKE_AM = col_double(),
+  WALK_AM = col_double(),
+  DRIVEALONE_NOTR_MD_LOW = col_double(),
+  SHARED2_NOTR_MD_LOW = col_double(),
+  SHARED3_NOTR_MD_LOW = col_double(),
+  DRIVEALONE_TR_MD_LOW = col_double(),
+  SHARED2_TR_MD_LOW = col_double(),
+  SHARED3_TR_MD_LOW = col_double(),
+  DRIVEALONE_NOTR_MD_MED = col_double(),
+  SHARED2_NOTR_MD_MED = col_double(),
+  SHARED3_NOTR_MD_MED = col_double(),
+  DRIVEALONE_TR_MD_MED = col_double(),
+  SHARED2_TR_MD_MED = col_double(),
+  SHARED3_TR_MD_MED = col_double(),
+  DRIVEALONE_NOTR_MD_HIGH = col_double(),
+  SHARED2_NOTR_MD_HIGH = col_double(),
+  SHARED3_NOTR_MD_HIGH = col_double(),
+  DRIVEALONE_TR_MD_HIGH = col_double(),
+  SHARED2_TR_MD_HIGH = col_double(),
+  SHARED3_TR_MD_HIGH = col_double(),
+  WALK_LOC_MD = col_double(),
+  WALK_PRM_MD = col_double(),
+  WALK_MIX_MD = col_double(),
+  PNR_LOCOUT_MD = col_double(),
+  PNR_PRMOUT_MD = col_double(),
+  PNR_MIXOUT_MD = col_double(),
+  KNR_LOCOUT_MD = col_double(),
+  KNR_PRMOUT_MD = col_double(),
+  KNR_MIXOUT_MD = col_double(),
+  TNC_LOCOUT_MD = col_double(),
+  TNC_PRMOUT_MD = col_double(),
+  TNC_MIXOUT_MD = col_double(),
+  PNR_LOCIN_MD = col_double(),
+  PNR_PRMIN_MD = col_double(),
+  PNR_MIXIN_MD = col_double(),
+  KNR_LOCIN_MD = col_double(),
+  KNR_PRMIN_MD = col_double(),
+  KNR_MIXIN_MD = col_double(),
+  TNC_LOCIN_MD = col_double(),
+  TNC_PRMIN_MD = col_double(),
+  TNC_MIXIN_MD = col_double(),
+  BIKE_MD = col_double(),
+  WALK_MD = col_double(),
+  DRIVEALONE_NOTR_PM_LOW = col_double(),
+  SHARED2_NOTR_PM_LOW = col_double(),
+  SHARED3_NOTR_PM_LOW = col_double(),
+  DRIVEALONE_TR_PM_LOW = col_double(),
+  SHARED2_TR_PM_LOW = col_double(),
+  SHARED3_TR_PM_LOW = col_double(),
+  DRIVEALONE_NOTR_PM_MED = col_double(),
+  SHARED2_NOTR_PM_MED = col_double(),
+  SHARED3_NOTR_PM_MED = col_double(),
+  DRIVEALONE_TR_PM_MED = col_double(),
+  SHARED2_TR_PM_MED = col_double(),
+  SHARED3_TR_PM_MED = col_double(),
+  DRIVEALONE_NOTR_PM_HIGH = col_double(),
+  SHARED2_NOTR_PM_HIGH = col_double(),
+  SHARED3_NOTR_PM_HIGH = col_double(),
+  DRIVEALONE_TR_PM_HIGH = col_double(),
+  SHARED2_TR_PM_HIGH = col_double(),
+  SHARED3_TR_PM_HIGH = col_double(),
+  WALK_LOC_PM = col_double(),
+  WALK_PRM_PM = col_double(),
+  WALK_MIX_PM = col_double(),
+  PNR_LOCOUT_PM = col_double(),
+  PNR_PRMOUT_PM = col_double(),
+  PNR_MIXOUT_PM = col_double(),
+  KNR_LOCOUT_PM = col_double(),
+  KNR_PRMOUT_PM = col_double(),
+  KNR_MIXOUT_PM = col_double(),
+  TNC_LOCOUT_PM = col_double(),
+  TNC_PRMOUT_PM = col_double(),
+  TNC_MIXOUT_PM = col_double(),
+  PNR_LOCIN_PM = col_double(),
+  PNR_PRMIN_PM = col_double(),
+  PNR_MIXIN_PM = col_double(),
+  KNR_LOCIN_PM = col_double(),
+  KNR_PRMIN_PM = col_double(),
+  KNR_MIXIN_PM = col_double(),
+  TNC_LOCIN_PM = col_double(),
+  TNC_PRMIN_PM = col_double(),
+  TNC_MIXIN_PM = col_double(),
+  BIKE_PM = col_double(),
+  WALK_PM = col_double(),
+  DRIVEALONE_NOTR_EV_LOW = col_double(),
+  SHARED2_NOTR_EV_LOW = col_double(),
+  SHARED3_NOTR_EV_LOW = col_double(),
+  DRIVEALONE_TR_EV_LOW = col_double(),
+  SHARED2_TR_EV_LOW = col_double(),
+  SHARED3_TR_EV_LOW = col_double(),
+  DRIVEALONE_NOTR_EV_MED = col_double(),
+  SHARED2_NOTR_EV_MED = col_double(),
+  SHARED3_NOTR_EV_MED = col_double(),
+  DRIVEALONE_TR_EV_MED = col_double(),
+  SHARED2_TR_EV_MED = col_double(),
+  SHARED3_TR_EV_MED = col_double(),
+  DRIVEALONE_NOTR_EV_HIGH = col_double(),
+  SHARED2_NOTR_EV_HIGH = col_double(),
+  SHARED3_NOTR_EV_HIGH = col_double(),
+  DRIVEALONE_TR_EV_HIGH = col_double(),
+  SHARED2_TR_EV_HIGH = col_double(),
+  SHARED3_TR_EV_HIGH = col_double(),
+  WALK_LOC_EV = col_double(),
+  WALK_PRM_EV = col_double(),
+  WALK_MIX_EV = col_double(),
+  PNR_LOCOUT_EV = col_double(),
+  PNR_PRMOUT_EV = col_double(),
+  PNR_MIXOUT_EV = col_double(),
+  KNR_LOCOUT_EV = col_double(),
+  KNR_PRMOUT_EV = col_double(),
+  KNR_MIXOUT_EV = col_double(),
+  TNC_LOCOUT_EV = col_double(),
+  TNC_PRMOUT_EV = col_double(),
+  TNC_MIXOUT_EV = col_double(),
+  PNR_LOCIN_EV = col_double(),
+  PNR_PRMIN_EV = col_double(),
+  PNR_MIXIN_EV = col_double(),
+  KNR_LOCIN_EV = col_double(),
+  KNR_PRMIN_EV = col_double(),
+  KNR_MIXIN_EV = col_double(),
+  TNC_LOCIN_EV = col_double(),
+  TNC_PRMIN_EV = col_double(),
+  TNC_MIXIN_EV = col_double(),
+  BIKE_EV = col_double(),
+  WALK_EV = col_double(),
+  timeDrive = col_double(),
+  distanceDrive = col_double(),
+  costTollDrive = col_double(),
+  timeTransitInVehicle = col_double(),
+  timeRapidTransitInVehicle = col_double(),
+  timeExpressBusTransitInVehicle = col_double(),
+  timeLocalBusTransitInVehicle = col_double(),
+  timeLightRailTransitInVehicle = col_double(),
+  timeCommuterRailTransitInVehicle = col_double(),
+  timeTransitInitialWait = col_double(),
+  costFareTransit = col_double(),
+  transfersTransit = col_double(),
+  timeBike = col_double(),
+  timeWalk = col_double(),
+  sample_rate = col_double(),
+  otaz = col_double(),
+  dtaz = col_double(),
+  model = col_character()
+))
+
+
+```
+
+# Temp I/O
+```{r temp-io}
+# saveRDS(trips_df, temp_trips_filename)
+trips_df <- readRDS(temp_trips_filename)
+```
+
+
+# Reductions 
+## Work
+```{r reductions}
+work_df <- trips_df %>%
+  filter(primary_purpose == "work") %>%
+  group_by(destination) %>%
+  summarise(work_trips = n(), .groups = "drop") %>%
+  left_join(select(maz_df, mgra, emp_total), ., by = c("mgra" = "destination")) %>%
+  filter(!is.na(work_trips))
+
+ggplot(work_df, aes(x = emp_total, y = work_trips)) + geom_point()
+
+zero_emp_work_df <- work_df %>%
+  filter(emp_total < 1) %>%
+  filter(work_trips > 0)
+
+zero_work_emp_df <- work_df %>%
+  filter(emp_total > 20) %>%
+  filter(work_trips < 1)
+```
+
+## Shop
+```{r reductions-shop}
+shop_df <- trips_df %>%
+  filter(primary_purpose == "shopping") %>%
+  group_by(destination) %>%
+  summarise(shop_trips = n(), .groups = "drop") %>%
+  left_join(select(maz_df, mgra, emp_ret), ., by = c("mgra" = "destination")) %>%
+  filter(!is.na(shop_trips))
+
+ggplot(shop_df, aes(x = emp_ret, y = shop_trips)) + geom_point()
+
+zero_ret_shop_df <- shop_df %>%
+  filter(emp_ret < 1) %>%
+  filter(shop_trips > 0)
+
+zero_shop_ret_df <- shop_df %>%
+  filter(emp_ret > 20) %>%
+  filter(shop_trips < 1)
+
+```
+# Findings
+The sampling *appears* to be implemented correctly. The correlation between work trip ends and total employment is `r cor(work_df$emp_total, work_df$work_trips)` at the MGRA level. The number of MGRAs with zero total employment and non-zero work trips is `r nrow(zero_emp_work_df)` (out of `r nrow(maz_df)`). The number of MGRAs with total employment of at least 20 and zero work trips is `r nrow(zero_work_emp_df)`. 
+
+For shopping trips, the correlation between shopping trip ends and retail employment is `r cor(shop_df$emp_ret, shop_df$shop_trips)` at the MGRA level. The number of MGRAs with zero retail employment and non-zero shopping trips is `r nrow(zero_ret_shop_df)` (out of `r nrow(maz_df)`), presumably because other size terms impact shopping trips? Note to SANDAG to check the size terms for shopping trips (why would it be something other than retail?). The number of MGRAs with retail employment of at least 20 and zero shopping trips is `r nrow(zero_shop_ret_df)`.  
+
+This evidence suggests the sampling is done correctly. 
+
+
+###
+
