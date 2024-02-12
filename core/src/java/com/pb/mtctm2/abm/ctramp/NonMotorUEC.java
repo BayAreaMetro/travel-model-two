@@ -106,10 +106,7 @@ public class NonMotorUEC
         // log DMU values
         if (trace)
         {
-            TapDataManager tapManager = TapDataManager.getInstance();
-            if (Arrays.binarySearch(tapManager.getTaps(), pTaz) > 0
-                    && Arrays.binarySearch(tapManager.getTaps(), aTaz) > 0)
-                uec.logDataValues(logger, pTaz, aTaz, 0);
+            uec.logDataValues(logger, pTaz, aTaz, 0);
             dmu.logValues(logger);
         }
 

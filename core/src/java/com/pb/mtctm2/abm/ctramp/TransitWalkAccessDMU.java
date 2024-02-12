@@ -31,8 +31,8 @@ public class TransitWalkAccessDMU
 
     protected HashMap<String, Integer> methodIndexMap;
 
-    double                              tapToMgraWalkTime;
-    double                              mgraToTapWalkTime;
+    double                              stopsToMgraWalkTime;
+    double                              mgraToStopsWalkTime;
     double                              escalatorTime;
     int 								period;
     int 								set;
@@ -42,7 +42,7 @@ public class TransitWalkAccessDMU
     int                                 personType = 1;     //defaults to full-time worker
     float                               ivtCoeff;
     float                               costCoeff;
-    int									accessEgressMode=0; //this is called a walk-access DMU but it is used in the TAP-to-TAP UEC, so it is
+    int									accessEgressMode=0; //this is called a walk-access DMU but it is used in the TAZ-to-TAZ UEC, so it is
                                                             //possible that it is being called for a drive-access path!
     int                                 tourCategoryIsJoint = 0;
     float                               valueOfTime = (float) 10.0;
@@ -60,7 +60,7 @@ public class TransitWalkAccessDMU
      * 
      * @param accessEgressMode
      */
-    public void setAccessEgressMode(int accessEgressMode){
+    public void setAccessEgress(int accessEgressMode){
     	this.accessEgressMode = accessEgressMode;
     }
     
@@ -74,50 +74,50 @@ public class TransitWalkAccessDMU
      * 
      * @return accessEgressMode
      */
-    public int getAccessEgressMode(){
+    public int getAccessEgress(){
     	return accessEgressMode;
     }
     
   
     /**
-     * Get the time from the production/origin MGRA to the boarding TAP.
+     * Get the time from the production/origin MGRA to stops.
      * 
-     * @return The time from the production/origin MGRA to the boarding TAP.
+     * @return The time from the production/origin MGRA to stops.
      */
-    public double getMgraTapWalkTime()
+    public double getMgraStopsWalkTime()
     {
-        return mgraToTapWalkTime;
+        return mgraToStopsWalkTime;
     }
 
     /**
-     * Set the time from the production/origin MGRA to the boarding TAP.
+     * Set the time from the production/origin MGRA to stops.
      * 
-     * @param walkTime The time from the production/origin MGRA to the boarding TAP.
+     * @param walkTime The time from the production/origin MGRA to stops.
      */
-    public void setMgraTapWalkTime(double walkTime)
+    public void setMgraStopsWalkTime(double walkTime)
     {
-        this.mgraToTapWalkTime = walkTime;
+        this.mgraToStopsWalkTime = walkTime;
     }
 
     /**
-     * Get the time from the alighting TAP to the attraction/destination MGRA.
+     * Get the time from stops to the attraction/destination MGRA.
      * 
-     * @return The time from the alighting TAP to the attraction/destination MGRA.
+     * @return The time from stops to the attraction/destination MGRA.
      */
-    public double getTapMgraWalkTime()
+    public double getStopsMgraWalkTime()
     {
-        return tapToMgraWalkTime;
+        return stopsToMgraWalkTime;
     }
 
     /**
-     * Set the time from the alighting TAP to the attraction/destination MGRA.
+     * Set the time from the alighting stops to the attraction/destination MGRA.
      * 
-     * @param walkTime The time from the alighting TAP to the attraction/destination
+     * @param walkTime The time from the alighting stops to the attraction/destination
      *            MGRA.
      */
-    public void setTapMgraWalkTime(double walkTime)
+    public void setStopsMgraWalkTime(double walkTime)
     {
-        this.tapToMgraWalkTime = walkTime;
+        this.stopsToMgraWalkTime = walkTime;
     }
 
     /**
@@ -265,8 +265,8 @@ public class TransitWalkAccessDMU
         localLogger.info("");
         localLogger.info("Walk DMU Values:");
         localLogger.info("");
-        localLogger.info(String.format("MGRA to TAP walk time:    %9.4f", mgraToTapWalkTime));
-        localLogger.info(String.format("TAP to MGRA walk time:    %9.4f", tapToMgraWalkTime));
+        localLogger.info(String.format("MGRA to Stops walk time:    %9.4f", mgraToStopsWalkTime));
+        localLogger.info(String.format("Stops to MGRA walk time:    %9.4f", stopsToMgraWalkTime));
         localLogger.info(String.format("Escalator time:           %9.4f", escalatorTime));
         localLogger.info(String.format("Period:                   %9s", period));
         localLogger.info(String.format("Set:                      %9s", set));
@@ -296,8 +296,8 @@ public class TransitWalkAccessDMU
         methodIndexMap = new HashMap<String, Integer>();
 
         methodIndexMap.put("getEscalatorTime", 0);
-        methodIndexMap.put("getMgraTapWalkTime", 1);
-        methodIndexMap.put("getTapMgraWalkTime", 2);
+        methodIndexMap.put("getMgraStopsWalkTime", 1);
+        methodIndexMap.put("getStopsMgraWalkTime", 2);
         methodIndexMap.put("getTOD", 3);
         methodIndexMap.put("getSet", 4);
         
@@ -305,7 +305,7 @@ public class TransitWalkAccessDMU
         methodIndexMap.put("getPersonType", 8);
         methodIndexMap.put("getIvtCoeff", 9);
         methodIndexMap.put("getCostCoeff", 10);
-        methodIndexMap.put("getAccessEgressMode", 11);
+        methodIndexMap.put("getAccessEgress", 11);
         methodIndexMap.put("getTourCategoryIsJoint", 12);
         methodIndexMap.put("getValueOfTime", 13);
         
@@ -331,9 +331,9 @@ public class TransitWalkAccessDMU
             case 0:
                 return getEscalatorTime();
             case 1:
-                return getMgraTapWalkTime();
+                return getMgraStopsWalkTime();
             case 2:
-                return getTapMgraWalkTime();
+                return getStopsMgraWalkTime();
             case 3:
                 return getTOD();
             case 4:
@@ -347,7 +347,7 @@ public class TransitWalkAccessDMU
             case 10:
             	return getCostCoeff();
             case 11:
-            	return getAccessEgressMode();
+            	return getAccessEgress();
             case 12:
             	return getTourCategoryIsJoint();
             case 13:

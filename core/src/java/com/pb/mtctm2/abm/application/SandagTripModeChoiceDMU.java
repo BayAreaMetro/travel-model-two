@@ -397,15 +397,15 @@ public class SandagTripModeChoiceDMU
                 break;
             case 101:
             	if ( outboundHalfTourDirection == 1 )
-                    returnValue = getTransitLogSum(DTW);
+                    returnValue = getTransitLogSum(PTW);
                 else
-                    returnValue = getTransitLogSum(WTD);
+                    returnValue = getTransitLogSum(WTP);
                 break;
             case 102:
             	if ( outboundHalfTourDirection == 1 )
-                    returnValue = getTransitLogSum(DTW);
+                    returnValue = getTransitLogSum(KTW);
                 else
-                    returnValue = getTransitLogSum(WTD);
+                    returnValue = getTransitLogSum(WTK);
                 break;
             case 200:
                 returnValue = getWorkers();

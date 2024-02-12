@@ -80,6 +80,8 @@ public final class MgraDataManager
     private static final String MGRA_DISTANCE_COEFF_OTHER = "mgra.avg.cost.dist.coeff.other";
     private static final String LOG_MGRA_PARKCOST = "mgra.avg.cost.trace.zone";
     public static final String PROPERTIES_MAX_WALK_DIST = "mgra.max.parking.distance";
+    public static final String MGRA_STOPS_WALK_ACCESS_TIME_FILE = "mgra.stops.walk.access.time.file";
+    public static final String MGRA_STOPS_WALK_EGRESS_TIME_FILE = "mgra.stops.walk.egress.time.file";
 
     public static final int PARK_AREA_ONE = 1;
     private static final String MGRA_PARKAREA_FIELD   = "parkarea";
@@ -101,12 +103,7 @@ public final class MgraDataManager
     private ArrayList<Integer>          mgras  = new ArrayList<Integer>();
     private int                         maxMgra;
 
-    private int                         maxTap;
-    private int                         nMgrasWithWlkTaps;
-    // [mgra], [0=tapID, 1=Distance], [tap number (0-number of taps)]
-    private int[][][]                   mgraWlkTapsDistArray;
     private int[]                       mgraTaz;
-    private float                       maxWalkTapDistMi = 1.25f;  
 
     // An array of Hashmaps dimensioned by origin mgra, with distance in feet, in a ragged
     // array (no key for mgra means no other mgras in walk distance)
@@ -119,10 +116,10 @@ public final class MgraDataManager
 
     private HashMap<Integer, Integer>[] oMgraBikeDistance;
     private HashMap<Integer, Integer>[] dMgraBikeDistance;
-
-    // An array dimensioned to maxMgra of ragged arrays of lists of TAPs accessible by driving
-    private Set<Integer>[]              driveAccessibleTaps;
-    private Set<Integer>[]              walkAccessibleTaps;
+    
+    // An array of Hashmaps dimensioned by origin mgra, time period, with time in minutes
+    private HashMap<Integer, Integer>[] mgraToStopsWalkAccessTime;
+    private HashMap<Integer, Integer>[] mgraFromStopsWalkEgressTime;
 
     private TableDataSet                mgraTableDataSet;
     
@@ -149,8 +146,6 @@ public final class MgraDataManager
     private int[]                       mstallssam;
     private float[]                     mparkcost;
     
-    private TableDataSet tapLinesTable;
-    private HashMap<Integer,String> taplines;
     protected HashMap<Integer, double[]> naicsProbabilitiesByMAZ;
 
 	protected HashMap<String, String> rbMap;
@@ -167,29 +162,12 @@ public final class MgraDataManager
      
         this.rbMap = rbMap;
         
-        if(rbMap.containsKey("maz.tap.maxWalkTapDistInMiles")){
-        
-        	maxWalkTapDistMi = Util.getFloatValueFromPropertyMap(rbMap, "maz.tap.maxWalkTapDistInMiles");
-        }
-        
         readMgraTableData(rbMap);
-        
-        //read maz to tap and trim set 
-        readMgraWlkTaps(rbMap);
-        
-        
-        //trim tap lines
-        boolean trimTapSet = Util.getBooleanValueFromPropertyMap(rbMap, "maz.tap.trimTapSet");
-        if(trimTapSet){
-        	readTapLines(rbMap);
-        	trimTapSet();
-        }
         
         readMazMazWalkDistance(rbMap);
         readMazMazBikeDistance(rbMap);
-
-        // pre-process the list of TAPS reachable by drive access for each MGRA 
-        mapDriveAccessTapsToMgras( TazDataManager.getInstance(rbMap) );
+        readMgraToStopsWalkAccessTime(rbMap);
+        readMgraFromStopsWalkEgressime(rbMap);
         
         // create arrays from 4ddensity fields added to MGRA table used by TourModeChoice DMU methods
         process4ddensityData(rbMap);
@@ -198,7 +176,7 @@ public final class MgraDataManager
        
         setupNaicsArrays();
        
-        printMgraStats();
+        //printMgraStats();
     }
 
     /**
@@ -237,172 +215,7 @@ public final class MgraDataManager
             return instance;
         }
     }
-
-    /**
-     * read tap lines table (tap, line names served)
-     * @param rbMap
-     */
-    public void readTapLines(HashMap<String, String> rbMap) {
-    	
-    	File tapLinesTableFile = Paths.get(Util.getStringValueFromPropertyMap(rbMap, "scenario.path"),
-                Util.getStringValueFromPropertyMap(rbMap, "maz.tap.tapLines")).toFile();
-        try {
-        	CSVFileReader csvReader = new CSVFileReader();
-        	tapLinesTable = csvReader.readFile( tapLinesTableFile);
-        } catch (IOException e) {
-        	throw new RuntimeException();
-        }
-        
-    	//get tap lines table field names
-        int[] tapLinesTapIds = tapLinesTable.getColumnAsInt("TAP");
-        String[] linesForTap = tapLinesTable.getColumnAsString("LINES");
-        
-        //create lookups
-        taplines = new HashMap<Integer,String>();
-        for(int i=0; i<tapLinesTapIds.length; i++) {
-        	taplines.put(tapLinesTapIds[i], linesForTap[i]);
-        }
-    }
     
-    /**
-     * trim the near tap set by origin/destination by only including the nearest tap when more than one tap serves the same line.
-     */
-    public void trimTapSet() {
-    	
-    	//mgraWlkTapsDistArray[maz], [2] ([0] = taps, [1]=distances), []
-    	
-	    int mazToTaps = 0;
-	    int trimmedTaps = 0; 
-	    
-        //loop thru mazs	    
-	    for (int i=0; i < mgraWlkTapsDistArray.length; i++) {
-	    	
-	    	//skip mazs with no taps
-	    	if(mgraWlkTapsDistArray[i][0] != null) {
-	    		
-	    		//get taps and distances
-		    	int[] taps = mgraWlkTapsDistArray[i][0];
-		    	int[] distances = mgraWlkTapsDistArray[i][1];
-		    	
-		    	ArrayList<Maz2Tap> maz2TapData = new ArrayList<Maz2Tap>();
-		    	for (int j=0; j <taps.length; j++) {
-		    	
-		    	  //setup data
-	    		  Maz2Tap m2t = new Maz2Tap();
-	    		  m2t.tap = taps[j];
-	    		  m2t.dist = distances[j];
-	    		  if(taplines.containsKey(m2t.tap)) { //else drop tap from list
-	    			  m2t.lines = taplines.get(m2t.tap).split(" ");
-	    		  }  
-	    		  maz2TapData.add(m2t);
-	    		  
-		    	}
-		    	
-		    	//sort by distance and check for new lines
-				Collections.sort(maz2TapData);
-				HashMap<String,String> linesServed = new HashMap<String,String>();
-				for (Maz2Tap m2t : maz2TapData) {
-					
-					//skip if no lines served
-					if(m2t.lines != null) {
-					
-						for (int k=0; k<m2t.lines.length; k++) {
-							if(linesServed.containsKey(m2t.lines[k]) == false) {
-								m2t.servesNewLines = true;
-								linesServed.put(m2t.lines[k], m2t.lines[k]);
-							}
-						}
-					}
-		    	}
-		    	
-				//remove unused taps
-				ArrayList<Integer> tapsToRemove = new ArrayList<Integer>();
-				for (Maz2Tap m2t : maz2TapData) {
-					mazToTaps = mazToTaps + 1;
-					if( m2t.servesNewLines == false) {
-						tapsToRemove.add(m2t.tap);
-						trimmedTaps = trimmedTaps + 1;
-					}
-				}
-				
-				int[] finalTaps = new int[taps.length-tapsToRemove.size()];
-				int[] finalDistances = new int[taps.length-tapsToRemove.size()];
-				
-				int tapCounter = 0;
-				for (int m=0; m<taps.length; m++) {
-					if(!tapsToRemove.contains(taps[m])) {
-						finalTaps[tapCounter] = taps[m];
-						finalDistances[tapCounter] = distances[m];
-						tapCounter = tapCounter + 1;
-					}
-				}
-				
-				//update data structures
-		    	mgraWlkTapsDistArray[i][0] = finalTaps;
-		    	mgraWlkTapsDistArray[i][1] = finalDistances;
-	    		
-	    	}
-	    	
-	    }
-
-	    logger.info("Removed " + trimmedTaps + " of " + mazToTaps + " Maz tap pairs since servesNewLines=false");
-
-    }
-  
-    
-    /**
-     * Read the walk-transit taps for mgras.
-     * 
-     * @param rb The resourcebundle with the scenario.path and
-     *            mgra.wlkacc.taps.and.distance.file properties.
-     */
-    public void readMgraWlkTaps(HashMap<String, String> rbMap) {
-        File mgraWlkTapCorresFile = Paths.get(Util.getStringValueFromPropertyMap(rbMap, "scenario.path"),
-                		                      Util.getStringValueFromPropertyMap(rbMap, "maz.tap.distance.file")).toFile();
-
-        Map<Integer,Map<Integer,Integer>> mgraToTapToDistance = new TreeMap<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(mgraWlkTapCorresFile))) {
-        	String line;
-        	while ((line = reader.readLine()) != null) {
-				line = line.trim();
-				if (line.length() == 0)
-					continue;
-				String[] data = line.split(",");
-        		//10001,90002,90002,43053.39,11689.23
-        		//maz,tap,tap,generalized cost,distance in feet
-        		int maz = Integer.parseInt(data[0]);
-        		int tap = Integer.parseInt(data[1]);
-        		int distance = new Double(data[4]).intValue();
-        		
-        		if(((float)distance) > (maxWalkTapDistMi * 5280.0))
-        			continue;
-        		
-        		if (!mgraToTapToDistance.containsKey(maz)) 
-        			mgraToTapToDistance.put(maz,new TreeMap<Integer,Integer>());
-        		mgraToTapToDistance.get(maz).put(tap,distance);
-        		if (tap > maxTap) 
-        			maxTap = tap;
-        	}
-        } catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-        nMgrasWithWlkTaps = mgraToTapToDistance.size();
-        mgraWlkTapsDistArray = new int[maxMgra + 1][2][];
-        for (int maz : mgraToTapToDistance.keySet()) {
-        	Map<Integer,Integer> tapToDistance = mgraToTapToDistance.get(maz);
-        	int[] taps = new int[tapToDistance.size()];
-        	int[] distances = new int[taps.length];
-        	mgraWlkTapsDistArray[maz][0] = taps;
-        	mgraWlkTapsDistArray[maz][1] = distances;
-        	int counter = 0;
-        	for (int tap : tapToDistance.keySet()) {
-        		taps[counter] = tap;
-        		distances[counter++] = tapToDistance.get(tap);
-        	}
-        }
-    }
-
     private void readMazMazWalkDistance(HashMap<String, String> rbMap) {
         File mazMazDistanceFile = Paths.get(Util.getStringValueFromPropertyMap(rbMap, "scenario.path"),
                 		                      Util.getStringValueFromPropertyMap(rbMap, "maz.maz.distance.file")).toFile();
@@ -559,78 +372,6 @@ public final class MgraDataManager
         return dMgraWalkDistance[dMgra].containsKey( oMgra );
 
     }
-
-    /**
-     * Get the walk distance from an MGRA to a TAP.
-     * 
-     * @param mgra The number of the destination MGRA.
-     * @param pos The position of the TAP in the MGRA array (0+)
-     * @return The walk distance in feet.
-     */
-    public float getMgraToTapWalkDist(int mgra, int pos)
-    {
-        return mgraWlkTapsDistArray[mgra][1][pos]; // [1] = distance
-    }
-
-    /**
-     * Get the position of the tap in the mgra walk tap array.
-     * 
-     * @param mgra The mgra to lookup
-     * @param tap The tap to lookup
-     * @return The position of the tap in the mgra array. -1 is returned if it is an
-     *         invalid tap for the mgra, or if the tap is not within walking
-     *         distance.
-     */
-    public int getTapPosition(int mgra, int tap)
-    {
-
-        if (mgraWlkTapsDistArray[mgra] != null)
-        {
-            if (mgraWlkTapsDistArray[mgra][0] != null)
-            {
-                for (int i = 0; i < mgraWlkTapsDistArray[mgra][0].length; ++i)
-                    if (mgraWlkTapsDistArray[mgra][0][i] == tap) return i;
-            }
-        }
-
-        return -1;
-
-    }
-
-    /**
-     * Get the walk time from an MGRA to a TAP.
-     * 
-     * @param mgra The number of the destination MGRA.
-     * @param pos The position of the TAP in the MGRA array (0+)
-     * @return The walk time in minutes.
-     */
-    public float getMgraToTapWalkTime(int mgra, int pos)
-    {
-        return (float) (mgraWlkTapsDistArray[mgra][1][pos] * Constants.walkMinutesPerFoot);
-    }
-
-    
-    /**
-     * Get the walk time from an MGRA to a TAP.
-     * 
-     * @param mgra The MGRA
-     * @param tap The TAP
-     * @return The walk time in minutes, else -1 if there is no walk link between the MGRA and the TAP.
-     */
-    public float getWalkTimeFromMgraToTap(int mgra, int tap){
-    	
-    	int tapPosition = getTapPosition(mgra, tap);
-    	float time = 0;
-    	
-    	if(tapPosition==-1){
-    		logger.info("Bad Tap Position for Walk Access From MAZ: "+mgra+" to TAP: "+tap);
-    		return -1;
-    	}
-    	else{
-    		time = (float) (mgraWlkTapsDistArray[mgra][1][tapPosition] * Constants.walkMinutesPerFoot);
-    	}
-    	return time;
-    }
     
     /**
      * Get the walk distance from an MGRA to an MGRA. Return 0 if not within walking
@@ -742,7 +483,6 @@ public final class MgraDataManager
     {
         logger.info("Number of MGRAs: " + mgras.size());
         logger.info("Max MGRA: " + maxMgra);
-        logger.info("Max TAP: "+maxTap);
 
         //logger.info("Number of MGRAs with WalkAccessTaps: " + nMgrasWithWlkTaps);
         //logger.info("Number of TAPs in MGRA 18 (should be 3): "
@@ -776,16 +516,6 @@ public final class MgraDataManager
     }
 
     /**
-     * Get the maximum TAP.
-     * 
-     * @return The highest TAP number
-     */
-    public int getMaxTap()
-    {
-        return maxTap;
-    }
-
-    /**
      * Get the ArrayList of MGRAs
      * 
      * @return ArrayList<Integer> mgras.
@@ -804,84 +534,6 @@ public final class MgraDataManager
     {
         return mgraTaz;
     }
-
-    /**
-     * Get the array of Taps within walk distance
-     * 
-     * @return The int[][][] array of Taps within walk distance of MGRAs
-     */
-    public int[][][] getMgraWlkTapsDistArray()
-    {
-        return mgraWlkTapsDistArray;
-    }
-
-    
-    /**
-     * get arrays of drive accessible TAPS for each MGRA and populate an array of sets so that later one can
-     * determine, for a given mgra, if a tap is contained in the set.
-     * 
-     * @param args TazDataManager to get TAPs with drive access from TAZs
-     */
-    public void mapDriveAccessTapsToMgras( TazDataManager tazDataManager )
-    {
-
-        walkAccessibleTaps = new TreeSet[maxMgra+1];
-        driveAccessibleTaps = new TreeSet[maxMgra+1];
-        
-        for ( int mgra=1; mgra <= maxMgra; mgra++ ) {
-            
-            // get the TAZ associated with this MGRA
-            int taz = getTaz( mgra );
-
-            // store the array of walk accessible TAPS for this MGRA as a set so that contains can be called on it later
-            // to determine, for a given mgra, if a tap is contained in the set.
-            int[] mgraSet = getMgraWlkTapsDistArray()[mgra][0];
-            if ( mgraSet != null ) {
-                walkAccessibleTaps[mgra] = new TreeSet<Integer>();
-                for ( int i=0; i < mgraSet.length; i++ )    
-                    walkAccessibleTaps[mgra].add( mgraSet[i] );
-            }
-            
-            // store the array of drive accessible TAPS for this MGRA as a set so that contains can be called on it later
-            // to determine, for a given mgra, if a tap is contained in the set.
-            int[] tapItems = tazDataManager.getParkRideOrKissRideTapsForZone( taz, AccessMode.PARK_N_RIDE );
-            if ( tapItems != null ) {
-            	driveAccessibleTaps[mgra] = new TreeSet<Integer>();
-            	for ( int item : tapItems )    
-            		driveAccessibleTaps[mgra].add( item );
-            }
-            
-        }
-        
-    }
-    
-    /**
-     * @param mgra for which we want to know if TAP can be reached by drive access
-     * @param tap for which we want to know if the mgra can reach it by drive access
-     * @return true if reachable; false otherwise
-     */
-    public boolean getTapIsDriveAccessibleFromMgra( int mgra, int tap )
-    {
-        if ( driveAccessibleTaps[mgra] == null )
-            return false;
-        else
-            return driveAccessibleTaps[mgra].contains( tap );
-    }
-    
-    
-    /**
-     * @param mgra for which we want to know if TAP can be reached by walk access
-     * @param tap for which we want to know if the mgra can reach it by walk access
-     * @return true if reachable; false otherwise
-     */
-    public boolean getTapIsWalkAccessibleFromMgra( int mgra, int tap )
-    {
-        if ( walkAccessibleTaps[mgra] == null )
-            return false;
-        else
-            return walkAccessibleTaps[mgra].contains( tap );
-    }
-    
 
     /**
      * return the duDen value for the mgra
@@ -1425,27 +1077,6 @@ public final class MgraDataManager
         mdm.printMgraStats();
     }
     
-    
-    private class Maz2Tap implements Comparable<Maz2Tap>, Serializable
-    {
-        public int maz;
-        public int tap;
-        public double dist;
-        public String[] lines;
-        public boolean servesNewLines = false;
-        
-    	@Override
-    	public int compareTo(Maz2Tap o) {
-		    if ( this.dist < o.dist ) {
-		    	return -1;
-		    } else if (this.dist==o.dist) {
-		    	return 0;
-		    } else {
-		    	return 1;
-		    }
-    	}
-    }
-    
     /**
      * A private method to create probability arrays for each NAICS code listed in properties file as:
      *   tt.naics.NAICSCODE where NAICSCODE is a two digit number 10,20,30,..90.
@@ -1499,6 +1130,73 @@ public final class MgraDataManager
     public HashMap<Integer, double[]> getNaicsProbabilitiesByMAZ() {
 		return naicsProbabilitiesByMAZ;
 	}
+    
+    /**
+     * This method is for reading input mgra to stop average walk access/egress time from csv
+     * the walk time should be based on mgra and time period
+     * @param mgraStopsWalkTimeFile
+     * @param mgraStopsWalkTime
+     */
+    private void readMgraStopsTime(File mgraStopsWalkTimeFile, HashMap[] mgraStopsWalkTime){
+    	try (BufferedReader reader = new BufferedReader(new FileReader(mgraStopsWalkTimeFile))) {
+        	String line;
+        	
+        	while ((line = reader.readLine()) != null) {
+				line = line.trim();
+				if (line.length() == 0)
+					continue;
+				String[] data = line.split(",");
+				int mgra = Integer.parseInt(data[0]);
+        		int timePeriod = Integer.parseInt(data[1]);
+        		int time = new Double(data[3]).intValue();
+        		
+        		if (mgraStopsWalkTime[mgra] == null)
+        		    mgraStopsWalkTime[mgra] = new HashMap();
+        		mgraStopsWalkTime[mgra].put(timePeriod,time);
+        	}
+    	} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+    }
+    
+    public void readMgraToStopsWalkAccessTime(HashMap<String, String> rbMap) {
+    	File mgraToStopsWalkAccessTimeFile = Paths.get(Util.getStringValueFromPropertyMap(rbMap, "scenario.path"),
+                Util.getStringValueFromPropertyMap(rbMap, MGRA_STOPS_WALK_ACCESS_TIME_FILE)).toFile();
+    	mgraToStopsWalkAccessTime = new HashMap[maxMgra + 1];
+    	readMgraStopsTime(mgraToStopsWalkAccessTimeFile,mgraToStopsWalkAccessTime);
+    }
+    
+    public void readMgraFromStopsWalkEgressime(HashMap<String, String> rbMap) {
+    	File mgraToStopsWalkAccessTimeFile = Paths.get(Util.getStringValueFromPropertyMap(rbMap, "scenario.path"),
+                Util.getStringValueFromPropertyMap(rbMap, MGRA_STOPS_WALK_EGRESS_TIME_FILE)).toFile();
+    	mgraFromStopsWalkEgressTime = new HashMap[maxMgra + 1];
+    	readMgraStopsTime(mgraToStopsWalkAccessTimeFile,mgraFromStopsWalkEgressTime);
+    }
+    
+    public double getPMgraToStopsWalkTime(int mgra, int timePeriod) {
+    	if (mgraToStopsWalkAccessTime[mgra] == null) 
+    		return 0;
+    	else if (mgraToStopsWalkAccessTime[mgra].containsKey(timePeriod))
+    		return mgraToStopsWalkAccessTime[mgra].get(timePeriod);
+    	else
+    		return 0;
+    }
+    
+    public double getAMgraFromStopsWalkTime(int mgra, int timePeriod) {
+    	if (mgraFromStopsWalkEgressTime[mgra] == null) 
+    		return 0;
+    	else if (mgraFromStopsWalkEgressTime[mgra].containsKey(timePeriod))
+    		return mgraFromStopsWalkEgressTime[mgra].get(timePeriod);
+    	else
+    		return 0;
+    }
+    
+    public boolean getStopsAreWalkAccessibleFromMgra(int mgra, int timePeroid){
+    	if (mgraToStopsWalkAccessTime[mgra] == null)
+            return false;
+
+        return mgraToStopsWalkAccessTime[mgra].containsKey( timePeroid );
+    }
 
 
 }

@@ -38,8 +38,8 @@ public class TransitPathUEC
     protected transient Logger     logger = Logger.getLogger(TransitPathUEC.class);
 
     double[]                    bestUtilities;
-    int[]                       bestPTap;
-    int[]                       bestATap;
+    //int[]                       bestPTap;
+    //int[]                       bestATap;
 
     File                        UECFile;
 
@@ -81,8 +81,8 @@ public class TransitPathUEC
         bestUtilities = new double[Modes.TransitMode.values().length]; // bestUtility
         // by Transit
         // Ride mode
-        bestPTap = new int[Modes.TransitMode.values().length];
-        bestATap = new int[Modes.TransitMode.values().length];
+        //bestPTap = new int[Modes.TransitMode.values().length];
+        //bestATap = new int[Modes.TransitMode.values().length];
     }
 
     /**
@@ -111,8 +111,8 @@ public class TransitPathUEC
     public void clearArrays( double initialValue )
     {
         Arrays.fill(bestUtilities, initialValue);
-        Arrays.fill(bestPTap, 0);
-        Arrays.fill(bestATap, 0);
+        //Arrays.fill(bestPTap, 0);
+        //Arrays.fill(bestATap, 0);
 
     }
 
@@ -162,8 +162,8 @@ public class TransitPathUEC
             {
                 newBestPath = true;
                 bestUtilities[i] = calculatedUtilities[i];
-                bestPTap[i] = pTap;
-                bestATap[i] = aTap;
+                //bestPTap[i] = pTap;
+                //bestATap[i] = aTap;
 
                 if (trace)
                 {
@@ -209,8 +209,6 @@ public class TransitPathUEC
             Modes.AccessMode accessMode)
     {
 
-        driveAccessDMU.setDriveTimeToTap(tazManager.getTapTime(itdz, pos, accessMode));
-        driveAccessDMU.setDriveDistToTap(tazManager.getTapDist(itdz, pos, accessMode));
         int[] availFlag = {1, 1};
 
         double[] utilities = driveAccessUEC.solve(new IndexValues(), driveAccessDMU, availFlag);
@@ -244,8 +242,8 @@ public class TransitPathUEC
             String line = String.format("%16s", altName);
             line = line
                     + String.format("  %12.4f", bestUtilities[Modes.getTransitModeIndex(altName)]);
-            line = line + String.format("  %12d", bestPTap[Modes.getTransitModeIndex(altName)]);
-            line = line + String.format("  %12d", bestATap[Modes.getTransitModeIndex(altName)]);
+            //line = line + String.format("  %12d", bestPTap[Modes.getTransitModeIndex(altName)]);
+            //line = line + String.format("  %12d", bestATap[Modes.getTransitModeIndex(altName)]);
 
             localLogger.info(line);
         }
@@ -296,8 +294,8 @@ public class TransitPathUEC
     {
 
     	double[] bestTaps = new double[2];
-        bestTaps[0] = bestPTap[alt];
-        bestTaps[1] = bestATap[alt];
+        //bestTaps[0] = bestPTap[alt];
+        //bestTaps[1] = bestATap[alt];
 
         return bestTaps;
     }

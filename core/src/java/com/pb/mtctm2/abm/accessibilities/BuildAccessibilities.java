@@ -6,6 +6,7 @@ import com.pb.mtctm2.abm.ctramp.CtrampApplication;
 import com.pb.mtctm2.abm.ctramp.HouseholdChoiceModelsTaskJppf;
 import com.pb.mtctm2.abm.ctramp.MgraDataManager;
 import com.pb.mtctm2.abm.ctramp.ModelStructure;
+import com.pb.mtctm2.abm.ctramp.TazDataManager;
 import com.pb.mtctm2.abm.ctramp.Util;
 import com.pb.common.newmodel.UtilityExpressionCalculator;
 
@@ -133,6 +134,8 @@ public final class BuildAccessibilities
     private double[][][]                nMotorExpUtilities;
     
     private MgraDataManager             mgraManager;
+    private TazDataManager              tazManager;
+    private AutoTazSkimsCalculator      tazDistanceCalculator;
 
 
     // purpose (defined in UEC)
@@ -243,7 +246,10 @@ public final class BuildAccessibilities
 
         
         mgraManager = MgraDataManager.getInstance(rbMap);
+        tazManager = TazDataManager.getInstance(rbMap);
         
+        tazDistanceCalculator = new AutoTazSkimsCalculator(rbMap);
+        tazDistanceCalculator.computeTazDistanceArrays();
         
         // get dimensions for the accessibilities table
         alts = dcUEC.getNumberOfAlternatives();
@@ -709,6 +715,7 @@ public final class BuildAccessibilities
             //pass shared data
             DataProvider dataProvider = new MemoryMapDataProvider();
             dataProvider.setValue("mgraManager", mgraManager);
+            dataProvider.setValue("tazDistanceCalculator", tazDistanceCalculator);
             dataProvider.setValue("sovExpUtilities", sovExpUtilities);
             dataProvider.setValue("hovExpUtilities", hovExpUtilities);
             dataProvider.setValue("nMotorExpUtilities", nMotorExpUtilities);

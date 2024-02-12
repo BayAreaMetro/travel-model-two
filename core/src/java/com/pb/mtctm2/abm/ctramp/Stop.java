@@ -15,14 +15,9 @@ public class Stop
     int     park;
     int     mode;
     int     stopPeriod;
-    int     boardTap;
-    int     alightTap;
     boolean inbound;
-    int     set;
     short   minute;
-    float randomNumberForTapChoice;
     
-
 	float   sampleRate;
 
     String  origPurpose;
@@ -60,21 +55,6 @@ public class Stop
     public void setMode(int mode)
     {
         this.mode = mode;
-    }
-    
-    public void setBoardTap(int tap)
-    {
-        boardTap = tap;
-    }
-    
-    public void setAlightTap(int tap)
-    {
-        alightTap = tap;
-    }
-    
-    public void setSet(int Skimset)
-    {
-        set = Skimset;
     }
     
     public void setStopPeriod(int period)
@@ -117,21 +97,6 @@ public class Stop
         return mode;
     }
 
-    public int getBoardTap()
-    {
-        return boardTap;
-    }
-    
-    public int getAlightTap()
-    {
-        return alightTap;
-    }
-    
-    public int getSet()
-    {
-        return set;
-    }
-    
     public int getStopPeriod()
     {
         return stopPeriod;
@@ -187,13 +152,5 @@ public class Stop
 	public void setMinute(short minute) {
 		this.minute = minute;
 	}
-    public float getRandomNumberForTapChoice() {
-		return randomNumberForTapChoice;
-	}
-
-	public void setRandomNumberForTapChoice(float randomNumberForTapChoice) {
-		this.randomNumberForTapChoice = randomNumberForTapChoice;
-	}
-
 
 }

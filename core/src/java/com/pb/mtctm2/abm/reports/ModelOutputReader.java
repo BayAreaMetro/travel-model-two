@@ -220,12 +220,12 @@ public class ModelOutputReader {
     		int atWork_freq           = (int) tourData.getValueAt(row,"atWork_freq");           
     		int num_ob_stops          = (int) tourData.getValueAt(row,"num_ob_stops");          
     		int num_ib_stops          = (int) tourData.getValueAt(row,"num_ib_stops");          
-    		int out_btap              = (int) tourData.getValueAt(row,"out_btap");              
-    		int out_atap              = (int) tourData.getValueAt(row,"out_atap");              
-    		int in_btap               = (int) tourData.getValueAt(row,"in_btap");               
-    		int in_atap               = (int) tourData.getValueAt(row,"in_atap");               
-    		int out_set               = (int) tourData.getValueAt(row,"out_set");               
-    		int in_set                = (int) tourData.getValueAt(row,"in_set");                
+    		//int out_btap              = (int) tourData.getValueAt(row,"out_btap");              
+    		//int out_atap              = (int) tourData.getValueAt(row,"out_atap");              
+    		//int in_btap               = (int) tourData.getValueAt(row,"in_btap");               
+    		//int in_atap               = (int) tourData.getValueAt(row,"in_atap");               
+    		//int out_set               = (int) tourData.getValueAt(row,"out_set");               
+    		//int in_set                = (int) tourData.getValueAt(row,"in_set");                
     		float sampleRate          = tourData.getValueAt(row,"sampleRate");                  
     		int avAvailable           = (int) tourData.getValueAt(row,"avAvailable");           
     		float[] util = new float[modelStructure.getMaxTourModeIndex()];
@@ -234,8 +234,7 @@ public class ModelOutputReader {
     		TourFileAttributes tourFileAttributes = new TourFileAttributes(hh_id, person_id, person_num, person_type,
     				 tour_id,  tour_category, tour_purpose, orig_mgra,dest_mgra,
     				 start_period, end_period, tour_mode, tour_distance, tour_time,
-    				 atWork_freq,  num_ob_stops, num_ib_stops, out_btap, out_atap,
-    				 in_btap, in_atap, out_set, in_set, sampleRate, avAvailable,
+    				 atWork_freq,  num_ob_stops, num_ib_stops, sampleRate, avAvailable,
     				util, prob, tour_composition, tour_participants);
         	
         	//if individual tour, map key is person_id, else it is hh_id
@@ -588,12 +587,12 @@ public class ModelOutputReader {
 		int atWork_freq;
 		int num_ob_stops;
 		int num_ib_stops;
-		int out_btap;
-		int out_atap;
-		int in_btap;
-		int in_atap;
-		int out_set;
-		int in_set;
+		//int out_btap;
+		//int out_atap;
+		//int in_btap;
+		//int in_atap;
+		//int out_set;
+		//int in_set;
 		float sampleRate;
 		int avAvailable;
 		float[] util;
@@ -606,8 +605,7 @@ public class ModelOutputReader {
 		public TourFileAttributes(long hh_id, long person_id, int person_num, int person_type,
 				int tour_id, String tour_category,String tour_purpose, int orig_mgra,int dest_mgra,
 				int start_period,int end_period,int tour_mode, float tour_distance,float tour_time,
-				int atWork_freq, int num_ob_stops,int num_ib_stops,int out_btap,int out_atap,
-				int in_btap,int in_atap,int out_set,int in_set,float sampleRate,int avAvailable,
+				int atWork_freq, int num_ob_stops,int num_ib_stops,float sampleRate,int avAvailable,
 				float[] util, float[] prob, int tour_composition,String tour_participants){
 			
 			
@@ -628,12 +626,6 @@ public class ModelOutputReader {
 			this.atWork_freq = atWork_freq;
 			this.num_ob_stops = num_ob_stops;
 			this.num_ib_stops = num_ib_stops;
-			this.out_btap = out_btap;
-			this.out_atap = out_atap;
-			this.in_btap = in_btap;
-			this.in_atap = in_atap;
-			this.out_set = out_set;
-			this.in_set = in_set;
 			this.sampleRate = sampleRate;
 			this.avAvailable = avAvailable;
 			this.util = util;

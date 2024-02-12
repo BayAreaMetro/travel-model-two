@@ -23,9 +23,6 @@ class Trip implements Comparable{
 	int occupancy;
 	float sampleRate;
 	int mode;
-	int boardingTap;
-	int alightingTap;
-	int set;
 	float transitPathRandom;
 	String tourPurpose;
 	String originPurpose;
@@ -36,7 +33,7 @@ class Trip implements Comparable{
 	int tourMode;
 	
 	
-	public Trip(long hhid,long personId,int personNumber, int tourid,int stopid,int inbound,int joint,int originMaz, int destinationMaz, int departPeriod, float departTime, float sampleRate, int mode, int boardingTap, int alightingTap, int set, float rnum){
+	public Trip(long hhid,long personId,int personNumber, int tourid,int stopid,int inbound,int joint,int originMaz, int destinationMaz, int departPeriod, float departTime, float sampleRate, int mode, float rnum){
        	this.hhid = hhid;		
        	this.personId = personId;
     	this.personNumber = personNumber;
@@ -51,9 +48,6 @@ class Trip implements Comparable{
 		this.departTime = departTime;
 		this.sampleRate = sampleRate;
 		this.mode = mode;
-		this.boardingTap = boardingTap;
-		this.alightingTap = alightingTap;
-		this.set = set;
 		this.transitPathRandom = rnum;
 		
 		
@@ -74,9 +68,6 @@ class Trip implements Comparable{
     	logger.info("   departTime:              "+departTime);
     	logger.info("   sampleRate:              "+sampleRate);
     	logger.info("   mode:                    "+mode);
-    	logger.info("   original boardingTap:    "+boardingTap);
-    	logger.info("   original alightingTap:   "+alightingTap);
-    	logger.info("   original set:            "+set);
     	logger.info("   transit path rnum        "+transitPathRandom);
 	}
 
@@ -190,30 +181,6 @@ class Trip implements Comparable{
 
 	public void setMode(int mode) {
 		this.mode = mode;
-	}
-
-	public int getBoardingTap() {
-		return boardingTap;
-	}
-
-	public void setBoardingTap(int boardingTap) {
-		this.boardingTap = boardingTap;
-	}
-
-	public int getAlightingTap() {
-		return alightingTap;
-	}
-
-	public void setAlightingTap(int alightingTap) {
-		this.alightingTap = alightingTap;
-	}
-
-	public int getSet() {
-		return set;
-	}
-
-	public void setSet(int set) {
-		this.set = set;
 	}
 
 	public String getTourPurpose() {

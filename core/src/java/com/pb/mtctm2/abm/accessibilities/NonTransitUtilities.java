@@ -82,7 +82,7 @@ public class NonTransitUtilities
 
         maxTaz = tazManager.maxTaz;
 
-        logger.info("max Taz " + maxTaz);
+        //logger.info("max Taz " + maxTaz);
 
         // Create the peak and off-peak UECs
         String uecFileName = Util.getStringValueFromPropertyMap(rbMap, "acc.uec.file");
@@ -123,7 +123,7 @@ public class NonTransitUtilities
         seek = Util.getBooleanValueFromPropertyMap(rbMap, "Seek");
 
         int maxMgra = mgraManager.getMaxMgra();
-        logger.info("max Mgra " + maxMgra);
+        //logger.info("max Mgra " + maxMgra);
 
         
         

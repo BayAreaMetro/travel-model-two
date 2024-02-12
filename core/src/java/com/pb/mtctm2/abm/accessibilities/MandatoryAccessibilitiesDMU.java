@@ -17,11 +17,8 @@ public class MandatoryAccessibilitiesDMU
     protected double                   hovNestLogsum;
     protected double                   wlkNestLogsum;
     protected double                   drvNestLogsum;
-    protected int                      bestSet;
-    protected float                    mgraTapWalkTime;
-    protected float                    tapMgraWalkTime;
-    protected float                    driveDistToTap;
-    protected float                    driveTimeToTap;
+    protected double                   mgraStopsWalkTime;
+    protected double                   stopsMgraWalkTime;
     protected int                      autoSufficiency;
 
     public MandatoryAccessibilitiesDMU()
@@ -79,54 +76,24 @@ public class MandatoryAccessibilitiesDMU
         this.drvNestLogsum = drvNestLogsum;
     }
 
-    public int getBestSet()
+    public double getMgraStopsWalkTime()
     {
-        return bestSet;
+        return mgraStopsWalkTime;
     }
 
-    public void setBestSet(int bestSet)
+    public void setMgraStopsWalkTime(double mgraStopsWalkTime)
     {
-        this.bestSet = bestSet;
+        this.mgraStopsWalkTime = mgraStopsWalkTime;
     }
 
-    public float getMgraTapWalkTime()
+    public double getStopsMgraWalkTime()
     {
-        return mgraTapWalkTime;
+        return stopsMgraWalkTime;
     }
 
-    public void setMgraTapWalkTime(float mgraTapWalkTime)
+    public void setStopsMgraWalkTime(double stopsMgraWalkTime)
     {
-        this.mgraTapWalkTime = mgraTapWalkTime;
-    }
-
-    public float getTapMgraWalkTime()
-    {
-        return tapMgraWalkTime;
-    }
-
-    public void setTapMgraWalkTime(float tapMgraWalkTime)
-    {
-        this.tapMgraWalkTime = tapMgraWalkTime;
-    }
-
-    public float getDriveDistToTap()
-    {
-        return driveDistToTap;
-    }
-
-    public void setDriveDistToTap(float drvDistToTap)
-    {
-        this.driveDistToTap = drvDistToTap;
-    }
-
-    public float getDriveTimeToTap()
-    {
-        return driveTimeToTap;
-    }
-
-    public void setDriveTimeToTap(float drvTimeToTap)
-    {
-        this.driveTimeToTap = drvTimeToTap;
+        this.stopsMgraWalkTime = stopsMgraWalkTime;
     }
 
     public int getIndexValue(String variableName)
@@ -138,16 +105,13 @@ public class MandatoryAccessibilitiesDMU
     {
         methodIndexMap = new HashMap<String, Integer>();
 
-        methodIndexMap.put("getBestSet", 0);
-        methodIndexMap.put("getDriveDistToTap", 1);
-        methodIndexMap.put("getDriveTimeToTap", 2);
-        methodIndexMap.put("getWlkNestLogsum", 3);
-        methodIndexMap.put("getDrvNestLogsum", 4);
-        methodIndexMap.put("getSovNestLogsum", 5);
-        methodIndexMap.put("getHovNestLogsum", 6);
-        methodIndexMap.put("getMgraTapWalkTime", 7);
-        methodIndexMap.put("getTapMgraWalkTime", 8);
-        methodIndexMap.put("getAutoSufficiency", 9);
+        methodIndexMap.put("getWlkNestLogsum", 0);
+        methodIndexMap.put("getDrvNestLogsum", 1);
+        methodIndexMap.put("getSovNestLogsum", 2);
+        methodIndexMap.put("getHovNestLogsum", 3);
+        methodIndexMap.put("getMgraStopsWalkTime", 4);
+        methodIndexMap.put("getStopsMgraWalkTime", 5);
+        methodIndexMap.put("getAutoSufficiency", 6);
     }
 
     public double getValueForIndex(int variableIndex, int arrayIndex)
@@ -156,24 +120,18 @@ public class MandatoryAccessibilitiesDMU
         switch (variableIndex)
         {
             case 0:
-                return getBestSet();
-            case 1:
-                return getDriveDistToTap();
-            case 2:
-                return getDriveTimeToTap();
-            case 3:
                 return getWlkNestLogsum();
-            case 4:
+            case 1:
                 return getDrvNestLogsum();
-            case 5:
+            case 2:
                 return getSovNestLogsum();
-            case 6:
+            case 3:
                 return getHovNestLogsum();
-            case 7:
-                return getMgraTapWalkTime();
-            case 8:
-                return getTapMgraWalkTime();
-            case 9:
+            case 4:
+                return getMgraStopsWalkTime();
+            case 5:
+                return getStopsMgraWalkTime();
+            case 6:
                 return getAutoSufficiency();
 
             default:

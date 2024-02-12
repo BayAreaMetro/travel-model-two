@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
+
 import com.pb.common.datafile.TableDataSet;
 import com.pb.common.util.Tracer;
 import com.pb.mtctm2.abm.ctramp.CtrampApplication;
@@ -23,7 +24,6 @@ import com.pb.mtctm2.abm.ctramp.Util;
 import com.pb.common.newmodel.UtilityExpressionCalculator;
 
 import org.apache.log4j.Logger;
-
 import org.jppf.server.protocol.JPPFTask;
 import org.jppf.task.storage.DataProvider;
 
@@ -64,7 +64,12 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
     
     private HashMap<String, String>     rbMap;
     
+    public static final int                   WTW = 0;
+    public static final int                   WTD = 1;
+    public static final int                   DTW = 2;
     
+    private AutoAndNonMotorizedSkimsCalculator anm;
+    private AutoTazSkimsCalculator tazDistanceCalculator;
    
     /**
      * Call threaded but not with JPPF
@@ -167,6 +172,7 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
             DataProvider dataProvider = getDataProvider();
 
             mgraManager = (MgraDataManager) dataProvider.getValue("mgraManager");
+            tazDistanceCalculator = (AutoTazSkimsCalculator) dataProvider.getValue("tazDistanceCalculator");
             sovExpUtilities = (double[][][]) dataProvider.getValue("sovExpUtilities");
             hovExpUtilities = (double[][][]) dataProvider.getValue("hovExpUtilities");
             nMotorExpUtilities = (double[][][]) dataProvider.getValue("nMotorExpUtilities");
@@ -185,8 +191,6 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
             dcUtilityPage = (int) dataProvider.getValue("dcUtilityPage");
 
             rbMap = (HashMap<String, String>) dataProvider.getValue("rbMap");
-            
-
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -234,7 +238,10 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
 //        ntUtilities.setNonMotorUtilsMap(ntUtilitiesMap);
 
         McLogsumsCalculator logsumHelper = new McLogsumsCalculator();
-        logsumHelper.setupSkimCalculators(rbMap);
+        logsumHelper.setupSkimCalculators(rbMap);               
+        logsumHelper.setTazDistanceSkimArrays( tazDistanceCalculator.getStoredFromTazToAllTazsDistanceSkims(), tazDistanceCalculator.getStoredToTazFromAllTazsDistanceSkims() );
+        anm = logsumHelper.getAnmSkimCalculator();
+        
         bestPathCalculator = logsumHelper.getBestTransitPathCalculator();
 
         // set up the tracer object
@@ -272,6 +279,7 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
         // DMUs for this UEC
         TransitWalkAccessDMU walkDmu = new TransitWalkAccessDMU();
         walkDmu.setTransitFareDiscounts(bestPathCalculator.getTransitFareDiscounts());
+        TransitDriveAccessDMU driveDmu = new TransitDriveAccessDMU();
 
         for (int i = startRange; i <= endRange; i++)
         { // Origin MGRA
@@ -279,7 +287,7 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
             int iMgra = mgraManager.getMgras().get(i);
   
             //log zone processed
-            logger.info("...Origin MGRA "+ iMgra);
+            //logger.info("...Origin MGRA "+ iMgra);
         	
             ++originMgras;
             mgraNumbers[iMgra] = iMgra;
@@ -319,11 +327,13 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
             	if (!sample[jMgra]) continue;
             	
             	//log zone pair processed
-                //logger.info("...Origin MGRA "+ iMgra + "...Destination MGRA "+ jMgra);
+            	//logger.info("...Origin MGRA "+ iMgra + "...Destination MGRA "+ jMgra);
             	
                 if (!hasSizeTerm[jMgra]) continue;
 
                 int jTaz = mgraManager.getTaz(jMgra);
+                
+                float odDistance = (float) anm.getTazDistanceFromTaz(iTaz, ModelStructure.AM_SKIM_PERIOD_INDEX)[jTaz];
 
                 if (seek && !trace) continue;
 
@@ -342,18 +352,8 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
                     System.exit(-1);
                 }
 
-                // calculate walk-transit exponentiated utility
-                // determine the best transit path, which also stores the best utilities array and the best mode
-                bestPathCalculator.findBestWalkTransitWalkTaps(walkDmu, ModelStructure.MD_SKIM_PERIOD_INDEX, iMgra, jMgra, false, logger);
-                
-                // sum the exponentiated utilities over modes
-                double opWTExpUtility = 0;
-                double[] walkTransitWalkUtilities = bestPathCalculator.getBestUtilities();
-                for (int k=0; k < walkTransitWalkUtilities.length; k++){
-                    if ( walkTransitWalkUtilities[k] > MIN_EXP_FUNCTION_ARGUMENT )
-                        opWTExpUtility += Math.exp(walkTransitWalkUtilities[k]);
-                }
-
+                // calculate off peak walk-transit utility, it is not exponentiated
+                double opWTUtility = bestPathCalculator.calcPersonSpecificUtilities(iTaz, jTaz, walkDmu, driveDmu, WTW, iMgra, jMgra, ModelStructure.MD_SKIM_PERIOD_INDEX, false, logger, odDistance);
 
                 double pkSovExpUtility = 0;
                 double pkHovExpUtility = 0;
@@ -370,16 +370,8 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
                     System.exit(-1);
                 }
 
-                // determine the best transit path, which also stores the best utilities array and the best mode
-                bestPathCalculator.findBestWalkTransitWalkTaps(walkDmu, ModelStructure.AM_SKIM_PERIOD_INDEX, iMgra, jMgra, false, logger);
-                
-                // sum the exponentiated utilities over modes
-                double pkWTExpUtility = 0;
-                walkTransitWalkUtilities = bestPathCalculator.getBestUtilities();
-                for (int k=0; k < walkTransitWalkUtilities.length; k++){
-                    if ( walkTransitWalkUtilities[k] > MIN_EXP_FUNCTION_ARGUMENT )
-                        pkWTExpUtility += Math.exp(walkTransitWalkUtilities[k]);
-                }
+                // calculate peak walk-transit utility, it is not exponentiated
+                double pkWTUtility = bestPathCalculator.calcPersonSpecificUtilities(iTaz, jTaz, walkDmu, driveDmu, WTW, iMgra, jMgra, ModelStructure.AM_SKIM_PERIOD_INDEX, false, logger, odDistance);
 
                 double nmExpUtility = 0;
                 try
@@ -401,49 +393,49 @@ public class DcUtilitiesTaskJppf extends JPPFTask implements Callable<List<Objec
                 logsums[1] = Math.log(opHovExpUtility);
 
                 // 2: Walk-Transit
-                if (opWTExpUtility > 0) logsums[2] = Math.log(opWTExpUtility);
+                if (opWTUtility > 0) logsums[2] = opWTUtility;
 
                 // 3: Non-Motorized
                 if (nmExpUtility > 0) logsums[3] = Math.log(nmExpUtility);
 
                 // 4: SOVLS_0
-                logsums[4] = Math.log(opSovExpUtility * expConstants[0][0] + opWTExpUtility
+                logsums[4] = Math.log(opSovExpUtility * expConstants[0][0] + Math.exp(opWTUtility)
                         * expConstants[0][2] + nmExpUtility * expConstants[0][3]);
                 // 5: SOVLS_1
-                logsums[5] = Math.log(opSovExpUtility * expConstants[1][0] + opWTExpUtility
+                logsums[5] = Math.log(opSovExpUtility * expConstants[1][0] + Math.exp(opWTUtility)
                         * expConstants[1][2] + nmExpUtility * expConstants[1][3]);
 
                 // 6: SOVLS_2
-                logsums[6] = Math.log(opSovExpUtility * expConstants[2][0] + opWTExpUtility
+                logsums[6] = Math.log(opSovExpUtility * expConstants[2][0] + Math.exp(opWTUtility)
                         * expConstants[2][2] + nmExpUtility * expConstants[2][3]);
 
                 // 7: HOVLS_0_OP
-                logsums[7] = Math.log(opHovExpUtility * expConstants[0][1] + opWTExpUtility
+                logsums[7] = Math.log(opHovExpUtility * expConstants[0][1] + Math.exp(opWTUtility)
                         * expConstants[0][2] + nmExpUtility * expConstants[0][3]);
 
                 // 8: HOVLS_1_OP
-                logsums[8] = Math.log(opHovExpUtility * expConstants[1][1] + opWTExpUtility
+                logsums[8] = Math.log(opHovExpUtility * expConstants[1][1] + Math.exp(opWTUtility)
                         * expConstants[1][2] + nmExpUtility * expConstants[1][3]);
 
                 // 9: HOVLS_2_OP
-                logsums[9] = Math.log(opHovExpUtility * expConstants[2][1] + opWTExpUtility
+                logsums[9] = Math.log(opHovExpUtility * expConstants[2][1] + Math.exp(opWTUtility)
                         * expConstants[2][2] + nmExpUtility * expConstants[2][3]);
 
                 // 10: HOVLS_0_PK
-                logsums[10] = Math.log(pkHovExpUtility * expConstants[0][1] + pkWTExpUtility
+                logsums[10] = Math.log(pkHovExpUtility * expConstants[0][1] + Math.exp(pkWTUtility)
                         * expConstants[0][2] + nmExpUtility * expConstants[0][3]);
 
                 // 11: HOVLS_1_PK
-                logsums[11] = Math.log(pkHovExpUtility * expConstants[1][1] + pkWTExpUtility
+                logsums[11] = Math.log(pkHovExpUtility * expConstants[1][1] + Math.exp(pkWTUtility)
                         * expConstants[1][2] + nmExpUtility * expConstants[1][3]);
 
                 // 12: HOVLS_2_PK
-                logsums[12] = Math.log(pkHovExpUtility * expConstants[2][1] + pkWTExpUtility
+                logsums[12] = Math.log(pkHovExpUtility * expConstants[2][1] + Math.exp(pkWTUtility)
                         * expConstants[2][2] + nmExpUtility * expConstants[2][3]);
 
                 // 13: ALL
                 logsums[13] = Math.log(pkSovExpUtility * expConstants[3][0] + pkHovExpUtility
-                        * expConstants[3][1] + pkWTExpUtility * expConstants[3][2] + nmExpUtility
+                        * expConstants[3][1] + Math.exp(pkWTUtility) * expConstants[3][2] + nmExpUtility
                         * expConstants[3][3]);
 
                 aDmu.setLogsums(logsums);

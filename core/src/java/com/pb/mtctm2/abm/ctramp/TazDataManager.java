@@ -45,19 +45,6 @@ public class TazDataManager
 	public static final String TAZ_DATA_FILE_PCTDETOUR_COLUMN_PROPERTY = "taz.data.pctdetour.column";
 	public static final String TAZ_DATA_FILE_TERMINAL_COLUMN_PROPERTY = "taz.data.terminal.column";
 
-	public static final String TAZ_TAP_ACCESS_FILE_PROPERTY = "taz.tap.access.file";
-	public static final String TAZ_TAP_ACCESS_FILE_FTAZ_COLUMN_PROPERTY = "taz.tap.access.ftaz.column";
-	public static final String TAZ_TAP_ACCESS_FILE_MODE_COLUMN_PROPERTY = "taz.tap.access.mode.column";
-	public static final String TAZ_TAP_ACCESS_FILE_PERIOD_COLUMN_PROPERTY = "taz.tap.access.period.column";
-	public static final String TAZ_TAP_ACCESS_FILE_TTAP_COLUMN_PROPERTY = "taz.tap.access.ttap.column";
-	public static final String TAZ_TAP_ACCESS_FILE_TMAZ_COLUMN_PROPERTY = "taz.tap.access.tmaz.column";
-	public static final String TAZ_TAP_ACCESS_FILE_TTAZ_COLUMN_PROPERTY = "taz.tap.access.ttaz.column";
-	public static final String TAZ_TAP_ACCESS_FILE_DTIME_COLUMN_PROPERTY = "taz.tap.access.dtime.column";
-	public static final String TAZ_TAP_ACCESS_FILE_DDIST_COLUMN_PROPERTY = "taz.tap.access.ddist.column";
-	public static final String TAZ_TAP_ACCESS_FILE_DTOLL_COLUMN_PROPERTY = "taz.tap.access.dtoll.column";
-	public static final String TAZ_TAP_ACCESS_FILE_WDIST_COLUMN_PROPERTY = "taz.tap.access.wdist.column";
-			
-
     protected transient Logger       logger = Logger.getLogger(TazDataManager.class);
     private static TazDataManager instance;
     public int[]                  tazs;
@@ -81,15 +68,7 @@ public class TazDataManager
 //    private int[]                 cmsa;
     // This might be a poor name for this array.
     // Please change if you know better.
-    private int[]                 tazAreaType;                                   
-    // they are being read from same file but might be different - [tdz][id,time,dist][tap position]
-    // in the future.
-    private float[][][]           tazParkNRideTaps;
-    // They are floats because they store time and distance
-    private float[][][]           tazKissNRideTaps;                               
-
-    // added from tdz manager
-    private int[]                 tazParkingType;
+    private int[]                 tazAreaType;
     
     private double[] avgtts;
     private double[] transpDist;
@@ -120,10 +99,8 @@ public class TazDataManager
         readMgraTableData(rbMap); 
         setTazMgraCorrespondence();
         readTazData(rbMap);
-        
-        readTazTapAccessData(rbMap);
 
-        printTazStats();
+        //printTazStats();
     }
     
     private void readTazData(HashMap<String,String> rbMap) {
@@ -160,77 +137,6 @@ public class TazDataManager
     		pctDetour[taz] = pctdetour;
     		transpDist[taz] = dist;
     	}
-    }
-    
-    private void readTazTapAccessData(HashMap<String,String> rbMap) {
-        File dataFile = Paths.get(Util.getStringValueFromPropertyMap(rbMap, "scenario.path"),
-                                  Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_PROPERTY)).toFile();
-        
-        String ftazColumn = Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_FTAZ_COLUMN_PROPERTY);
-        String modeColumn = Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_MODE_COLUMN_PROPERTY);
-        String periodColumn = Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_PERIOD_COLUMN_PROPERTY);
-        String ttapColumn = Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_TTAP_COLUMN_PROPERTY);
-        String tmazColumn = Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_TMAZ_COLUMN_PROPERTY);
-        String ttazColumn = Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_TTAZ_COLUMN_PROPERTY);
-        String dtimeColumn = Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_DTIME_COLUMN_PROPERTY);
-        String ddistColumn = Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_DDIST_COLUMN_PROPERTY);
-        String dtollColumn = Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_DTOLL_COLUMN_PROPERTY);
-        String wdistColumn = Util.getStringValueFromPropertyMap(rbMap,TAZ_TAP_ACCESS_FILE_WDIST_COLUMN_PROPERTY);
-        List<String> columnNames = Arrays.asList(ftazColumn,modeColumn,periodColumn,ttapColumn,tmazColumn,ttazColumn,
-        		                                 dtimeColumn,ddistColumn,dtollColumn,wdistColumn);
-
-        Map<Integer,Map<Integer,float[]>> tazTap = new HashMap<>(); //maz -> tap -> [time,distance] 
-        try (BufferedReader reader = new BufferedReader(new FileReader(dataFile))) {
-        	String line;
-        	Map<String,Integer> columns = new HashMap<>();
-        	while ((line = reader.readLine()) != null) {
-        		line = line.trim();
-        		if (line.length() == 0)
-        			continue;
-        		String[] data = line.split(",");
-        		if (columns.size() == 0) {
-        			for (int s = 0; s < data.length; s++) {
-        				String column = data[s];
-        				for (String columnName : columnNames)
-        					if (column.equalsIgnoreCase(columnName))
-        						columns.put(columnName,s);
-        			}
-        			continue;
-        		}
-        		int taz = Integer.parseInt(data[columns.get(ftazColumn)]);
-        		if (!tazTap.containsKey(taz))
-        			tazTap.put(taz,new TreeMap<Integer,float[]>());
-        		int tap = Integer.parseInt(data[columns.get(ttapColumn)]);
-        		float wdist = Float.parseFloat(data[columns.get(wdistColumn)]);
-        		float time = Float.parseFloat(data[columns.get(dtimeColumn)]) + wdist / 5280 / 3 * 60; //walk @ 3 mph
-        		float dist = Float.parseFloat(data[columns.get(ddistColumn)]) * 5280 + wdist;
-        		tazTap.get(taz).put(tap,new float[] {time,dist});
-        	}
-        } catch (IOException e) {
-        	throw new RuntimeException(e);
-        }
-        tazParkNRideTaps = new float[maxTaz + 1][3][]; // tapId, time, distance
-        tazKissNRideTaps = new float[maxTaz + 1][3][]; // tapId, time, distance
-        for (int taz : tazTap.keySet()) {
-        	Map<Integer,float[]> data = tazTap.get(taz);
-        	float[] taps = new float[data.size()];
-        	float[] time = new float[taps.length];
-        	float[] dist = new float[taps.length];
-        	int counter = 0;
-        	for (int tap : data.keySet()) {
-        		float[] d = data.get(tap);
-        		taps[counter] = tap;
-        		time[counter] = d[0];
-        		dist[counter] = d[1];
-        		counter++;
-        	}
-        	tazParkNRideTaps[taz][0] = taps;
-        	tazParkNRideTaps[taz][1] = time;
-        	tazParkNRideTaps[taz][2] = dist;
-        	tazKissNRideTaps[taz][0] = taps;
-        	tazKissNRideTaps[taz][1] = time;
-        	tazKissNRideTaps[taz][2] = dist;
-        }
     }
 
     /**
@@ -446,166 +352,6 @@ public class TazDataManager
     }
 */
     
-    /**
-     * This method will return the Parking Type for the TAZ.
-     * 
-     * @param taz - TAZ that Parking Type is wanted for.
-     *@return Parking Type
-     */
-    public int getTazParkingType(int taz)
-    {
-        return tazParkingType[taz];
-    }
-
-    /**
-     * Get the list of Park and Ride Taps for this TAZ.
-     * 
-     * @param Taz
-     * @return An array of PNR taps for the TAZ.
-     */
-    public int[] getParkRideTapsForZone(int taz)
-    {
-        if (tazParkNRideTaps[taz][0] == null) return null;
-
-        int[] parkTaps = new int[tazParkNRideTaps[taz][0].length];
-        for (int i = 0; i < tazParkNRideTaps[taz][0].length; i++)
-        {
-            parkTaps[i] = (int) tazParkNRideTaps[taz][0][i];
-        }
-        return parkTaps;
-    }
-
-    /**
-     * Get the list of Kiss and Ride Taps for this TAZ.
-     * 
-     * @param Taz
-     * @return An array of KNR taps for the TAZ.
-     */
-    public int[] getKissRideTapsForZone(int taz)
-    {
-        if (tazKissNRideTaps[taz][0] == null) return null;
-        int[] kissTaps = new int[tazKissNRideTaps[taz][0].length];
-        for (int i = 0; i < tazKissNRideTaps[taz][0].length; i++)
-        {
-            kissTaps[i] = (int) tazKissNRideTaps[taz][0][i];
-        }
-        return kissTaps;
-    }
-
-    public int[] getParkRideOrKissRideTapsForZone(int taz, AccessMode aMode)
-    {
-
-        switch (aMode)
-        {
-            case WALK:
-                return null;
-            case PARK_N_RIDE:
-                return getParkRideTapsForZone(taz);
-            case KISS_N_RIDE:
-                return getKissRideTapsForZone(taz);
-            default:
-                throw new RuntimeException(
-                        "Error trying to get ParkRideOrKissRideTaps for unknown access mode: "
-                                + aMode);
-        }
-    }
-
-    /**
-     * Get the position of the tap in the taz tap array.
-     * 
-     * @param taz The taz to lookup
-     * @param tap The tap to lookup
-     * @param aMode The access mode
-     * @return The position of the tap in the taz array. -1 is returned if it is an
-     *         invalid tap for the taz.
-     */
-    public int getTapPosition(int taz, int tap, AccessMode aMode)
-    {
-
-        int[] taps = getParkRideOrKissRideTapsForZone(taz, aMode);
-
-        if (taps == null) return -1;
-
-        for (int i = 0; i < taps.length; ++i)
-            if (taps[i] == tap) return i;
-
-        return -1;
-
-    }
-
-    /**
-     * Get the taz to tap time in minutes.
-     * 
-     * @param taz Origin/Production TAZ
-     * @param pos Position of the TAP in this TAZ
-     * @param mode Park and Ride or Kiss and Ride
-     * @return The TAZ to TAP time in minutes.
-     */
-    public float getTapTime(int taz, int pos, AccessMode aMode)
-    {
-        // only expecting this method for Park and Ride and Kiss and Ride modes.
-        switch (aMode)
-        {
-            case PARK_N_RIDE:
-                return (tazParkNRideTaps[taz][1][pos]);
-            case KISS_N_RIDE:
-                return (tazKissNRideTaps[taz][1][pos]);
-            default:
-                throw new RuntimeException(
-                        "Error trying to get ParkRideOrKissRideTaps for invalid access mode: "
-                                + aMode);
-        }
-    }
-    
-    /**
-     * Get the time from the TAZ to the TAP in minutes.
-     * 
-     * @param taz The origin TAZ
-     * @param tap The destination TAP
-     * @param aMode The access model (PNR or KNR)
-     * @return The time in minutes, or -1 if there isn't an access link from the TAZ to the TAP.
-     */
-    public float getTimeToTapFromTaz(int taz, int tap, AccessMode aMode){
-    	
-    	int btapPosition = getTapPosition(taz,tap,aMode);
-    	float time;
-    	
-    	if(btapPosition==-1){
-    		logger.info("Bad tap position for " + (aMode==Modes.AccessMode.PARK_N_RIDE ? "PNR" : "KNR") +" access board tap");
-    		return -1;
-    	}else{
-    		time = getTapTime(taz,btapPosition,Modes.AccessMode.PARK_N_RIDE);
-    	}
-    	
-    	return time;
-    	
-    }
-    
-
-    /**
-     * Get the taz to tap distance in miles.
-     * 
-     * @param taz Origin/Production TAZ
-     * @param pos Position of the TAP in this TAZ
-     * @param mode Park and Ride or Kiss and Ride
-     * @return The TAZ to TAP distance in miles.
-     */
-    public float getTapDist(int taz, int pos, AccessMode aMode)
-    {
-        // only expecting this method for Park and Ride and Kiss and Ride modes.
-        switch (aMode)
-        {
-            case PARK_N_RIDE:
-                return tazParkNRideTaps[taz][2][pos]/5280f;
-            case KISS_N_RIDE:
-                return tazKissNRideTaps[taz][2][pos]/5180f;
-            default:
-                throw new RuntimeException(
-                        "Error trying to get ParkRideOrKissRideTaps for invalid access mode: "
-                                + aMode);
-        }
-    }
-
     /**
      * Returns the max TAZ value
      * @return the max TAZ value

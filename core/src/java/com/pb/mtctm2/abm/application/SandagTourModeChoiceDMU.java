@@ -328,10 +328,10 @@ public class SandagTourModeChoiceDMU
                 returnValue = getTransitLogSum(WTW, true) + getTransitLogSum(WTW, false);
                 break;
             case 101:
-                returnValue = getTransitLogSum(WTD, true) + getTransitLogSum(DTW, false);
+                returnValue = getTransitLogSum(WTP, true) + getTransitLogSum(PTW, false);
                 break;
             case 102:
-                returnValue = getTransitLogSum(WTD, true) + getTransitLogSum(DTW, false);
+                returnValue = getTransitLogSum(WTK, true) + getTransitLogSum(KTW, false);
                 break;
             case 200:
                 returnValue = getWorkers();

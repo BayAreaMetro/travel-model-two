@@ -9,23 +9,17 @@ public class StoredTransitSkimData
     private transient Logger                        logger       = Logger.getLogger(StoredTransitSkimData.class);;
 
     private static StoredTransitSkimData objInstance = null;
-    private int numSets;
 
     // these arrays are shared by McLogsumsAppender objects and are used by wtw, wtd, and dtw calculators.
-    private double[][][][][] storedWtwDepartPeriodTapTapSkims;
-    private double[][][][][] storedWtdDepartPeriodTapTapSkims;
-    private double[][][][][] storedDtwDepartPeriodTapTapSkims;
-        
+    private double[][][][] storedWtwDepartPeriodTazTazSkims;
+    private double[][][][] storedWtdDepartPeriodTazTazSkims;
+    private double[][][][] storedDtwDepartPeriodTazTazSkims;
     
-    private StoredTransitSkimData(){
-    	this.numSets = numSets;
-    }
-    
-    public static synchronized StoredTransitSkimData getInstance( int numSets, int numPeriods, int maxTap )
+    public static synchronized StoredTransitSkimData getInstance( int numPeriods, int maxTaz )
     {
         if (objInstance == null) {
             objInstance = new StoredTransitSkimData();
-            objInstance.setupStoredDataArrays(numSets, numPeriods, maxTap );
+            objInstance.setupStoredDataArrays(numPeriods, maxTaz );
             return objInstance;
         }
         else {
@@ -33,23 +27,23 @@ public class StoredTransitSkimData
         }
     }    
     
-    private void setupStoredDataArrays(int numSets, int numPeriods, int maxTap ){        
+    private void setupStoredDataArrays(int numPeriods, int maxTaz ){        
         
-    	storedWtwDepartPeriodTapTapSkims = new double[numSets][numPeriods + 1][maxTap + 1][][];
-        storedWtdDepartPeriodTapTapSkims = new double[numSets][numPeriods + 1][maxTap + 1][][];
-        storedDtwDepartPeriodTapTapSkims = new double[numSets][numPeriods + 1][maxTap + 1][][];
+    	storedWtwDepartPeriodTazTazSkims = new double[numPeriods + 1][maxTaz + 1][][];
+        storedWtdDepartPeriodTazTazSkims = new double[numPeriods + 1][maxTaz + 1][][];
+        storedDtwDepartPeriodTazTazSkims = new double[numPeriods + 1][maxTaz + 1][][];
     }
     
-    public double[][][][][] getStoredWtwDepartPeriodTapTapSkims() {
-        return storedWtwDepartPeriodTapTapSkims;
+    public double[][][][] getStoredWtwDepartPeriodTazTazSkims() {
+        return storedWtwDepartPeriodTazTazSkims;
     }
     
-    public double[][][][][] getStoredWtdDepartPeriodTapTapSkims() {
-        return storedWtdDepartPeriodTapTapSkims;
+    public double[][][][] getStoredWtdDepartPeriodTazTazSkims() {
+        return storedWtdDepartPeriodTazTazSkims;
     }
     
-    public double[][][][][] getStoredDtwDepartPeriodTapTapSkims() {
-        return storedDtwDepartPeriodTapTapSkims;
+    public double[][][][] getStoredDtwDepartPeriodTazTazSkims() {
+        return storedDtwDepartPeriodTazTazSkims;
     }
     
     
