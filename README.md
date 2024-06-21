@@ -19,3 +19,5 @@ To build, install apache ant (https://ant.apache.org/)
 Set the `REPOSITORY_DIR` environment variable to this directory, and run `ant all`.
 This will read the build configuration in `build.xml`.
 
+VV: Edit the batch file (compile_jar.bat) to have correct ant-installation and java installation, and run then run it to create jar.
+

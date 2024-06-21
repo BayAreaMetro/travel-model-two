@@ -650,7 +650,7 @@ public class UsualWorkSchoolLocationChoiceModel
 
         // save the mappings between segment index and segment labels to a file for
         // workers and students
-        String fileName = projectDirectory + WORK_SCHOOL_SEGMENTS_FILE_NAME;
+        String fileName = projectDirectory + resourceBundle.getString(WORK_SCHOOL_SEGMENTS_FILE_NAME);
 
         try
         {

@@ -8,6 +8,8 @@ public interface CtrampDmuFactoryIf
 {
 
     public AutoOwnershipChoiceDMU getAutoOwnershipDMU();
+    
+    public ExplicitTelecommuteDMU getExplicitTelecoummteDMU();
 
     public TransitSubsidyAndPassDMU getTransitSubsidyAndPassDMU();
 
