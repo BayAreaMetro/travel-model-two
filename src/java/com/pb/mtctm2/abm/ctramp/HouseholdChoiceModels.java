@@ -40,6 +40,7 @@ public class HouseholdChoiceModels
     private boolean                                                  runTransponderModel;
     private boolean                                                  runParkingProvisionModel;
     private boolean                                                  runCoordinatedDailyActivityPatternModel;
+    private boolean                                                  runExplicitTelecommuteModel;
     private boolean                                                  runIndividualMandatoryTourFrequencyModel;
     private boolean                                                  runMandatoryTourModeChoiceModel;
     private boolean                                                  runMandatoryTourDepartureTimeAndDurationModel;
@@ -67,6 +68,7 @@ public class HouseholdChoiceModels
     private TransponderChoiceModel                                   tcModel;
     private ParkingProvisionModel                                    ppModel;
     private HouseholdCoordinatedDailyActivityPatternModel            cdapModel;
+    private ExplicitTelecommuteModel								 etModel;
     private HouseholdIndividualMandatoryTourFrequencyModel           imtfModel;
     private HouseholdIndividualNonMandatoryTourFrequencyModel        inmtfModel;
     private HouseholdAtWorkSubtourFrequencyModel                     awfModel;
@@ -142,6 +144,7 @@ public class HouseholdChoiceModels
         runTransponderModel = Boolean.parseBoolean(propertyMap.get(CtrampApplication.PROPERTIES_RUN_TRANSPONDER_CHOICE));
         runParkingProvisionModel = Boolean.parseBoolean(propertyMap.get(CtrampApplication.PROPERTIES_RUN_FREE_PARKING_AVAILABLE));
         runCoordinatedDailyActivityPatternModel = Boolean.parseBoolean(propertyMap.get(CtrampApplication.PROPERTIES_RUN_DAILY_ACTIVITY_PATTERN));
+        runExplicitTelecommuteModel = Boolean.parseBoolean(propertyMap.get(CtrampApplication.PROPERTIES_RUN_EXPLICIT_TELECOMMUTE));
         runIndividualMandatoryTourFrequencyModel = Boolean.parseBoolean(propertyMap.get(CtrampApplication.PROPERTIES_RUN_INDIV_MANDATORY_TOUR_FREQ));
         runMandatoryTourModeChoiceModel = Boolean.parseBoolean(propertyMap.get(CtrampApplication.PROPERTIES_RUN_MAND_TOUR_MODE_CHOICE));
         runMandatoryTourDepartureTimeAndDurationModel = Boolean.parseBoolean(propertyMap.get(CtrampApplication.PROPERTIES_RUN_MAND_TOUR_DEP_TIME_AND_DUR));
@@ -195,6 +198,12 @@ public class HouseholdChoiceModels
                 cdapModel = new HouseholdCoordinatedDailyActivityPatternModel(propertyMap,modelStructure, dmuFactory, accTable);
                 if ( measureObjectSizes ) logger.info ( "CDAP size:       " + ObjectUtil.sizeOf( cdapModel ) );
             }
+            
+            if (runExplicitTelecommuteModel) {
+                etModel = new ExplicitTelecommuteModel(propertyMap, dmuFactory, accTable, pctHighIncome, pctMedHighPlusIncome, pctMultipleAutos, avgtts, transpDist, pctDetour);
+                if ( measureObjectSizes ) logger.info ( "ET size:       " + ObjectUtil.sizeOf( etModel ) );
+            }
+
 
             if (runIndividualMandatoryTourFrequencyModel) {
                 imtfModel = new HouseholdIndividualMandatoryTourFrequencyModel(propertyMap,modelStructure, dmuFactory, accTable, mandAcc);
@@ -311,6 +320,9 @@ public class HouseholdChoiceModels
             if (runCoordinatedDailyActivityPatternModel && cdapModel != null)
                 lastModel += " cdap";
 
+            if (runExplicitTelecommuteModel && etModel != null)
+                lastModel += " et";
+
             if (runIndividualMandatoryTourFrequencyModel && imtfModel != null)
                 lastModel += " imtf";
 
@@ -396,6 +408,10 @@ public class HouseholdChoiceModels
 
         if (runCoordinatedDailyActivityPatternModel)
             cdapModel.applyModel(hhObject);
+        
+        if (runExplicitTelecommuteModel)
+            etModel.applyModel(hhObject);
+        
 
         if (runIndividualMandatoryTourFrequencyModel){
             imtfModel.applyModel(hhObject);
@@ -488,7 +504,13 @@ public class HouseholdChoiceModels
             cdapModel.applyModel( hhObject );
             cdapTime += ( System.nanoTime() - check );
         }
-
+        
+        if (runExplicitTelecommuteModel) {
+            //long hhSeed = globalSeed + hhObject.getHhId() + TP_SEED_OFFSET; 
+            //hhObject.getHhRandom().setSeed( hhSeed );
+            etModel.applyModel(hhObject);
+        }
+        
         if ( runIndividualMandatoryTourFrequencyModel ) {
             long check = System.nanoTime();
             //long hhSeed = globalSeed + hhObject.getHhId() + IMTF_SEED_OFFSET; 

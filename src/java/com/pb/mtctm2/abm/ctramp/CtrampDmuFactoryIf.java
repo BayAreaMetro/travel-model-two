@@ -8,8 +8,6 @@ public interface CtrampDmuFactoryIf
 {
 
     public AutoOwnershipChoiceDMU getAutoOwnershipDMU();
-    
-    public ExplicitTelecommuteDMU getExplicitTelecoummteDMU();
 
     public TransitSubsidyAndPassDMU getTransitSubsidyAndPassDMU();
 
@@ -18,6 +16,8 @@ public interface CtrampDmuFactoryIf
     public TransponderChoiceDMU getTransponderChoiceDMU();
 
     public CoordinatedDailyActivityPatternDMU getCoordinatedDailyActivityPatternDMU();
+    
+    public ExplicitTelecommuteDMU getExplicitTelecoummteDMU();
 
     public DcSoaDMU getDcSoaDMU();
 

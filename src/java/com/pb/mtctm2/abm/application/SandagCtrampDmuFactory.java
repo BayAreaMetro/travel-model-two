@@ -150,7 +150,8 @@ public class SandagCtrampDmuFactory implements CtrampDmuFactoryIf, Serializable
 	
 	public ExplicitTelecommuteDMU getExplicitTelecoummteDMU() 
 	{
-		return new SandagExplicitTelecommuteDMU();
+		return new ExplicitTelecommuteDMU();
+		//return new SandagExplicitTelecommuteDMU();
 	}
 
 }

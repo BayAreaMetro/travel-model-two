@@ -36,6 +36,7 @@ public class Household
     private int                       imtfModelPattern;
     private String                    jtfModelPattern;
     private int                       tpChoice;
+    private int						  etChoice;
     
     private Random                    hhRandom;
     private int                       randomCount = 0;
@@ -43,6 +44,7 @@ public class Household
     private int                       preAoRandomCount;
     private int                       aoRandomCount;
     private int                       tpRandomCount;
+    private int 					  etRandomCount;
     private int                       fpRandomCount;
     private int                       cdapRandomCount;
     private int                       imtfRandomCount;
@@ -136,7 +138,11 @@ public class Household
     {
         tpRandomCount = count;
     }
-
+    
+    public void setEtRandomCount(int count)
+    {
+        etRandomCount = count;
+    }
     public void setFpRandomCount(int count)
     {
         fpRandomCount = count;
@@ -238,7 +244,11 @@ public class Household
     public void setTpChoice( int value ){
         tpChoice = value;
     }
-    
+    public void setEtChoice(int value)
+    {
+    	etChoice = value;
+    }
+       
      /**
      * auto sufficiency: 1 if cars < workers, 2 if cars equal workers, 3 if cars >
      * workers
@@ -277,6 +287,11 @@ public class Household
     {
         return tpChoice;
     }
+	
+	public int getEtChoice()
+	{
+		return etChoice;
+	}
 
     public void setCoordinatedDailyActivityPatternResult(String pattern)
     {

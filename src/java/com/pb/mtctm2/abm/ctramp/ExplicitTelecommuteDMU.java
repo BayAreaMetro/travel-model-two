@@ -6,42 +6,51 @@ import org.apache.log4j.Logger;
 import com.pb.common.calculator.IndexValues;
 import com.pb.common.calculator.VariableTable;
 
+/**
+ * @author crf <br/>
+ *         Started: Apr 14, 2009 11:09:58 AM
+ */
 public class ExplicitTelecommuteDMU
         implements Serializable, VariableTable
 {
 
-    protected transient Logger         logger                           = Logger.getLogger(ExplicitTelecommuteDMU.class);
+    protected transient Logger         logger = Logger.getLogger(ExplicitTelecommuteDMU.class);
 
     protected HashMap<String, Integer> methodIndexMap;
 
-    private Household                  hh;
-    private IndexValues                dmuIndex;
+    private IndexValues dmuIndex;
 
-    private boolean                    useAccessibility                 = false;
+    private Household hh;
 
-    private double                     workAutoDependency               = 0.0;
-    private double                     schoolAutoDependency             = 0.0;
-    private double                     workAutoTime                     = 0.0;
-
-    private double                     workersRailProportion            = 0.0;
-    private double                     studentsRailProportion           = 0.0;
-
-    private double                     homeTazAutoAccessibility         = 0.0;
-    private double                     homeTazTransitAccessibility      = 0.0;
-    private double                     homeTazNonMotorizedAccessibility = 0.0;
-
+    private double percentTazIncome100Kplus;
+    private double percentTazIncome75Kplus;
+    private double percentTazMultpleAutos;
+    private double expectedTravelTimeSavings;
+    private double transpDist;
+    private double pctDetour;
+    private double accessibility;
+    
+    
     public ExplicitTelecommuteDMU()
     {
         dmuIndex = new IndexValues();
     }
-
-    public void setHouseholdObject(Household hhObject)
+    
+    private void setupMethodIndexMap()
     {
-        hh = hhObject;
+        methodIndexMap = new HashMap<String, Integer>();
+
+        methodIndexMap.put("getAutoOwnership", 0);
+        methodIndexMap.put("getPctHighIncome", 1);
+        methodIndexMap.put("getPctMultipleAutos", 2);
+        methodIndexMap.put("getAvgtts", 3);
+        methodIndexMap.put("getDistanceFromFacility", 4);
+        methodIndexMap.put("getPctAltTimeCBD", 5);
+        methodIndexMap.put("getAvgTransitAccess", 6);
+        methodIndexMap.put("getPctIncome75Kplus", 7);
     }
 
-    // DMU methods - define one of these for every @var in the mode choice control
-    // file.
+
 
     public void setDmuIndexValues(int hhId, int zoneId, int origTaz, int destTaz)
     {
@@ -55,238 +64,82 @@ public class ExplicitTelecommuteDMU
         if (hh.getDebugChoiceModels())
         {
             dmuIndex.setDebug(true);
-            dmuIndex.setDebugLabel("Debug ET UEC");
+            dmuIndex.setDebugLabel("Debug Explicit Telecommute UEC");
         }
-
     }
 
-    public IndexValues getDmuIndexValues()
-    {
-        return dmuIndex;
+    public void setHouseholdObject(Household hhObj) {
+        hh = hhObj;
     }
 
-    public Household getHouseholdObject()
-    {
-        return hh;
-    }
 
-    public int getGq()
-    {
-        return hh.getIsGroupQuarters();
-    }
-
-    public int getDrivers()
-    {
-        return hh.getDrivers();
-    }
-
-    public int getNumFtWorkers()
-    {
-        return hh.getNumFtWorkers();
-    }
-
-    public int getNumPtWorkers()
-    {
-        return hh.getNumPtWorkers();
-    }
-
-    public int getNumPersons18to24()
-    {
-        return hh.getNumPersons18to24();
+    public void setPctIncome100Kplus( double value) {
+        percentTazIncome100Kplus = value;
     }
     
-    public int getNumPersons18to35(){
-    	return hh.getNumPersons18to35();
+    public void setPctIncome75Kplus( double value) {
+        percentTazIncome75Kplus = value;
     }
 
-    public int getNumPersons6to15()
-    {
-        return hh.getNumPersons6to15();
+    public void setPctTazMultpleAutos( double value) {
+        percentTazMultpleAutos = value;
+    }
+
+    public void setExpectedTravelTimeSavings( double value) {
+        expectedTravelTimeSavings = value;
+    }
+
+    public void setTransponderDistance( double value) {
+        transpDist = value;
     }
     
-    public int getNumPersons65Plus()
-    {
-    	return (hh.getNumPersons65to79()+hh.getNumPersons80plus());
-    }
-
-    public int getNumPersons80plus()
-    {
-        return hh.getNumPersons80plus();
-    }
-
-    public int getNumPersons65to79()
-    {
-        return hh.getNumPersons65to79();
-    }
-
-    public int getHhIncomeInDollars()
-    {
-        return hh.getIncomeInDollars();
-    }
-
-    public int getNumHighSchoolGraduates()
-    {
-        return hh.getNumHighSchoolGraduates();
-    }
-
-    public int getDetachedDwellingType()
-    {
-        return hh.getHhBldgsz();
-    }
-
-    public double getUseAccessibilities()
-    {
-        return useAccessibility ? 1 : 0;
-    }
-
-    public double getHomeTazAutoAccessibility()
-    {
-        return homeTazAutoAccessibility;
-    }
-
-    public double getHomeTazTransitAccessibility()
-    {
-        return homeTazTransitAccessibility;
-    }
-
-    public double getHomeTazNonMotorizedAccessibility()
-    {
-        return homeTazNonMotorizedAccessibility;
-    }
-
-    public double getWorkAutoDependency()
-    {
-        return workAutoDependency;
-    }
-
-    public double getSchoolAutoDependency()
-    {
-        return schoolAutoDependency;
-    }
-
-    public double getWorkAutoTime() {
-		return workAutoTime;
-	}
-
-	public void setWorkAutoTime(double workAutoTime) {
-		this.workAutoTime = workAutoTime;
-	}
-
-	public double getWorkersRailProportion()
-    {
-        return workersRailProportion;
-    }
-
-    public double getStudentsRailProportion()
-    {
-        return studentsRailProportion;
+    public void setPctDetour( double value) {
+        pctDetour = value;
     }
     
-    public int getHhCountyId()
-    {
-    	return hh.getCountyId(); 
+    public void setAccessibility( double value) {
+        accessibility = value;
     }
     
-    public int getHhType()
-    {
-    	return hh.getHhType();
-    }
-
-    public void setUseAccessibilities(boolean flag)
-    {
-        useAccessibility = flag;
-    }
-
-    public void setHomeTazAutoAccessibility(double acc)
-    {
-        homeTazAutoAccessibility = acc;
-    }
-
-    public void setHomeTazTransitAccessibility(double acc)
-    {
-        homeTazTransitAccessibility = acc;
-    }
-
-    public void setHomeTazNonMotorizedAccessibility(double acc)
-    {
-        homeTazNonMotorizedAccessibility = acc;
-    }
-
-    public void setWorkAutoDependency(double value)
-    {
-        workAutoDependency = value;
-    }
-
-    public void setSchoolAutoDependency(double value)
-    {
-        schoolAutoDependency = value;
-    }
-
-    public void setWorkersRailProportion(double proportion)
-    {
-        workersRailProportion = proportion;
-    }
-
-    public void setStudentsRailProportion(double proportion)
-    {
-        studentsRailProportion = proportion;
+    
+    public double getPctIncome100Kplus() {
+        return percentTazIncome100Kplus;
     }
     
-    public double getNumberOfWorkersWithTransitSubsidy() {
-    	
-    	double returnValue=0;
-    	Person[] persons = hh.getPersons();
-    	 for(int i = 1;i<persons.length;++i) {
-    		 if(persons[i].getPersonIsWorker()>0) {
-    			 if(persons[i].getTransitSubsidyChoice()==1)
-    				 ++returnValue;
-    		 }
-    	 }
-    	 
-    	 return returnValue;
+    public double getPctIncome75Kplus() {
+        return percentTazIncome75Kplus;
+    }
+    
+    public double getPctTazMultpleAutos() {
+        return percentTazMultpleAutos;
+    }
+    
+    public double getExpectedTravelTimeSavings() {
+        return expectedTravelTimeSavings;
+    }
+    
+    public double getTransponderDistance() {
+        return transpDist;
+    }
+    
+    public double getPctDetour() {
+        return pctDetour;
+    }
+    
+    public double getAccessibility() {
+        return accessibility;
+    }
+    
+    public int getAutoOwnership() {
+        return hh.getAutosOwned();
     }
 
-   public double getNumberOfWorkersWithTransitPass() {
-    	
-    	double returnValue=0;
-    	Person[] persons = hh.getPersons();
-    	 for(int i = 1;i<persons.length;++i) {
-    		 if(persons[i].getPersonIsWorker()>0) {
-    			 if(persons[i].getTransitPassChoice()==1)
-    				 ++returnValue;
-    		 }
-    	 }
-    	 
-    	 return returnValue;
+    public IndexValues getDmuIndexValues() {
+        return dmuIndex; 
     }
-
-    public double getNumberOfStudentsWithTransitSubsidy() {
-    	
-    	double returnValue=0;
-    	Person[] persons = hh.getPersons();
-    	 for(int i = 1;i<persons.length;++i) {
-    		 if(persons[i].getPersonIsStudent()>0) {
-    			 if(persons[i].getTransitSubsidyChoice()==1)
-    				 ++returnValue;
-    		 }
-    	 }
-    	 
-    	 return returnValue;
-    }
-
-   public double getNumberOfStudentsWithTransitPass() {
-    	
-    	double returnValue=0;
-    	Person[] persons = hh.getPersons();
-    	 for(int i = 1;i<persons.length;++i) {
-    		 if(persons[i].getPersonIsStudent()>0) {
-    			 if(persons[i].getTransitPassChoice()==1)
-    				 ++returnValue;
-    		 }
-    	 }
-    	 
-    	 return returnValue;
-    }
+    
+    
+    
     public int getIndexValue(String variableName)
     {
         return methodIndexMap.get(variableName);
