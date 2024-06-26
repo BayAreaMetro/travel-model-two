@@ -55,7 +55,7 @@ public class ExplicitTelecommuteModel
 
         // locate the explicit telecommute choice UEC
         String uecFileDirectory = propertyMap.get( CtrampApplication.PROPERTIES_UEC_PATH );
-        String tpUecFile = uecFileDirectory + propertyMap.get(ET_CONTROL_FILE_TARGET);
+        String etUecFile = uecFileDirectory + propertyMap.get(ET_CONTROL_FILE_TARGET);
 
         int dataSheet = Util.getIntegerValueFromPropertyMap( propertyMap, ET_DATA_SHEET_TARGET );
         int modelSheet = Util.getIntegerValueFromPropertyMap( propertyMap, ET_MODEL_SHEET_TARGET );
@@ -64,7 +64,7 @@ public class ExplicitTelecommuteModel
         etDmuObject = dmuFactory.getExplicitTelecoummteDMU();
 
         // create the explicit telecommute choice model object
-        etModel = new ChoiceModelApplication(tpUecFile, modelSheet, dataSheet, propertyMap, (VariableTable) etDmuObject);
+        etModel = new ChoiceModelApplication(etUecFile, modelSheet, dataSheet, propertyMap, (VariableTable) etDmuObject);
 
     }
 

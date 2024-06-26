@@ -35,22 +35,6 @@ public class ExplicitTelecommuteDMU
     {
         dmuIndex = new IndexValues();
     }
-    
-    private void setupMethodIndexMap()
-    {
-        methodIndexMap = new HashMap<String, Integer>();
-
-        methodIndexMap.put("getAutoOwnership", 0);
-        methodIndexMap.put("getPctHighIncome", 1);
-        methodIndexMap.put("getPctMultipleAutos", 2);
-        methodIndexMap.put("getAvgtts", 3);
-        methodIndexMap.put("getDistanceFromFacility", 4);
-        methodIndexMap.put("getPctAltTimeCBD", 5);
-        methodIndexMap.put("getAvgTransitAccess", 6);
-        methodIndexMap.put("getPctIncome75Kplus", 7);
-    }
-
-
 
     public void setDmuIndexValues(int hhId, int zoneId, int origTaz, int destTaz)
     {
