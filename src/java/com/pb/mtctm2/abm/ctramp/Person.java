@@ -92,7 +92,9 @@ public class Person
     private float                schoolLocLogsum;
 
     private int                  freeParkingAvailable;
-    private float               reimbursePercent;
+    private float                reimbursePercent;
+    
+    private int 				 etChoice;
     
     private String               cdapActivity;
     private int                  imtfChoice;
@@ -339,6 +341,11 @@ public class Person
     public void setFreeParkingAvailableResult( int chosenAlt )
     {
         freeParkingAvailable = chosenAlt;
+    }
+    
+    public void setEtChoice( int chosenAlt )
+    {
+        etChoice = chosenAlt;
     }
     
     public void setParkingReimbursement(float pct)
@@ -789,6 +796,11 @@ public class Person
     public float getParkingReimbursement()
     {
         return reimbursePercent;
+    }
+    
+    public int getEtChoice()
+    {
+    	return etChoice;
     }
 
     public String getCdapActivity()

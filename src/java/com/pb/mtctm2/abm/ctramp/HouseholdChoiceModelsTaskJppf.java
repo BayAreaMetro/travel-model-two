@@ -155,7 +155,7 @@ public class HouseholdChoiceModelsTaskJppf
 
     private void logModelComponentTimes( long[] componentTimes, long[] partialStopTimes, Logger logger, int modelIndex ) {
         
-        String[] label1 = { "AO", "FP", "CDAP", "IMTF", "IMTOD", "IMMC", "JTF", "JTDC", "JTTOD", "JTMC", "INMTF", "INMTDCSOA",  "INMTDCTOT", "INMTTOD", "INMTMC", "AWTF", "AWTDCSOA", "AWTDCTOT", "AWTTOD", "AWTMC", "STF", "STDTM" };
+        String[] label1 = { "AO", "FP", "CDAP", "ET", "IMTF", "IMTOD", "IMMC", "JTF", "JTDC", "JTTOD", "JTMC", "INMTF", "INMTDCSOA",  "INMTDCTOT", "INMTTOD", "INMTMC", "AWTF", "AWTDCSOA", "AWTDCTOT", "AWTTOD", "AWTMC", "STF", "STDTM" };
         
         logger.info( "Household choice model component runtimes (in milliseconds) for task: " + taskIndex + ", modelIndex: " + modelIndex + ", startIndex: " + startIndex + ", endIndex: " + endIndex );
         

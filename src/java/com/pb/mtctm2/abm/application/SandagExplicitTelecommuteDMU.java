@@ -18,14 +18,22 @@ public class SandagExplicitTelecommuteDMU
     {
         methodIndexMap = new HashMap<String, Integer>();
 
-        methodIndexMap.put("getAutoOwnership", 0);
-        methodIndexMap.put("getPctHighIncome", 1);
-        methodIndexMap.put("getPctMultipleAutos", 2);
-        methodIndexMap.put("getAvgtts", 3);
-        methodIndexMap.put("getDistanceFromFacility", 4);
-        methodIndexMap.put("getPctAltTimeCBD", 5);
-        methodIndexMap.put("getAvgTransitAccess", 6);
-        methodIndexMap.put("getPctIncome75Kplus", 7);
+        methodIndexMap.put("getHhIncomeInDollars", 0);
+        methodIndexMap.put("getWorkLocMgra", 1);
+        methodIndexMap.put("getLsWgtAvgCostM", 2);
+        methodIndexMap.put("getLsWgtAvgCostD", 3);
+        methodIndexMap.put("getLsWgtAvgCostH", 4);
+        methodIndexMap.put("getMgraParkArea", 5);
+        methodIndexMap.put("getNumFreeHours", 6);
+        methodIndexMap.put("getMStallsOth", 7);
+        methodIndexMap.put("getMStallsSam", 8);
+        methodIndexMap.put("getMParkCost", 9);
+        methodIndexMap.put("getDStallsOth", 10);
+        methodIndexMap.put("getDStallsSam", 11);
+        methodIndexMap.put("getDParkCost", 12);
+        methodIndexMap.put("getHStallsOth", 13);
+        methodIndexMap.put("getHStallsSam", 14);
+        methodIndexMap.put("getHParkCost", 15);
     }
 
     public double getValueForIndex(int variableIndex, int arrayIndex)
@@ -34,21 +42,38 @@ public class SandagExplicitTelecommuteDMU
         switch (variableIndex)
         {
             case 0:
-                return getAutoOwnership();
+                return getIncomeInDollars();
             case 1:
-                return getPctIncome100Kplus();
+                return getWorkLocMgra();
             case 2:
-                return getPctTazMultpleAutos();
+                return getLsWgtAvgCostM();
             case 3:
-                return getExpectedTravelTimeSavings();
+                return getLsWgtAvgCostD();
             case 4:
-                return getTransponderDistance();
+                return getLsWgtAvgCostH();
             case 5:
-                return getPctDetour();
+                return getMgraParkArea();
             case 6:
-                return getAccessibility();
+                return getNumFreeHours();
             case 7:
-                return getPctIncome75Kplus();
+                return getMStallsOth();
+            case 8:
+                return getMStallsSam();
+            case 9:
+                return getMParkCost();
+            case 10:
+                return getDStallsOth();
+            case 11:
+                return getDStallsSam();
+            case 12:
+                return getDParkCost();
+            case 13:
+                return getHStallsOth();
+            case 14:
+                return getHStallsSam();
+            case 15:
+                return getHParkCost();
+
 
             default:
                 logger.error("method number = " + variableIndex + " not found");

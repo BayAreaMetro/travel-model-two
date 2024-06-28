@@ -18,22 +18,37 @@ public class ExplicitTelecommuteDMU
 
     protected HashMap<String, Integer> methodIndexMap;
 
-    private IndexValues dmuIndex;
+    private Household                  hh;
+    private Person                     person;
+    private IndexValues                dmuIndex;
 
-    private Household hh;
+    private int                        mgraParkArea;
+    private int                        numFreeHours;
+    private int                        mstallsoth;
+    private int                        mstallssam;
+    private float                      mparkcost;
+    private int                        dstallsoth;
+    private int                        dstallssam;
+    private float                      dparkcost;
+    private int                        hstallsoth;
+    private int                        hstallssam;
+    private float                      hparkcost;
 
-    private double percentTazIncome100Kplus;
-    private double percentTazIncome75Kplus;
-    private double percentTazMultpleAutos;
-    private double expectedTravelTimeSavings;
-    private double transpDist;
-    private double pctDetour;
-    private double accessibility;
+    private double                     lsWgtAvgCostM;
+    private double                     lsWgtAvgCostD;
+    private double                     lsWgtAvgCostH;
     
     
     public ExplicitTelecommuteDMU()
     {
         dmuIndex = new IndexValues();
+    }
+
+    /** need to set hh and home taz before using **/
+    public void setPersonObject(Person person)
+    {
+        hh = person.getHouseholdObject();
+        this.person = person;
     }
 
     public void setDmuIndexValues(int hhId, int zoneId, int origTaz, int destTaz)
@@ -48,81 +63,142 @@ public class ExplicitTelecommuteDMU
         if (hh.getDebugChoiceModels())
         {
             dmuIndex.setDebug(true);
-            dmuIndex.setDebugLabel("Debug Explicit Telecommute UEC");
+            dmuIndex.setDebugLabel("Debug Free Parking UEC");
         }
     }
 
-    public void setHouseholdObject(Household hhObj) {
-        hh = hhObj;
+    public void setMgraParkArea( int value) {
+        mgraParkArea = value;
+    }
+
+    public void setNumFreeHours( int value) {
+        numFreeHours = value;
+    }
+
+    public void setLsWgtAvgCostM( double cost ) {
+        lsWgtAvgCostM = cost;
+    }
+    
+    public void setLsWgtAvgCostD( double cost ) {
+        lsWgtAvgCostD = cost;
+    }
+    
+    public void setLsWgtAvgCostH( double cost ) {
+        lsWgtAvgCostH = cost;
+    }
+    
+    public void setMStallsOth( int value ) {
+        mstallsoth = value;
+    }
+    
+    public void setMStallsSam( int value ) {
+        mstallssam = value;
+    }
+    
+    public void setMParkCost( float value ) {
+        mparkcost = value;
+    }
+    
+    public void setDStallsOth( int value ) {
+        dstallsoth = value;
+    }
+    
+    public void setDStallsSam( int value ) {
+        dstallssam = value;
+    }
+    
+    public void setDParkCost( float value ) {
+        dparkcost = value;
+    }
+    
+    public void setHStallsOth( int value ) {
+        hstallsoth = value;
+    }
+    
+    public void setHStallsSam( int value ) {
+        hstallssam = value;
+    }
+    
+    public void setHParkCost( float value ) {
+        hparkcost = value;
+    }
+    
+
+    
+    
+    public IndexValues getDmuIndexValues()
+    {
+        return dmuIndex;
+    }
+
+    /* dmu @ functions */
+
+    public int getIncomeInDollars()
+    {
+        return hh.getIncomeInDollars();
+    }
+
+    public double getLsWgtAvgCostM() {
+        return lsWgtAvgCostM;
+    }
+
+    public double getLsWgtAvgCostD() {
+        return lsWgtAvgCostD;
+    }
+
+    public double getLsWgtAvgCostH() {
+        return lsWgtAvgCostH;
+    }
+
+    public int getMgraParkArea() {
+        return mgraParkArea;
+    }
+
+    public int getNumFreeHours() {
+        return numFreeHours;
+    }
+
+    public int getMStallsOth() {
+        return mstallsoth;
+    }
+
+    public int getMStallsSam() {
+        return mstallssam;
+    }
+
+    public float getMParkCost() {
+        return mparkcost;
+    }
+
+    public int getDStallsOth() {
+        return dstallsoth;
+    }
+
+    public int getDStallsSam() {
+        return dstallssam;
+    }
+
+    public float getDParkCost() {
+        return dparkcost;
+    }
+
+    public int getHStallsOth() {
+        return hstallsoth;
+    }
+
+    public int getHStallsSam() {
+        return hstallssam;
+    }
+
+    public float getHParkCost() {
+        return hparkcost;
+    }
+
+    public int getWorkLocMgra() {
+        return person.getPersonWorkLocationZone();
     }
 
 
-    public void setPctIncome100Kplus( double value) {
-        percentTazIncome100Kplus = value;
-    }
-    
-    public void setPctIncome75Kplus( double value) {
-        percentTazIncome75Kplus = value;
-    }
-
-    public void setPctTazMultpleAutos( double value) {
-        percentTazMultpleAutos = value;
-    }
-
-    public void setExpectedTravelTimeSavings( double value) {
-        expectedTravelTimeSavings = value;
-    }
-
-    public void setTransponderDistance( double value) {
-        transpDist = value;
-    }
-    
-    public void setPctDetour( double value) {
-        pctDetour = value;
-    }
-    
-    public void setAccessibility( double value) {
-        accessibility = value;
-    }
-    
-    
-    public double getPctIncome100Kplus() {
-        return percentTazIncome100Kplus;
-    }
-    
-    public double getPctIncome75Kplus() {
-        return percentTazIncome75Kplus;
-    }
-    
-    public double getPctTazMultpleAutos() {
-        return percentTazMultpleAutos;
-    }
-    
-    public double getExpectedTravelTimeSavings() {
-        return expectedTravelTimeSavings;
-    }
-    
-    public double getTransponderDistance() {
-        return transpDist;
-    }
-    
-    public double getPctDetour() {
-        return pctDetour;
-    }
-    
-    public double getAccessibility() {
-        return accessibility;
-    }
-    
-    public int getAutoOwnership() {
-        return hh.getAutosOwned();
-    }
-
-    public IndexValues getDmuIndexValues() {
-        return dmuIndex; 
-    }
-    
-    
     
     public int getIndexValue(String variableName)
     {

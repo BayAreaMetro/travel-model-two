@@ -1081,9 +1081,9 @@ public class CtrampApplication implements Serializable
             {
 
                 Household household = householdArray[i];
-                if ( household.getTpChoice()+1 == ExplicitTelecommuteModel.ET_MODEL_NO_ALT )
+                if ( household.getTpChoice()+1 == TransponderChoiceModel.TP_MODEL_NO_ALT )
                     numNo++;
-                else if ( household.getTpChoice()+1 == ExplicitTelecommuteModel.ET_MODEL_YES_ALT )
+                else if ( household.getTpChoice()+1 == TransponderChoiceModel.TP_MODEL_YES_ALT )
                     numYes++;
                 else numOther++;
                 
@@ -1127,16 +1127,19 @@ public class CtrampApplication implements Serializable
             {
 
                 Household household = householdArray[i];
-                if ( household.getEtChoice()+1 == ExplicitTelecommuteModel.ET_MODEL_NO_ALT )
-                    numNo++;
-                else if ( household.getEtChoice()+1 == ExplicitTelecommuteModel.ET_MODEL_YES_ALT )
-                    numYes++;
-                else numOther++;
+                Person[] persons = household.getPersons();
+                for ( int p=1; p < persons.length; p++ ) 
+                {
+                	if ( persons[p].getEtChoice()+1 == ExplicitTelecommuteModel.ET_MODEL_NO_ALT )
+                		numNo++;
+                	else if ( persons[p].getEtChoice()+1 == ExplicitTelecommuteModel.ET_MODEL_YES_ALT )
+                		numYes++;
+                	else numOther++;
                 
             }
 
         }
-
+        }
         logger.info( String.format("%-16s  %20d", "No", numNo ) );
         logger.info( String.format("%-16s  %20d", "Yes", numYes ) );
         logger.info( String.format("%-16s  %20d", "Other", numOther ) );
@@ -1144,6 +1147,7 @@ public class CtrampApplication implements Serializable
         logger.info(String.format("%-16s  %20s", "----------", "------------------" ) );
         logger.info(String.format("%-16s  %20d", "Total", (numNo + numYes + numOther) ) );
 
+    
     }
     
     private void logFpResults(HouseholdDataManagerIf householdDataManager)

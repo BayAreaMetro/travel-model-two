@@ -23,39 +23,48 @@ public class ExplicitTelecommuteModel
     public static final int        			   ET_MODEL_NO_ALT = 1;
     public static final int        			   ET_MODEL_YES_ALT = 2;
 
-    private ChoiceModelApplication etModel;
-    private ExplicitTelecommuteDMU etDmuObject;
+
 
     private AccessibilitiesTable accTable;
+    private MgraDataManager mgraManager;
     
-    private double[] pctHighIncome;
-    private double[] pctMedHighPlusIncome;
-    private double[] pctMultipleAutos;
-    private double[] avgtts;
-    private double[] transpDist;
-    private double[] pctDetour;
+    private double meanReimb;
+    private double stdDevReimb;
     
-    public ExplicitTelecommuteModel( HashMap<String, String> propertyMap, CtrampDmuFactoryIf dmuFactory, AccessibilitiesTable accTable,
-            double[] pctHighIncome, double[] pctMedHighPlusIncome, double[] pctMultipleAutos, double[] avgtts, double[] transpDist, double[] pctDetour )
-    {
-        this.accTable = accTable;
-        this.pctHighIncome = pctHighIncome;
-        this.pctMedHighPlusIncome = pctMedHighPlusIncome;
-        this.pctMultipleAutos = pctMultipleAutos;
-        this.avgtts = avgtts;
-        this.transpDist = transpDist;
-        this.pctDetour = pctDetour;
-        
-        setupExplictiTelecommuteModelApplication(propertyMap, dmuFactory);
+    private int[]                               mgraParkArea;
+    private int[]                               numfreehrs;
+    private int[]                               hstallsoth;
+    private int[]                               hstallssam;
+    private float[]                             hparkcost;
+    private int[]                               dstallsoth;
+    private int[]                               dstallssam;
+    private float[]                             dparkcost;
+    private int[]                               mstallsoth;
+    private int[]                               mstallssam;
+    private float[]                             mparkcost;
+    
+    private double[]                            lsWgtAvgCostM;
+    private double[]                            lsWgtAvgCostD;
+    private double[]                            lsWgtAvgCostH;
+    
+    private ChoiceModelApplication etModel;
+    private ExplicitTelecommuteDMU etDmuObject;
+    
+
+    
+    public ExplicitTelecommuteModel( HashMap<String, String> propertyMap, CtrampDmuFactoryIf dmuFactory )
+    {        
+        mgraManager = MgraDataManager.getInstance(propertyMap);        
+        setupFreeParkingChoiceModelApplication(propertyMap, dmuFactory);
     }
 
-    private void setupExplictiTelecommuteModelApplication(HashMap<String, String> propertyMap, CtrampDmuFactoryIf dmuFactory)
+    private void setupFreeParkingChoiceModelApplication(HashMap<String, String> propertyMap, CtrampDmuFactoryIf dmuFactory)
     {
-        logger.info("setting up explicit telecommute choice model.");
+        logger.info("setting up explicit telecommute model.");
 
-        // locate the explicit telecommute choice UEC
+        // locate the explicit telecommute  UEC
         String uecFileDirectory = propertyMap.get( CtrampApplication.PROPERTIES_UEC_PATH );
-        String etUecFile = uecFileDirectory + propertyMap.get(ET_CONTROL_FILE_TARGET);
+        String fpUecFile = uecFileDirectory + propertyMap.get(ET_CONTROL_FILE_TARGET);
 
         int dataSheet = Util.getIntegerValueFromPropertyMap( propertyMap, ET_DATA_SHEET_TARGET );
         int modelSheet = Util.getIntegerValueFromPropertyMap( propertyMap, ET_MODEL_SHEET_TARGET );
@@ -64,45 +73,83 @@ public class ExplicitTelecommuteModel
         etDmuObject = dmuFactory.getExplicitTelecoummteDMU();
 
         // create the explicit telecommute choice model object
-        etModel = new ChoiceModelApplication(etUecFile, modelSheet, dataSheet, propertyMap, (VariableTable) etDmuObject);
+        etModel = new ChoiceModelApplication(fpUecFile, modelSheet, dataSheet, propertyMap, (VariableTable) etDmuObject);
 
+        //meanReimb = Float.parseFloat( propertyMap.get(REIMBURSEMENT_MEAN) );
+        //stdDevReimb = Float.parseFloat( propertyMap.get(REIMBURSEMENT_STD_DEV) );
+
+        mgraParkArea = mgraManager.getMgraParkAreas();
+        numfreehrs = mgraManager.getNumFreeHours();
+        lsWgtAvgCostM = mgraManager.getLsWgtAvgCostM();
+        lsWgtAvgCostD = mgraManager.getLsWgtAvgCostD();
+        lsWgtAvgCostH = mgraManager.getLsWgtAvgCostH();
+        mstallsoth = mgraManager.getMStallsOth();
+        mstallssam = mgraManager.getMStallsSam();
+        mparkcost = mgraManager.getMParkCost();
+        dstallsoth = mgraManager.getDStallsOth();
+        dstallssam = mgraManager.getDStallsSam();
+        dparkcost = mgraManager.getDParkCost();
+        hstallsoth = mgraManager.getHStallsOth();
+        hstallssam = mgraManager.getHStallsSam();
+        hparkcost = mgraManager.getHParkCost();
+        
     }
 
     
     public void applyModel(Household hhObject){
 
-        int homeTaz = hhObject.getHhTaz();
-
-        etDmuObject.setHouseholdObject( hhObject );
-        
-        // set the zone, orig and dest attributes
-        etDmuObject.setDmuIndexValues( hhObject.getHhId(), hhObject.getHhTaz(), hhObject.getHhTaz(), 0 );
-        
-        etDmuObject.setPctIncome100Kplus( pctHighIncome[homeTaz] ); 
-        etDmuObject.setPctIncome75Kplus( pctMedHighPlusIncome[homeTaz] );
-        etDmuObject.setPctTazMultpleAutos( pctMultipleAutos[homeTaz] ); 
-        etDmuObject.setExpectedTravelTimeSavings( avgtts[homeTaz] ); 
-        etDmuObject.setTransponderDistance( transpDist[homeTaz] ); 
-        etDmuObject.setPctDetour( pctDetour[homeTaz] );
-
-        float accessibility = accTable.getAggregateAccessibility("transit", hhObject.getHhMgra());
-        etDmuObject.setAccessibility( accessibility );
-
-
         Random hhRandom = hhObject.getHhRandom();
-        double randomNumber = hhRandom.nextDouble();
+
+        // person array is 1-based
+        Person[] person = hhObject.getPersons();         
+        for (int i=1; i<person.length; i++) {
+          
+                double randomNumber = hhRandom.nextDouble();
+                int chosen = getEtChoice(person[i], randomNumber);
+                person[i].setEtChoice(chosen);
+
+        }
+
+        hhObject.setFpRandomCount( hhObject.getHhRandomCount() );
+    }
+
+    
+    private int getEtChoice (Person personObj, double randomNumber) {
         
-        // compute utilities and choose transponder choice alternative.
-        etModel.computeUtilities ( etDmuObject, etDmuObject.getDmuIndexValues() );
+        // get the corresponding household object
+        Household hhObj = personObj.getHouseholdObject();
+        etDmuObject.setPersonObject( personObj );
+        
+        etDmuObject.setMgraParkArea( mgraParkArea[personObj.getUsualWorkLocation()] );
+        etDmuObject.setNumFreeHours( numfreehrs[personObj.getUsualWorkLocation()] );
+        etDmuObject.setLsWgtAvgCostM( lsWgtAvgCostM[personObj.getUsualWorkLocation()] );
+        etDmuObject.setLsWgtAvgCostD( lsWgtAvgCostD[personObj.getUsualWorkLocation()] );
+        etDmuObject.setLsWgtAvgCostH( lsWgtAvgCostH[personObj.getUsualWorkLocation()] );
+        etDmuObject.setMStallsOth( mstallsoth[personObj.getUsualWorkLocation()] );
+        etDmuObject.setMStallsSam( mstallssam[personObj.getUsualWorkLocation()] );
+        etDmuObject.setMParkCost( mparkcost[personObj.getUsualWorkLocation()] );
+        etDmuObject.setDStallsSam( dstallssam[personObj.getUsualWorkLocation()] );
+        etDmuObject.setDStallsOth( dstallsoth[personObj.getUsualWorkLocation()] );
+        etDmuObject.setDParkCost( dparkcost[personObj.getUsualWorkLocation()] );
+        etDmuObject.setHStallsOth( hstallsoth[personObj.getUsualWorkLocation()] );
+        etDmuObject.setHStallsSam( hstallssam[personObj.getUsualWorkLocation()] );
+        etDmuObject.setHParkCost( hparkcost[personObj.getUsualWorkLocation()] );
+        
+        
+        // set the zone and dest attributes to the person's work location
+        etDmuObject.setDmuIndexValues(hhObj.getHhId(),personObj.getUsualWorkLocation(),hhObj.getHhTaz(),personObj.getUsualWorkLocation());
+
+        // compute utilities and choose auto ownership alternative.
+        etModel.computeUtilities (etDmuObject,etDmuObject.getDmuIndexValues() );
 
         // if the choice model has at least one available alternative, make choice.
         int chosenAlt;
-        if ( etModel.getAvailabilityCount() > 0) {
+        if (etModel.getAvailabilityCount() > 0) {
             chosenAlt = etModel.getChoiceResult(randomNumber);
         }
         else {
-            String decisionMaker = String.format("HHID=%d",  hhObject.getHhId() );
-            String errorMessage = String.format("Exception caught for %s, no available explicit telecommute alternatives to choose from in choiceModelApplication.", decisionMaker );
+            String decisionMaker = String.format("HHID=%d, PERSID=%d",  hhObj.getHhId(), personObj.getPersonId() );
+            String errorMessage = String.format("Exception caught for %s, no available explicit telecommute options to choose from in choiceModelApplication.", decisionMaker );
             logger.error (errorMessage);
             
             etModel.logUECResults( logger, decisionMaker );            
@@ -110,17 +157,14 @@ public class ExplicitTelecommuteModel
         }
 
         // write choice model alternative info to log file
-        if ( hhObject.getDebugChoiceModels() ) {
-            String decisionMaker = String.format("HHID=%d",  hhObject.getHhId() );
-            etModel.logAlternativesInfo("Explicit Telecommute Choice", decisionMaker, logger);
-            logger.info( String.format("%s result chosen for %s is %d with rn %.8f",
-                    "Explicit Telecommute Choice", decisionMaker, chosenAlt, randomNumber));
+        if ( hhObj.getDebugChoiceModels() ) {
+            String decisionMaker = String.format("HHID=%d, PERSID=%d",  hhObj.getHhId(), personObj.getPersonId() );
+            etModel.logAlternativesInfo("Free parking Choice", decisionMaker, logger);
+            logger.info(String.format("%s result chosen for %s is %d with rn %.8f",
+                    "Free parking Choice", decisionMaker, chosenAlt, randomNumber));
             etModel.logUECResults( logger, decisionMaker );            
         }
-        
-        hhObject.setEtChoice( chosenAlt-1 );
 
-        hhObject.setTpRandomCount( hhObject.getHhRandomCount() );
+        return chosenAlt;
     }
-    
 }

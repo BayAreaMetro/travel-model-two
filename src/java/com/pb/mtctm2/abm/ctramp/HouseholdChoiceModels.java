@@ -87,6 +87,7 @@ public class HouseholdChoiceModels
     private long aoTime;
     private long fpTime;
     private long cdapTime;
+    private long etTime;
     private long imtfTime;
     private long imtodTime;
     private long imtmcTime;
@@ -200,7 +201,7 @@ public class HouseholdChoiceModels
             }
             
             if (runExplicitTelecommuteModel) {
-                etModel = new ExplicitTelecommuteModel(propertyMap, dmuFactory, accTable, pctHighIncome, pctMedHighPlusIncome, pctMultipleAutos, avgtts, transpDist, pctDetour);
+                etModel = new ExplicitTelecommuteModel(propertyMap, dmuFactory);
                 if ( measureObjectSizes ) logger.info ( "ET size:       " + ObjectUtil.sizeOf( etModel ) );
             }
 
@@ -506,9 +507,10 @@ public class HouseholdChoiceModels
         }
         
         if (runExplicitTelecommuteModel) {
-            //long hhSeed = globalSeed + hhObject.getHhId() + TP_SEED_OFFSET; 
-            //hhObject.getHhRandom().setSeed( hhSeed );
+
+        	long check = System.nanoTime();
             etModel.applyModel(hhObject);
+            etTime += (System.nanoTime() - check);
         }
         
         if ( runIndividualMandatoryTourFrequencyModel ) {
@@ -686,6 +688,7 @@ public class HouseholdChoiceModels
         aoTime = 0;
         fpTime = 0;
         cdapTime = 0;
+        etTime = 0;
         imtfTime = 0;
         imtodTime = 0;
         imtmcTime = 0;
@@ -719,25 +722,26 @@ public class HouseholdChoiceModels
         returnTimes[0] = aoTime;
         returnTimes[1] = fpTime;
         returnTimes[2] = cdapTime;
-        returnTimes[3] = imtfTime;
-        returnTimes[4] = imtodTime;
-        returnTimes[5] = imtmcTime;
-        returnTimes[6] = jtfTime;
-        returnTimes[7] = jtdcTime;
-        returnTimes[8] = jtodTime;
-        returnTimes[9] = jtmcTime;
-        returnTimes[10] = inmtfTime;
-        returnTimes[11] = inmtdcSoaTime;
-        returnTimes[12] = inmtdcTime;
-        returnTimes[13] = inmtodTime;
-        returnTimes[14] = inmtmcTime;
-        returnTimes[15] = awtfTime;
-        returnTimes[16] = awtdcSoaTime;
-        returnTimes[17] = awtdcTime;
-        returnTimes[18] = awtodTime;
-        returnTimes[19] = awtmcTime;
-        returnTimes[20] = stfTime;
-        returnTimes[21] = stdtmTime;
+        returnTimes[3] = etTime;
+        returnTimes[4] = imtfTime;
+        returnTimes[5] = imtodTime;
+        returnTimes[6] = imtmcTime;
+        returnTimes[7] = jtfTime;
+        returnTimes[8] = jtdcTime;
+        returnTimes[9] = jtodTime;
+        returnTimes[10] = jtmcTime;
+        returnTimes[11] = inmtfTime;
+        returnTimes[12] = inmtdcSoaTime;
+        returnTimes[13] = inmtdcTime;
+        returnTimes[14] = inmtodTime;
+        returnTimes[15] = inmtmcTime;
+        returnTimes[16] = awtfTime;
+        returnTimes[17] = awtdcSoaTime;
+        returnTimes[18] = awtdcTime;
+        returnTimes[19] = awtodTime;
+        returnTimes[20] = awtmcTime;
+        returnTimes[21] = stfTime;
+        returnTimes[22] = stdtmTime;
         return returnTimes;
     }
     
