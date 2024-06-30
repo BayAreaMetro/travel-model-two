@@ -55,16 +55,16 @@ public class ExplicitTelecommuteModel
     public ExplicitTelecommuteModel( HashMap<String, String> propertyMap, CtrampDmuFactoryIf dmuFactory )
     {        
         mgraManager = MgraDataManager.getInstance(propertyMap);        
-        setupFreeParkingChoiceModelApplication(propertyMap, dmuFactory);
+        setupExplicitTelecommuteChoiceModel(propertyMap, dmuFactory);
     }
 
-    private void setupFreeParkingChoiceModelApplication(HashMap<String, String> propertyMap, CtrampDmuFactoryIf dmuFactory)
+    private void setupExplicitTelecommuteChoiceModel(HashMap<String, String> propertyMap, CtrampDmuFactoryIf dmuFactory)
     {
         logger.info("setting up explicit telecommute model.");
 
         // locate the explicit telecommute  UEC
         String uecFileDirectory = propertyMap.get( CtrampApplication.PROPERTIES_UEC_PATH );
-        String fpUecFile = uecFileDirectory + propertyMap.get(ET_CONTROL_FILE_TARGET);
+        String etUecFile = uecFileDirectory + propertyMap.get(ET_CONTROL_FILE_TARGET);
 
         int dataSheet = Util.getIntegerValueFromPropertyMap( propertyMap, ET_DATA_SHEET_TARGET );
         int modelSheet = Util.getIntegerValueFromPropertyMap( propertyMap, ET_MODEL_SHEET_TARGET );
@@ -73,7 +73,7 @@ public class ExplicitTelecommuteModel
         etDmuObject = dmuFactory.getExplicitTelecoummteDMU();
 
         // create the explicit telecommute choice model object
-        etModel = new ChoiceModelApplication(fpUecFile, modelSheet, dataSheet, propertyMap, (VariableTable) etDmuObject);
+        etModel = new ChoiceModelApplication(etUecFile, modelSheet, dataSheet, propertyMap, (VariableTable) etDmuObject);
 
         //meanReimb = Float.parseFloat( propertyMap.get(REIMBURSEMENT_MEAN) );
         //stdDevReimb = Float.parseFloat( propertyMap.get(REIMBURSEMENT_STD_DEV) );
@@ -102,15 +102,21 @@ public class ExplicitTelecommuteModel
 
         // person array is 1-based
         Person[] person = hhObject.getPersons();         
-        for (int i=1; i<person.length; i++) {
-          
+        for (int i=1; i<person.length; i++) 
+        {
+            int workLoc = person[i].getUsualWorkLocation();
+            if ( workLoc != ModelStructure.WORKS_AT_HOME_LOCATION_INDICATOR ) {
                 double randomNumber = hhRandom.nextDouble();
                 int chosen = getEtChoice(person[i], randomNumber);
                 person[i].setEtChoice(chosen);
 
         }
+            else {
+            	person[i].setEtChoice(1);
+            }
+        }
 
-        hhObject.setFpRandomCount( hhObject.getHhRandomCount() );
+        hhObject.setEtRandomCount( hhObject.getHhRandomCount() );
     }
 
     

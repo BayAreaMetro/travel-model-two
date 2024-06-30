@@ -1106,7 +1106,7 @@ public class CtrampApplication implements Serializable
         logger.info("");
         logger.info("");
         logger.info("Explicit Telecommute Model Results");
-        logger.info( String.format( "%-16s  %20s", "Category", "Num Households" ) );
+        logger.info( String.format( "%-16s  %20s", "Category", "Num Persons" ) );
         logger.info( String.format( "%-16s  %20s", "----------", "------------------" ) );
 
         ArrayList<int[]> startEndTaskIndicesList = getWriteHouseholdRanges(householdDataManager.getNumHouseholds());
@@ -1130,9 +1130,9 @@ public class CtrampApplication implements Serializable
                 Person[] persons = household.getPersons();
                 for ( int p=1; p < persons.length; p++ ) 
                 {
-                	if ( persons[p].getEtChoice()+1 == ExplicitTelecommuteModel.ET_MODEL_NO_ALT )
+                	if ( persons[p].getEtChoice() == ExplicitTelecommuteModel.ET_MODEL_NO_ALT )
                 		numNo++;
-                	else if ( persons[p].getEtChoice()+1 == ExplicitTelecommuteModel.ET_MODEL_YES_ALT )
+                	else if ( persons[p].getEtChoice() == ExplicitTelecommuteModel.ET_MODEL_YES_ALT )
                 		numYes++;
                 	else numOther++;
                 

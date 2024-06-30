@@ -718,7 +718,7 @@ public class HouseholdChoiceModels
     }
     
     public long[] getTimes() {
-        long[] returnTimes = new long[22];
+        long[] returnTimes = new long[23];
         returnTimes[0] = aoTime;
         returnTimes[1] = fpTime;
         returnTimes[2] = cdapTime;
