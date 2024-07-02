@@ -105,7 +105,7 @@ public class ExplicitTelecommuteModel
         for (int i=1; i<person.length; i++) 
         {
             int workLoc = person[i].getUsualWorkLocation();
-            if ( workLoc != ModelStructure.WORKS_AT_HOME_LOCATION_INDICATOR ) {
+            if ( workLoc != ModelStructure.WORKS_AT_HOME_LOCATION_INDICATOR && workLoc >0 ) {
                 double randomNumber = hhRandom.nextDouble();
                 int chosen = getEtChoice(person[i], randomNumber);
                 person[i].setEtChoice(chosen);
