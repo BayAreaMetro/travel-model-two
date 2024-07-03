@@ -137,7 +137,18 @@ public class ExplicitTelecommuteDMU
     {
         return hh.getIncomeInDollars();
     }
-
+    
+    public double getLnhhinc()
+    {
+    	if (hh.getIncomeInDollars()>0)
+    	{
+    		return Math.log(hh.getIncomeInDollars());
+    	}
+    	else 
+    	{
+    		return 0.0;
+    	}
+    }
     public double getLsWgtAvgCostM() {
         return lsWgtAvgCostM;
     }

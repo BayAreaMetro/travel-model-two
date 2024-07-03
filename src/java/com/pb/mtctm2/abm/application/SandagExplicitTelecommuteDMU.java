@@ -18,7 +18,7 @@ public class SandagExplicitTelecommuteDMU
     {
         methodIndexMap = new HashMap<String, Integer>();
 
-        methodIndexMap.put("getHhIncomeInDollars", 0);
+        methodIndexMap.put("getLnhhinc",0);//;getHhIncomeInDollars", 0);
         methodIndexMap.put("getWorkLocMgra", 1);
         methodIndexMap.put("getLsWgtAvgCostM", 2);
         methodIndexMap.put("getLsWgtAvgCostD", 3);
@@ -42,7 +42,7 @@ public class SandagExplicitTelecommuteDMU
         switch (variableIndex)
         {
             case 0:
-                return getIncomeInDollars();
+                return getLnhhinc(); //getIncomeInDollars();
             case 1:
                 return getWorkLocMgra();
             case 2:

@@ -112,7 +112,7 @@ public class ExplicitTelecommuteModel
 
         }
             else {
-            	person[i].setEtChoice(1);
+            	person[i].setEtChoice(-1); //Not applicable to workers who don't have a work location.
             }
         }
 
@@ -165,9 +165,9 @@ public class ExplicitTelecommuteModel
         // write choice model alternative info to log file
         if ( hhObj.getDebugChoiceModels() ) {
             String decisionMaker = String.format("HHID=%d, PERSID=%d",  hhObj.getHhId(), personObj.getPersonId() );
-            etModel.logAlternativesInfo("Free parking Choice", decisionMaker, logger);
+            etModel.logAlternativesInfo("Explicit Telecommute Choice", decisionMaker, logger);
             logger.info(String.format("%s result chosen for %s is %d with rn %.8f",
-                    "Free parking Choice", decisionMaker, chosenAlt, randomNumber));
+                    "Explicit Telecommute Choice", decisionMaker, chosenAlt, randomNumber));
             etModel.logUECResults( logger, decisionMaker );            
         }
 
