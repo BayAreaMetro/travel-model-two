@@ -14,12 +14,13 @@ public class ExplicitTelecommuteModel
         implements Serializable
 {
 
-    private transient Logger                   logger                 = Logger.getLogger(ExplicitTelecommuteModel.class);
-    private transient Logger                   etLogger               = Logger.getLogger("et");
+    private transient Logger                   logger   = Logger.getLogger(ExplicitTelecommuteModel.class);
+    private transient Logger                   etLogger = Logger.getLogger("et");
 
     private static final String                ET_CONTROL_FILE_TARGET = "et.uec.file";
     private static final String                ET_MODEL_SHEET_TARGET  = "et.model.page";
     private static final String                ET_DATA_SHEET_TARGET   = "et.data.page";
+    private static final String 			   ET_UPDATE_CDAP_MODEL_SHEET_TARGET = "et.updatecdap.model.page";
     public static final int        			   ET_MODEL_NO_ALT = 1;
     public static final int        			   ET_MODEL_YES_ALT = 2;
 
@@ -48,6 +49,7 @@ public class ExplicitTelecommuteModel
     private double[]                            lsWgtAvgCostH;
     
     private ChoiceModelApplication etModel;
+    private ChoiceModelApplication updateCdapModel;
     private ExplicitTelecommuteDMU etDmuObject;
     
 
@@ -68,13 +70,14 @@ public class ExplicitTelecommuteModel
 
         int dataSheet = Util.getIntegerValueFromPropertyMap( propertyMap, ET_DATA_SHEET_TARGET );
         int modelSheet = Util.getIntegerValueFromPropertyMap( propertyMap, ET_MODEL_SHEET_TARGET );
-        
+        int updateCdapModelSheet = Util.getIntegerValueFromPropertyMap(propertyMap, ET_UPDATE_CDAP_MODEL_SHEET_TARGET);
         // create the explicit telecommute choice model DMU object.
         etDmuObject = dmuFactory.getExplicitTelecoummteDMU();
 
         // create the explicit telecommute choice model object
         etModel = new ChoiceModelApplication(etUecFile, modelSheet, dataSheet, propertyMap, (VariableTable) etDmuObject);
-
+        updateCdapModel = new ChoiceModelApplication(etUecFile, updateCdapModelSheet, dataSheet, propertyMap, (VariableTable) etDmuObject);
+        
         //meanReimb = Float.parseFloat( propertyMap.get(REIMBURSEMENT_MEAN) );
         //stdDevReimb = Float.parseFloat( propertyMap.get(REIMBURSEMENT_STD_DEV) );
 
@@ -105,11 +108,22 @@ public class ExplicitTelecommuteModel
         for (int i=1; i<person.length; i++) 
         {
             int workLoc = person[i].getUsualWorkLocation();
-            if ( workLoc != ModelStructure.WORKS_AT_HOME_LOCATION_INDICATOR && workLoc >0 ) {
+            String cdap = person[i].getCdapActivity();
+            person[i].setPreExplicitTelecommuteCdap(cdap);
+            int cdapIndex = person[i].getCdapIndex();
+            if ( workLoc != ModelStructure.WORKS_AT_HOME_LOCATION_INDICATOR && workLoc >0 && cdapIndex == 1 ) {
                 double randomNumber = hhRandom.nextDouble();
                 int chosen = getEtChoice(person[i], randomNumber);
                 person[i].setEtChoice(chosen);
-
+                if (chosen == 2) {
+                	//Add function to update cdap to Non-Mandatory or Home according to a fixed probability dist
+                	updateCdapModel.computeUtilities(etDmuObject,etDmuObject.getDmuIndexValues());
+                	int chosenCdap = updateCdapModel.getChoiceResult(randomNumber);
+                	String newChosenCdapActivity = (chosenCdap==1)?"N":"H";
+                	person[i].setDailyActivityResult(newChosenCdapActivity);
+                	//logger.info(String.format("Update Cdap result chosen for is %d", chosenCdap));
+                }
+                
         }
             else {
             	person[i].setEtChoice(-1); //Not applicable to workers who don't have a work location.

@@ -149,6 +149,18 @@ public class ExplicitTelecommuteDMU
     		return 0.0;
     	}
     }
+    
+    public double getPersonIsFullTimeWorker()
+    {
+    	return person.getPersonIsFullTimeWorker();
+    }
+    
+    public double getPersonIsPartTimeWorker()
+    {
+    	return person.getPersonIsPartTimeWorker();
+    }
+    
+    
     public double getLsWgtAvgCostM() {
         return lsWgtAvgCostM;
     }

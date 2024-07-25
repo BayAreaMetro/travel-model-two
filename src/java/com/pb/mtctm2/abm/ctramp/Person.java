@@ -95,6 +95,7 @@ public class Person
     private float                reimbursePercent;
     
     private int 				 etChoice;
+    private String				 preEtCdap;
     
     private String               cdapActivity;
     private int                  imtfChoice;
@@ -1959,5 +1960,15 @@ public class Person
     {
         nul, FT_worker_age_16plus, PT_worker_nonstudent_age_16plus, University_student, Nonworker_nonstudent_age_16_64, Nonworker_nonstudent_age_65plus, Student_age_16_19_not_FT_wrkr_or_univ_stud, Student_age_6_15_schpred, Preschool_under_age_6
     }
+
+	public void setPreExplicitTelecommuteCdap(String cdap) {
+		
+		this.preEtCdap = cdap;
+		
+	}
+	public String getPreExplicitTelecommuteCdap()
+	{
+		return preEtCdap;
+	}
 
 }

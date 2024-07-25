@@ -325,8 +325,9 @@ public class HouseholdDataWriter
         data.add("transitSubsidy_percent");
         data.add("transitPass_choice");
         data.add("naicsCode");
-        data.add("activity_pattern");
+        data.add("preTelecommuteCdap");
         data.add("telecommute");
+        data.add("postTelecommuteCdap");
         data.add("imf_choice");
         data.add("inmf_choice");
         data.add("fp_choice");
@@ -353,6 +354,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.INTEGER);
+        data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
@@ -377,8 +379,9 @@ public class HouseholdDataWriter
         data.add(string(p.getTransitSubsidyPercent()));
         data.add(string(p.getTransitPassChoice()));
         data.add(string(p.getNaicsCode()));
-        data.add(string(p.getCdapActivity()));
+        data.add(string(p.getPreExplicitTelecommuteCdap()));
         data.add(string(p.getEtChoice()));
+        data.add(string(p.getCdapActivity()));
         data.add(string(p.getImtfChoice()));
         data.add(string(p.getInmtfChoice()));
         data.add(string(p.getFreeParkingAvailableResult()));
