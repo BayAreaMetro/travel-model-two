@@ -24,29 +24,6 @@ public class ExplicitTelecommuteModel
     public static final int        			   ET_MODEL_NO_ALT = 1;
     public static final int        			   ET_MODEL_YES_ALT = 2;
 
-
-
-    private AccessibilitiesTable accTable;
-    private MgraDataManager mgraManager;
-    
-    private double meanReimb;
-    private double stdDevReimb;
-    
-    private int[]                               mgraParkArea;
-    private int[]                               numfreehrs;
-    private int[]                               hstallsoth;
-    private int[]                               hstallssam;
-    private float[]                             hparkcost;
-    private int[]                               dstallsoth;
-    private int[]                               dstallssam;
-    private float[]                             dparkcost;
-    private int[]                               mstallsoth;
-    private int[]                               mstallssam;
-    private float[]                             mparkcost;
-    
-    private double[]                            lsWgtAvgCostM;
-    private double[]                            lsWgtAvgCostD;
-    private double[]                            lsWgtAvgCostH;
     
     private ChoiceModelApplication etModel;
     private ChoiceModelApplication updateCdapModel;
@@ -55,8 +32,7 @@ public class ExplicitTelecommuteModel
 
     
     public ExplicitTelecommuteModel( HashMap<String, String> propertyMap, CtrampDmuFactoryIf dmuFactory )
-    {        
-        mgraManager = MgraDataManager.getInstance(propertyMap);        
+    {               
         setupExplicitTelecommuteChoiceModel(propertyMap, dmuFactory);
     }
 
@@ -78,23 +54,6 @@ public class ExplicitTelecommuteModel
         etModel = new ChoiceModelApplication(etUecFile, modelSheet, dataSheet, propertyMap, (VariableTable) etDmuObject);
         updateCdapModel = new ChoiceModelApplication(etUecFile, updateCdapModelSheet, dataSheet, propertyMap, (VariableTable) etDmuObject);
         
-        //meanReimb = Float.parseFloat( propertyMap.get(REIMBURSEMENT_MEAN) );
-        //stdDevReimb = Float.parseFloat( propertyMap.get(REIMBURSEMENT_STD_DEV) );
-
-        mgraParkArea = mgraManager.getMgraParkAreas();
-        numfreehrs = mgraManager.getNumFreeHours();
-        lsWgtAvgCostM = mgraManager.getLsWgtAvgCostM();
-        lsWgtAvgCostD = mgraManager.getLsWgtAvgCostD();
-        lsWgtAvgCostH = mgraManager.getLsWgtAvgCostH();
-        mstallsoth = mgraManager.getMStallsOth();
-        mstallssam = mgraManager.getMStallsSam();
-        mparkcost = mgraManager.getMParkCost();
-        dstallsoth = mgraManager.getDStallsOth();
-        dstallssam = mgraManager.getDStallsSam();
-        dparkcost = mgraManager.getDParkCost();
-        hstallsoth = mgraManager.getHStallsOth();
-        hstallssam = mgraManager.getHStallsSam();
-        hparkcost = mgraManager.getHParkCost();
         
     }
 
@@ -102,7 +61,7 @@ public class ExplicitTelecommuteModel
     public void applyModel(Household hhObject){
 
         Random hhRandom = hhObject.getHhRandom();
-        //Get pre-telecommute hh cdap
+        //Get pre-telecommute hh cdap and store it in a different object
         hhObject.setPreEtCdapPattern(hhObject.getCoordinatedDailyActivityPattern());
         // person array is 1-based
         Person[] person = hhObject.getPersons();         
@@ -110,7 +69,7 @@ public class ExplicitTelecommuteModel
         {
             int workLoc = person[i].getUsualWorkLocation();
             String cdap = person[i].getCdapActivity();
-            person[i].setPreExplicitTelecommuteCdap(cdap);
+            person[i].setPreExplicitTelecommuteCdap(cdap); //Storing the person pre-et cdap here 
             int cdapIndex = person[i].getCdapIndex();
             if ( workLoc != ModelStructure.WORKS_AT_HOME_LOCATION_INDICATOR && workLoc >0 && cdapIndex == 1 ) 
             {
@@ -152,27 +111,11 @@ public class ExplicitTelecommuteModel
         // get the corresponding household object
         Household hhObj = personObj.getHouseholdObject();
         etDmuObject.setPersonObject( personObj );
-        
-        etDmuObject.setMgraParkArea( mgraParkArea[personObj.getUsualWorkLocation()] );
-        etDmuObject.setNumFreeHours( numfreehrs[personObj.getUsualWorkLocation()] );
-        etDmuObject.setLsWgtAvgCostM( lsWgtAvgCostM[personObj.getUsualWorkLocation()] );
-        etDmuObject.setLsWgtAvgCostD( lsWgtAvgCostD[personObj.getUsualWorkLocation()] );
-        etDmuObject.setLsWgtAvgCostH( lsWgtAvgCostH[personObj.getUsualWorkLocation()] );
-        etDmuObject.setMStallsOth( mstallsoth[personObj.getUsualWorkLocation()] );
-        etDmuObject.setMStallsSam( mstallssam[personObj.getUsualWorkLocation()] );
-        etDmuObject.setMParkCost( mparkcost[personObj.getUsualWorkLocation()] );
-        etDmuObject.setDStallsSam( dstallssam[personObj.getUsualWorkLocation()] );
-        etDmuObject.setDStallsOth( dstallsoth[personObj.getUsualWorkLocation()] );
-        etDmuObject.setDParkCost( dparkcost[personObj.getUsualWorkLocation()] );
-        etDmuObject.setHStallsOth( hstallsoth[personObj.getUsualWorkLocation()] );
-        etDmuObject.setHStallsSam( hstallssam[personObj.getUsualWorkLocation()] );
-        etDmuObject.setHParkCost( hparkcost[personObj.getUsualWorkLocation()] );
-        
-        
+                 
         // set the zone and dest attributes to the person's work location
         etDmuObject.setDmuIndexValues(hhObj.getHhId(),personObj.getUsualWorkLocation(),hhObj.getHhTaz(),personObj.getUsualWorkLocation());
 
-        // compute utilities and choose auto ownership alternative.
+        // compute utilities and choose explicit telecommute option: 1 = Does not telecommute, 2 =  Telecommutes.
         etModel.computeUtilities (etDmuObject,etDmuObject.getDmuIndexValues() );
 
         // if the choice model has at least one available alternative, make choice.
