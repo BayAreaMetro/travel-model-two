@@ -102,7 +102,8 @@ public class ExplicitTelecommuteModel
     public void applyModel(Household hhObject){
 
         Random hhRandom = hhObject.getHhRandom();
-
+        //Get pre-telecommute hh cdap
+        hhObject.setPreEtCdapPattern(hhObject.getCoordinatedDailyActivityPattern());
         // person array is 1-based
         Person[] person = hhObject.getPersons();         
         for (int i=1; i<person.length; i++) 
@@ -111,17 +112,29 @@ public class ExplicitTelecommuteModel
             String cdap = person[i].getCdapActivity();
             person[i].setPreExplicitTelecommuteCdap(cdap);
             int cdapIndex = person[i].getCdapIndex();
-            if ( workLoc != ModelStructure.WORKS_AT_HOME_LOCATION_INDICATOR && workLoc >0 && cdapIndex == 1 ) {
+            if ( workLoc != ModelStructure.WORKS_AT_HOME_LOCATION_INDICATOR && workLoc >0 && cdapIndex == 1 ) 
+            {
                 double randomNumber = hhRandom.nextDouble();
                 int chosen = getEtChoice(person[i], randomNumber);
                 person[i].setEtChoice(chosen);
-                if (chosen == 2) {
-                	//Add function to update cdap to Non-Mandatory or Home according to a fixed probability dist
-                	updateCdapModel.computeUtilities(etDmuObject,etDmuObject.getDmuIndexValues());
-                	int chosenCdap = updateCdapModel.getChoiceResult(randomNumber);
-                	String newChosenCdapActivity = (chosenCdap==1)?"N":"H";
+                if (chosen == 2) 
+                {
+                	String hhCdap = hhObject.getCoordinatedDailyActivityPattern();
+                	int person_index = person[i].getPersonNum();
+                	String newChosenCdapActivity = "N"; //if the HH pattern is joint, update cdap to N
+                	if (hhCdap.charAt(hhCdap.length()-1)=='0')
+                	{
+                		//Update cdap to Non-Mandatory or Home according to a fixed probability distribution if pattern is not j
+                    	updateCdapModel.computeUtilities(etDmuObject,etDmuObject.getDmuIndexValues());
+                    	int chosenCdap = updateCdapModel.getChoiceResult(randomNumber);
+                    	newChosenCdapActivity = (chosenCdap==1)?"N":"H";
+                    }
+                	
                 	person[i].setDailyActivityResult(newChosenCdapActivity);
-                	//logger.info(String.format("Update Cdap result chosen for is %d", chosenCdap));
+                	String newHhCdap = hhCdap.substring(0,person_index-1)+ newChosenCdapActivity + hhCdap.substring(person_index);
+                	hhObject.setCoordinatedDailyActivityPatternResult(newHhCdap);
+                	
+
                 }
                 
         }

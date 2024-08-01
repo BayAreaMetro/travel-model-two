@@ -32,6 +32,7 @@ public class Household
     private int                       aoModelAutos;
     private int                       automatedVehicles;
     private int                       conventionalVehicles;
+    private String 					  preEtCdapPattern;
     private String                    cdapModelPattern;
     private int                       imtfModelPattern;
     private String                    jtfModelPattern;
@@ -1674,4 +1675,14 @@ public class Household
 		this.sampleRate = sampleRate;
 	}
 
+	public void setPreEtCdapPattern(String coordinatedDailyActivityPattern) {
+		this.preEtCdapPattern = coordinatedDailyActivityPattern ;
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public String getPreEtCdapPattern()
+	{
+		return preEtCdapPattern;
+	}
 }

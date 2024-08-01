@@ -268,6 +268,7 @@ public class HouseholdDataWriter
         data.add("autos");
         data.add("automated_vehicles");
         data.add("transponder");
+        data.add("pre_et_cdap_pattern");
         data.add("cdap_pattern");
         data.add("jtf_choice");
         data.add("sampleRate");
@@ -286,6 +287,7 @@ public class HouseholdDataWriter
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.TEXT);
+        data.add(SqliteDataTypes.TEXT);
         data.add(SqliteDataTypes.INTEGER);
         data.add(SqliteDataTypes.REAL);
         data.add(SqliteDataTypes.INTEGER);
@@ -302,6 +304,7 @@ public class HouseholdDataWriter
         data.add(string(hh.getAutosOwned()));
         data.add(string(hh.getAutomatedVehicles()));
         data.add(string(hh.getTpChoice()));
+        data.add(string(hh.getPreEtCdapPattern()));
         data.add(string(hh.getCoordinatedDailyActivityPattern()));
         data.add(string(hh.getJointTourFreqChosenAlt()));
         data.add(string(hh.getSampleRate()));
@@ -327,7 +330,7 @@ public class HouseholdDataWriter
         data.add("naicsCode");
         data.add("preTelecommuteCdap");
         data.add("telecommute");
-        data.add("postTelecommuteCdap");
+        data.add("cdap");
         data.add("imf_choice");
         data.add("inmf_choice");
         data.add("fp_choice");
