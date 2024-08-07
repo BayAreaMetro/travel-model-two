@@ -444,7 +444,7 @@ public class CtrampApplication implements Serializable
         logger.info("flag to run UWSL was set to: " + runUsualWorkSchoolChoiceModel);
 
         boolean runAutoOwnershipChoiceModel = ResourceUtil.getBooleanProperty(resourceBundle, PROPERTIES_RUN_AUTO_OWNERSHIP);
-        boolean runExplicitTelecommute = ResourceUtil.getBooleanProperty( resourceBundle, PROPERTIES_RUN_TRANSPONDER_CHOICE);
+        boolean runTransponderChoiceModel = ResourceUtil.getBooleanProperty( resourceBundle, PROPERTIES_RUN_TRANSPONDER_CHOICE);
         boolean runExplicitTelecommuteModel = ResourceUtil.getBooleanProperty( resourceBundle, PROPERTIES_RUN_EXPLICIT_TELECOMMUTE);
         boolean runFreeParkingChoiceModel = ResourceUtil.getBooleanProperty( resourceBundle, PROPERTIES_RUN_FREE_PARKING_AVAILABLE);
         boolean runCoordinatedDailyActivityPatternChoiceModel = ResourceUtil.getBooleanProperty( resourceBundle, PROPERTIES_RUN_DAILY_ACTIVITY_PATTERN);
@@ -454,7 +454,7 @@ public class CtrampApplication implements Serializable
         boolean runAtWorkSubTourFrequencyModel = ResourceUtil.getBooleanProperty(resourceBundle, PROPERTIES_RUN_AT_WORK_SUBTOUR_FREQ);
         boolean runStopFrequencyModel = ResourceUtil.getBooleanProperty(resourceBundle, PROPERTIES_RUN_STOP_FREQUENCY);
         
-        if (runAutoOwnershipChoiceModel || runExplicitTelecommute || runExplicitTelecommuteModel || runFreeParkingChoiceModel
+        if (runAutoOwnershipChoiceModel || runTransponderChoiceModel || runExplicitTelecommuteModel || runFreeParkingChoiceModel
                 || runCoordinatedDailyActivityPatternChoiceModel
                 || runMandatoryTourFreqChoiceModel || runIndivNonManTourFrequencyModel
                 || runAtWorkSubTourFrequencyModel || runStopFrequencyModel)
@@ -465,7 +465,7 @@ public class CtrampApplication implements Serializable
             if (runAutoOwnershipChoiceModel)
                 householdDataManager.resetPreAoRandom();
 
-            if (runExplicitTelecommute)
+            if (runTransponderChoiceModel)
                 householdDataManager.computeTransponderChoiceTazPercentArrays();
 
             logger.info("starting HouseholdChoiceModelRunner.");
@@ -480,9 +480,9 @@ public class CtrampApplication implements Serializable
                 logAoResults(householdDataManager, false);
             }
 
-            if (runExplicitTelecommute)
+            if (runTransponderChoiceModel)
             {
-                logEtResults(householdDataManager);
+                logTpResults(householdDataManager);
             }
 
             if (runFreeParkingChoiceModel)
@@ -495,7 +495,10 @@ public class CtrampApplication implements Serializable
                 saveCdapResults(householdDataManager, projectDirectory);
                 logCdapResults(householdDataManager);
             }
-            
+            if (runExplicitTelecommuteModel)
+            {
+            	logEtResults(householdDataManager);
+            }
 
             if (runMandatoryTourFreqChoiceModel)
             {

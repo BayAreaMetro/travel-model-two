@@ -76,7 +76,7 @@ public class ExplicitTelecommuteModel
                 double randomNumber = hhRandom.nextDouble();
                 int chosen = getEtChoice(person[i], randomNumber);
                 person[i].setEtChoice(chosen);
-                if (chosen == 2) 
+                if (chosen == ET_MODEL_YES_ALT) 
                 {
                 	String hhCdap = hhObject.getCoordinatedDailyActivityPattern();
                 	int person_index = person[i].getPersonNum();
@@ -86,7 +86,7 @@ public class ExplicitTelecommuteModel
                 		//Update cdap to Non-Mandatory or Home according to a fixed probability distribution if pattern is not j
                     	updateCdapModel.computeUtilities(etDmuObject,etDmuObject.getDmuIndexValues());
                     	int chosenCdap = updateCdapModel.getChoiceResult(randomNumber);
-                    	newChosenCdapActivity = (chosenCdap==1)?"N":"H";
+                    	newChosenCdapActivity = (chosenCdap == 1)?"N":"H";
                     }
                 	
                 	person[i].setDailyActivityResult(newChosenCdapActivity);

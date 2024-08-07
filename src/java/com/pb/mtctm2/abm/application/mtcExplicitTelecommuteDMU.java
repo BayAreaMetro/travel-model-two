@@ -4,11 +4,11 @@ import java.util.HashMap;
 
 import com.pb.mtctm2.abm.ctramp.ExplicitTelecommuteDMU;
 
-public class SandagExplicitTelecommuteDMU
+public class mtcExplicitTelecommuteDMU
         extends ExplicitTelecommuteDMU
 {
 
-    public SandagExplicitTelecommuteDMU()
+    public mtcExplicitTelecommuteDMU()
     {
         super();
         setupMethodIndexMap();
