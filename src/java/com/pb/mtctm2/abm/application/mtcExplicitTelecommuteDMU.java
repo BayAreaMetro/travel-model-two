@@ -18,7 +18,7 @@ public class mtcExplicitTelecommuteDMU
     {
         methodIndexMap = new HashMap<String, Integer>();
 
-        methodIndexMap.put("getLnhhinc",0);//;getHhIncomeInDollars", 0);
+        methodIndexMap.put("getLnhhinc",0);
         methodIndexMap.put("getPersonIsFullTimeWorker", 1);
         methodIndexMap.put("getPersonIsPartTimeWorker", 2);
 
@@ -30,7 +30,7 @@ public class mtcExplicitTelecommuteDMU
         switch (variableIndex)
         {
             case 0:
-                return getLnhhinc(); //getIncomeInDollars();
+                return getLnhhinc();
             case 1:
                 return getPersonIsFullTimeWorker();
             case 2:

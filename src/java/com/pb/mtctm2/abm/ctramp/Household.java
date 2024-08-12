@@ -1677,7 +1677,6 @@ public class Household
 
 	public void setPreEtCdapPattern(String coordinatedDailyActivityPattern) {
 		this.preEtCdapPattern = coordinatedDailyActivityPattern ;
-		// TODO Auto-generated method stub
 		
 	}
 	
