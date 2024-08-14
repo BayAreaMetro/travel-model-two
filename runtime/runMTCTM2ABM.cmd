@@ -34,30 +34,30 @@ set PATH=%JAVA_PATH%\bin;%OLDPATH%
 
 rem ### Run ABM LOCAL
 java -server -Xmx120g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration %iteration% -sampleRate %sampleRate% -sampleSeed 0
-rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
+::java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration %iteration% -sampleRate %sampleRate% -sampleSeed 0
 rem java -agentlib:jdwp=transport=dt_socket,address=1045,server=y,suspend=y -server Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
 
 rem ## backup CT-RAMP outputs since they will be over-written by PNR model
-rem mkdir ctramp_output\unconstrained
-rem copy ctramp_output\indivTourData_%iteration%.csv ctramp_output\unconstrained /Y
-rem copy ctramp_output\jointTourData_%iteration%.csv ctramp_output\unconstrained /Y
-rem copy ctramp_output\indivTripData_%iteration%.csv ctramp_output\unconstrained /Y
-rem copy ctramp_output\jointTripData_%iteration%.csv ctramp_output\unconstrained /Y
+mkdir ctramp_output\unconstrained
+copy ctramp_output\indivTourData_%iteration%.csv ctramp_output\unconstrained /Y
+copy ctramp_output\jointTourData_%iteration%.csv ctramp_output\unconstrained /Y
+copy ctramp_output\indivTripData_%iteration%.csv ctramp_output\unconstrained /Y
+copy ctramp_output\jointTripData_%iteration%.csv ctramp_output\unconstrained /Y
 
 rem ### Run PNR model
-rem java -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.transitcapacityrestraint.ParkingCapacityRestraintModel mtcpcrm -iteration %iteration% -sampleRate %sampleRate% -sampleSeed 0
+::java -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientLocal.properties com.pb.mtctm2.abm.transitcapacityrestraint.ParkingCapacityRestraintModel mtcpcrm -iteration %iteration% -sampleRate %sampleRate% -sampleSeed 0
 
 rem ### Run ABM DISTRIBUTED
 rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientDistributed.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
 rem java -server -Xmx130g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j.xml -Dproject.folder=%PROJECT_DIRECTORY% -Djppf.config=jppf-clientDistributed.properties com.pb.mtctm2.abm.application.MTCTM2TourBasedModel mtctm2 -iteration 1 -sampleRate %sampleRate% -sampleSeed 0
 
 rem ### create demand matrices in OMX matrix format - must restart mtx manager before running? - yes
-rem del /f %PROJECT_DIRECTORY%\ctramp_output\*.omx
-rem del /f %PROJECT_DIRECTORY%\ctramp_output\*.mat
+::del /f %PROJECT_DIRECTORY%\ctramp_output\*.omx
+::del /f %PROJECT_DIRECTORY%\ctramp_output\*.mat
 del /f ctramp_output\*.omx
 del /f ctramp_output\*.mat
-java -Xmx130g -cp "%CLASSPATH%" -Dproject.folder=%PROJECT_DIRECTORY% com.pb.mtctm2.abm.application.MTCTM2TripTables mtctm2 -iteration %iteration% -sampleRate %sampleRate%
-rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server -Xmx80g -cp "%CLASSPATH%" -Dproject.folder=%PROJECT_DIRECTORY% com.pb.mtctm2.abm.application.MTCTM2TripTables mtctm2 -iteration %iteration% -sampleRate %sampleRate%
+java -Xmx250g -cp "%CLASSPATH%" -Dproject.folder=%PROJECT_DIRECTORY% com.pb.mtctm2.abm.application.MTCTM2TripTables mtctm2 -iteration %iteration% -sampleRate %sampleRate% -appendSkims FALSE
+::rem java -Xdebug -Xrunjdwp:transport=dt_socket,address=1045,server=y,suspend=y -server -Xmx80g -cp "%CLASSPATH%" -Dproject.folder=%PROJECT_DIRECTORY% com.pb.mtctm2.abm.application.MTCTM2TripTables mtctm2 -iteration %iteration% -sampleRate %sampleRate%
 
 rem ### restore saved environment variable values, and change back to original current directory
 set JAVA_PATH=%OLDJAVAPATH%
