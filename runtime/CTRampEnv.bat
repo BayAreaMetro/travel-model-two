@@ -1,20 +1,20 @@
 rem this file has environment variables for CT-RAMP batch files
-
+set ENVTYPE=WSP
 :: The location of the 64-bit java development kit or runtime environment
 IF ENVTYPE==RSG (
-  set JAVA_PATH="C:\Program Files\Java\jre1.8.0_261"
+  set JAVA_PATH="C:\Program Files\Java\jre1.8.0_361"
 ) ELSE (
-  set JAVA_PATH=C:\Program Files\Java\jre1.8.0_301
+  set JAVA_PATH="C:\Program Files\Java\jdk1.8.0_162"
 )
 
 :: The location of the RUNTPP, CLUSTER, VOYAGER executables from Citilabs
-set TPP_PATH=C:\Program Files\Citilabs\CubeVoyager
+set TPP_PATH="C:\Program Files\Citilabs\CubeVoyager"
 
 :: The location of the Cube executable from Citilabs (what is this used for?)
 IF ENVTYPE==RSG (
-  set CUBE_PATH=C:\Program Files (x86)\Citilabs\Cube
+  set CUBE_PATH="C:\Program Files (x86)\Citilabs\Cube"
 ) ELSE (
-  set CUBE_PATH=C:\Program Files\Citilabs\Cube
+  set CUBE_PATH="C:\Program Files (x86)\Citilabs\Cube"
 )
 
 :: The name of the conda python environment to use
@@ -22,20 +22,22 @@ IF ENVTYPE==RSG (
 set TM2_PYTHON_CONDA_ENV=tm2_transit_ccr
 
 :: Location of Emme installation
-IF ENVTYPE==RSG (
-  SET EMME_PATH=C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.5.1
-  SET EMMEPATH=C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.5.1
-  SET EMME_PYTHON_PATH="C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.5.1\Python27"
-  :: BEWARE path issues with other python installs
-  path=%EMMEPATH%\programs;%EMMEPATH%\Python27;%EMMEPATH%\Python27\Scripts\;%PATH%
-) ELSE (
-  SET EMME_PATH=C:\Program Files\INRO\Emme\Emme 4\Emme-4.6.0
-)
+:: IF ENVTYPE==RSG (
+::   SET EMME_PATH=C:\"Program Files"\INRO\Emme\Emme 4\Emme-4.4.5.1
+::   SET EMMEPATH=C:\"Program Files"\INRO\Emme\Emme 4\Emme-4.4.5.1
+::   SET EMME_PYTHON_PATH="C:\Program Files\INRO\Emme\Emme 4\Emme-4.4.5.1\Python27"
+::   :: BEWARE path issues with other python installs
+::   SET path=%EMMEPATH%\programs;%EMMEPATH%\Python27;%EMMEPATH%\Python27\Scripts\;%PATH%
+:: ) ELSE (
+::   SET EMME_PATH=C:\"Program Files"\INRO\Emme\Emme 4\Emme-4.5.1
+:: )
+
+SET EMME_PATH="C:\Program Files\INRO\Emme\Emme 4\Emme-4.5.1"
 
 IF ENVTYPE==RSG (
   SET NUMBER_OF_PROCESSORS=56
 ) ELSE (
-  set NUMBER_OF_PROCESSORS=24
+  set NUMBER_OF_PROCESSORS=48
 )
 
 :: The location of the Python executable -- for MTC, use the %TM2_PYTHON_CONDA_ENV% python
@@ -81,7 +83,7 @@ IF ENVTYPE==RSG (
   SET MATRIX_SERVER=\\%MTC02%
   SET MATRIX_SERVER_BASE_DIR=%MATRIX_SERVER%\e$\projects\clients\MTC\%SCEN%
   SET MATRIX_SERVER_ABSOLUTE_BASE_DIR=e:\projects\clients\MTC\%SCEN%
-  SET MATRIX_SERVER_JAVA_PATH=C:\Program Files\Java\jre1.8.0_261
+  SET MATRIX_SERVER_JAVA_PATH="C:\Program Files\Java\jre1.8.0_261"
 ) ELSE (
   set MATRIX_SERVER=localhost
 )
@@ -91,7 +93,7 @@ IF ENVTYPE==RSG (
   SET HH_SERVER=\\%MTC02%
   SET HH_SERVER_BASE_DIR=%HH_SERVER%\e$\projects\clients\MTC\%SCEN%
   SET HH_SERVER_ABSOLUTE_BASE_DIR=e:\projects\clients\MTC\%SCEN%
-  SET HH_SERVER_JAVA_PATH=C:\Program Files\Java\jre1.8.0_261
+  SET HH_SERVER_JAVA_PATH="C:\Program Files\Java\jre1.8.0_261"
 ) ELSE (
   set HH_SERVER=localhost
 )
