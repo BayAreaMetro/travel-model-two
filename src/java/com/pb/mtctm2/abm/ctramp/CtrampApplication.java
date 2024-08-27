@@ -71,6 +71,7 @@ public class CtrampApplication implements Serializable
     public static final String                         PROPERTIES_RUN_TRANSPONDER_CHOICE                         = "RunModel.TransponderChoice";
     public static final String                         PROPERTIES_RUN_FREE_PARKING_AVAILABLE                     = "RunModel.FreeParking";
     public static final String                         PROPERTIES_RUN_DAILY_ACTIVITY_PATTERN                     = "RunModel.CoordinatedDailyActivityPattern";
+    public static final String                         PROPERTIES_RUN_EXPLICIT_TELECOMMUTE                       = "RunModel.ExplicitTelecommute";
     public static final String                         PROPERTIES_RUN_INDIV_MANDATORY_TOUR_FREQ                  = "RunModel.IndividualMandatoryTourFrequency";
     public static final String                         PROPERTIES_RUN_MAND_TOUR_DEP_TIME_AND_DUR                 = "RunModel.MandatoryTourDepartureTimeAndDuration";
     public static final String                         PROPERTIES_RUN_MAND_TOUR_MODE_CHOICE                      = "RunModel.MandatoryTourModeChoice";
@@ -444,6 +445,7 @@ public class CtrampApplication implements Serializable
 
         boolean runAutoOwnershipChoiceModel = ResourceUtil.getBooleanProperty(resourceBundle, PROPERTIES_RUN_AUTO_OWNERSHIP);
         boolean runTransponderChoiceModel = ResourceUtil.getBooleanProperty( resourceBundle, PROPERTIES_RUN_TRANSPONDER_CHOICE);
+        boolean runExplicitTelecommuteModel = ResourceUtil.getBooleanProperty( resourceBundle, PROPERTIES_RUN_EXPLICIT_TELECOMMUTE);
         boolean runFreeParkingChoiceModel = ResourceUtil.getBooleanProperty( resourceBundle, PROPERTIES_RUN_FREE_PARKING_AVAILABLE);
         boolean runCoordinatedDailyActivityPatternChoiceModel = ResourceUtil.getBooleanProperty( resourceBundle, PROPERTIES_RUN_DAILY_ACTIVITY_PATTERN);
         boolean runMandatoryTourFreqChoiceModel = ResourceUtil.getBooleanProperty(resourceBundle, PROPERTIES_RUN_INDIV_MANDATORY_TOUR_FREQ);
@@ -452,7 +454,7 @@ public class CtrampApplication implements Serializable
         boolean runAtWorkSubTourFrequencyModel = ResourceUtil.getBooleanProperty(resourceBundle, PROPERTIES_RUN_AT_WORK_SUBTOUR_FREQ);
         boolean runStopFrequencyModel = ResourceUtil.getBooleanProperty(resourceBundle, PROPERTIES_RUN_STOP_FREQUENCY);
         
-        if (runAutoOwnershipChoiceModel || runTransponderChoiceModel || runFreeParkingChoiceModel
+        if (runAutoOwnershipChoiceModel || runTransponderChoiceModel || runExplicitTelecommuteModel || runFreeParkingChoiceModel
                 || runCoordinatedDailyActivityPatternChoiceModel
                 || runMandatoryTourFreqChoiceModel || runIndivNonManTourFrequencyModel
                 || runAtWorkSubTourFrequencyModel || runStopFrequencyModel)
@@ -493,7 +495,10 @@ public class CtrampApplication implements Serializable
                 saveCdapResults(householdDataManager, projectDirectory);
                 logCdapResults(householdDataManager);
             }
-            
+            if (runExplicitTelecommuteModel)
+            {
+            	logEtResults(householdDataManager);
+            }
 
             if (runMandatoryTourFreqChoiceModel)
             {
@@ -1098,6 +1103,56 @@ public class CtrampApplication implements Serializable
 
     }
 
+    private void logEtResults(HouseholdDataManagerIf householdDataManager)
+    {
+
+        logger.info("");
+        logger.info("");
+        logger.info("Explicit Telecommute Model Results");
+        logger.info( String.format( "%-16s  %20s", "Category", "Num Persons" ) );
+        logger.info( String.format( "%-16s  %20s", "----------", "------------------" ) );
+
+        ArrayList<int[]> startEndTaskIndicesList = getWriteHouseholdRanges(householdDataManager.getNumHouseholds());
+
+        int numYes = 0;
+        int numNo = 0;
+        int numOther = 0;
+        for (int[] startEndIndices : startEndTaskIndicesList)
+        {
+
+            int startIndex = startEndIndices[0];
+            int endIndex = startEndIndices[1];
+
+            // get the array of households
+            Household[] householdArray = householdDataManager.getHhArray(startIndex, endIndex);
+
+            for (int i = 0; i < householdArray.length; ++i)
+            {
+
+                Household household = householdArray[i];
+                Person[] persons = household.getPersons();
+                for ( int p=1; p < persons.length; p++ ) 
+                {
+                	if ( persons[p].getEtChoice() == ExplicitTelecommuteModel.ET_MODEL_NO_ALT )
+                		numNo++;
+                	else if ( persons[p].getEtChoice() == ExplicitTelecommuteModel.ET_MODEL_YES_ALT )
+                		numYes++;
+                	else numOther++;
+                
+            }
+
+        }
+        }
+        logger.info( String.format("%-16s  %20d", "No", numNo ) );
+        logger.info( String.format("%-16s  %20d", "Yes", numYes ) );
+        logger.info( String.format("%-16s  %20d", "Other", numOther ) );
+
+        logger.info(String.format("%-16s  %20s", "----------", "------------------" ) );
+        logger.info(String.format("%-16s  %20d", "Total", (numNo + numYes + numOther) ) );
+
+    
+    }
+    
     private void logFpResults(HouseholdDataManagerIf householdDataManager)
     {
 

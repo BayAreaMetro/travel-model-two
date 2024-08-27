@@ -32,6 +32,7 @@ public class Household
     private int                       aoModelAutos;
     private int                       automatedVehicles;
     private int                       conventionalVehicles;
+    private String 					  preEtCdapPattern;
     private String                    cdapModelPattern;
     private int                       imtfModelPattern;
     private String                    jtfModelPattern;
@@ -43,6 +44,7 @@ public class Household
     private int                       preAoRandomCount;
     private int                       aoRandomCount;
     private int                       tpRandomCount;
+    private int 					  etRandomCount;
     private int                       fpRandomCount;
     private int                       cdapRandomCount;
     private int                       imtfRandomCount;
@@ -136,7 +138,11 @@ public class Household
     {
         tpRandomCount = count;
     }
-
+    
+    public void setEtRandomCount(int count)
+    {
+        etRandomCount = count;
+    }
     public void setFpRandomCount(int count)
     {
         fpRandomCount = count;
@@ -238,7 +244,7 @@ public class Household
     public void setTpChoice( int value ){
         tpChoice = value;
     }
-    
+       
      /**
      * auto sufficiency: 1 if cars < workers, 2 if cars equal workers, 3 if cars >
      * workers
@@ -277,6 +283,7 @@ public class Household
     {
         return tpChoice;
     }
+	
 
     public void setCoordinatedDailyActivityPatternResult(String pattern)
     {
@@ -1668,4 +1675,13 @@ public class Household
 		this.sampleRate = sampleRate;
 	}
 
+	public void setPreEtCdapPattern(String coordinatedDailyActivityPattern) {
+		this.preEtCdapPattern = coordinatedDailyActivityPattern ;
+		
+	}
+	
+	public String getPreEtCdapPattern()
+	{
+		return preEtCdapPattern;
+	}
 }

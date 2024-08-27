@@ -19,6 +19,7 @@ import com.pb.mtctm2.abm.ctramp.DcSoaDMU;
 import com.pb.mtctm2.abm.ctramp.DestChoiceDMU;
 import com.pb.mtctm2.abm.ctramp.DestChoiceTwoStageModelDMU;
 import com.pb.mtctm2.abm.ctramp.DestChoiceTwoStageSoaTazDistanceUtilityDMU;
+import com.pb.mtctm2.abm.ctramp.ExplicitTelecommuteDMU;
 import com.pb.mtctm2.abm.ctramp.IndividualMandatoryTourFrequencyDMU;
 import com.pb.mtctm2.abm.ctramp.IndividualNonMandatoryTourFrequencyDMU;
 import com.pb.mtctm2.abm.ctramp.JointTourModelsDMU;
@@ -145,5 +146,12 @@ public class SandagCtrampDmuFactory implements CtrampDmuFactoryIf, Serializable
     {
         return new SandagParkingChoiceDMU();
     }
+
+	
+	public ExplicitTelecommuteDMU getExplicitTelecoummteDMU() 
+	{
+		//return new ExplicitTelecommuteDMU();
+		return new mtcExplicitTelecommuteDMU();
+	}
 
 }

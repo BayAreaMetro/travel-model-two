@@ -16,6 +16,8 @@ public interface CtrampDmuFactoryIf
     public TransponderChoiceDMU getTransponderChoiceDMU();
 
     public CoordinatedDailyActivityPatternDMU getCoordinatedDailyActivityPatternDMU();
+    
+    public ExplicitTelecommuteDMU getExplicitTelecoummteDMU();
 
     public DcSoaDMU getDcSoaDMU();
 
