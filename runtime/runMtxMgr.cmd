@@ -43,8 +43,8 @@ rem ### Doing this ensures that the JAVA_HOME path we defined above is the on th
 set PATH=%LIB_JAR_PATH%;%OLDPATH%
 
 rem java -Dname=p%HOST_MATRIX_PORT% -Xdebug -Xrunjdwp:transport=dt_socket,address=1049,server=y,suspend=y -server -Xmx64g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_mtx.xml com.pb.mtctm2.abm.ctramp.MatrixDataServer -hostname %HOST_IP_ADDRESS% -port %HOST_MATRIX_PORT% -label "MTCTM2 Matrix Sever"
-ECHO ***calling: %JAVA_PATH%\bin\java -Dname=p%HOST_MATRIX_PORT% -Xmx80g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_mtx.xml com.pb.mtctm2.abm.ctramp.MatrixDataServer -hostname %HOST_IP_ADDRESS% -port %HOST_MATRIX_PORT% -label "MTCTM2 Matrix Server"
-START "Matrix Manager" java -Djava.library.path=%LIB_JAR_PATH% -Dname=p%HOST_MATRIX_PORT% -Xmx80g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_mtx.xml com.pb.mtctm2.abm.ctramp.MatrixDataServer -hostname %HOST_IP_ADDRESS% -port %HOST_MATRIX_PORT% -label "MTCTM2 Matrix Server"
+ECHO ***calling: %JAVA_PATH%\bin\java -Dname=p%HOST_MATRIX_PORT% -Xmx120g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_mtx.xml com.pb.mtctm2.abm.ctramp.MatrixDataServer -hostname %HOST_IP_ADDRESS% -port %HOST_MATRIX_PORT% -label "MTCTM2 Matrix Server"
+START "Matrix Manager" java -Djava.library.path=%LIB_JAR_PATH% -Dname=p%HOST_MATRIX_PORT% -Xmx120g -cp "%CLASSPATH%" -Dlog4j.configuration=log4j_mtx.xml com.pb.mtctm2.abm.ctramp.MatrixDataServer -hostname %HOST_IP_ADDRESS% -port %HOST_MATRIX_PORT% -label "MTCTM2 Matrix Server"
 
 rem ### restore saved environment variable values, and change back to original current directory
 set JAVA_PATH=%OLDJAVAPATH%
