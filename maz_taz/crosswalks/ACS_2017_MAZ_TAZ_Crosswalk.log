@@ -1,0 +1,9 @@
+INFO [2021-09-30 14:27:57] Create Census 2010 MAZ and TAZ shares of blockgroups.R
+INFO [2021-09-30 14:27:57] Bringing in Census 2010 block-level total households and then summing to block group.
+INFO [2021-09-30 14:28:19] There are 109228 blocks and 4756 block groups in 2010.
+INFO [2021-09-30 14:28:19] Calculate 2010 household block share of block groups for later summing at MAZ/TAZ2 level.
+INFO [2021-09-30 14:28:21] BG(s) with no hhs in Census 2010, yet some in ACS 2017: Blockgroup 60855050082 with 2 blocks
+INFO [2021-09-30 14:28:21] Any such block groups will be apportioned to constituent blocks proportionately by number of blocks.
+INFO [2021-09-30 14:28:21] Sum block shares to MAZ and TAZ2, respectively.
+INFO [2021-09-30 14:28:21] Output maz crosswalk: Census 2010 hhs maz share of blockgroups_ACS2017.csv
+INFO [2021-09-30 14:28:21] Output taz crosswalk: Census 2010 hhs taz share of blockgroups_ACS2017.csv

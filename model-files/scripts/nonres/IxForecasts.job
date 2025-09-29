@@ -42,118 +42,310 @@ run pgm = matrix
    mati = nonres\ixDaily2015.tpp
 
    ; Write out a year-specific matrix
-   mato = nonres\ixDailyx4.tpp, mo = 1-4, name = ix_daily_da, ix_daily_sr2, ix_daily_sr3, ix_daily_total
-
-   ; Also read the totals from 2015
-   filei lookupi[1] = nonres\ixDaily2015_totals.dbf
-
-   ; And assumptions from Box: Interregional Volumes v3.xlsx (https://mtcdrive.box.com/s/1v6my109gjxq7v7kxc9j63sumzie9jbw)
-   filei lookupi[2] = nonres\ixex_config.dbf
-
-   lookup lookupi=1, name=totals_2015,
-     lookup[1]=EXT_ZONE, result=PROD,  ; productions
-     lookup[2]=EXT_ZONE, result=ATTR   ; attractions
-
-   lookup lookupi=2, name=growth,
-     lookup[1]=EXT_ZONE, result=comm_share,
-     lookup[2]=EXT_ZONE, result=slope
-
-   ; summarize by external production and attraction zones - daily total
-   ARRAY factor=21, prod_tot=21, attr_tot=21, total_modyear=21
-
-   IF (I==1)
-
-     ; first, figure out desired daily total
-     LOOP EXT_ZONE = @FIRST_EXT_ZONE@,@LAST_EXT_ZONE@
-       prod_total_2015 = totals_2015(1,EXT_ZONE)
-       attr_total_2015 = totals_2015(2,EXT_ZONE)
-
-       ; assumptions
-       commute_share   = growth(1,EXT_ZONE)
-       slope           = growth(2,EXT_ZONE)
-       total_2015      = prod_total_2015 + attr_total_2015
-       year_delta      = %MODEL_YEAR%-2015
-
-       ; figure out 2015 desired total -- this is future-dependent
-       IF ('@token_future@'='PBA50')
-
-         IF (EXT_ZONE == @FIRST_EXT_ZONE@) PRINT LIST="--PBA50--%MODEL_YEAR%--  Non-commute share grows based on slope for ",year_delta," years"
-         total_modyear[EXT_ZONE-@FIRST_EXT_ZONE@] = total_2015 + year_delta*(1.0-commute_share)*slope
-
-       ELSE
-         print LIST="Do not understand token_future @token_future@"
-         ABORT MSG="Do not understand token_future @token_future@"
-       ENDIF
-
-       if (total_2015 == 0)
-         factor[EXT_ZONE-@FIRST_EXT_ZONE@] = 1.0
-       else
-         factor[EXT_ZONE-@FIRST_EXT_ZONE@] = total_modyear[EXT_ZONE-@FIRST_EXT_ZONE@]/total_2015
-       endif
-
-       PRINT LIST="For external zone ",EXT_ZONE, " prod_2015: ", prod_total_2015, " attr_2015: ", attr_total_2015,
-         " commute share: ", commute_share, " slope: ", slope,
-         " total 2015: ", total_2015, " total model_year: ", total_modyear[EXT_ZONE-@FIRST_EXT_ZONE@], " => factor: ",factor[EXT_ZONE-@FIRST_EXT_ZONE@]
-
-     ENDLOOP
-
-     ; however there are X/X trips between 4742 and 4743
-     tot2015_4742_4743 = MATVAL(1,1,4742,4743) + MATVAL(1,2,4742,4743) + MATVAL(1,3,4742,4743)
-     tot2015_4743_4742 = MATVAL(1,1,4743,4742) + MATVAL(1,2,4743,4742) + MATVAL(1,3,4743,4742)
-
-     ; so if we scale those according to 4742, then 4743 will be short this much
-     tot_4742 = (tot2015_4742_4743 + tot2015_4743_4742) * factor[4742-@FIRST_EXT_ZONE@]
-     tot_4743 = (tot2015_4742_4743 + tot2015_4743_4742) * factor[4743-@FIRST_EXT_ZONE@]
-     diff_4743 = tot_4743 - tot_4742
-
-     PRINT LIST="XX trips for 4742-4743: ", tot2015_4742_4743, " 4743-4742: ", tot2015_4743_4742
-     PRINT LIST="Using 4742 factor: ", tot_4742, "; Using 4743 factor: ", tot_4743, "; 4743 will be short by: ", diff_4743
-
-     ; so make up for it by upping the modyear target. Assuming two XX vals factor to tot2015_4742, remove them from the calc
-     total_2015 = totals_2015(1,4743) + totals_2015(2,4743)
-     factor[4743 - @FIRST_EXT_ZONE@] = (total_modyear[4743-@FIRST_EXT_ZONE@]-tot_4742)/(total_2015-tot2015_4742_4743-tot2015_4743_4742)
-     PRINT LIST=" => Updating factor 4743 to ", factor[4743 - @FIRST_EXT_ZONE@]
-
-   ENDIF
-
+   mato = nonres\ixDaily2005.tpp, mo = 1-4, name = ix_daily_da, ix_daily_sr2, ix_daily_sr3, ix_daily_total
+   
    jloop
 
-      ; Apply gateway-specific adjustment factors
-      ; (no X/X trips mean the gateways act independently, other than the pair we compensated for above)
-      if (I >= @FIRST_EXT_ZONE@)
-
-         ; 4742/4743 have XX trips -- use 4742 factor
-         if ((I=4743) & (J=4742))
-           mw[1] = mi.1.IX_Daily_DA  * factor[J-@FIRST_EXT_ZONE@]
-           mw[2] = mi.1.IX_Daily_SR2 * factor[J-@FIRST_EXT_ZONE@]
-           mw[3] = mi.1.IX_Daily_SR3 * factor[J-@FIRST_EXT_ZONE@]
-         else
-           mw[1] = mi.1.IX_Daily_DA  * factor[I-@FIRST_EXT_ZONE@]
-           mw[2] = mi.1.IX_Daily_SR2 * factor[I-@FIRST_EXT_ZONE@]
-           mw[3] = mi.1.IX_Daily_SR3 * factor[I-@FIRST_EXT_ZONE@]
-         endif
-
-      elseif (J >= @FIRST_EXT_ZONE@)
-         mw[1] = mi.1.IX_Daily_DA  * factor[J-@FIRST_EXT_ZONE@]
-         mw[2] = mi.1.IX_Daily_SR2 * factor[J-@FIRST_EXT_ZONE@]
-         mw[3] = mi.1.IX_Daily_SR3 * factor[J-@FIRST_EXT_ZONE@]
+      ; Default value is the 2006 value
+      mw[1] = mi.1.IX_Daily_DA
+      mw[2] = mi.1.IX_Daily_SR2
+      mw[3] = mi.1.IX_Daily_SR3
+   
+      ; Apply gateway-specific adjustments based on chats with SJCOG, SACOG, and review of counts    
+      ;   - I-505, Solano/Yolo
+      if (i == 4694 || j == 4694)
+      
+         mw[1] = mi.1.IX_Daily_DA  * 1.020228
+         mw[2] = mi.1.IX_Daily_SR2 * 1.020228
+         mw[3] = mi.1.IX_Daily_SR3 * 1.020228
+      
       endif
-
+      
+      ;   - I-80, Solano/Yolo
+      if (i == 4696 || j == 4696)
+      
+         mw[1] = mi.1.IX_Daily_DA  * 1.242555
+         mw[2] = mi.1.IX_Daily_SR2 * 1.242555
+         mw[3] = mi.1.IX_Daily_SR3 * 1.242555
+      
+      endif
+      
+      ;   - CA 12, Solano/Sacramento
+      if (i == 4697 || j == 4697)
+      
+         mw[1] = mi.1.IX_Daily_DA  * 0.848518
+         mw[2] = mi.1.IX_Daily_SR2 * 0.848518
+         mw[3] = mi.1.IX_Daily_SR3 * 0.848515
+      
+      endif
+            
+      ;   - CA 4, Contra Costa/San Joaquin
+      if (i == 4699 || j == 4699)
+      
+         mw[1] = mi.1.IX_Daily_DA  * 1.673817
+         mw[2] = mi.1.IX_Daily_SR2 * 1.673817
+         mw[3] = mi.1.IX_Daily_SR3 * 1.673817
+      
+      endif
+      
       ; Sum the working matrices to form the total
       mw[4] = mw[1] + mw[2] + mw[3]
-      IF (J>@TAZ_COUNT@) attr_tot[J-@FIRST_EXT_ZONE@] = attr_tot[J-@FIRST_EXT_ZONE@] + Mw[4]
-
+   
    endjloop
+   
+endrun
+EndDistributeMultistep
 
-   IF (I>@TAZ_COUNT@) prod_tot[I-@FIRST_EXT_ZONE@] = prod_tot[I-@FIRST_EXT_ZONE@] + ROWSUM(4)
+Wait4Files Files=MTC_IX1.script.end
 
-   ; write production/attraction totals to the log file and dbf
-   IF (I==ZONES)
-     print LIST="-----RESULTS-----"
-     LOOP EXT_ZONE = @FIRST_EXT_ZONE@,@LAST_EXT_ZONE@
-       total = prod_tot[EXT_ZONE-@FIRST_EXT_ZONE@] + attr_tot[EXT_ZONE-@FIRST_EXT_ZONE@]
-       print LIST="For external zone ",EXT_ZONE, " production: ", prod_tot[EXT_ZONE-@FIRST_EXT_ZONE@], " attraction: ", attr_tot[EXT_ZONE-@FIRST_EXT_ZONE@], " total: ", total
-     ENDLOOP
-   ENDIF
+; Step 2:  build forecast
+   
+token_year = %MODEL_YEAR%
+growth_exponent = '@token_year@ - 2005'
 
+; If forecast year is 2005, do nothing; the base matrix is a 2005 forecast
+
+if(token_year == 2005)  
+  goto done
+endif
+
+; Set gateway-specific annual growth rates
+base_4689 = '1.005'
+base_4690 = '1.005'
+base_4691 = '1.005'
+base_4692 = '1.005'
+base_4693 = '1.005'
+base_4694 = '1.010'
+base_4695 = '1.010'
+base_4696 = '1.010'
+base_4697 = '1.010'
+base_4698 = '1.010'
+base_4699 = '1.010'
+base_4700 = '1.010'
+base_4701 = '1.015'
+base_4702 = '1.010'
+base_4703 = '1.010'
+base_4704 = '1.010'
+base_4705 = '1.005'
+base_4706 = '1.005'
+base_4707 = '1.005'
+base_4708 = '1.005'
+base_4709 = '1.005'
+
+   
+DistributeMultistep processid = 'MTC_IX', processNum = 1
+run pgm = matrix
+
+    DistributeINTRASTEP ProcessID='MTC_IX',ProcessList=2-13
+
+  ; Begin with 2005 base year matrix established above
+  mati = nonres\ixDaily2005.tpp
+  
+  ; Write out a year-specific matrix
+  mato = nonres\ixDaily@token_year@.tpp, mo = 1-4, name = ix_daily_da, ix_daily_sr2, ix_daily_sr3, ix_daily_total
+  
+  jloop
+
+     ; Populate 2005 base year values
+     mw[1] = mi.1.IX_Daily_DA
+     mw[2] = mi.1.IX_Daily_SR2
+     mw[3] = mi.1.IX_Daily_SR3
+  
+     ; Apply gateway-specific adjustment factors (no X/X trips mean the gateways act independently)
+     
+     ;   - CA 1, Sonoma/Mendocino
+     if (i == 4689 || j == 4689)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4689@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4689@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4689@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 128, Sonoma/Mendocino
+     if (i == 4690 || j == 4690)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4690@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4690@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4690@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - US 101, Sonoma/Mendocino
+     if (i == 4691 || j == 4691)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4691@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4691@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4691@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 29, Napa/Lake
+     if (i == 4692 || j == 4692)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4692@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4692@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4692@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 128, Napa/Yolo
+     if (i == 4693 || j == 4693)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4693@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4693@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4693@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - I-505, Solano/Yolo
+     if (i == 4694 || j == 4694)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4694@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4694@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4694@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 113, Solano/Yolo
+     if (i == 4695 || j == 4695)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4695@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4695@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4695@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - I-80, Solano/Yolo
+     if (i == 4696 || j == 4696)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4696@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4696@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4696@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 12, Solano/Sacramento
+     if (i == 4697 || j == 4697)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4697@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4697@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4697@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 160, Contra Costa/Sacramento (combined with CA 4, 1465)
+     if (i == 4698 || j == 4698)
+     
+        mw[1] = 0.0
+        mw[2] = 0.0
+        mw[3] = 0.0
+     
+     endif
+     
+     ;   - CA 4, Contra Costa/San Joaquin
+     if (i == 4699 || j == 4699)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4699@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4699@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4699@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - County J-4, Alameda/San Joaquin
+     if (i == 4700 || j == 4700)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4700@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4700@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4700@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - I-580/I-205, Alameda/San Joaquin
+     if (i == 4701 || j == 4701)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4701@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4701@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4701@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 152, Santa Clara/Merced
+     if (i == 4702 || j == 4702)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4702@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4702@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4702@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 156, Santa Clara/San Benito
+     if (i == 4703 || j == 4703)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4703@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4703@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4703@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 25, Santa Clara/San Benito
+     if (i == 4704 || j == 4704)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4704@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4704@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4704@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - US 101, Santa Clara/San Benito
+     if (i == 4705 || j == 4705)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4705@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4705@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4705@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 152, Santa Clara/Santa Cruz
+     if (i == 4706 || j == 4706)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4706@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4706@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4706@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 17, Santa Clara/Santa Cruz
+     if (i == 4707 || j == 4707)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4707@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4707@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4707@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 9, Santa Clara/Santa Cruz
+     if (i == 4708 || j == 4708)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4708@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4708@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4708@,@token_year@ - 2005)
+     
+     endif
+     
+     ;   - CA 1, San Mateo/Santa Cruz
+     if (i == 4709 || j == 4709)
+     
+        mw[1] = mi.1.IX_Daily_DA  * pow(@base_4709@,@token_year@ - 2005)
+        mw[2] = mi.1.IX_Daily_SR2 * pow(@base_4709@,@token_year@ - 2005)
+        mw[3] = mi.1.IX_Daily_SR3 * pow(@base_4709@,@token_year@ - 2005)
+     
+     endif
+     
+     ; Sum the working matrices to form the total
+     mw[4] = mw[1] + mw[2] + mw[3]
+  
+  endjloop
+  
+  
 endrun

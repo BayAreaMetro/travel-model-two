@@ -435,7 +435,7 @@ endloop ; year
 Wait4Files Files=MTC_AIRPAX1.script.end,MTC_AIRPAX2.script.end
 
 ; step 3: build matrices by interpolating between the year 2007 and the year 2035 trip tables
-token_scale = '(%MODEL_YEAR% - 2007)/(2035 - %MODEL_YEAR%)'
+token_scale = '(%MODEL_YEAR% - 2007)/(2035 - 2007)'
       
    
 run pgm = matrix
