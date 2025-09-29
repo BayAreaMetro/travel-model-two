@@ -7,3 +7,11 @@ core/release/
 *.Rhistory
 model-files/runtime/config/pskill.exe
 utilities/vta_expresslane_feed_saver/vta_expresslanes_2018*
+utilities/sandag-activitysim/*
+site/
+.DS_Store
+utilities/compare-transit-skims/TM2.2.0/indivTripData_1.csv
+utilities/compare-transit-skims/TM2.2.0/maz_data_withDensity.csv
+utilities/compare-transit-skims/TM2.2.0/transit_skims_AM.omx
+utilities/compare-transit-skims/TM2.2.1.1/indivTripData_1.csv
+utilities/compare-transit-skims/TM2.2.1.1/trnskmAM_WLK_TRN_WLK.omx
